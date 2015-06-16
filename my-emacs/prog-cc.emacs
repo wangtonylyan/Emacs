@@ -42,6 +42,7 @@
 ; semantic-ia-complete-symbol
 ; semantic-ia-complete-symbol-menu
 ; semantic-ia-complete-tip
+; semantic-complete-analyze-inline
 ; semantic-complete-analyze-inline-idle
 ; semantic-analyze-possible-completions
 ; semantic-ia-fast-jump
@@ -217,10 +218,12 @@
   ;; 作为默认的选择，性能较差
   ;; (b)GNU Global
   ;; (require 'semantic/db-global)
+  (require 'cedet-global)
   (when (eq system-type 'windows-nt)
     (add-to-list 'exec-path (concat my-emacs-exec-bin-path "global/bin"))
     )
-  (when (executable-find "global")
+  (when (and (executable-find "global")
+             (cedet-gnu-global-version-check t))
     (require 'semantic/db-global)
     (semanticdb-enable-gnu-global-databases 'c-mode)
     (semanticdb-enable-gnu-global-databases 'c++-mode)
@@ -262,20 +265,29 @@
   ; 代码浏览的相关功能设置(待完善)
   ;-------------------------------------------------------------------------
   (require 'semantic/ia)
-  ;semantic-ia-fast-jump
+  (define-key semantic-mode-map "" 'semantic-ia-fast-jump)
+  (define-key semantic-mode-map "" 'semantic-complete-jump)
+  (define-key semantic-mode-map "" 'semantic-complete-jump-local)
+  (define-key semantic-mode-map "" 'semantic-complete-jump-local-members)
+  (define-key semantic-mode-map "" 'semantic-decoration-include-visit) ;jump to include file
+  (define-key semantic-mode-map "" 'semantic-mrub-switch-tag)
   (require 'semantic/symref)
-  ;semantic-symref-symbol
+  (define-key semantic-mode-map "" 'semantic-symref)
+  (define-key semantic-mode-map "" 'semantic-symref-symbol)
   (require 'semantic/senator)
-  ;senator相关
-
+  (define-key semantic-mode-map "" 'senator-next-tag)
+  (define-key semantic-mode-map "" 'senator-previous-tag)
+  (define-key semantic-mode-map "" 'senator-go-to-up-reference)
   ) ;end of my-plugin-cedet-init()
 
 (defun my-plugin-cedet-start ()
   (when (boundp 'ac-sources)
     (setq ac-sources
           (append my-prog-ac-sources '(ac-source-semantic)))
+    (when (and (executable-find "global")
+               (cedet-gnu-global-version-check t))
+      (add-to-list 'ac-sources 'ac-source-gtags))
     )
-;  (local-set-key [(control return)] 'semantic-ia-complete-symbol-menu)
   ) ;end of my-plugin-cedet-start()
 
 
