@@ -204,7 +204,7 @@
                        (semanticdb-create-database semanticdb-new-database-class path)))
         '(
           "/usr/include"
-          "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
+;          "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
           ))
   ; 随后每次启动时加载之前已创建的数据库
   (mapc (lambda (mode)
@@ -216,7 +216,9 @@
   ;; 作为默认的选择，性能较差
   ;; (b)GNU Global
   ;; (require 'semantic/db-global)
-  (add-to-list 'exec-path (concat my-emacs-exec-bin-path "global/bin"))
+  (when (eq system-type 'windows-nt)
+    (add-to-list 'exec-path (concat my-emacs-exec-bin-path "global/bin"))
+    )
   (when (executable-find "global")
     (require 'semantic/db-global)
     (semanticdb-enable-gnu-global-databases 'c-mode)

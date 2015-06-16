@@ -75,13 +75,15 @@
 ;===========================================================================
 ;===========================================================================
 (defun my-python-mode-init ()
-  (setq my-python-interpreter-path (concat my-emacs-exec-bin-path "/programming/python2/"))
-  (add-to-list 'exec-path my-python-interpreter-path)
+  (when (eq system-type 'windows-nt)
+    (setq my-python-interpreter-path (concat my-emacs-exec-bin-path "/programming/python2/"))
+    (add-to-list 'exec-path my-python-interpreter-path)
+    )
   (when (executable-find "python")
     ;; …Ë÷√python-mode
     (require 'python)
     (remove-hook 'python-mode-hook 'wisent-python-default-setup)
-    (setq python-shell-interpreter (concat my-python-interpreter-path "python")
+    (setq python-shell-interpreter "python"
           python-shell-interpreter-args "-i"
 ;          python-shell-prompt-regexp ""
 ;          python-shell-prompt-output-regexp ""
