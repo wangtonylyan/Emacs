@@ -151,9 +151,9 @@
   ; SemanticDB
   ;-------------------------------------------------------------------------
   ;; 数据库文件保存设置
-  (setq semanticdb-default-save-directory nil) ;作为缺省路径，仅主动生成的数据库的文件才会保存于此
+;  (setq semanticdb-default-save-directory nil) ;作为缺省路径，仅主动生成的数据库的文件才会保存于此
 ;  (setq semanticdb-default-file-name "")
-  (setq semanticdb-persistent-path '(project)) ;保存于由EDE所管理的项目的路径下
+  (setq semanticdb-persistent-path '(always)) ;'project为由EDE所管理的项目的路径下
   ;; 优化SemanticDB的搜索/parse
   ;; 1)限定搜索范围
   (mapc (lambda (mode)
@@ -204,6 +204,7 @@
                        (semanticdb-create-database semanticdb-new-database-class path)))
         '(
           "/usr/include"
+          "/usr/local/include"
 ;          "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
           ))
   ; 随后每次启动时加载之前已创建的数据库

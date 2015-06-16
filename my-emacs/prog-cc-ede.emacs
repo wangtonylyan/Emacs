@@ -9,9 +9,9 @@
 
 ;===========================================================================
 ;; 2)对于简单的项目，应利用以下函数新建并定制
-;  (ede-cpp-root-project "EVOLUTION"
-;           :file "~/projects/EVOLUTION/EVOLUTION.org"
-;           :include-path '("/include")
-;           :system-include-path '("" "")
-;           :spp-table '(("MACRO1" . "VALUE1"))
-;           )
+  (ede-cpp-root-project "evo_btappl"
+                        :file "~/projects/workspace-eclipse/evolution/evolution/evo_btappl/.project"
+;                        :include-path '("/include")
+;                        :system-include-path '("" "")
+;                        :spp-table '(("MACRO1" . "VALUE1"))
+                        )
