@@ -9,9 +9,9 @@
 
 ;===========================================================================
 ;; 2)对于简单的项目，应利用以下函数新建并定制
-  (ede-cpp-root-project "EVOLUTION"
-           :file "~/projects/EVOLUTION/EVOLUTION.org"
+;  (ede-cpp-root-project "EVOLUTION"
+;           :file "~/projects/EVOLUTION/EVOLUTION.org"
 ;           :include-path '("/include")
 ;           :system-include-path '("" "")
 ;           :spp-table '(("MACRO1" . "VALUE1"))
-           )
+;           )

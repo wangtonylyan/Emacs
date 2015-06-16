@@ -37,8 +37,10 @@
 ;===========================================================================
 ;; 配置Emacs的exec-path就无需修改操作系统的环境变量了
 ;; 当然也可以设置(setenv "PATH" "")，效果是一样的
-(setq my-emacs-exec-bin-path "D:/softwares/")
-(add-to-list 'exec-path my-emacs-exec-bin-path)
+(when (eq system-type 'windows-nt)
+  (setq my-emacs-exec-bin-path "D:/softwares/")
+  (add-to-list 'exec-path my-emacs-exec-bin-path)
+  )
 
 
 ;===========================================================================

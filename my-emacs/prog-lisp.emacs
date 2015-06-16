@@ -26,8 +26,10 @@
 ; 下载并安装后即可使用，而此处仍选择自己安装和配置这些插件
 ;===========================================================================
 (defun my-plugin-lispbox-init ()
-  (setq my-lisp-interpreter-path (concat my-emacs-exec-bin-path "programming/SBCL"))
-  (add-to-list 'exec-path my-lisp-interpreter-path)
+  (when (eq system-type 'windows-nt)
+    (setq my-lisp-interpreter-path (concat my-emacs-exec-bin-path "programming/SBCL"))
+    (add-to-list 'exec-path my-lisp-interpreter-path)
+    )
   (when (executable-find "sbcl")
     ;-----------------------------------------------------------------------
     ; SLIME (The Superior Lisp Interaction Mode for Emacs)
@@ -61,7 +63,10 @@
     ;-----------------------------------------------------------------------
     ;; 以下是对于SMILE的定制
     ; 指定SLIME所依赖的Lisp实现环境
-    (setq inferior-lisp-program (concat my-lisp-interpreter-path "sbcl"))
+    (setq inferior-lisp-program
+          (if (eq system-type 'windows-nt)
+              (concat my-lisp-interpreter-path "sbcl")
+            "sbcl"))
     ; 指定当前加载的contributed package
     (setq slime-contribs '(
                            slime-fancy
