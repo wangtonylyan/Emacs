@@ -55,7 +55,6 @@
  '(tool-bar-mode nil) ;取消工具栏
  '(global-font-lock-mode nil) ;取消全局性的语法高亮
  '(electric-indent-mode nil) ;取消全局性的换行缩进
- '(ido-mode nil) ;当在minibuffer中输入时，提供路径和文件名的补全功能
  '(ecb-options-version "2.40") ;ecb-minor-mode
  )
 (custom-set-faces
@@ -144,6 +143,7 @@
 
 ;; Mode
 (icomplete-mode 1) ;当在minibuffer中输入时，提供命令补全功能
+(ido-mode 1) ;当在minibuffer中输入时，提供路径和文件名的补全功能
 ;(uniquify-mode 1) ;buffer命名
 ;; built-in Speedbar (rather than CEDET Speedbar)
 (setq speedbar-use-images nil) ;不使用image方式
