@@ -54,7 +54,8 @@
  '(current-language-environment "Chinese-GB")
  '(tool-bar-mode nil) ;取消工具栏
  '(global-font-lock-mode nil) ;取消全局性的语法高亮
- '(electric-indent-mode nil) ;Emacs24.5以上版本会默认启用该模式
+ '(electric-indent-mode nil) ;取消全局性的换行缩进
+ '(ido-mode nil) ;当在minibuffer中输入时，提供路径和文件名的补全功能
  '(ecb-options-version "2.40") ;ecb-minor-mode
  )
 (custom-set-faces
@@ -143,7 +144,6 @@
 
 ;; Mode
 (icomplete-mode 1) ;当在minibuffer中输入时，提供命令补全功能
-;(ido-mode 1) ;当在minibuffer中输入时，提供文件名补全功能
 ;(uniquify-mode 1) ;buffer命名
 ;; built-in Speedbar (rather than CEDET Speedbar)
 (setq speedbar-use-images nil) ;不使用image方式
@@ -167,8 +167,9 @@
 ; 该插件已集成于Emacs24以上版本中，作为默认的主题管理组件
 ; 其自带了一些主题，网上还有许多基于该插件独立发布的主题
 ;===========================================================================
-(setq my-emacs-theme-load-path "~/.emacs.d/site-lisp/color-theme/")
+(setq my-emacs-theme-load-path (concat my-emacs-plugin-load-path "color-theme"))
 (add-to-list 'custom-theme-load-path my-emacs-theme-load-path)
+(setq my-emacs-enabled-theme-name nil)
 ;---------------------------------------------------------------------------
 ; [theme] Solarized
 ;---------------------------------------------------------------------------
@@ -179,18 +180,15 @@
 ; 下载下来后只需保留三个.el脚本文件即可：
 ; color-theme-solarized.el, solarized-theme.el, solarized-definitions.el
 ;===========================================================================
-;(setq my-if-use-solarized t)
-(when (and (boundp 'my-if-use-solarized)
-           my-if-use-solarized)
-  (progn
-    (load-theme 'solarized t)
-    (add-hook 'after-make-frame-functions
-              (lambda (frame)
-                (let ((mode 'dark)) ;'dark or 'light
-                  (set-frame-parameter frame 'background-mode mode)
-                  (set-terminal-parameter frame 'background-mode mode))
-                (enable-theme 'solarized)))
-    ))
+(when (equal my-emacs-enabled-theme-name "solarized")
+  (load-theme 'solarized t)
+  (add-hook 'after-make-frame-functions
+            (lambda (frame)
+              (let ((mode 'dark)) ;'dark or 'light
+                (set-frame-parameter frame 'background-mode mode)
+                (set-terminal-parameter frame 'background-mode mode))
+              (enable-theme 'solarized)))
+  )
 
 
 ;===========================================================================
