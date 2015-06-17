@@ -1,5 +1,6 @@
 /*
-!.gitignore
-!backup/*
-!my-emacs/*.emacs
-!init.el
+!/.gitignore
+!/init.el
+!/my-emacs/*.emacs
+!/backup/*
+
