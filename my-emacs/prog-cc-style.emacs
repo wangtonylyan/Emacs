@@ -40,16 +40,16 @@
     ;-----------------------------------------------------------------------
     ; 设置大括号的前后是否应换行，即"{"将位于行头或行尾或单行或任意位置
     ; 不在以下alist中列出的syntactic symbol，将执行默认行为：(before after)
-    (c-hanging-braces-alist . ((defun-open            . (after))
-                               (defun-close           . (before))
-                               (class-open            . (after))
-                               (class-close           . (before))
-                               (inline-open           . (after))
-                               (inline-close          . (before))
-                               (block-open            . (after))
-                               (block-close           . c-snug-do-while)
-                               (statement-cont        . (after))
-                               (substatement-open     . (after))
+    (c-hanging-braces-alist . ((defun-open)
+                               (defun-close)
+                               (class-open)
+                               (class-close)
+                               (inline-open)
+                               (inline-close)
+                               (block-open)
+                               (block-close)
+                               (statement-cont)
+                               (substatement-open)
                                (statement-case-open   . (before after))
                                (brace-list-open)
                                (brace-list-close)
@@ -79,7 +79,7 @@
     (c-cleanup-list . (brace-else-brace
                        brace-elseif-brace
                        brace-catch-brace
-                       empty-defun-braces
+;                       empty-defun-braces
                        defun-close-semi
                        list-close-comma
                        scope-operator
