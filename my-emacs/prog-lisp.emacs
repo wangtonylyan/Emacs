@@ -118,7 +118,7 @@
 (eval-after-load 'lisp-mode ;/lisp/emacs-lisp/lisp-mode.el
   '(progn
      (my-lisp-mode-init)
-     (add-hook 'lisp-mode 'my-lisp-mode-start)
+     (add-hook 'lisp-mode-hook 'my-lisp-mode-start)
      ))
 ;===========================================================================
 ;===========================================================================
@@ -135,5 +135,5 @@
 (eval-after-load 'lisp-mode ;/lisp/emacs-lisp/lisp-mode.el
   '(progn
      (my-emacs-lisp-mode-init)
-     (add-hook 'emacs-lisp-mode 'my-emacs-lisp-mode-start)
+     (add-hook 'emacs-lisp-mode-hook 'my-emacs-lisp-mode-start)
      ))
