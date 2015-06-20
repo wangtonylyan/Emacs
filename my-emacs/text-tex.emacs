@@ -26,20 +26,27 @@
 ; http://www.ctan.org/
 ; CTAN is a set of Internet sites around the world
 ; that offer TeX-related material for download.
-; 国内镜像: http://mirrors.xmu.edu.cn/CTAN/
+; 国内镜像:
+; http://mirrors.xmu.edu.cn/CTAN/
+; http://mirrors.lifetoy.org/CTAN/
 ;---------------------------------------------------------------------------
 
 ;===========================================================================
 ; AUCTeX
 ;===========================================================================
-; http://www.gnu.org/software/auctex/index.html
+; http://www.gnu.org/software/auctex/
 ; Emacs中内置了一整套tex major mode，用于支持TeX的编辑功能
-; 但仍推荐使用此插件，其也提供了一套与内置相似的模式
+; 但仍推荐使用此插件，其生效后会完全覆盖/替代内置中对应的major模式
 ; 该插件类似于SLIME，作为各种发行版的前端Emacs接口
+;---------------------------------------------------------------------------
 ; 其官网上为Windows平台提供了预编译的版本
 ; 下载后将解压缩目录下share/emacs/site-lisp子目录中的所有文件
 ; 在不改变site-start.d、site-start.el、tex-site.el此三者相对位置的前提下
-; 全部移至Emacs的插件存放目录中即可，目前暂还将上述三者共同移至了auctex子目录中
+; 全部移至Emacs的插件存放目录中即可，目前还暂将上述三者共同移至了auctex子目录中
+; 原本site-start.d中的文件应放置于某个Emacs启动时会自动加载的目录下(如/lisp)
+; 但目前采用由以下代码加载的方式
+; 此外，还可将share/info目录加入Info-directory-list
+;---------------------------------------------------------------------------
 (defun my-plugin-auctex-init ()
   (add-to-list 'load-path (concat my-emacs-plugin-load-path "auctex"))
   (add-to-list 'load-path (concat my-emacs-plugin-load-path "auctex/site-start.d"))
@@ -54,7 +61,37 @@
   ) ;end of my-plugin-auctex-init()
 
 (defun my-plugin-auctex-start ()
+  (setq TeX-auto-save t)
+  (setq TeX-parse-self t)
+;  (setq-default TeX-master nil)
+  (reftex-mode t)
+  (TeX-fold-mode t)
   ) ;end of my-plugin-auctex-start()
+
+;===========================================================================
+;===========================================================================
+(defun my-TeX-mode-init ()
+  (my-plugin-auctex-init)
+  )
+(defun my-TeX-mode-start ()
+  (when (boundp 'TeX-mode)
+    (my-plugin-auctex-start))
+  )
+(eval-after-load 'tex-mode ;/lisp/textmodes/tex-mode.el
+  '(progn
+     (my-TeX-mode-init)
+     (add-hook 'TeX-mode-hook 'my-TeX-mode-start)
+     ))
+
+(defun my-LaTeX-mode-init ()
+)
+(defun my-LaTeX-mode-start ()
+)
+(eval-after-load 'tex-mode ;/lisp/textmodes/tex-mode.el
+  '(progn
+     (my-LaTeX-mode-init)
+     (add-hook 'LaTeX-mode-hook 'my-LaTeX-mode-start)
+     ))
 
 ;===========================================================================
 ;===========================================================================
@@ -65,7 +102,7 @@
 (eval-after-load 'tex-mode ;/lisp/textmodes/tex-mode.el
   '(progn
      (my-tex-mode-init)
-     (add-hook 'tex-mode 'my-tex-mode-start)
+     (add-hook 'tex-mode-hook 'my-tex-mode-start)
      ))
 
 
