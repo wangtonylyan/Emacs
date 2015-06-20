@@ -18,7 +18,7 @@
 ; ConTeXt Minimal :: 支持ConTeXt
 ; 4) editor
 ; TeXworks :: 许多发行版所提供的编辑器
-; WinEdit
+; WinEdt
 ; Kile
 ; 当然诸如Emacs、Vim等也可通过集成插件的形式支持TeX的编辑
 ;---------------------------------------------------------------------------
