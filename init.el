@@ -72,7 +72,7 @@
 ;===========================================================================
 ;; Account
 (setq user-full-name "Tony")
-(setq user-mail-address "wangtonylyan@outlook.com")
+(setq user-mail-address "")
 
 ;; UI
 ;(setq inhibit-startup-message 1) ;取消启动界面
