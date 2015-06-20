@@ -53,8 +53,8 @@
  ;; If there is more than one, they won't work right.
  '(current-language-environment "Chinese-GB")
  '(tool-bar-mode nil) ;取消工具栏
+ '(electric-indent-mode nil) ;取消全局性的自动缩进
  '(global-font-lock-mode nil) ;取消全局性的语法高亮
- '(electric-indent-mode nil) ;取消全局性的换行缩进
  '(ecb-options-version "2.40") ;ecb-minor-mode
  )
 (custom-set-faces
@@ -169,6 +169,7 @@
 ;===========================================================================
 (setq my-emacs-theme-load-path (concat my-emacs-plugin-load-path "color-theme"))
 (add-to-list 'custom-theme-load-path my-emacs-theme-load-path)
+(add-to-list 'load-path my-emacs-theme-load-path)
 (setq my-emacs-enabled-theme-name nil)
 ;---------------------------------------------------------------------------
 ; [theme] Solarized
@@ -176,19 +177,39 @@
 ; http://ethanschoonover.com/solarized
 ; https://github.com/altercation/solarized
 ; https://github.com/sellout/emacs-color-theme-solarized
-; 该主题已支持各种平台，包括了Emacs、Vim、VisualStudio
 ; 下载下来后只需保留三个.el脚本文件即可：
 ; color-theme-solarized.el, solarized-theme.el, solarized-definitions.el
 ;===========================================================================
 (when (equal my-emacs-enabled-theme-name "solarized")
-  (load-theme 'solarized t)
-  (add-hook 'after-make-frame-functions
-            (lambda (frame)
-              (let ((mode 'dark)) ;'dark or 'light
+  ;; 包含有2种模式
+  (let ((mode
+         'dark
+;         'light
+         ))
+    (load-theme 'solarized t)
+    (add-hook 'after-make-frame-functions
+              (lambda (frame)
                 (set-frame-parameter frame 'background-mode mode)
-                (set-terminal-parameter frame 'background-mode mode))
-              (enable-theme 'solarized)))
-  )
+                (set-terminal-parameter frame 'background-mode mode)
+                (enable-theme 'solarized)))))
+;---------------------------------------------------------------------------
+; [theme] Tomorrow
+;---------------------------------------------------------------------------
+; https://github.com/chriskempson/tomorrow-theme
+;===========================================================================
+(when (equal my-emacs-enabled-theme-name "tomorrow")
+  ;; 包含有5个主题
+  (let ((theme
+         'tomorrow-day
+;         'tomorrow-night
+;         'tomorrow-night-blue
+;         'tomorrow-night-bright
+;         'tomorrow-night-eighties
+         ))
+    (load-theme theme t)
+    (add-hook 'after-make-frame-functions
+              (lambda (frame)
+                (enable-theme theme)))))
 
 
 ;===========================================================================
@@ -198,9 +219,11 @@
 (load-file (concat my-emacs-config-file-path "prog.emacs"))
 ; cc-mode (c-mode, c++-mode, java-mode)
 (load-file (concat my-emacs-config-file-path "prog-cc.emacs"))
-; lisp-mode, emacs-lisp-mode
+; lisp-mode, emacs-lisp-mode, lisp-interaction-mode
 (load-file (concat my-emacs-config-file-path "prog-lisp.emacs"))
 ; python-mode
 (load-file (concat my-emacs-config-file-path "prog-py.emacs"))
+; tex-mode, latex-mode
+(load-file (concat my-emacs-config-file-path "text-tex.emacs"))
 ; web-browser
 (load-file (concat my-emacs-config-file-path "web-browser.emacs"))
