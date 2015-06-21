@@ -1,7 +1,7 @@
 !/.gitignore
 !/README.md
 !/init.el
-!/my-emacs/*.emacs
+!/my-emacs/*.el
 !/backup/*
 !/backup/plugins/*
 /*
