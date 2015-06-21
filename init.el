@@ -216,8 +216,7 @@
 ; 加载其他配置文件
 ;===========================================================================
 (mapcar (lambda (name)
-          (let ((file (concat my-emacs-config-file-path name)))
-            (when (file-exists-p file) (load-file file))))
+          (load (concat my-emacs-config-file-path name) t nil t nil))
         '("prog.emacs" ;prog-mode
           "prog-cc.emacs" ;cc-mode (c-mode, c++-mode, java-mode)
           "prog-lisp.emacs" ;lisp-mode, emacs-lisp-mode, lisp-interaction-mode
