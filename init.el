@@ -216,11 +216,11 @@
 ; 加载其他配置文件
 ;===========================================================================
 (mapcar (lambda (name)
-          (load (concat my-emacs-config-file-path name) t nil t nil))
-        '("prog.emacs" ;prog-mode
-          "prog-cc.emacs" ;cc-mode (c-mode, c++-mode, java-mode)
-          "prog-lisp.emacs" ;lisp-mode, emacs-lisp-mode, lisp-interaction-mode
-          "prog-py.emacs" ;python-mode
-          "text-tex.emacs" ;tex-mode, latex-mode
-          "web-browser.emacs" ;web browser
+          (load (concat my-emacs-config-file-path name) t nil nil t))
+        '("prog" ;prog-mode
+          "prog-cc" ;cc-mode (c-mode, c++-mode, java-mode)
+          "prog-lisp" ;lisp-mode, emacs-lisp-mode, lisp-interaction-mode
+          "prog-py" ;python-mode
+          "text-tex" ;tex-mode, latex-mode
+          "web-browser" ;web browser
           ))
