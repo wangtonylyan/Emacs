@@ -124,7 +124,7 @@
             (highlight-changes-remove-highlight (point-min) (point-max))
             ))
 
-;; Backup
+;; Backup and Revert
 (setq make-backup-files t) ;启用自动备份
 (setq version-control t) ;启用版本控制，即可以备份多次
 (setq kept-old-versions 1) ;备份最旧的版本个数
@@ -133,6 +133,7 @@
 (setq dired-kept-versions 2)
 (setq backup-directory-alist '(("." . "~/.emacs.d.backups"))) ;设置备份文件的路径
 (setq backup-by-copying t) ;备份设置方式为直接拷贝
+(global-auto-revert-mode t) ;当硬盘上的文件被修改后，Emacs会提示用户重新读取该文件
 
 ;; File Extension
 ;(setq auto-mode-alist
