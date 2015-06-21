@@ -2,7 +2,12 @@
 !/README.md
 !/init.el
 !/my-emacs/*.el
-!/backup/*
-!/backup/plugins/*
+!/backup
+
 *.elc
-/*
+ac-comphist.dat
+ede-projects.el
+/auto-save-list
+/elpa
+/semanticdb
+/site-lisp
