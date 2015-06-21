@@ -215,15 +215,13 @@
 ;===========================================================================
 ; 加载其他配置文件
 ;===========================================================================
-; prog-mode
-(load-file (concat my-emacs-config-file-path "prog.emacs"))
-; cc-mode (c-mode, c++-mode, java-mode)
-(load-file (concat my-emacs-config-file-path "prog-cc.emacs"))
-; lisp-mode, emacs-lisp-mode, lisp-interaction-mode
-(load-file (concat my-emacs-config-file-path "prog-lisp.emacs"))
-; python-mode
-(load-file (concat my-emacs-config-file-path "prog-py.emacs"))
-; tex-mode, latex-mode
-(load-file (concat my-emacs-config-file-path "text-tex.emacs"))
-; web-browser
-(load-file (concat my-emacs-config-file-path "web-browser.emacs"))
+(mapcar (lambda (name)
+          (let ((file (concat my-emacs-config-file-path name)))
+            (when (file-exists-p file) (load-file file))))
+        '("prog.emacs" ;prog-mode
+          "prog-cc.emacs" ;cc-mode (c-mode, c++-mode, java-mode)
+          "prog-lisp.emacs" ;lisp-mode, emacs-lisp-mode, lisp-interaction-mode
+          "prog-py.emacs" ;python-mode
+          "text-tex.emacs" ;tex-mode, latex-mode
+          "web-browser.emacs" ;web browser
+          ))
