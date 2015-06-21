@@ -69,7 +69,7 @@
                '(;; 以下分类反映的只是目前实际的使用情况，而非各自的局限范围：
                  ac-source-filename
                  ac-source-files-in-current-dir
-                 ac-source-words-in-buffer
+;                 ac-source-words-in-buffer
                  ac-source-words-in-same-mode-buffers
 ;                 ac-source-words-in-all-buffer
 ;                 ac-source-abbrev ;Emacs abbreviation
