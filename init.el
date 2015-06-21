@@ -26,9 +26,9 @@
   (setenv "HOME" "E:/")
   ; 设置默认工作目录
   (setq default-directory "~/")
-  ; 设置shell，默认使用cmdproxy.exe
-  (setq shell-file-name "C:/windows/system32/cmd.exe")
-  (setq shell-command-switch "/c")
+  ; 设置shell，使用由Emacs提供的cmdproxy.exe
+  (setq shell-file-name "D:/softwares/programming/emacs/bin/cmdproxy.exe")
+  (setq shell-command-switch "-c")
   )
 
 
@@ -105,6 +105,7 @@
 (setq debug-on-error t) ;显示错误信息
 (fset 'yes-or-no-p 'y-or-n-p) ;以y/n替换yes/no
 (setq visible-bell t) ;以窗口闪烁的方式代替错误提示音
+(global-visual-line-mode t)
 
 ;; Edit
 (setq-default indent-tabs-mode nil) ;make indentation commands use space only

@@ -9,5 +9,6 @@ ac-comphist.dat
 ede-projects.el
 /auto-save-list
 /elpa
+/eshell
 /semanticdb
 /site-lisp
