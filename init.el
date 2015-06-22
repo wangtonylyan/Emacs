@@ -57,6 +57,7 @@
  '(tool-bar-mode nil) ;取消工具栏
  '(electric-indent-mode nil) ;取消全局性的自动缩进
  '(global-font-lock-mode nil) ;取消全局性的语法高亮
+ '(ido-everywhere nil) ;仅使ido补全find-file和switch-to-buffer
  '(ecb-options-version "2.40") ;ecb-minor-mode
  )
 (custom-set-faces
@@ -146,8 +147,11 @@
 ;(define-key lisp-mode (kbd "C-c ;") 'func)
 
 ;; Mode
-(icomplete-mode 1) ;当在minibuffer中输入时，提供命令补全功能
-(ido-mode 1) ;当在minibuffer中输入时，提供路径和文件名的补全功能
+;; 以下两个都可以在minibuff中提供补全功能，且支持同样多的命令
+;; 但前者需要TAB键触发，而后者自动呈现，且默认仅支持find-file和switch-to-buffer
+(icomplete-mode t)
+(ido-mode t)
+(setq ido-enable-flex-matching nil)
 ;(uniquify-mode 1) ;buffer命名
 ;; built-in Speedbar (rather than CEDET Speedbar)
 (setq speedbar-use-images nil) ;不使用image方式
