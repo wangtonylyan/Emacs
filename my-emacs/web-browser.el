@@ -1,3 +1,7 @@
+(provide 'my-web-browser)
+(eval-when-compile
+  (require 'my-init)
+  )
 ;===========================================================================
 ; Text-Based Web Browser
 ;===========================================================================
@@ -31,8 +35,9 @@
 ;===========================================================================
 (defun my-plugin-w3m-init ()
   (add-to-list 'exec-path (concat my-emacs-exec-bin-path "w3m"))
-  (add-to-list 'load-path (concat my-emacs-plugin-load-path "emacs-w3m"))
-  (require 'w3m-load)
+  (eval-when-compile
+    (add-to-list 'load-path (concat my-emacs-plugin-load-path "emacs-w3m"))
+    (require 'w3m-load))
   (setq w3m-home-page "http://www.baidu.com/")
   (setq w3m-use-cookies t)
   (setq w3m-use-favicon nil)

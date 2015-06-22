@@ -1,3 +1,8 @@
+(provide 'my-prog)
+(eval-when-compile
+  (require 'simple)
+  (require 'my-init)
+  )
 ;===========================================================================
 ; Yasnippet
 ;===========================================================================
@@ -8,8 +13,9 @@
 ; 而脚本注释中的name属性只是作为替换成功后所呈现出的描述信息，或存在同名文件时的提示选择信息
 ;===========================================================================
 (defun my-plugin-yasnippet-init ()
-  (add-to-list 'load-path (concat my-emacs-plugin-load-path "yasnippet"))
-  (require 'yasnippet)
+  (eval-when-compile
+    (add-to-list 'load-path (concat my-emacs-plugin-load-path "yasnippet"))
+    (require 'yasnippet))
   (setq yas-snippet-dirs '()) ;删除默认值(可选)
   (add-to-list 'yas-snippet-dirs (concat my-emacs-config-file-path "snippets"))
   (define-key yas-minor-mode-map (kbd "<tab>") nil)
@@ -40,8 +46,9 @@
 ; 后两者只需将各自的单个.el文件拷贝进auto-complete的安装目录下即可完成安装
 ;===========================================================================
 (defun my-plugin-auto-complete-init ()
-  (add-to-list 'load-path (concat my-emacs-plugin-load-path "auto-complete"))
-  (require 'auto-complete-config)
+  (eval-when-compile
+    (add-to-list 'load-path (concat my-emacs-plugin-load-path "auto-complete"))
+    (require 'auto-complete-config))
   (add-to-list 'ac-dictionary-directories (concat my-emacs-config-file-path "ac-dicts"))
   (ac-set-trigger-key "TAB") ;ac会在输入trigger key后立即强制生效
   (setq ac-trigger-commands '(self-insert-command

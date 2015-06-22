@@ -1,3 +1,5 @@
+(provide 'my-init)
+;===========================================================================
 ;; Emacs initialization file
 ; ~/.emacs > ~/.emacs.el > ~/.emacs.d/init.el
 ;1)加载插件的方式
@@ -219,7 +221,8 @@
 ;===========================================================================
 (mapc (lambda (name)
         (load (concat my-emacs-config-file-path name) t nil nil t))
-      '("prog" ;prog-mode
+      '(
+        "prog" ;prog-mode
         "prog-cc" ;cc-mode (c-mode, c++-mode, java-mode)
         "prog-lisp" ;lisp-mode, emacs-lisp-mode, lisp-interaction-mode
         "prog-py" ;python-mode
