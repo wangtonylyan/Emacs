@@ -97,24 +97,24 @@
 ;          python-shell-completion-string-code ""
           )
     ;; 将lambda关键字显示为λ
-    (if (< (string-to-number emacs-version) (string-to-number "24.4"))
-        (progn
-          ;; 低于24.4版本使用由第三方提供的lambda-mode
-          (eval-when-compile (require 'lambda-mode))
-          (add-hook 'python-mode-hook #'lambda-mode 1)
-          (setq lambda-regex "lambda ")
-          (setq lambda-symbol (string (make-char 'greek-iso8859-7 107))))
-      (progn
-        ;; 使用24.4以上版本内置的prettify-symbols-mode
-        (prettify-symbols-mode t))
-      )
+    (when (< (string-to-number emacs-version) 24.4)
+      ;; 低于24.4版本使用由第三方提供的lambda-mode
+      (eval-when-compile (require 'lambda-mode))
+      (add-hook 'python-mode-hook #'lambda-mode 1)
+      (setq lambda-regex "lambda ")
+      (setq lambda-symbol (string (make-char 'greek-iso8859-7 107))))
     ;; Ropemacs
     (my-plugin-ropemacs-init)
     ))
 (defun my-python-mode-start ()
+  (when (>= (string-to-number emacs-version) 24.4)
+    ;; 24.4以上版本使用内置的prettify-symbols-mode
+    (prettify-symbols-mode t)
+    (setq prettify-symbols-alist '(("lambda" . 955)))
+    )
   (when (fboundp 'ropemacs-mdoe)
-    (my-plugin-ropemacs-start)
-    ))
+    (my-plugin-ropemacs-start))
+  )
 (eval-after-load 'python ;/lisp/progmodes/python.el
   '(progn
      (my-python-mode-init)
