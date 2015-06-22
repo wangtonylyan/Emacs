@@ -1,3 +1,7 @@
+(provide 'my-prog-py)
+(eval-when-compile
+  (require 'my-prog)
+  )
 ;===========================================================================
 ; Ropemacs
 ;===========================================================================
@@ -54,8 +58,9 @@
 ; 随后会在当前目录下生成pymacs.el文件，将其移至Emacs的load-path中即可
 ;===========================================================================
 (defun my-plugin-ropemacs-init ()
-  (add-to-list 'load-path (concat my-emacs-plugin-load-path "ropemacs"))
-  (require 'pymacs)
+  (eval-when-compile
+    (add-to-list 'load-path (concat my-emacs-plugin-load-path "ropemacs"))
+    (require 'pymacs))
   (pymacs-load "ropemacs" "rope-")
   (setq ropemacs-confirm-saving t)
   (setq ropemacs-enable-autoimport t)
@@ -81,7 +86,7 @@
     )
   (when (executable-find "python")
     ;; 设置python-mode
-    (require 'python)
+    (eval-when-compile (require 'python))
     (remove-hook 'python-mode-hook 'wisent-python-default-setup)
     (setq python-shell-interpreter "python"
           python-shell-interpreter-args "-i"
@@ -92,7 +97,7 @@
 ;          python-shell-completion-string-code ""
           )
     ;; lambda-mode
-    (require 'lambda-mode)
+    (eval-when-compile (require 'lambda-mode))
     (add-hook 'python-mode-hook #'lambda-mode 1)
     (setq lambda-regex "lambda ")
     (setq lambda-symbol (string (make-char 'greek-iso8859-7 107)))
