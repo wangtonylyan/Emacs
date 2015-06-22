@@ -96,11 +96,18 @@
 ;          python-shell-completion-module-string-code ""
 ;          python-shell-completion-string-code ""
           )
-    ;; lambda-mode
-    (eval-when-compile (require 'lambda-mode))
-    (add-hook 'python-mode-hook #'lambda-mode 1)
-    (setq lambda-regex "lambda ")
-    (setq lambda-symbol (string (make-char 'greek-iso8859-7 107)))
+    ;; 将lambda关键字显示为λ
+    (if (< (string-to-number emacs-version) (string-to-number "24.4"))
+        (progn
+          ;; 低于24.4版本使用由第三方提供的lambda-mode
+          (eval-when-compile (require 'lambda-mode))
+          (add-hook 'python-mode-hook #'lambda-mode 1)
+          (setq lambda-regex "lambda ")
+          (setq lambda-symbol (string (make-char 'greek-iso8859-7 107))))
+      (progn
+        ;; 使用24.4以上版本内置的prettify-symbols-mode
+        (prettify-symbols-mode t))
+      )
     ;; Ropemacs
     (my-plugin-ropemacs-init)
     ))
