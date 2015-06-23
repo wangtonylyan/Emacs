@@ -1,13 +1,10 @@
 (provide 'my-prog-cc)
-(eval-when-compile
-  (require 'cc-mode)
-  (require 'my-prog)
-  )
+(require 'my-prog)
 ;===========================================================================
 ; Style
 ;===========================================================================
 (defun my-cc-style-init ()
-  (eval-when-compile (load-file (concat my-emacs-config-file-path "prog-cc-style.el")))
+  (load-file (concat my-emacs-config-file-path "prog-cc-style.el"))
   (define-key c-mode-base-map "\C-m" 'c-context-line-break) ;换行后自动缩进
   )
 (defun my-cc-style-start ()
@@ -92,7 +89,7 @@
 ; 以下配置主要面向于内置版，但基本上能兼容于独立版
 ;===========================================================================
 (defun my-plugin-cedet-init ()
-  (eval-when-compile (require 'cedet))
+  (require 'cedet)
 
   ;-------------------------------------------------------------------------
   ; Semantic
@@ -182,7 +179,7 @@
   ;; 3)设置上述限定范围中的system类型，即变量semantic-dependency-system-include-path
   ; 利用gcc的输出信息
   (when (executable-find "gcc")
-    (eval-when-compile (require 'semantic/bovine/gcc))
+    (require 'semantic/bovine/gcc)
     (semantic-gcc-setup)
     )
   ; 若要完全地自定义，则需先重置，再追加
@@ -223,13 +220,13 @@
   ;; 作为默认的选择，性能较差
   ;; (b)GNU Global
   ;; (require 'semantic/db-global)
-  (eval-when-compile (require 'cedet-global))
+  (require 'cedet-global)
   (when (eq system-type 'windows-nt)
     (add-to-list 'exec-path (concat my-emacs-exec-bin-path "global/bin"))
     )
   (when (and (executable-find "global")
              (cedet-gnu-global-version-check t))
-    (eval-when-compile (require 'semantic/db-global))
+    (require 'semantic/db-global)
     (semanticdb-enable-gnu-global-databases 'c-mode)
     (semanticdb-enable-gnu-global-databases 'c++-mode)
     )
@@ -237,7 +234,7 @@
   ;-------------------------------------------------------------------------
   ; EDE
   ;-------------------------------------------------------------------------
-  (eval-when-compile (require 'ede))
+  (require 'ede)
   (global-ede-mode 1) ;配合semantic-mode全局性地启用
   ;; EDE默认使用Unix上的Locate命令来定位文件，此外还支持使用GNU Global
   ;; 但目前Emacs内置的CEDET中删除了ede-locate.el文件，因此也就不支持修改了
@@ -269,17 +266,17 @@
   ;-------------------------------------------------------------------------
   ; 代码浏览的相关功能设置(待完善)
   ;-------------------------------------------------------------------------
-  (eval-when-compile (require 'semantic/ia))
+  (require 'semantic/ia)
   (define-key semantic-mode-map "" 'semantic-ia-fast-jump)
   (define-key semantic-mode-map "" 'semantic-complete-jump)
   (define-key semantic-mode-map "" 'semantic-complete-jump-local)
   (define-key semantic-mode-map "" 'semantic-complete-jump-local-members)
   (define-key semantic-mode-map "" 'semantic-decoration-include-visit) ;jump to include file
   (define-key semantic-mode-map "" 'semantic-mrub-switch-tag)
-  (eval-when-compile (require 'semantic/symref))
+  (require 'semantic/symref)
   (define-key semantic-mode-map "" 'semantic-symref)
   (define-key semantic-mode-map "" 'semantic-symref-symbol)
-  (eval-when-compile (require 'semantic/senator))
+  (require 'semantic/senator)
   (define-key semantic-mode-map "" 'senator-next-tag)
   (define-key semantic-mode-map "" 'senator-previous-tag)
   (define-key semantic-mode-map "" 'senator-go-to-up-reference)
@@ -344,9 +341,8 @@
 ;===========================================================================
 (defun my-plugin-ecb-init ()
   (save-excursion
-    (eval-when-compile
-      (add-to-list 'load-path (concat my-emacs-plugin-load-path "ecb"))
-      (require 'ecb))
+    (add-to-list 'load-path (concat my-emacs-plugin-load-path "ecb"))
+    (require 'ecb)
     (unless (boundp 'stack-trace-on-error)
       (defvar stack-trace-on-error nil)) ;兼容性
     (setq ecb-layout-name "left15"
@@ -446,7 +442,7 @@
 ; https://github.com/leoliu/ggtags
 ;===========================================================================
 (defun my-plugin-ggtags-init ()
-  (eval-when-compile (require 'ggtags))
+  (require 'ggtags)
   )
 (defun my-plugin-ggtags-start ()
   (ggtags-mode 1) ;local minor mode

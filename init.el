@@ -58,6 +58,7 @@
  '(electric-indent-mode nil) ;取消全局性的自动缩进
  '(global-font-lock-mode nil) ;取消全局性的语法高亮
  '(ido-everywhere nil) ;仅使ido补全find-file和switch-to-buffer
+ '(ido-enable-flex-matching nil)
  '(ecb-options-version "2.40") ;ecb-minor-mode
  )
 (custom-set-faces
@@ -151,7 +152,6 @@
 ;; 但前者需要TAB键触发，而后者自动呈现，且默认仅支持find-file和switch-to-buffer
 (icomplete-mode t)
 (ido-mode t)
-(setq ido-enable-flex-matching nil)
 ;(uniquify-mode 1) ;buffer命名
 ;; built-in Speedbar (rather than CEDET Speedbar)
 (setq speedbar-use-images nil) ;不使用image方式
