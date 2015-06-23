@@ -1,7 +1,5 @@
 (provide 'my-prog-lisp)
-(eval-when-compile
-  (require 'my-prog)
-  )
+(require 'my-prog)
 ;===========================================================================
 ; Common Lisp Implementations
 ;===========================================================================
@@ -48,10 +46,9 @@
     ; SLIME有两种安装和使用方式：注意这些方式彼此冲突，只能选其一
     ;-----------------------------------------------------------------------
     ; 方式1)从网上下载SMILE源码或利用MELPA下载，并作为Emacs的插件被加载和运行
-    (eval-when-compile
-      (add-to-list 'load-path (concat my-emacs-plugin-load-path "slime"))
-      (require 'slime)
-      (require 'slime-autoloads))
+    (add-to-list 'load-path (concat my-emacs-plugin-load-path "slime"))
+    (require 'slime)
+    (require 'slime-autoloads)
     ;-----------------------------------------------------------------------
     ; 方式2)利用Quicklisp安装SMILE包，作为某个具体的Common Lisp实现的组件被加载和运行
     ; 基于Quicklisp所提供的quicklisp-slime-helper库，可参考：

@@ -1,8 +1,5 @@
 (provide 'my-text-tex)
-(eval-when-compile
-  (require 'tex-mode)
-  (require 'my-init)
-  )
+(require 'my-init)
 ;===========================================================================
 ; TeX
 ;===========================================================================
@@ -55,11 +52,10 @@
 ; 此外，还可将解压缩目录下share/info子目录加入至Info-directory-list
 ;---------------------------------------------------------------------------
 (defun my-plugin-auctex-init ()
-  (eval-when-compile
-    (add-to-list 'load-path (concat my-emacs-plugin-load-path "auctex"))
-    (add-to-list 'load-path (concat my-emacs-plugin-load-path "auctex/site-start.d"))
-    (load "auctex.el")
-    (load "preview-latex.el"))
+  (add-to-list 'load-path (concat my-emacs-plugin-load-path "auctex"))
+  (add-to-list 'load-path (concat my-emacs-plugin-load-path "auctex/site-start.d"))
+  (load "auctex.el")
+  (load "preview-latex.el")
   (when (eq system-type 'windows-nt)
     (add-to-list 'exec-path (concat my-emacs-exec-bin-path "MiKTeX/miktex/bin/x64/"))
     (when (executable-find "miktex-texworks")

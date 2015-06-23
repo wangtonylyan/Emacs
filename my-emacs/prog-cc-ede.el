@@ -1,7 +1,5 @@
 (provide 'my-prog-cc-ede)
-(eval-when-compile
-  (require 'my-prog-cc)
-  )
+(require 'my-prog-cc)
 ;===========================================================================
 ;; 1)对于复杂的项目，应利用ede-new新建并利用Project.ede文件定制
 ;ede-project-directories的作用：
