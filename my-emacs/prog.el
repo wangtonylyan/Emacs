@@ -15,11 +15,12 @@
   (setq yas-snippet-dirs '()) ;删除默认值(可选)
   (add-to-list 'yas-snippet-dirs (concat my-emacs-config-file-path "snippets"))
   (define-key yas-minor-mode-map (kbd "<tab>") nil)
+  (define-key yas-minor-mode-map (kbd "TAB") nil)
   (setq yas-prompt-functions '(
-                               yas-x-prompt ;GTK环境下推荐
+;                               yas-x-prompt ;GTK环境下推荐
 ;                               yas-dropdown-prompt
 ;                               yas-completing-prompt
-;                               yas-ido-prompt ;Windows环境下推荐，其余支持不好
+                               yas-ido-prompt ;Windows环境下推荐，其余支持不好
                                ))
 ;  (yas-global-mode 1) ;未全局性地启用
   ) ;end of my-plugin-yasnippet-init()

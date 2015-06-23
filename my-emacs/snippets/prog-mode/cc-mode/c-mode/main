@@ -1,0 +1,7 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: main
+# key: main
+# --
+int main(int argc, char *args[]) {
+    return 0;
+}
