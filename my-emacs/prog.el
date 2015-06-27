@@ -125,7 +125,7 @@
 ;===========================================================================
 ; Flymake
 ;===========================================================================
-; Emacs内置，动态编译检查，效率低，准确度高，依赖于后台编译器的支持
+; Emacs内置，静态编译检查，效率低，准确度高，依赖于后台编译器的支持
 ;===========================================================================
 
 ;===========================================================================
@@ -134,14 +134,17 @@
 ; version: 0.24
 ; http://www.flycheck.org/
 ; https://github.com/flycheck/flycheck
-; 静态语法检查，效率高，准确度低，依赖于后台语法解析器(或编译器前端)的支持
+; 静态语义分析，效率高，准确度低，依赖于后台语法解析器(或编译器前端)的支持
 ; 针对不同语言需安装各自相应的后台支持，具体可参见
 ; http://www.flycheck.org/manual/latest/Supported-languages.html
 ; 推荐使用ELPA安装，因为其还依赖于其他官网上没有提供的开发包
 ;===========================================================================
 (defun my-plugin-flycheck-init ()
   ; 可以通过以下方式为每种模式设置相应的checker，取自变量flycheck-checkers
-;  (add-hook 'emacs-lisp-mode-hook (lambda () (flycheck-select-checker 'emacs-lisp))
+  (add-hook 'emacs-lisp-mode-hook
+            (lambda ()
+;              (flycheck-select-checker 'emacs-lisp) ;无法在lisp-interaction-mode中使用该checker
+              (setq flycheck-emacs-lisp-load-path 'inherit)))
 ;  (global-flycheck-mode 1)
   )
 (defun my-plugin-flycheck-start ()

@@ -57,7 +57,12 @@
  '(tool-bar-mode nil) ;取消工具栏
  '(electric-indent-mode nil) ;取消全局性的自动缩进
  '(global-font-lock-mode nil) ;取消全局性的语法高亮
- '(ido-everywhere nil) ;仅使ido补全find-file和switch-to-buffer
+ ;; 以下两个模式都提供在minibuff中的补全功能，且支持同样多的领域
+ ;; 但前者需要TAB键触发，而后者自动呈现，但默认仅支持find-file和switch-to-buffer
+ ;; 插件Smex的实现就是基于其对execute-extended-command的支持
+ '(icomplete-mode t)
+ '(ido-mode 'both)
+ '(ido-everywhere nil) ;仅使ido支持find-file和switch-to-buffer
  '(ido-enable-flex-matching nil)
  '(ecb-options-version "2.40") ;ecb-minor-mode
  )
@@ -148,10 +153,6 @@
 ;(define-key lisp-mode (kbd "C-c ;") 'func)
 
 ;; Mode
-;; 以下两个都可以在minibuff中提供补全功能，且支持同样多的命令
-;; 但前者需要TAB键触发，而后者自动呈现，且默认仅支持find-file和switch-to-buffer
-(icomplete-mode t)
-(ido-mode t)
 ;(uniquify-mode 1) ;buffer命名
 ;; built-in Speedbar (rather than CEDET Speedbar)
 (setq speedbar-use-images nil) ;不使用image方式
@@ -185,6 +186,18 @@
 (setq my-emacs-plugin-load-path "~/.emacs.d/site-lisp/")
 (add-to-list 'load-path my-emacs-plugin-load-path)
 
+;===========================================================================
+; Smex
+;===========================================================================
+; https://github.com/nonsequitur/smex
+; 其完全基于ido-mode实现，提供了对于execute-extended-command更为强大的支持
+; 包括了记录用户操作历史、快速查询输入命令的快捷键及函数说明等功能
+;===========================================================================
+(require 'smex)
+(global-set-key (kbd "M-x") 'smex)
+(global-set-key (kbd "M-X") 'smex-major-mode-commands)
+(global-set-key (kbd "C-c C-c M-x") 'execute-extended-command) ;原M-x快捷键能
+
 
 ;===========================================================================
 ; Color Theme
@@ -205,7 +218,7 @@
 ; https://github.com/sellout/emacs-color-theme-solarized
 ; 下载下来后只需保留三个.el脚本文件即可：
 ; color-theme-solarized.el, solarized-theme.el, solarized-definitions.el
-;===========================================================================
+;---------------------------------------------------------------------------
 (when (equal my-emacs-enabled-theme-name "solarized")
   ;; 包含有2种模式
   (let ((mode
@@ -222,7 +235,7 @@
 ; [theme] Tomorrow
 ;---------------------------------------------------------------------------
 ; https://github.com/chriskempson/tomorrow-theme
-;===========================================================================
+;---------------------------------------------------------------------------
 (when (equal my-emacs-enabled-theme-name "tomorrow")
   ;; 包含有5个主题
   (let ((theme
