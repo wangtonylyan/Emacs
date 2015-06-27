@@ -125,7 +125,7 @@
 ;===========================================================================
 ; Flymake
 ;===========================================================================
-; Emacs内置，动态编译检查，效率低，准确度高
+; Emacs内置，动态编译检查，效率低，准确度高，依赖于后台编译器的支持
 ;===========================================================================
 
 ;===========================================================================
@@ -134,12 +134,18 @@
 ; version: 0.24
 ; http://www.flycheck.org/
 ; https://github.com/flycheck/flycheck
-; 静态语法检查，效率高，准确度低
+; 静态语法检查，效率高，准确度低，依赖于后台语法解析器(或编译器前端)的支持
+; 针对不同语言需安装各自相应的后台支持，具体可参见
+; http://www.flycheck.org/manual/latest/Supported-languages.html
 ; 推荐使用ELPA安装，因为其还依赖于其他官网上没有提供的开发包
 ;===========================================================================
 (defun my-plugin-flycheck-init ()
+  ; 可以通过以下方式为每种模式设置相应的checker，取自变量flycheck-checkers
+;  (add-hook 'emacs-lisp-mode-hook (lambda () (flycheck-select-checker 'emacs-lisp))
+;  (global-flycheck-mode 1)
   )
 (defun my-plugin-flycheck-start ()
+  (flycheck-mode 1) ;启用Flycheck
   )
 
 ;===========================================================================
@@ -147,18 +153,23 @@
 (defun my-prog-mode-init ()
   (my-plugin-yasnippet-init)
   (my-plugin-auto-complete-init)
+  (my-plugin-flycheck-init)
   )
 (defun my-prog-mode-start ()
   (font-lock-mode 1) ;启用语法高亮
   (linum-mode 1) ;在buffer左边显示行号
-  (my-plugin-yasnippet-start)
-  (my-plugin-auto-complete-start)
-  ;; 各继承于prog-mode的编程模式在启动时都将重设其buffer-local的ac-sources
-  ;; 方法是各自追加my-prog-ac-sources链表
-  ;; 优点是当同一个buffer多次切换不同的编程模式时，不会彼此影响
-  (setq my-prog-ac-sources
-        (append ac-sources '(ac-source-dictionary
-                             ac-source-yasnippet)))
+  (when (fboundp 'yas-minor-mode)
+    (my-plugin-yasnippet-start))
+  (when (fboundp 'auto-complete-mode)
+    (my-plugin-auto-complete-start)
+    ;; 各继承于prog-mode的编程模式在启动时都将重设其buffer-local的ac-sources
+    ;; 方法是各自追加my-prog-ac-sources链表
+    ;; 优点是当同一个buffer多次切换不同的编程模式时，不会彼此影响
+    (setq my-prog-ac-sources
+          (append ac-sources '(ac-source-dictionary
+                               ac-source-yasnippet))))
+  (when (fboundp 'flycheck-mode)
+    (my-plugin-flycheck-start))
   )
 (eval-after-load 'simple ;/lisp/simple.el
   '(progn
