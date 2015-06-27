@@ -163,12 +163,20 @@
 ;===========================================================================
 ; 1) ELPA (Emacs Lisp Package Archive)
 ; 可以通过Emacs24以上版本内置的ELPA工具来安装和管理第三方插件
-; 通过ELPA下载安装的插件会随Emacs启动而自动load/require
 ;---------------------------------------------------------------------------
 (require 'package)
-; 设置更新源
+; Emacs使用的默认更新源为：("gnu" . "http://elpa.gnu.org/")
+; 添加更新源：MELPA每天更新，其包含了绝大多数插件
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-(package-initialize)
+(setq package-load-list '(;以下插件的声明顺序需符合彼此之间的依赖关系
+                          (dash t)
+                          (epl t)
+                          (let-alist t)
+                          (pkg-info t)
+                          (flycheck t)
+                          )) ;指定由以下方式所加载的插件
+(setq package-enable-at-startup nil) ;方式1) 随Emacs的启动而自动加载插件
+(package-initialize) ;方式2) 主动执行该函数以加载插件
 ;---------------------------------------------------------------------------
 ; 2) 从网上下载、编译、安装第三方插件
 ; 资源网站:
