@@ -159,14 +159,22 @@
 
 
 ;===========================================================================
-; 加载全局性的第三方插件
+; 管理和加载全局性的第三方插件
 ;===========================================================================
-;; 第三方插件资源：
-;; https://github.com/emacsmirror
-
-(setq my-emacs-config-file-path "~/.emacs.d/my-emacs/")
+; 1) ELPA (Emacs Lisp Package Archive)
+; 可以通过Emacs24以上版本内置的ELPA工具来安装和管理第三方插件
+;---------------------------------------------------------------------------
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+(package-initialize)
+;---------------------------------------------------------------------------
+; 2) 从网上下载、编译、安装第三方插件
+; 资源网站:
+; https://github.com/emacsmirror
+;---------------------------------------------------------------------------
 (setq my-emacs-plugin-load-path "~/.emacs.d/site-lisp/")
 (add-to-list 'load-path my-emacs-plugin-load-path)
+
 
 ;===========================================================================
 ; Color Theme
@@ -223,6 +231,7 @@
 ;===========================================================================
 ; 加载其他配置文件
 ;===========================================================================
+(setq my-emacs-config-file-path "~/.emacs.d/my-emacs/")
 (mapc (lambda (name)
         (load (concat my-emacs-config-file-path name) t nil nil t))
       '(

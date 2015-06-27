@@ -14,6 +14,7 @@
   (require 'yasnippet)
   (setq yas-snippet-dirs '()) ;删除默认值(可选)
   (add-to-list 'yas-snippet-dirs (concat my-emacs-config-file-path "snippets"))
+  ;; 为配合auto-complete使用，需禁用以下自身的快捷键补全功能
   (define-key yas-minor-mode-map (kbd "<tab>") nil)
   (define-key yas-minor-mode-map (kbd "TAB") nil)
   (setq yas-prompt-functions '(
@@ -29,6 +30,17 @@
   (yas-minor-mode 1) ;启用Yasnippet，会自动执行(yas-reload-all)
   ) ;end of my-plugin-yasnippet-start()
 
+;===========================================================================
+; Company (complete anything)
+;===========================================================================
+; http://company-mode.github.io/
+; https://github.com/company-mode/company-mode
+; 一个与auto-complete功能基本类似的补全插件，相比于后者，更新更为频繁，且支持MELPA安装
+;===========================================================================
+(defun my-plugin-company-init ()
+  )
+(defun my-plugin-company-start ()
+  )
 
 ;===========================================================================
 ; Auto-Complete
@@ -109,6 +121,26 @@
   (auto-complete-mode 1) ;启用Auto-Complete
   ) ;end of my-plugin-auto-complete-start()
 
+
+;===========================================================================
+; Flymake
+;===========================================================================
+; Emacs内置，动态编译检查，效率低，准确度高
+;===========================================================================
+
+;===========================================================================
+; Flycheck
+;===========================================================================
+; version: 0.23
+; http://www.flycheck.org/
+; https://github.com/flycheck/flycheck
+; 静态语法检查，效率高，准确度低
+; 推荐使用MELPA安装，因为其还依赖于其他官网上没有提供的开发包
+;===========================================================================
+(defun my-plugin-flycheck-init ()
+  )
+(defun my-plugin-flycheck-start ()
+  )
 
 ;===========================================================================
 ;===========================================================================
