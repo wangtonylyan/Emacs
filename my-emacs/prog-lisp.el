@@ -45,12 +45,12 @@
     ; 官方提供的SMILE手册中以SBCL为例，因此推荐新手使用SMILE+SBCL的组合
     ; SLIME有两种安装和使用方式：注意这些方式彼此冲突，只能选其一
     ;-----------------------------------------------------------------------
-    ; 方式1)从网上下载SMILE源码或利用MELPA下载，并作为Emacs的插件被加载和运行
+    ; 方式1) 从网上下载SMILE源码或利用ELPA下载，并作为Emacs的插件被加载和运行
     (add-to-list 'load-path (concat my-emacs-plugin-load-path "slime"))
     (require 'slime)
     (require 'slime-autoloads)
     ;-----------------------------------------------------------------------
-    ; 方式2)利用Quicklisp安装SMILE包，作为某个具体的Common Lisp实现的组件被加载和运行
+    ; 方式2) 利用Quicklisp安装SMILE包，作为某个具体的Common Lisp实现的组件被加载和运行
     ; 基于Quicklisp所提供的quicklisp-slime-helper库，可参考：
     ; https://github.com/quicklisp/quicklisp-slime-helper
     ; 以SBCL为例（前提是已安装有Quicklisp），运行以下命令即可安装SLIME

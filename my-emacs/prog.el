@@ -35,7 +35,7 @@
 ;===========================================================================
 ; http://company-mode.github.io/
 ; https://github.com/company-mode/company-mode
-; 一个与auto-complete功能基本类似的补全插件，相比于后者，更新更为频繁，且支持MELPA安装
+; 一个与auto-complete功能基本类似的补全插件，相比于后者，更新更为频繁，且支持ELPA安装
 ;===========================================================================
 (defun my-plugin-company-init ()
   )
