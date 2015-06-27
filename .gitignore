@@ -3,6 +3,7 @@
 !/init.el
 !/my-emacs/*.el
 !/backup
+!/site-lisp/*.el
 
 *.elc
 ac-comphist.dat
@@ -13,4 +14,4 @@ smex-items
 /elpa
 /eshell
 /semanticdb
-/site-lisp
+/site-lisp/*/*
