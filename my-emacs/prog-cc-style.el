@@ -1,4 +1,3 @@
-(provide 'my-prog-cc-style)
 ;===========================================================================
 ; Style for C, C++, Java
 ;===========================================================================
@@ -97,3 +96,5 @@
   ) ;end of my-c-style
 
 (c-add-style "my-c-style" my-c-style) ;into c-style-alist
+
+(provide 'my-prog-cc-style)

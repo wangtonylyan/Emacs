@@ -1,4 +1,3 @@
-(provide 'my-web-browser)
 (require 'my-init)
 ;===========================================================================
 ; Text-Based Web Browser
@@ -34,12 +33,15 @@
 (defun my-plugin-w3m-init ()
   (add-to-list 'exec-path (concat my-emacs-exec-bin-path "w3m"))
   (add-to-list 'load-path (concat my-emacs-plugin-load-path "emacs-w3m"))
-  (require 'w3m-load)
-  (setq w3m-home-page "http://www.baidu.com/")
-  (setq w3m-use-cookies t)
-  (setq w3m-use-favicon nil)
-  )
+  (when (and (executable-find "w3m")
+             (require 'w3m-load nil t))
+    (setq w3m-home-page "http://www.baidu.com/")
+    (setq w3m-use-cookies t)
+    (setq w3m-use-favicon nil))
+  ) ;end of my-plugin-w3m-init()
 
 (defun my-plugin-w3m-start ()
   (w3m-mode)
-  )
+  ) ;end of my-plugin-w3m-start()
+
+(provide 'my-web-browser)

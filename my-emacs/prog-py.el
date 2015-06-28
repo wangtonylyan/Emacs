@@ -1,4 +1,3 @@
-(provide 'my-prog-py)
 (require 'my-prog)
 ;===========================================================================
 ; Ropemacs
@@ -57,11 +56,11 @@
 ;===========================================================================
 (defun my-plugin-ropemacs-init ()
   (add-to-list 'load-path (concat my-emacs-plugin-load-path "ropemacs"))
-  (require 'pymacs)
-  (pymacs-load "ropemacs" "rope-")
-  (setq ropemacs-confirm-saving t)
-  (setq ropemacs-enable-autoimport t)
-  (setq ropemacs-autoimport-modules '("os"))
+  (when (require 'pymacs nil t)
+    (pymacs-load "ropemacs" "rope-")
+    (setq ropemacs-confirm-saving t)
+    (setq ropemacs-enable-autoimport t)
+    (setq ropemacs-autoimport-modules '("os")))
   ) ;end of my-plugin-ropemacs-init()
 
 (defun my-plugin-ropemacs-start ()
@@ -83,23 +82,23 @@
     )
   (when (executable-find "python")
     ;; 设置python-mode
-    (require 'python)
-    (remove-hook 'python-mode-hook 'wisent-python-default-setup)
-    (setq python-shell-interpreter "python"
-          python-shell-interpreter-args "-i"
-;          python-shell-prompt-regexp ""
-;          python-shell-prompt-output-regexp ""
-;          python-shell-completion-setup-code ""
-;          python-shell-completion-module-string-code ""
-;          python-shell-completion-string-code ""
-          )
+    (when (require 'python nil t)
+      (remove-hook 'python-mode-hook 'wisent-python-default-setup)
+      (setq python-shell-interpreter "python"
+            python-shell-interpreter-args "-i"
+;            python-shell-prompt-regexp ""
+;            python-shell-prompt-output-regexp ""
+;            python-shell-completion-setup-code ""
+;            python-shell-completion-module-string-code ""
+;            python-shell-completion-string-code ""
+            ))
     ;; 将lambda关键字显示为λ
     (when (< (string-to-number emacs-version) 24.4)
       ;; 低于24.4版本使用由第三方提供的lambda-mode
-      (require 'lambda-mode)
-      (add-hook 'python-mode-hook #'lambda-mode 1)
-      (setq lambda-regex "lambda ")
-      (setq lambda-symbol (string (make-char 'greek-iso8859-7 107))))
+      (when (require 'lambda-mode nil t)
+        (add-hook 'python-mode-hook #'lambda-mode 1)
+        (setq lambda-regex "lambda ")
+        (setq lambda-symbol (string (make-char 'greek-iso8859-7 107)))))
     ;; Ropemacs
     (my-plugin-ropemacs-init)
     ))
@@ -107,8 +106,7 @@
   (when (>= (string-to-number emacs-version) 24.4)
     ;; 24.4以上版本使用内置的prettify-symbols-mode
     (prettify-symbols-mode t)
-    (setq prettify-symbols-alist '(("lambda" . 955)))
-    )
+    (setq prettify-symbols-alist '(("lambda" . 955))))
   (when (fboundp 'ropemacs-mdoe)
     (my-plugin-ropemacs-start))
   )
@@ -117,3 +115,5 @@
      (my-python-mode-init)
      (add-hook 'python-mode-hook 'my-python-mode-start)
      ))
+
+(provide 'my-prog-py)

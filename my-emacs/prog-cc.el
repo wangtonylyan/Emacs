@@ -1,4 +1,3 @@
-(provide 'my-prog-cc)
 (require 'my-prog)
 ;===========================================================================
 ; Style
@@ -342,67 +341,65 @@
 (defun my-plugin-ecb-init ()
   (save-excursion
     (add-to-list 'load-path (concat my-emacs-plugin-load-path "ecb"))
-    (require 'ecb)
-    (unless (boundp 'stack-trace-on-error)
-      (defvar stack-trace-on-error nil)) ;兼容性
-    (setq ecb-layout-name "left15"
-;          ecb-toggle-layout-sequence '()
-;          ecb-layout-window-sizes nil ;推荐通过调用ecb-change-layout命令，以交互式的方式修改
-          ecb-windows-width 0.2
-          ecb-primary-secondary-mouse-buttons 'mouse-1--C-mouse-1
-          ecb-tip-of-the-day nil
-;          ecb-auto-compatibility-check nil
-          )
-    ;; directories window
-    (setq ecb-source-path '("~"))
-    (setq ecb-tree-buffer-style 'image)
-    (setq ecb-auto-expand-directory-tree 'best)
-    (setq ecb-excluded-directories-regexps '("^\\(\\.\\|\\.\\.\\)$"))
-    (setq ecb-show-sources-in-directories-buffer '("left15"))
-    ;; sources window
-;    (setq ecb-source-file-regexps '())
-;    (setq ecb-sources-exclude-cvsignore '())
-    ;; methods window
-    (setq ecb-process-non-semantic-files nil) ;禁用non-semantic-sources
-    ;; history window
-;    (setq ecb-history-exclude-file-regexps '())
-    ;; compilation window
-    (setq ecb-compile-window-height 0.2
-          ecb-compile-window-width 'edit-window
-          ecb-compile-window-temporally-enlarge 'both
-          ecb-enlarged-compilation-window-max-height 0.5
-          )
-    (setq ecb-compilation-buffer-names ;以下名称的buffer内容将被呈现于该窗口
-          (append ecb-compilation-buffer-names '(("*Process List*")
-                                                 ("*Proced*")
-                                                 (".notes")
-                                                 ("*appt-buf*")
-                                                 ("*Compile-Log*")
-                                                 ("*etags tmp*")
-                                                 ("*svn-process*")
-                                                 ("*svn-info-output*")
-                                                 ("*Python Output*")
-                                                 ("*Org Agenda*")
-                                                 ("*EMMS Playlist*")
-                                                 ("*Moccur*")
-                                                 ("*Directory"))
-                  ))
-    (setq ecb-compilation-major-modes ;以下模式的buffer内容将被呈现于该窗口
-          (append ecb-compilation-major-modes '(change-log-mode
-                                                calendar-mode
-                                                diary-mode
-                                                diary-fancy-display-mode
-                                                xgtags-select-mode
-                                                svn-status-mode
-                                                svn-info-mode
-                                                svn-status-diff-mode
-                                                svn-log-view-mode
-                                                svn-log-edit-mode
-                                                erc-mode
-                                                gud-mode)
-                  ))
-    (ecb-minor-mode 1) ;global minor mode
-    )
+    (when (require 'ecb nil t)
+      (unless (boundp 'stack-trace-on-error)
+        (defvar stack-trace-on-error nil)) ;兼容性
+      (setq ecb-layout-name "left15"
+;            ecb-toggle-layout-sequence '()
+;            ecb-layout-window-sizes nil ;推荐通过调用ecb-change-layout命令，以交互式的方式修改
+            ecb-windows-width 0.2
+            ecb-primary-secondary-mouse-buttons 'mouse-1--C-mouse-1
+            ecb-tip-of-the-day nil
+;            ecb-auto-compatibility-check nil
+            )
+      ;; directories window
+      (setq ecb-source-path '("~"))
+      (setq ecb-tree-buffer-style 'image)
+      (setq ecb-auto-expand-directory-tree 'best)
+      (setq ecb-excluded-directories-regexps '("^\\(\\.\\|\\.\\.\\)$"))
+      (setq ecb-show-sources-in-directories-buffer '("left15"))
+      ;; sources window
+;      (setq ecb-source-file-regexps '())
+;      (setq ecb-sources-exclude-cvsignore '())
+      ;; methods window
+      (setq ecb-process-non-semantic-files nil) ;禁用non-semantic-sources
+      ;; history window
+;      (setq ecb-history-exclude-file-regexps '())
+      ;; compilation window
+      (setq ecb-compile-window-height 0.2
+            ecb-compile-window-width 'edit-window
+            ecb-compile-window-temporally-enlarge 'both
+            ecb-enlarged-compilation-window-max-height 0.5
+            )
+      (setq ecb-compilation-buffer-names ;以下名称的buffer内容将被呈现于该窗口
+            (append ecb-compilation-buffer-names '(("*Process List*")
+                                                   ("*Proced*")
+                                                   (".notes")
+                                                   ("*appt-buf*")
+                                                   ("*Compile-Log*")
+                                                   ("*etags tmp*")
+                                                   ("*svn-process*")
+                                                   ("*svn-info-output*")
+                                                   ("*Python Output*")
+                                                   ("*Org Agenda*")
+                                                   ("*EMMS Playlist*")
+                                                   ("*Moccur*")
+                                                   ("*Directory"))))
+      (setq ecb-compilation-major-modes ;以下模式的buffer内容将被呈现于该窗口
+            (append ecb-compilation-major-modes '(change-log-mode
+                                                  calendar-mode
+                                                  diary-mode
+                                                  diary-fancy-display-mode
+                                                  xgtags-select-mode
+                                                  svn-status-mode
+                                                  svn-info-mode
+                                                  svn-status-diff-mode
+                                                  svn-log-view-mode
+                                                  svn-log-edit-mode
+                                                  erc-mode
+                                                  gud-mode)))
+      (ecb-minor-mode 1) ;global minor mode
+      ))
   ) ;end of my-plugin-ecb-init()
 
 (defun my-plugin-ecb-start ()
@@ -442,11 +439,12 @@
 ; https://github.com/leoliu/ggtags
 ;===========================================================================
 (defun my-plugin-ggtags-init ()
-  (require 'ggtags)
-  )
+  (when (require 'ggtags nil t)
+    )
+  ) ;end of my-plugin-ggtags-init()
 (defun my-plugin-ggtags-start ()
   (ggtags-mode 1) ;local minor mode
-  )
+  ) ;end of my-plugin-ggtags-start()
 
 
 ;===========================================================================
@@ -462,8 +460,9 @@
   )
 (defun my-cc-mode-start ()
   (my-cc-style-start)
-  (my-plugin-cedet-start)
-  (my-plugin-ecb-start)
+  (when (fboundp 'semantic-mode)
+    (my-plugin-cedet-start)
+    (my-plugin-ecb-start))
   )
 (eval-after-load 'cc-mode ;/lisp/progmodes/cc-mode.el
   '(progn
@@ -495,3 +494,5 @@
           (append my-prog-ac-sources '(ac-source-eclim)))
     )
   ) ;end of my-plugin-jdee-start()
+
+(provide 'my-prog-cc)
