@@ -1,4 +1,3 @@
-(provide 'my-init)
 ;===========================================================================
 ;; Emacs initialization file
 ; ~/.emacs > ~/.emacs.el > ~/.emacs.d/init.el
@@ -165,19 +164,16 @@
 ; 1) ELPA (Emacs Lisp Package Archive)
 ; 可以通过Emacs24以上版本内置的ELPA工具来安装和管理第三方插件
 ;---------------------------------------------------------------------------
-(require 'package)
-; Emacs使用的默认更新源为：("gnu" . "http://elpa.gnu.org/")
-; 添加更新源：MELPA每天更新，其包含了绝大多数插件
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-(setq package-load-list '(;以下插件的声明顺序需符合彼此之间的依赖关系
-                          (dash t)
-                          (epl t)
-                          (let-alist t)
-                          (pkg-info t)
-                          (flycheck t)
-                          )) ;指定由以下方式所加载的插件
-(setq package-enable-at-startup nil) ;方式1) 随Emacs的启动而自动加载插件
-(package-initialize) ;方式2) 主动执行该函数以加载插件
+(when (require 'package nil t)
+  ; Emacs使用的默认更新源为：("gnu" . "http://elpa.gnu.org/")
+  ; 添加更新源：MELPA每天更新，其包含了绝大多数插件
+  (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+  (setq package-load-list '(;以下插件的声明顺序需符合彼此之间的依赖关系
+                            (dash t) (epl t) (let-alist t) (pkg-info t) (flycheck t)
+                            )) ;指定由以下方式所加载的插件
+  (setq package-enable-at-startup nil) ;方式1) 随Emacs的启动而自动加载插件
+  (package-initialize) ;方式2) 主动执行该函数以加载插件
+  )
 ;---------------------------------------------------------------------------
 ; 2) 从网上下载、编译、安装第三方插件
 ; 资源网站:
@@ -193,11 +189,11 @@
 ; 其完全基于ido-mode实现，提供了对于execute-extended-command更为强大的支持
 ; 包括了记录用户操作历史、快速查询输入命令的快捷键及函数说明等功能
 ;===========================================================================
-(require 'smex)
-(global-set-key (kbd "M-x") 'smex)
-(global-set-key (kbd "M-X") 'smex-major-mode-commands)
-(global-set-key (kbd "C-c C-c M-x") 'execute-extended-command) ;原M-x快捷键能
-
+(when (require 'smex nil t)
+  (global-set-key (kbd "M-x") 'smex)
+  (global-set-key (kbd "M-X") 'smex-major-mode-commands)
+  (global-set-key (kbd "C-c C-c M-x") 'execute-extended-command) ;原M-x快捷键能
+  )
 
 ;===========================================================================
 ; Color Theme
@@ -254,6 +250,7 @@
 ;===========================================================================
 ; 加载其他配置文件
 ;===========================================================================
+(provide 'my-init)
 (setq my-emacs-config-file-path "~/.emacs.d/my-emacs/")
 (mapc (lambda (name)
         (load (concat my-emacs-config-file-path name) t nil nil t))

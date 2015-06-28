@@ -1,4 +1,3 @@
-(provide 'my-prog-lisp)
 (require 'my-prog)
 ;===========================================================================
 ; Common Lisp Implementations
@@ -45,12 +44,7 @@
     ; 官方提供的SMILE手册中以SBCL为例，因此推荐新手使用SMILE+SBCL的组合
     ; SLIME有两种安装和使用方式：注意这些方式彼此冲突，只能选其一
     ;-----------------------------------------------------------------------
-    ; 方式1) 从网上下载SMILE源码或利用ELPA下载，并作为Emacs的插件被加载和运行
-    (add-to-list 'load-path (concat my-emacs-plugin-load-path "slime"))
-    (require 'slime)
-    (require 'slime-autoloads)
-    ;-----------------------------------------------------------------------
-    ; 方式2) 利用Quicklisp安装SMILE包，作为某个具体的Common Lisp实现的组件被加载和运行
+    ; 方式1) 利用Quicklisp安装SMILE包，作为某个具体的Common Lisp实现的组件被加载和运行
     ; 基于Quicklisp所提供的quicklisp-slime-helper库，可参考：
     ; https://github.com/quicklisp/quicklisp-slime-helper
     ; 以SBCL为例（前提是已安装有Quicklisp），运行以下命令即可安装SLIME
@@ -58,42 +52,45 @@
     ; 安装完成后会在Quicklisp安装目录下额外生成slime-helper.el文件
     ; 随后只需在Emacs中加载该文件即可启用SMILE
 ;    (setq my-emacs-quicklisp-install-path "C:/Users/WM/quicklisp/")
-;    (load (concat my-emacs-quicklisp-install-path "slime-helper.el"))
-    ; 注意此方式下对于SMILE的定制和启动完全在SBCL环境中，以下定制代码不适用！
+;    (when (load (concat my-emacs-quicklisp-install-path "slime-helper.el"))
+    ; 注意此方式下对于SMILE的定制和启动完全在SBCL环境中！
     ;-----------------------------------------------------------------------
-    ;; 以下是对于SMILE的定制
-    ; 指定SLIME所依赖的Lisp实现环境
-    (setq inferior-lisp-program
-          (if (eq system-type 'windows-nt)
-              (concat my-lisp-interpreter-path "sbcl")
-            "sbcl"))
-    ; 指定当前加载的contributed package
-    (setq slime-contribs '(
-                           slime-fancy
-                           slime-scratch
-                           slime-editing-commands
-                           slime-repl
-                           inferior-slime
-                           slime-autodoc
-                           ))
-    (setq slime-description-autofocus nil)
-    (slime-setup) ;使上述定制生效
+    ; 方式2) 从网上下载SMILE源码或利用ELPA下载，并作为Emacs的插件被加载、配置和运行
+    (add-to-list 'load-path (concat my-emacs-plugin-load-path "slime"))
+    (when (and (require 'slime nil t)
+               (require 'slime-autoloads nil t))
+      ; 指定SLIME所依赖的Lisp实现环境
+      (setq inferior-lisp-program
+            (if (eq system-type 'windows-nt)
+                (concat my-lisp-interpreter-path "sbcl")
+              "sbcl"))
+      ; 指定当前加载的contributed package
+      (setq slime-contribs '(
+                             slime-fancy
+                             slime-scratch
+                             slime-editing-commands
+                             slime-repl
+                             inferior-slime
+                             slime-autodoc
+                             ))
+      (setq slime-description-autofocus nil)
+      (slime-setup) ;使上述定制生效
+      ))
 
-    ;-----------------------------------------------------------------------
-    ; Quicklisp
-    ;-----------------------------------------------------------------------
-    ; http://www.quicklisp.org/
-    ; https://github.com/quicklisp
-    ; Quicklisp是一个可以被安装在绝大多数Common Lisp实现环境中的库管理工具
-    ; 以下是安装Quicklisp的命令，需要在某个具体的Common Lisp实现环境中执行
-    ; 以SBCL为例: [shell]$ sbcl --load quicklisp.lisp
-    ; [SBCL]* (quicklisp-quickstart:install) ;在SBCL环境中安装Quicklisp组件
-    ; [SBCL]* (ql:system-apropos "vecto") ;查询vecto库相关信息
-    ; [SBCL]* (ql:quickload "vecto") ;下载并安装vecto库
-    ; [SBCL]* (ql:add-to-init-file) ;生成~/.sbclrc文件，以使SBCL在启动时自动启用Quicklisp
-    ; 注意无论是否使用quick-slime-helper，都推荐安装Quicklisp作为Common Lisp开发环境中的库管理工具
-    ;-----------------------------------------------------------------------
-    )
+  ;-----------------------------------------------------------------------
+  ; Quicklisp
+  ;-----------------------------------------------------------------------
+  ; http://www.quicklisp.org/
+  ; https://github.com/quicklisp
+  ; Quicklisp是一个可以被安装在绝大多数Common Lisp实现环境中的库管理工具
+  ; 以下是安装Quicklisp的命令，需要在某个具体的Common Lisp实现环境中执行
+  ; 以SBCL为例: [shell]$ sbcl --load quicklisp.lisp
+  ; [SBCL]* (quicklisp-quickstart:install) ;在SBCL环境中安装Quicklisp组件
+  ; [SBCL]* (ql:system-apropos "vecto") ;查询vecto库相关信息
+  ; [SBCL]* (ql:quickload "vecto") ;下载并安装vecto库
+  ; [SBCL]* (ql:add-to-init-file) ;生成~/.sbclrc文件，以使SBCL在启动时自动启用Quicklisp
+  ; 注意无论是否使用quick-slime-helper，都推荐安装Quicklisp作为Common Lisp开发环境中的库管理工具
+  ;-----------------------------------------------------------------------
   ) ;end of my-plugin-lispbox-init()
 
 (defun my-plugin-lispbox-start ()
@@ -137,3 +134,5 @@
      (my-emacs-lisp-mode-init)
      (add-hook 'emacs-lisp-mode-hook 'my-emacs-lisp-mode-start)
      ))
+
+(provide 'my-prog-lisp)

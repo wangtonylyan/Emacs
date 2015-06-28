@@ -1,4 +1,3 @@
-(provide 'my-text-tex)
 (require 'my-init)
 ;===========================================================================
 ; TeX
@@ -54,14 +53,13 @@
 (defun my-plugin-auctex-init ()
   (add-to-list 'load-path (concat my-emacs-plugin-load-path "auctex"))
   (add-to-list 'load-path (concat my-emacs-plugin-load-path "auctex/site-start.d"))
-  (load "auctex.el")
-  (load "preview-latex.el")
-  (when (eq system-type 'windows-nt)
-    (add-to-list 'exec-path (concat my-emacs-exec-bin-path "MiKTeX/miktex/bin/x64/"))
-    (when (executable-find "miktex-texworks")
-      (require 'tex-mik))
-    )
-
+  (when (and (load "auctex.el" t)
+             (load "preview-latex.el" t))
+    (when (eq system-type 'windows-nt)
+      (add-to-list 'exec-path (concat my-emacs-exec-bin-path "MiKTeX/miktex/bin/x64/"))
+      (when (executable-find "miktex-texworks")
+        (require 'tex-mik nil t))
+      ))
   ) ;end of my-plugin-auctex-init()
 
 (defun my-plugin-auctex-start ()
@@ -125,3 +123,5 @@
      (my-latex-mode-init)
      (add-hook 'latex-mode-hook 'my-latex-mode-start)
      ))
+
+(provide 'my-text-tex)
