@@ -150,6 +150,12 @@
 ;; Key
 ;(global-set-key "\C-c s" 'func)
 ;(define-key lisp-mode (kbd "C-c ;") 'func)
+(global-set-key (kbd "C-x h") 'windmove-left)
+(global-set-key (kbd "C-x l") 'windmove-right)
+(global-set-key (kbd "C-x k") 'windmove-up)
+(global-set-key (kbd "C-x j") 'windmove-down)
+(global-set-key (kbd "C-x a") 'mark-whole-buffer)
+
 
 ;; Mode
 ;(uniquify-mode 1) ;buffer命名
@@ -193,6 +199,25 @@
   (global-set-key (kbd "M-x") 'smex)
   (global-set-key (kbd "M-X") 'smex-major-mode-commands)
   (global-set-key (kbd "C-c C-c M-x") 'execute-extended-command) ;原M-x快捷键能
+  )
+
+;===========================================================================
+; Minimap
+;===========================================================================
+; https://github.com/dustinlacewell/emacs-minimap
+; 提供一个类似于Sublime编辑器中的minimap功能
+; 其全部的可配置选项见于(customize-group minimap)中
+;===========================================================================
+(when (require 'minimap nil t)
+  (setq minimap-always-recenter nil) ;设置为nil才有效?
+  (setq minimap-recenter-type 'middle)
+  (setq minimap-buffer-name-prefix "MINI") ;不能为空，否则无法启动minimap窗口
+  (setq minimap-hide-fringes t)
+  (setq minimap-hide-scroll-bar t)
+  (setq minimap-update-delay 1.0)
+  (setq minimap-window-location 'right)
+  (setq minimap-display-semantic-overlays nil)
+  (setq minimap-enlarge-certain-faces nil)
   )
 
 ;===========================================================================
@@ -245,6 +270,21 @@
     (add-hook 'after-make-frame-functions
               (lambda (frame)
                 (enable-theme theme)))))
+
+;===========================================================================
+; Powerline
+;===========================================================================
+; https://github.com/jonathanchu/emacs-powerline
+; 其提供了一个漂亮的mode line皮肤，缺点是当字体太多或字太多时，会显示不下所有内容
+;===========================================================================
+(setq my-emacs-if-enable-powerline nil)
+(when (and my-emacs-if-enable-powerline
+           (require 'powerline nil t))
+  (setq powerline-arrow-shape
+;        'arrow
+;        'curve
+        'arrow14
+        ))
 
 
 ;===========================================================================
