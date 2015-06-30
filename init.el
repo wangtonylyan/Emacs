@@ -107,7 +107,7 @@
 (column-number-mode 1) ;在mode-line显示列数
 (set-face-background 'default "#C7EDCC") ;设置背景颜色
 (set-face-attribute 'default nil :family "Monaco" :weight 'semi-bold) ;设置字体
-(set-frame-font "10" nil t) ;设置字号
+(set-frame-font "11" nil t) ;设置字号
 (show-paren-mode 1) ;左右括号相匹配显示
 (setq show-paren-style 'parentheses)
 (setq debug-on-error t) ;显示错误信息
