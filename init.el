@@ -53,16 +53,6 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(current-language-environment "Chinese-GB")
- '(tool-bar-mode nil) ;取消工具栏
- '(electric-indent-mode nil) ;取消全局性的自动缩进
- '(global-font-lock-mode nil) ;取消全局性的语法高亮
- ;; 以下两个模式都提供在minibuff中的补全功能，且支持同样多的领域
- ;; 但前者需要TAB键触发，而后者自动呈现，但默认仅支持find-file和switch-to-buffer
- ;; 插件Smex的实现就是基于其对execute-extended-command的支持
- '(icomplete-mode t)
- '(ido-mode 'both)
- '(ido-everywhere nil) ;仅使ido支持find-file和switch-to-buffer
- '(ido-enable-flex-matching nil)
  '(ecb-options-version "2.40") ;ecb-minor-mode
  )
 (custom-set-faces
@@ -84,6 +74,7 @@
 
 ;; UI
 ;(setq inhibit-startup-message 1) ;取消启动界面
+(tool-bar-mode -1) ;取消工具栏
 (setq frame-title-format "emacs@%b") ;设置标题栏显示为buffer名字
 ;; 关于smooth scrolling可以参考
 ;; http://www.emacswiki.org/emacs/SmoothScrolling
@@ -102,6 +93,7 @@
       )
 (setq-default scroll-up-aggressively 0.01
               scroll-down-aggressively 0.01)
+(scroll-bar-mode -1) ;取消滚动条
 (mouse-avoidance-mode 'animate) ;当光标移动至鼠标位置时，为避免遮挡视线，自动移开鼠标
 (setq-default line-spacing 0) ;行距
 (column-number-mode 1) ;在mode-line显示列数
@@ -155,9 +147,26 @@
 (global-set-key (kbd "C-x k") 'windmove-up)
 (global-set-key (kbd "C-x j") 'windmove-down)
 (global-set-key (kbd "C-x a") 'mark-whole-buffer)
-
+(global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
+(global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
+(global-set-key (kbd "<C-up>") 'text-scale-increase)
+(global-set-key (kbd "<C-down>") 'text-scale-decrease)
 
 ;; Mode
+(electric-indent-mode -1) ;取消全局性的自动缩进
+(global-font-lock-mode -1) ;取消全局性的语法高亮
+;; icomplete和ido这两个模式都能提供以下在minibuff中的补全功能
+;; find-file, switch-to-buffer, execute-extended-command
+;; 前者需要TAB键触发，而通常TAB键都会触发新建子窗口呈现补全，所以一般不用此模式
+;; 后者总是自动呈现，但缺省仅支持前两种补全功能
+;; 插件Smex的实现就是基于后者对于execute-extended-command的支持
+(icomplete-mode -1)
+(when (require 'ido nil t)
+  (ido-mode t)
+  (ido-everywhere -1) ;仅使ido支持find-file和switch-to-buffer
+  (setq ido-enable-flex-matching nil)
+  (setq ido-enable-prefix t)
+  (setq ido-enter-matching-directory nil))
 ;(uniquify-mode 1) ;buffer命名
 ;; built-in Speedbar (rather than CEDET Speedbar)
 (setq speedbar-use-images nil) ;不使用image方式
@@ -198,7 +207,7 @@
 (when (require 'smex nil t)
   (global-set-key (kbd "M-x") 'smex)
   (global-set-key (kbd "M-X") 'smex-major-mode-commands)
-  (global-set-key (kbd "C-c C-c M-x") 'execute-extended-command) ;原M-x快捷键能
+  (global-set-key (kbd "C-x M-x") 'execute-extended-command) ;原M-x快捷键能
   )
 
 ;===========================================================================
