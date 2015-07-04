@@ -33,6 +33,7 @@
 ;===========================================================================
 ; https://github.com/python-rope
 ; 其底层基于Rope和Pymacs，安装步骤为首先安装Rope和Pymacs，最后再安装Ropemacs
+; 虽安装于Python中，但会在加载时执行Elisp程序，从而为Emacs提供支持
 ; [shell]$ python setup.py install
 ;---------------------------------------------------------------------------
 ; Rope
@@ -56,18 +57,19 @@
 ;===========================================================================
 (defun my-plugin-ropemacs-init ()
   (add-to-list 'load-path (concat my-emacs-plugin-load-path "ropemacs"))
-  (when (require 'pymacs nil t)
-    (pymacs-load "ropemacs" "rope-")
+  (when (and (require 'pymacs nil t)
+             (pymacs-load "ropemacs" "rope-" t))
     (setq ropemacs-confirm-saving t)
     (setq ropemacs-enable-autoimport t)
-    (setq ropemacs-autoimport-modules '("os")))
+    (setq ropemacs-autoimport-modules '("os" "sys" "inspect")))
   ) ;end of my-plugin-ropemacs-init()
 
 (defun my-plugin-ropemacs-start ()
   ; 已自动将(ropemacs-mode)加入python-mode-hook中，因此无需手动启用
-  (when (boundp 'ac-sources)
-    (setq ac-sources
-          (append my-prog-ac-sources '(ac-source-ropemacs))))
+  (when (fboundp 'ropemacs-mode)
+    (when (boundp 'ac-sources)
+      (setq ac-sources
+            (append my-prog-ac-sources '(ac-source-ropemacs)))))
   ;; Ropemacs代码补全的快捷键与auto-complete不同，默认为M-/，可作为后者的补充
   ;; 因为后者在某些情况下必须至少输入一个字符，而此时就可以使用前者
   ) ;end of my-plugin-ropemacs-start()
@@ -77,7 +79,7 @@
 ;===========================================================================
 (defun my-python-mode-init ()
   (when (eq system-type 'windows-nt)
-    (setq my-python-interpreter-path (concat my-emacs-exec-bin-path "/programming/python2/"))
+    (setq my-python-interpreter-path (concat my-emacs-exec-bin-path "programming/python2/"))
     (add-to-list 'exec-path my-python-interpreter-path)
     )
   (when (executable-find "python")
