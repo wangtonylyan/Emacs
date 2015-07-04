@@ -49,7 +49,8 @@
 ;---------------------------------------------------------------------------
 ; version: 0.25
 ; https://github.com/pinard/Pymacs
-; Pymacs是一款作用类似于SLIME的Emacs插件，会启动并链接一个Python解释器进程
+; Pymacs是一款作用如同IPython client的Emacs插件
+; 其会启动并链接至一个Python解释器，将之作为后台负责执行和计算的kernel
 ; 安装步骤主要参照于其Makefile
 ; [shell]$ python pppp -C ppppconfig.py Pymacs.py.in pppp.rst.in pymacs.el.in pymacs.rst.in contrib tests
 ; [shell]$ python setup.py install
