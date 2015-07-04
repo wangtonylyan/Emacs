@@ -111,6 +111,7 @@
 (setq-default indent-tabs-mode nil) ;make indentation commands use space only
 (setq-default tab-width 4)
 ;(setq tab-always-indent t)
+(electric-indent-mode -1) ;取消全局性的自动缩进模式
 (global-highlight-changes-mode 1)
 (setq highlight-changes-global-changes-existing-buffers nil)
 (setq highlight-changes-visibility-initial-state t)
@@ -123,6 +124,7 @@
             (delete-trailing-whitespace) ;删除每行末尾的空格
             (highlight-changes-remove-highlight (point-min) (point-max))
             ))
+(global-font-lock-mode -1) ;取消全局性的语法高亮模式
 
 ;; Backup and Revert
 (setq make-backup-files t) ;启用自动备份
@@ -153,8 +155,6 @@
 (global-set-key (kbd "<C-down>") 'text-scale-decrease)
 
 ;; Mode
-(electric-indent-mode -1) ;取消全局性的自动缩进
-(global-font-lock-mode -1) ;取消全局性的语法高亮
 ;; icomplete和ido这两个模式都能提供以下在minibuff中的补全功能
 ;; find-file, switch-to-buffer, execute-extended-command
 ;; 前者需要TAB键触发，而通常TAB键都会触发新建子窗口呈现补全，所以一般不用此模式
