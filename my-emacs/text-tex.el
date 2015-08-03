@@ -36,19 +36,31 @@
 ; AUCTeX
 ;===========================================================================
 ; http://www.gnu.org/software/auctex/
+; http://ftp.gnu.org/gnu/auctex/
 ; Emacs中内置了一整套tex major mode，用于支持TeX的编辑功能
 ; 但仍推荐使用此插件，其生效后会完全覆盖/替代内置中对应的major模式
 ; TeX-mode (继承于text-mode), plain-TeX-mode, LaTeX-mode, ams-tex-mode,
 ; ConTeXt-mode, Texinfo-mode, docTex-mode (以上继承于TeX-mode)
 ; 该插件类似于SLIME，作为各种发行版的前端Emacs接口
 ;---------------------------------------------------------------------------
-; 其官网上为Windows平台提供了预编译的版本
-; 下载后将解压缩目录下share/emacs/site-lisp子目录中的所有文件
-; 在不改变site-start.d、site-start.el、tex-site.el此三者相对位置的前提下
-; 全部移至Emacs的插件存放目录中即可，目前还暂将上述三者共同移至了auctex子目录中
-; 原本site-start.d中的文件应放置于某个Emacs启动时会自动加载的目录下(如/lisp)
-; 但目前采用由以下代码加载的方式
-; 此外，还可将解压缩目录下share/info子目录加入至Info-directory-list
+; Windows平台上可使用由其官网上所提供的预编译的版本
+; 下载后将解压缩目录下share/emacs/site-lisp中的所有文件和子目录
+; 即site-start.el、tex-site.el、site-start.d和auctex
+; 在不改变其之间相对位置的前提下，移至任何由load-path所指定的路径下即可
+; 此外还可选择性地将解压缩目录下share/info子目录加入至Info-directory-list
+; 该预编译版本的打包方式是利用site-start.el间接地加载site-start.d目录下的
+; auctex.el和preview-latex.el文件--异曲同工
+; 而site-start.el文件本身应被放置于Emacs启动时会自动加载的目录下(如/lisp)
+; site-start.d目录下的文件、tex-site.el文件和auctex子目录应被放置于load-path指定目录下
+;---------------------------------------------------------------------------
+; Linux平台上需根据INSTALL文件说明进行操作：
+; 1) 由于configure程序无法很好地自动识别site-lisp目录位置，因此需手动设置，例如：
+; ./configure --with-lispdir=/home/wm/.emacs.d/site-lisp/auctex或
+; ./configure --with-lispdir=/usr/local/share/emacs/24.5/site-lisp
+; 2) make
+; 3) make install成功后会生成auctex.el、preview-latex.el、tex-site.el和auctex子文件夹
+; 这些文件和目录的相对位置只要不改变，可以随意移动至任何load-path指定的路径下
+; 此外，无论何种平台上，都可直接利用ELPA在线安装
 ;---------------------------------------------------------------------------
 (defun my-plugin-auctex-init ()
   (add-to-list 'load-path (concat my-emacs-plugin-load-path "auctex"))
@@ -81,7 +93,7 @@
   (when (fboundp 'TeX-mode)
     (my-plugin-auctex-start))
   )
-(eval-after-load 'tex-mode ;/lisp/textmodes/tex-mode.el
+(eval-after-load 'simple ;/lisp/simple.el
   '(progn
      (my-TeX-mode-init)
      (when (boundp 'TeX-mode-hook)
@@ -106,7 +118,9 @@
 (defun my-tex-mode-init ()
 )
 (defun my-tex-mode-start ()
-)
+  (font-lock-mode 1)
+  (linum-mode 1)
+  )
 (eval-after-load 'tex-mode ;/lisp/textmodes/tex-mode.el
   '(progn
      (my-tex-mode-init)
@@ -117,6 +131,8 @@
 (defun my-latex-mode-init ()
   )
 (defun my-latex-mode-start ()
+  (font-lock-mode 1)
+  (linum-mode 1)
   )
 (eval-after-load 'tex-mode ;/lisp/textmodes/tex-mode.el
   '(progn
