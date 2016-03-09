@@ -297,46 +297,26 @@
 ;===========================================================================
 ; version: 2.40
 ; http://ecb.sourceforge.net/
-; 此插件自从2009年之后就不再更新，最终版本为v2.4，基于CEDET v1.x
-; 因此并不兼容于Emacs23以上版本中内置的CEDET v2.x，需要修改源代码，具体操作步骤如下：
-; 1)将源文件中所有下述信息进行修改，这些为CEDET旧版本的接口
-; (require 'semantic-analyze) ----> (require 'semantic/analyze)
-; (require 'semantic-ctxt)    ----> (require 'semantic/ctxt)
-; (require 'semanticdb)       ----> 删除
-; (require 'semanticdb-find)  ----> 删除
-; (require 'semanticdb-mode)  ----> 删除
-; (require 'semantic-load)    ----> 删除
-; 上述操作共涉及到了以下三个文件：ecb-analyse.el，ecb-cedet-wrapper.el，ecb-method-browser.el
-; 2)注释或删除掉ecb-upgrade.el文件中的检查CEDET版本的以下语句：
-; ;; check if vedet-version is correct
-; (when (or (not (boundp 'cedet-version))
-;     (ecb-package-version-list<
-;      (ecb-package-version-str2list cedet-version)
-;      ecb-required-cedet-version-min)
-;     (ecb-package-version-list<
-;      ecb-required-cedet-version-max
-;      (ecb-package-version-str2list cedet-version)))
-;  (setq version-error (concat "cedet ["
-;                 cedet-required-version-str-min
-;                 ", "
-;                 cedet-required-version-str-max
-;                 "]")))
-; 3)编译安装的过程可仿照make.bat文件中的内容
-; 首先ECB目录下创建ecb-compile-script-init文件，并写入如下脚本
+; 此插件自从2009年之后就不再更新，最终版本定为v2.40，基于CEDET v1.x
+; 因此并不兼容于Emacs23以上版本中内置的CEDET v2.x，需要修改源代码
+;---------------------------------------------------------------------------
+; version: 2.40.1
+; https://github.com/emacsmirror/ecb
+; 而由GitHub上提供的版本，则解决了上述原版兼容性问题，完美支持Emacs23以上版本
+;---------------------------------------------------------------------------
+; 将源代码下载并解压缩至load-path下，即可使用，以下编译过程可提高执行性能(可选)
+; 1)修改或仿照make.bat文件中的内容
+; 首先ECB目录下创建ecb-compile-script-init文件，并写入下述脚本
 ; (add-to-list 'load-path "E:/.emacs.d/site-lisp/ecb") ;ECB所在目录
 ; (add-to-list 'load-path "D:/softwares/Emacs/lisp/cedet") ;CEDET所在目录
 ; (load-file "D:/softwares/Emacs/lisp/cedet/cedet.el") ;加载CEDET核心文件
 ; (require 'ecb)
 ; (setq debug-on-error t)
-; 最终执行以下shell命令即可完成ECB的编译安装工作
+; 最终执行以下shell命令即可完成ECB的编译工作
 ; [$] cd E:/.emacs.d/site-lisp/ecb
 ; [$] emacs -Q -l ecb-compile-script-init --eval "(ecb-byte-compile t)"
-; 忽视编译过程中的所有warning，编译完成后可删除ecb-compile-script-init文件
-;===========================================================================
-; version: 2.40.1
-; https://github.com/emacsmirror/ecb
-; 此版本解决了包括上述提到的几个重大的兼容性问题，能完美支持Emacs23以上版本
-; 编译安装过程同上，以下配置依然适用
+; 忽视编译过程中的所有warning，编译完成后可删除ecb-compile-script-init等文件
+; 2)在启动Emacs并require ECB后，执行ecb-byte-compile命令即可
 ;===========================================================================
 (defun my-plugin-ecb-init ()
   (save-excursion

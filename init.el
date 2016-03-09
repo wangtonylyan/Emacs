@@ -19,16 +19,17 @@
 ; Windows
 ;===========================================================================
 ; 1）在C:\Users\用户名\AppData\Roaming\.emacs文件中指示导入本文件
-;(load-file "E:/home/wm/.emacs.d/init.el")
+; (load-file "E:/home/wm/.emacs.d/init.el")
+; 或添加并设置系统的环境变量HOME
 ; 2）以下是本文件的内容
 ; 设置Emacs内部的环境变量，此方式需要每次在Emacs启动时被重新设置，不会保存
-; 也可以设置Windows系统的环境变量，但并不推荐，因为会影响到其他同样依赖于该变量的软件
 (when (eq system-type 'windows-nt)
   (setenv "HOME" "E:/")
   ; 设置默认工作目录
   (setq default-directory "~/")
   ; 设置shell，使用由Emacs提供的cmdproxy.exe
-  (setq shell-file-name "D:/softwares/programming/emacs/bin/cmdproxy.exe")
+  (setq shell-file-name
+        "D:/softwares/programming/emacs-24.5/libexec/emacs/24.5/i686-pc-mingw32/cmdproxy.exe")
   (setq shell-command-switch "-c")
   )
 
@@ -69,8 +70,8 @@
 ; 配置杂项
 ;===========================================================================
 ;; Account
-(setq user-full-name "Tony")
-(setq user-mail-address "")
+(setq user-full-name "TonyLYan")
+(setq user-mail-address "wangtonylyan@outlook.com")
 
 ;; UI
 ;(setq inhibit-startup-message 1) ;取消启动界面
@@ -98,7 +99,7 @@
 (setq-default line-spacing 0) ;行距
 (column-number-mode 1) ;在mode-line显示列数
 (set-face-background 'default "#C7EDCC") ;设置背景颜色
-(set-face-attribute 'default nil :family "Monaco" :weight 'semi-bold) ;设置字体
+(set-face-attribute 'default nil :family "Consolas" :weight 'normal) ;设置字体
 (set-frame-font "11" nil t) ;设置字号
 (show-paren-mode 1) ;左右括号相匹配显示
 (setq show-paren-style 'parentheses)
@@ -309,6 +310,7 @@
         "prog-cc" ;cc-mode (c-mode, c++-mode, java-mode)
         "prog-lisp" ;lisp-mode, emacs-lisp-mode, lisp-interaction-mode
         "prog-py" ;python-mode
+        "prog-haskell" ;haskell-mode
         "text-tex" ;tex-mode, latex-mode
         "web-browser" ;web browser
         ))
