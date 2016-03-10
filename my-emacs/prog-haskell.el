@@ -59,13 +59,13 @@
         my-emacs-haskell-mode-compile-file)
   ; 生成Emacs的autoloads文件
   (setq make-backup-files nil)
-  (setq generated-autoload-file (expand-file-name "haskell-mode-autoloads.el")) ; 指定目标文件
-  (update-directory-autoloads (expand-file-name ".")) ; 推荐以M-x交互式地执行该命令
+  (setq generated-autoload-file (expand-file-name "haskell-mode-autoloads.el")) ; 指定目标文件名
+  (update-directory-autoloads (expand-file-name ".")) ; 还可以M-x交互式地执行该命令
   )
 
 (defun my-plugin-haskell-mode-init ()
   (add-to-list 'load-path (concat my-emacs-plugin-load-path "haskell-mode"))
-  (when (require 'haskell-mode)
+  (when (require 'haskell-mode-autoloads nil t)
     (setq haskell-stylish-on-save t)
 ;    (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
     ))
