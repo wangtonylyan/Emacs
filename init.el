@@ -24,13 +24,14 @@
 ; 2）以下是本文件的内容
 ; 设置Emacs内部的环境变量，此方式需要每次在Emacs启动时被重新设置，不会保存
 (when (eq system-type 'windows-nt)
-  (setenv "HOME" "E:/")
+;  (setenv "HOME" "E:/")
   ; 设置默认工作目录
   (setq default-directory "~/")
   ; 设置shell，使用由Emacs提供的cmdproxy.exe
-  (setq shell-file-name
-        "D:/softwares/programming/emacs-24.5/libexec/emacs/24.5/i686-pc-mingw32/cmdproxy.exe")
-  (setq shell-command-switch "-c")
+  (setq my-shell-file-name "D:/softwares/programming/emacs-24.5/libexec/emacs/24.5/i686-pc-mingw32/cmdproxy.exe")
+  (when (executable-find my-shell-file-name)
+    (setq shell-file-name my-shell-file-name)
+    (setq shell-command-switch "-c"))
   )
 
 
