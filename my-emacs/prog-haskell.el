@@ -66,7 +66,7 @@
 (defun my-plugin-haskell-mode-init ()
   (add-to-list 'load-path (concat my-emacs-plugin-load-path "haskell-mode"))
   (when (require 'haskell-mode-autoloads nil t)
-    (setq haskell-stylish-on-save t)
+;    (setq haskell-stylish-on-save t)
 ;    (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
     ))
 (defun my-plugin-haskell-mode-start ()
