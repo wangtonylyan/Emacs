@@ -1,0 +1,248 @@
+-*- mode: org; -*-
+
+#+STARTUP: content  ; show all headlines
+#+STARTUP: indent  ; start with org-indent-mode turned on
+#+STARTUP: align  ; align all tables
+#+STARTUP: latexpreview  ; preview latex fragments
+
+(add-hook 'org-mode-hook 'turn-on-font-lock)
+(setq org-list-demote-modify-bullet '(("+" . "-") ("-" . "+") ("*" . "+")))
+(setq org-indent-indentation-per-level 2)
+(setq org-list-indent-offset 0) :: list indentation in addition to org-indent-indentation-per-level, 支持负数
+
+(setq org-directory "~/.emacs.d/org/")
+(setq org-default-notes-file (concat org-directory "note.org"))
+(define-key global-map "\C-cc" 'org-capture)
+
+*jorgon*
+(function)
+`global variable'
+<local variable>
+
+默认quote使用', `backquote用于需要在quote中嵌套非quote的内容.
+
+
+* concept
++ frame :: graphical window or terminal screen
++ window ::  main area of frame, where the buffer is displayed
+  - selected window :: the one shows the more prominent cursor
++ buffer :: the text you are editing
+  - current buffer :: the one displayed in the selected window
++ point :: the prominent cursor shows the location where most editing commands take effect
+  point指向的是光标所覆盖的字符与其之前一个字符中间的空隙.
+  每个buffer中的point都是独立的, 例如若一个buffer被同时打开于多个window中, 则各个window中的buffer也拥有独立的point.
++ mark :: 通过(set-mark)或(push-mark)等可以记录当前point的位置于mark ring中
++ mode line ::
++ echo area :: the line at the very bottom of the frame, aka, minibuffer
+  minibuffer中如果输入路径错误可以连续输入两个//以指示Emacs忽略第一个/之前的内容, 但后续路径就必须是绝对路径了, e.g. Find file: ~/u2/emacs/src//etc/termcap.
++ line :: *logical line* vs. *screen line*
+  - line wrapping, continuation :: display a too long *logical line* as two or more *screen lines*
+  - line truncation :: do not display the rest of a too long *logical line* out of window
++ key ::
+  - key sequence ::
+    + prefix key :: not long enough to invoke a command
+      e.g. C-c, C-h, C-x, C-x RET, C-x @, C-x a, C-x n, C-x r, C-x v, C-x 4, C-x 5, C-x 6, ESC, M-g, and M-o
+    + complete key :: a key sequence invokes a command
+  - keymap :: the binding between key sequence and command
+    正是由于key绑定于了某个command才导致key能起到对应的作用
+* keymap
+** common
++ point ::
+  - C-f :: (forward-char)
+  - C-b :: (backward-char)
+  - M-f :: (forward-word)
+  - M-b :: (backward-word)
+  - C-a :: (beginning-of-visual-line)
+  - C-e :: (end-of-visual-line)
+  - M-a :: (backward-sentence)
+  - M-e :: (forward-sentence)
+  - C-n :: (next-line)
+  - C-p :: (previous-line)
+  - C-v :: (scroll-up-command)
+  - M-v :: (scroll-down-command)
+  - C-M-v :: (scroll-other-window)
+  - M-< :: (beginning-of-buffer)
+  - M-> :: (end-of-buffer)
+  - M-r :: (move-to-window-line-top-bottom)
+  - C-l :: (recenter-top-bottom), 类似于M-r但只是移动视角
+  - C-s :: (isearch-forward)
+  - C-r :: (isearch-backward)
+  - C-s :: search again forward
+    + C-r :: search again backward
+    + RET :: exit, leaving point at current location
+  - C-SPACE :: (set-mark-command)
+  - C-x C-x :: (exchange-point-and-mark)
++ edit ::
+  - C-d :: (delete-char), without saving into ring
+  - M-d :: (kill-word)
+  - C-k :: (kill-visual-line)
+  - M-k :: (kill-sentence)
+  - C-w :: (kill-region)
+  - M-w :: (kill-ring-save)
+  - C-y :: (yank)
+  - M-y :: (yank-pop), used only after C-y, switch among ring savings
+  - C-x C-o :: (delete-blank-line), delete all but one of many consecutive blank lines
+  - C-o :: (org-open-line), insert a newline after the current point, 光标不移动
+  - C-j :: (org-return-indent), 光标会跟着下移一行
+  - C-x u :: (undo)
++ buffer :: C-x
+  - C-x C-f :: (find-file)
+  - C-x C-s :: (save-buffer)
+  - C-x b :: (switch-to-buffer)
+  - C-x C-b :: (list-buffers)
++ window :: C-x
+  - C-x 1 :: (delete-other-windows)
+  - C-x 2 :: (split-window-below)
+  - C-x 3 :: (split-window-right)
+  - C-x 4 C-f :: (find-file-other-window), open a file in a new window or another existing one
+  - C-x 4 b :: (switch-to-buffer-other-window)
+  - C-x o :: (other-window)
++ frame ::
+  - C-x C-c :: (save-buffers-kill-terminal)
+  - C-z :: (suspend-frame), minimize the frame
++ command ::
+  - C-g :: (keyboard-quit)
+  - C-x z :: (repeat), repeat the previous command
+    + C-x z z z ... :: repeat several times according to the number of z
+  - C-u <key> :: repeat the specific command four times, 默认次数就是4
+    + C-u C-u ... <key> :: repeat 4^(number of C-u) times
+    + C-u <number> <key> :: repeat <number> times, 指定重复执行的次数
+  - C-x C-e :: (eval-last-sexp)
++ help :: C-h
+  - C-h k :: (describe-key)
+  - C-h c :: (describe-key-briefly), print name of the function that the key invokes
+  - C-h v :: (describe-variable)
+  - C-h f :: (describe-function)
+  - C-h a :: (apropos-command), show commands that match a pattern
+  - C-h t :: (help-with-tutorial)
+** org-mode
++ basic ::
+  - C-c C-n :: (outline-next-visible-heading)
+  - C-c C-p :: (outline-previous-visible-heading)
+  - C-c C-u :: (outline-up-heading), backward to higher-level visible heading
+  - C-c C-f :: (org-forward-heading-same-level)
+  - C-c C-b :: (org-backward-heading-same-level)
+  - M-RET :: (org-meta-return), insert a new heading with the same level
+  - M-LEFT :: (org-metaleft), promote heading by one level
+  - M-RIGHT :: (org-metaright), demote heading by one level
+  - M-S-LEFT :: (org-shiftmetaleft), promote subtree by one level
+  - M-S-RIGHT :: (org-shiftmetaright), demote subtree by one level
+  - M-S-UP :: (org-shiftmetaup), move subtree up
+  - M-S-DOWN :: (org-shiftmetadown), move subtree down
+  - C-c C-x C-w :: (org-cut-special), kill subtree
+  - C-c C-x M-w :: (org-copy-special), copy subtree
+  - C-c C-x C-y :: (org-paste-special), yank subtree
++ source code ::
+  - C-c ' :: (org-edit-special), open a special editor for the element at point, e.g. source code block
+** self-defined
++ C-x a :: (mark-whole-buffer)
++ C-x h :: (windmove-left)
++ C-x l :: (windmove-right)
++ C-x j :: (windmove-down)
++ C-x k :: (windmove-up)
++ C-UP :: (text-scale-increase)
++ C-DOWN :: (text-scale-decrease)
++ C-WHEEL_UP :: (text-scale-increase)
++ C-WHEEL_DOWN :: (text-scale-decrease)
++ C-c c :: (org-capture)
+* startup
+** init script file
++ load sequence :: ~/.emacs > ~/.emacs.el > ~/.emacs.d/init.el
++ 由于Windows系统中环境变量HOME的默认值是"C:\Users\用户名\AppData\Roaming\", 因此需要以以下方式之一来指定初始化配置文件:
+  1. 创建HOME/.emacs文件, 并写入(load-file "NEW_HOME/.emacs.d/init.el"), 随后每次Emacs启动时都会先执行.emacs, 再加载.emacs.d/init.el.
+  2. 创建/修改Windows系统中的环境变量HOME, 于是每次Emacs启动时都会直接执行.emacs.d/init.el. 注意修改不是Emacs环境中的HOME变量, 因为该变量只有在.emacs.d/init.el执行后才会生效.
++ 目前启动时加载模块的策略是:
+  1. 各个模式的配置内容定义于单独的脚本文件中, 但所有的脚本文件都会随.emacs.d/init.el而被加载.
+  2. 各个脚本文件中的函数定义会随文件被加载而同时被evaluate, 但通过利用(eval-after-load)等方式, 使得它们只会在相应模式被启用时才被真正地执行.
+  3. 全局启用的常用插件随Emacs启动而被加载和初始化, 非常用子模式的插件随子模式的启用而被加载和初始化.
+** loading
++ (load-file <file>) :: 最原始的接口, 以下加载机制都是在此接口上的封装.
+  - pro ::
+  - con :: 必须声明完整的文件路径和扩展名
++ (load <file>) ::
+  - pro :: guess file name extension, search the directories in `load-path' for <file>
+  - con :: 每次执行都会重新加载
++ (require <symbol> <file>) :: load a feature in `features' if not already loaded
+  若`features'中没有, 则加载<file>.
+  - pro :: 若已加载则不会重复加载
+  - con ::
++ (autoload <symbol> <file>) ::
+  creates a placeholder object for a function defined in a file; trying to call the autoloading function loads the file to get the function's real definition.
+  - pro :: 使用时才真正执行(require), 若不指定<file>会自动扩展文件名
++ (eval-after-load <file/symbol> <form>) :: run quoted <form> right before <file/symbol> is totally loaded, 在执行<file/symbol>之前执行<form>所描述的指令.
+  因此可以在此方式中执行(add-hook), 随后加载的<file/symbol>同样能够启用.
+** variable
++ environment variable :: Emacs有一套内部的环境变量, 存储于变量`process-environment'中, 其内容就包括了从当前操作系统读取到的一部分环境变量
+  - "HOME" :: (setenv "HOME" <path>)
+  - "PATH" or `exec-path' :: (setenv "PATH" <path>) or (add-to-list 'exec-path <path>)
+* Emacs lisp
+** variable
+*** scope :: *global* vs. *local*
+Emacs中变量的作用域只有这两种, 后者对于每个buffer都会拥有一个独立的变量值. 因此与之相应的赋值方式也就有了两种:
+1. (set) :: 针对于global变量或某个buffer所属的local变量
+2. (set-default) :: 针对于所有buffer的local变量
+即若一个local变量通过(set-default)被赋值, 则该值是全局可见的, 但若其是通过(set)被赋值的, 则该值仅在执行该语句所在的buffer有效.
+** symbol
+*** true or false
++ nil :: false or empty list
++ t :: true
+** function
+*** type
++ (string-to-number), (string-to-int) ::
++ (number-to-string), (int-to-string) ::
++ (type-of) :: the type of an object
+*** string
++ (substring) ::
++ (concat) ::
++ (string)
++ (format) ::
++ (string-lessp), (string<) ::
++ (string-equal), (string=) ::
+*** buffer
++ (current-buffer) :: 返回当前正在编辑的buffer object, 即(point)所处的上下文
+  以下函数都会改变这个函数的返回值
++ (other-buffer) :: switch to other buffer
++ (set-buffer) :: make a specific buffer current for editing
++ (with-current-buffer) ::
++ (with-temp-buffer) ::
+https://www.gnu.org/software/emacs/manual/html_mono/eintr.html
+
++ (buffer-name) ::
++ (buffer-file-name) ::
++ (buffer-size) ::
++ (point) ::
++ (point-min) ::
++ (point-max) ::
++ (goto-char) :: set point to a specific position
+*** debug
++ (message) :: 将信息输出到minibuffer, 传参与(format)一致
+** special form
++ (if) :: condition
+  #+BEGIN_SRC emacs-lisp
+    (if (<condition>)
+        (<then>)
+      (<else>))
+  #+END_SRC
++ (let) :: define local variables
+  #+BEGIN_SRC emacs-lisp
+    (let ((<variable> <value>)
+          <variable>  ; nil
+          ...)
+      <body>)
+  #+END_SRC
++ (defun) :: define a function
+  #+BEGIN_SRC emacs-lisp
+    (defun <name> (<argument>)
+      "documentation"
+      (interactive)
+      <body>)
+  #+END_SRC
+  - (interactive) :: 可用于以M-x的方式调用函数并输入相应传参
++ (save-excursion) :: save the location of point and restore this position after the body is evaluated
+  #+BEGIN_SRC emacs-lisp
+    (save-excursion
+      <body>
+      ...)
+  #+END_SRC
+** macro
++ (progn)
