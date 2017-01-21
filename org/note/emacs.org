@@ -73,7 +73,7 @@
   - C-SPACE :: (set-mark-command)
   - C-x C-x :: (exchange-point-and-mark)
 + edit ::
-  - C-d :: (delete-char), without saving into ring
+  - C-d :: (delete-char), without saving into kill ring
   - M-d :: (kill-word)
   - C-k :: (kill-visual-line)
   - M-k :: (kill-sentence)
@@ -182,10 +182,12 @@ EmacsÖĞ±äÁ¿µÄ×÷ÓÃÓòÖ»ÓĞÕâÁ½ÖÖ, ºóÕß¶ÔÓÚÃ¿¸öbuffer¶¼»áÓµÓĞÒ»¸ö¶ÀÁ¢µÄ±äÁ¿Öµ. Òò´ËÓ
 1. (set) :: Õë¶ÔÓÚglobal±äÁ¿»òÄ³¸öbufferËùÊôµÄlocal±äÁ¿
 2. (set-default) :: Õë¶ÔÓÚËùÓĞbufferµÄlocal±äÁ¿
 ¼´ÈôÒ»¸ölocal±äÁ¿Í¨¹ı(set-default)±»¸³Öµ, Ôò¸ÃÖµÊÇÈ«¾Ö¿É¼ûµÄ, µ«ÈôÆäÊÇÍ¨¹ı(set)±»¸³ÖµµÄ, Ôò¸ÃÖµ½öÔÚÖ´ĞĞ¸ÃÓï¾äËùÔÚµÄbufferÓĞĞ§.
-** symbol
 *** true or false
-+ nil :: false or empty list
-+ t :: true
++ `nil' :: false or empty list
++ `t' :: true
+*** others
++ `last-command' :: record the last command executed
++ `this-command' :: record the command now being executed, µ±Ç°ÕıÔÚÖ´ĞĞµÄÃüÁî¿ÉÖ¸¶¨Æä¶ÔÍâ±©Â¶µÄÃüÁîÃû³Æ.
 ** function
 *** type
 + (string-to-number), (string-to-int) ::
@@ -214,8 +216,13 @@ https://www.gnu.org/software/emacs/manual/html_mono/eintr.html
 + (point-min) ::
 + (point-max) ::
 + (goto-char) :: set point to a specific position
+
++ (insert-buffer-substring)
++ (filter-buffer-substring)
 *** debug
 + (message) :: ½«ĞÅÏ¢Êä³öµ½minibuffer, ´«²ÎÓë(format)Ò»ÖÂ
++ (error) :: ´«²ÎÍ¬(message), ¿ÉÓÃÓÚÖĞ¶Ïµ±Ç°Ö´ĞĞÁ÷³Ì
++ (signal)
 ** special form
 + (if) :: condition
   #+BEGIN_SRC emacs-lisp
@@ -230,6 +237,24 @@ https://www.gnu.org/software/emacs/manual/html_mono/eintr.html
           ...)
       <body>)
   #+END_SRC
++ (save-excursion) :: save the location of point and restore this position after the body is evaluated
+  #+BEGIN_SRC emacs-lisp
+    (save-excursion
+      <body>
+      ...)
+  #+END_SRC
++ (progn)
+** macro
++ (when) :: if, without else part
+  #+BEGIN_SRC emacs-lisp
+    (when (<condition>)
+      (<then>))
+  #+END_SRC
++ (unless) :: if not, without else part
+  #+BEGIN_SRC emacs-lisp
+    (unless (<condition>)
+      (<then>))
+  #+END_SRC
 + (defun) :: define a function
   #+BEGIN_SRC emacs-lisp
     (defun <name> (<argument>)
@@ -238,11 +263,3 @@ https://www.gnu.org/software/emacs/manual/html_mono/eintr.html
       <body>)
   #+END_SRC
   - (interactive) :: ¿ÉÓÃÓÚÒÔM-xµÄ·½Ê½µ÷ÓÃº¯Êı²¢ÊäÈëÏàÓ¦´«²Î
-+ (save-excursion) :: save the location of point and restore this position after the body is evaluated
-  #+BEGIN_SRC emacs-lisp
-    (save-excursion
-      <body>
-      ...)
-  #+END_SRC
-** macro
-+ (progn)

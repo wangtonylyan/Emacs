@@ -100,8 +100,8 @@
 (setq-default line-spacing 0) ;行距
 (column-number-mode 1) ;在mode-line显示列数
 (set-face-background 'default "#C7EDCC") ;设置背景颜色
-(set-face-attribute 'default nil :family "Consolas" :weight 'normal) ;设置字体
-(set-frame-font "11" nil t) ;设置字号
+(set-face-attribute 'default nil :family "Microsoft YaHei Mono" :weight 'normal :height 110) ;设置字体, e.g. Consolas
+;(set-frame-font "11" nil t) ;设置字号, 同(set-face-attribute)中的:height
 (show-paren-mode 1) ;左右括号相匹配显示
 (setq show-paren-style 'parentheses)
 (setq debug-on-error t) ;显示错误信息
@@ -220,7 +220,7 @@
 ; 提供一个类似于Sublime编辑器中的minimap功能
 ; 其全部的可配置选项见于(customize-group minimap)中
 ;===========================================================================
-(when (require 'minimap nil t)
+(when (and nil (require 'minimap nil t))
   (setq minimap-always-recenter nil) ;设置为nil才有效?
   (setq minimap-recenter-type 'middle)
   (setq minimap-buffer-name-prefix "MINI") ;不能为空，否则无法启动minimap窗口
