@@ -100,8 +100,12 @@
 (setq-default line-spacing 0) ;行距
 (column-number-mode 1) ;在mode-line显示列数
 (set-face-background 'default "#C7EDCC") ;设置背景颜色
-(set-face-attribute 'default nil :family "Microsoft YaHei Mono" :weight 'normal :height 110) ;设置字体, e.g. Consolas
+
+(set-default-font "Consolas 11")
+(set-fontset-font "fontset-default" 'unicode"Microsoft YaHei Mono 10")
+;(set-face-attribute 'default nil :family "Microsoft YaHei Mono" :weight 'normal :height 110) ;设置字体, e.g. Consolas
 ;(set-frame-font "11" nil t) ;设置字号, 同(set-face-attribute)中的:height
+
 (show-paren-mode 1) ;左右括号相匹配显示
 (setq show-paren-style 'parentheses)
 (setq debug-on-error t) ;显示错误信息
@@ -126,7 +130,8 @@
             (delete-trailing-whitespace) ;删除每行末尾的空格
             (highlight-changes-remove-highlight (point-min) (point-max))
             ))
-(global-font-lock-mode -1) ;取消全局性的语法高亮模式
+;(global-font-lock-mode -1) ;取消全局性的语法高亮模式
+;(add-hook 'org-mode-hook 'turn-on-font-lock) ;可以通过注册hook的方式在特定模式下启用
 
 ;; Backup and Revert
 (setq make-backup-files t) ;启用自动备份
@@ -181,10 +186,13 @@
 ; 1) ELPA (Emacs Lisp Package Archive)
 ; 可以通过Emacs24以上版本内置的ELPA工具来安装和管理第三方插件
 ;---------------------------------------------------------------------------
+(setq url-proxy-services '(("http" . "10.25.71.1:8080")))  ;不支持authentication
+
 (when (require 'package nil t)
   ; Emacs使用的默认更新源为：("gnu" . "http://elpa.gnu.org/")
   ; 添加更新源：MELPA每天更新，其包含了绝大多数插件
-  (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+  ; (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+  (add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/") t)
   (setq package-load-list '(;以下插件的声明顺序需符合彼此之间的依赖关系
 ;                            (dash t) (epl t) (let-alist t) (pkg-info t) (flycheck t)
                             all
@@ -315,3 +323,22 @@
         "text-tex" ;tex-mode, latex-mode
         "web-browser" ;web browser
         ))
+
+
+;===========================================================================
+; org-mode
+;===========================================================================
+(setq org-list-demote-modify-bullet '(("+" . "-") ("-" . "+") ("*" . "+")))
+;(setq org-indent-indentation-per-level 2)
+;list indentation in addition to org-indent-indentation-per-level, 支持负数
+;(setq org-list-indent-offset 0)
+
+(setq org-directory "~/.emacs.d/org/")
+(setq org-default-notes-file (concat org-directory "note.org"))
+(define-key global-map "\C-cc" 'org-capture)
+
+;(add-to-list 'org-babel-load-languages '(sh . t))
+;(add-to-list 'org-babel-load-languages '(ruby . t))
+;(org-babel-do-load-languages 'org-babel-load-languages '((sh . t)))
+(setq org-src-fontify-natively t)
+(add-hook 'org-mode-hook (lambda () (setq truncate-lines nil)))
