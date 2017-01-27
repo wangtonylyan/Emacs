@@ -102,8 +102,8 @@
 (set-face-background 'default "#C7EDCC") ;设置背景颜色
 
 (set-default-font "Consolas 11")
-(set-fontset-font "fontset-default" 'unicode"Microsoft YaHei Mono 10")
-;(set-face-attribute 'default nil :family "Microsoft YaHei Mono" :weight 'normal :height 110) ;设置字体, e.g. Consolas
+(set-fontset-font "fontset-default" 'unicode "Microsoft YaHei Mono 10")
+;(set-face-attribute 'default nil :family "Microsoft YaHei Mono" :weight 'normal :height 110) ;设置字体，包括字号等
 ;(set-frame-font "11" nil t) ;设置字号, 同(set-face-attribute)中的:height
 
 (show-paren-mode 1) ;左右括号相匹配显示
