@@ -1,28 +1,3 @@
-;===========================================================================
-;; Emacs initialization file
-; ~/.emacs > ~/.emacs.el > ~/.emacs.d/init.el
-;1)加载插件的方式
-;load：每次调用时都会（重新）加载
-;require：若未加载，则加载之，而不会重新加载
-;autoload：使用时才require
-;eval-after-load：在一次load操作之后且在执行该loaded file/feature中的脚本之前
-;例如：eval-after-load中还"来得及"注册某个模式的hook
-;其第二个参数必须为quote form，否则的话会在作为传参时被立即计算
-;2)目前所采取的策略
-;在Emacs启动时load所有配置文件
-;配置文件中的函数定义在load时一同evaluate
-;插件的初始化工作使用eval-after-load，或注册于诸如c-initialization-hook的hook中，随对应模式的首次启动而执行其初始化工作
-;全局性插件的启动紧随其自身的初始化完成之后，局部性插件的启动则随对应模式的启动
-
-
-;===========================================================================
-; Windows
-;===========================================================================
-; 1）在C:\Users\用户名\AppData\Roaming\.emacs文件中指示导入本文件
-; (load-file "E:/home/wm/.emacs.d/init.el")
-; 或添加并设置系统的环境变量HOME
-; 2）以下是本文件的内容
-; 设置Emacs内部的环境变量，此方式需要每次在Emacs启动时被重新设置，不会保存
 (when (eq system-type 'windows-nt)
 ;  (setenv "HOME" "E:/")
   ; 设置默认工作目录
@@ -101,8 +76,14 @@
 (column-number-mode 1) ;在mode-line显示列数
 (set-face-background 'default "#C7EDCC") ;设置背景颜色
 
-(set-default-font "Consolas 11")
-(set-fontset-font "fontset-default" 'unicode "Microsoft YaHei Mono 10")
+;Windows系统上的Emacs25.1版本对中文字体的显示存在问题，打开中文文档时会存在卡顿的现象，必须手动指定中文字体为宋体才可避免。
+(if (and (eq system-type 'windows-nt) (> emacs-major-version 24))
+    (progn
+      (set-default-font "Consolas 11")
+      (set-fontset-font "fontset-default" 'unicode "宋体 10"))
+  (progn
+    (set-default-font "Consolas 11")
+    (set-fontset-font "fontset-default" 'unicode "Microsoft YaHei Mono 10")))
 ;(set-face-attribute 'default nil :family "Microsoft YaHei Mono" :weight 'normal :height 110) ;设置字体，包括字号等
 ;(set-frame-font "11" nil t) ;设置字号, 同(set-face-attribute)中的:height
 
@@ -149,17 +130,23 @@
 ;      (cons '("\\.emacs\\'" . emacs-lisp-mode) auto-mode-alist))
 
 ;; Key
-;(global-set-key "\C-c s" 'func)
-;(define-key lisp-mode (kbd "C-c ;") 'func)
+(global-set-key (kbd "C-x a") 'mark-whole-buffer)
 (global-set-key (kbd "C-x h") 'windmove-left)
 (global-set-key (kbd "C-x l") 'windmove-right)
-(global-set-key (kbd "C-x k") 'windmove-up)
 (global-set-key (kbd "C-x j") 'windmove-down)
-(global-set-key (kbd "C-x a") 'mark-whole-buffer)
+(global-set-key (kbd "C-x k") 'windmove-up)
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 (global-set-key (kbd "<C-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-down>") 'text-scale-decrease)
+(global-set-key (kbd "C-x C--") 'downcase-region)
+(global-set-key (kbd "C-x C-=") 'upcase-region)
+(global-unset-key (kbd "C-x C-l")) ;(downcase-region)
+(global-unset-key (kbd "C-x C-u")) ;(upcase-region)
+(put 'downcase-region 'disabled nil) ;去除每次执行此命令时的提示，强制执行
+(put 'upcase-region 'disabled nil)
+(global-set-key (kbd "C-c c") 'org-capture)
+(global-set-key (kbd "C-c a") 'org-agenda)
 
 ;; Mode
 ;; icomplete和ido这两个模式都能提供以下在minibuff中的补全功能
@@ -328,17 +315,49 @@
 ;===========================================================================
 ; org-mode
 ;===========================================================================
-(setq org-list-demote-modify-bullet '(("+" . "-") ("-" . "+") ("*" . "+")))
-;(setq org-indent-indentation-per-level 2)
-;list indentation in addition to org-indent-indentation-per-level, 支持负数
-;(setq org-list-indent-offset 0)
-
-(setq org-directory "~/.emacs.d/org/")
-(setq org-default-notes-file (concat org-directory "note.org"))
-(define-key global-map "\C-cc" 'org-capture)
-
 ;(add-to-list 'org-babel-load-languages '(sh . t))
 ;(add-to-list 'org-babel-load-languages '(ruby . t))
 ;(org-babel-do-load-languages 'org-babel-load-languages '((sh . t)))
+
+(setq org-list-demote-modify-bullet '(("+" . "-") ("-" . "+") ("*" . "+")))
 (setq org-src-fontify-natively t)
-(add-hook 'org-mode-hook (lambda () (setq truncate-lines nil)))
+(setq org-directory "~/.emacs.d/org/")
+(setq org-default-notes-file (concat org-directory "default.org"))
+(setq org-todo-keywords
+      '(
+        (sequence "NEW(n)" "TODO(t)" "DOING(i)" "PEND(p)" "|" "CANCEL(c)" "DONE(d)")
+        (type "HOME(h)" "WORK(w)")
+        ))
+(setq org-todo-keyword-faces
+      '(
+        ("NEW" . (:background "orange" :foreground "black" :weight bold))
+        ("TODO" . (:background "yellow" :foreground "black" :weight bold))
+        ("DOING" . (:background "red" :foreground "black" :weight bold))
+        ("PEND" . (:background "pink" :foreground "black" :weight bold))
+        ("CANCEL" . (:background "lime green" :foreground "black" :weight bold))
+        ("DONE" . (:background "green" :foreground "black" :weight bold))
+        ))
+(let ((my-org-file-task (concat org-directory "task.org")))
+  (setq org-capture-templates
+        `(
+          ("t" "Templates for task")
+          ("tn" "new" entry (file+datetree ,my-org-file-task) "* NEW %? %T %^G\n")
+          ("tt" "todo" entry (file+datetree ,my-org-file-task) "* TODO %? %T %^G\n")
+          ("ti" "doing" entry (file+datetree ,my-org-file-task) "* DOING %? %T %^G\n")
+          ("tp" "pend" entry (file+datetree ,my-org-file-task) "* PEND %? %T %^G\n")
+          ("tc" "cancel" entry (file+datetree ,my-org-file-task) "* CANCEL %? %T %^G\n")
+          ("td" "done" entry (file+datetree ,my-org-file-task) "* DONE %? %T %^G\n")
+
+          ("o" "Templates for note")
+          ("oo" "basic" entry (file+datetree (concat org-directory "note.org")) "* NOTE %? %T %^G\n")
+          ("c" "Templates for calendar")
+          ("cc" "basic" entry (file+datetree (concat org-directory "task.org")) "* CALENDAR %? %T %^G\n")
+          ("p" "Templates for project")
+          ("pp" "basic" entry (file+datetree (concat org-directory "project.org")) "* PROJECT %? %T %^G\n")
+          )))
+
+(add-hook 'org-mode-hook
+          (lambda ()
+            (progn
+              (setq truncate-lines nil)
+              (org-indent-mode t))))
