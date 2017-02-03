@@ -30,16 +30,14 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(current-language-environment "Chinese-GB")
- '(ecb-options-version "2.40") ;ecb-minor-mode
- )
+ '(ecb-options-version "2.40"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(highlight-changes ((t (:background "#CCFFCC"))))
- '(highlight-changes-delete ((t (:background "#CCFFCC"))))
- )
+ '(highlight-changes-delete ((t (:background "#CCFFCC")))))
 
 
 ;===========================================================================
@@ -173,7 +171,7 @@
 ; 1) ELPA (Emacs Lisp Package Archive)
 ; 可以通过Emacs24以上版本内置的ELPA工具来安装和管理第三方插件
 ;---------------------------------------------------------------------------
-(setq url-proxy-services '(("http" . "10.25.71.1:8080")))  ;不支持authentication
+;(setq url-proxy-services '(("http" . "10.25.71.1:8080")))  ;不支持authentication
 
 (when (require 'package nil t)
   ; Emacs使用的默认更新源为：("gnu" . "http://elpa.gnu.org/")
@@ -182,7 +180,8 @@
   (add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/") t)
   (setq package-load-list '(;以下插件的声明顺序需符合彼此之间的依赖关系
 ;                            (dash t) (epl t) (let-alist t) (pkg-info t) (flycheck t)
-                            all
+;                            all
+                            (geiser t) (paredit t)
                             )) ;指定由以下方式所加载的插件
   (setq package-enable-at-startup nil) ;方式1) 随Emacs的启动而自动加载插件
   (package-initialize) ;方式2) 主动执行该函数以加载插件
