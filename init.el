@@ -145,6 +145,7 @@
 (put 'upcase-region 'disabled nil)
 (global-set-key (kbd "C-c c") 'org-capture)
 (global-set-key (kbd "C-c a") 'org-agenda)
+(global-unset-key (kbd "C-q"))
 
 ;; Mode
 ;; icomplete和ido这两个模式都能提供以下在minibuff中的补全功能
@@ -292,6 +293,16 @@
         'arrow14
         ))
 
+;===========================================================================
+; Paredit
+;===========================================================================
+(when (require 'paredit nil t)
+  (add-hook 'emacs-lisp-mode-hook       'enable-paredit-mode)
+  (add-hook 'lisp-mode-hook             'enable-paredit-mode)
+  (add-hook 'lisp-interaction-mode-hook 'enable-paredit-mode)
+  (add-hook 'scheme-mode-hook           'enable-paredit-mode)
+  (add-hook 'org-mode 'enable-paredit-mode)
+  )
 
 ;===========================================================================
 ; 加载其他配置文件
