@@ -85,6 +85,9 @@
 ;(set-face-attribute 'default nil :family "Microsoft YaHei Mono" :weight 'normal :height 110) ;设置字体，包括字号等
 ;(set-frame-font "11" nil t) ;设置字号, 同(set-face-attribute)中的:height
 
+(setq default-buffer-file-coding-system 'utf-8)
+(prefer-coding-system 'utf-8)
+
 (show-paren-mode 1) ;左右括号相匹配显示
 (setq show-paren-style 'parentheses)
 (setq debug-on-error t) ;显示错误信息
