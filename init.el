@@ -182,7 +182,7 @@
   (setq package-load-list '(;以下插件的声明顺序需符合彼此之间的依赖关系
 ;                            (dash t) (epl t) (let-alist t) (pkg-info t) (flycheck t)
 ;                            all
-                            (geiser t) (paredit t)
+                            (geiser t) (paredit t) (auctex t)
                             )) ;指定由以下方式所加载的插件
   (setq package-enable-at-startup nil) ;方式1) 随Emacs的启动而自动加载插件
   (package-initialize) ;方式2) 主动执行该函数以加载插件
@@ -194,6 +194,13 @@
 ;---------------------------------------------------------------------------
 (setq my-emacs-plugin-load-path "~/.emacs.d/site-lisp/")
 (add-to-list 'load-path my-emacs-plugin-load-path)
+
+; auctex
+(when (and nil (require 'auctex nil t))
+  (setq TeX-auto-save t)
+  (setq TeX-parse-self t)
+  (setq-default TeX-master nil)
+  )
 
 ;===========================================================================
 ; Smex
