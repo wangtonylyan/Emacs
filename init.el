@@ -75,11 +75,11 @@
 (set-face-background 'default "#C7EDCC") ;设置背景颜色
 
 ;字体的名字源自于.ttf或.otf文件内自带的元信息，包括family和style等
-;以下使用不同的中英文字体和字号的目的是为了有助于美观，例如同一字体下的中文字符通常都比英文字符更高
+;以下使用不同的中英文字体和字号的目的是为了提升美观性，例如同一字体下的中文字符通常都比英文字符更高
 (if (eq system-type 'windows-nt)
     (progn
       (if (> emacs-major-version 24)
-          (progn ;Windows系统上的Emacs25.1版本对中文字体的显示存在问题，打开中文文档时会存在卡顿的现象，必须手动指定中文字体为宋体才可避免。
+          (progn ;Windows系统上的Emacs25版本对中文字体的显示存在问题，打开中文文档时会存在卡顿的现象，必须手动指定中文字体为宋体才可避免。
             (set-default-font "Consolas 11")
             (set-fontset-font "fontset-default" 'unicode "宋体 10"))
         (progn
