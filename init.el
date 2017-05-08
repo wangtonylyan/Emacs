@@ -74,16 +74,23 @@
 (column-number-mode 1) ;在mode-line显示列数
 (set-face-background 'default "#C7EDCC") ;设置背景颜色
 
-;Windows系统上的Emacs25.1版本对中文字体的显示存在问题，打开中文文档时会存在卡顿的现象，必须手动指定中文字体为宋体才可避免。
-(if (and (eq system-type 'windows-nt) (> emacs-major-version 24))
+;字体的名字源自于.ttf或.otf文件内自带的元信息，包括family和style等
+;以下使用不同的中英文字体和字号的目的是为了有助于美观，例如同一字体下的中文字符通常都比英文字符更高
+(if (eq system-type 'windows-nt)
     (progn
-      (set-default-font "Consolas 11")
-      (set-fontset-font "fontset-default" 'unicode "宋体 10"))
+      (if (> emacs-major-version 24)
+          (progn ;Windows系统上的Emacs25.1版本对中文字体的显示存在问题，打开中文文档时会存在卡顿的现象，必须手动指定中文字体为宋体才可避免。
+            (set-default-font "Consolas 11")
+            (set-fontset-font "fontset-default" 'unicode "宋体 10"))
+        (progn
+          (set-default-font "Consolas 11")
+          (set-fontset-font "fontset-default" 'unicode "Microsoft YaHei Mono 10"))))
   (progn
-    (set-default-font "Consolas 11")
-    (set-fontset-font "fontset-default" 'unicode "Microsoft YaHei Mono 10")))
+    (set-default-font "YaHei Consolas Hybrid 10")
+    (set-fontset-font "fontset-default" 'unicode "Source Han Serif SC SemiBold 9") ;或替换成"Microsoft YaHei Mono 10"
+    ))
 ;(set-face-attribute 'default nil :family "Microsoft YaHei Mono" :weight 'normal :height 110) ;设置字体，包括字号等
-;(set-frame-font "11" nil t) ;设置字号, 同(set-face-attribute)中的:height
+;(set-frame-font "10" nil t) ;设置字号, 同(set-face-attribute)中的:height
 
 (setq default-buffer-file-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
