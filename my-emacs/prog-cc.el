@@ -24,7 +24,7 @@
 ; 前者可用于支持C、C++、Lisp，而后者(基于GNU Bison实现)则可用于支持Java、Javascript、Python
 ; 利用上述语法分析器所得到的结果，Semantic还进一步地提供了以下一系列扩展功能
 ; 与之相比的是，旧版本的Emacs中采用正则表达式作为下述功能的基础支持，就显得比较落后了
-; 1)Semantic/Analyzer (Smart Completion、Jump、Summary)
+; 1) Semantic/Analyzer
 ; 主要从语法分析的角度提供了代码补全、跳转(浏览)、信息汇总等编程辅助功能
 ; semantic-ia-complete-symbol
 ; semantic-ia-complete-symbol-menu
@@ -33,18 +33,18 @@
 ; semantic-complete-analyze-inline-idle
 ; semantic-analyze-possible-completions
 ; semantic-ia-fast-jump
-; 2)Senator (SEmantic/NAvigaTOR)
+; 2) Senator (SEmantic/NAvigaTOR)
 ; 其提供的功能与Analyzer类似，但实现方式上更为简单
 ; 也因此导致其结果往往准确度较低，但响应速度更快
 ; senator-complete-symbol
 ; senator-completion-menu-popup
-; 3)Semantic/Symref (SYMbol REFerence)
+; 3) Semantic/Symref (SYMbol REFerence)
 ; 其提供的是查询某个符号在项目代码中被引用到的所有地方，但主要作为前端接口
 ; 而后台实现则完全基于外部工具，包括了GNU Global、Cscope、find/grep
-; 4)Idle Scheduler
+; 4) Idle Scheduler
 ; 在用户操作闲置时，实施语法分析、SemanticDB生成、信息提示等任务
 ; 主要基于的是Semantic/Analyzer
-; 5)SemanticDB
+; 5) SemanticDB
 ; 其以文件的形式，保存了由parser或tagging system所生成的标签信息
 ; 于是，代码补全、跳转、信息汇总等功能的实现，不仅可以基于实时的语法分析
 ; 也可以通过复用数据库的方式，从而也就提高了这些常用功能的执行效率
@@ -124,7 +124,7 @@
 ;  (setq semanticdb-default-file-name "")
   (setq semanticdb-persistent-path '(always)) ;'project为由EDE所管理的项目的路径下
   ;; 优化SemanticDB的搜索/parse
-  ;; 1)限定搜索范围
+  ;; 1) 限定搜索范围
   (mapc (lambda (mode)
           (setq-mode-local mode semanticdb-find-default-throttle
                            '(
@@ -137,12 +137,12 @@
                              omniscience ;自己创建的数据库就属于此类
                              )))
         '(c-mode c++-mode))
-  ;; 2)设置上述限定范围中的project类型，主要交由EDE或JDE等组件控制
+  ;; 2) 设置上述限定范围中的project类型，主要交由EDE或JDE等组件控制
 ;  (add-hook semanticdb-project-predicate-functions ) ;此项交由EDE设置
 ;  (add-hook semanticdb-project-root-functions ) ;此项交由EDE设置
   ; 甚至可以具体指定一些项目的根目录，该变量也会被semantic-project-root-functions中注册的函数修改
 ;  (setq semanticdb-project-roots '())
-  ;; 3)设置上述限定范围中的system类型，即变量semantic-dependency-system-include-path
+  ;; 3) 设置上述限定范围中的system类型，即变量semantic-dependency-system-include-path
   ; 利用gcc的输出信息
   (when (executable-find "gcc")
     (require 'semantic/bovine/gcc)
@@ -164,7 +164,7 @@
 ;  (add-to-list 'semantic-lex-c-preprocessor-symbol-map '("symbol" . "value"))
 ;  (add-to-list 'semantic-lex-c-preprocessor-symbol-file  "path/file")
 ;  (setq semantic-c-obey-conditional-section-parsing-flag nil)
-  ;; 4)事先主动地为某些常用目录生成数据库，以供复用
+  ;; 4) 事先主动地为某些常用目录生成数据库，以供复用
   (setq semanticdb-search-system-databases t)
   (setq my-semanticdb-list '())
   ; 若指定目录已存在数据库文件，则不会重复创建
@@ -180,11 +180,11 @@
   (mapc (lambda (mode)
           (setq-mode-local mode semanticdb-project-system-databases my-semanticdb-list))
         '(c-mode c++-mode))
-  ;; 5)修改SemanticDB后台支持，目前Emacs内置版暂只可依赖于以下两种(独立版还支持使用Cscope)
-  ;; (a)Ebrowse
+  ;; 5) 修改SemanticDB后台支持，目前Emacs内置版暂只可依赖于以下两种(独立版还支持使用Cscope)
+  ;; (a) Ebrowse
   ;; (require 'semantic/db-ebrowse)
   ;; 作为默认的选择，性能较差
-  ;; (b)GNU Global
+  ;; (b) GNU Global
   ;; (require 'semantic/db-global)
   (require 'cedet-global)
   (when (eq system-type 'windows-nt)
@@ -263,7 +263,7 @@
 ; ECB (Emacs Code Browser)
 ;===========================================================================
 ; 将源代码下载并解压缩至load-path下，即可使用，以下编译过程可提高执行性能(可选)
-; 1)修改或仿照make.bat文件中的内容
+; 1) 修改或仿照make.bat文件中的内容
 ; 首先ECB目录下创建ecb-compile-script-init文件，并写入下述脚本
 ; (add-to-list 'load-path "E:/.emacs.d/site-lisp/ecb") ;ECB所在目录
 ; (add-to-list 'load-path "D:/softwares/Emacs/lisp/cedet") ;CEDET所在目录
@@ -274,7 +274,7 @@
 ; [$] cd E:/.emacs.d/site-lisp/ecb
 ; [$] emacs -Q -l ecb-compile-script-init --eval "(ecb-byte-compile t)"
 ; 忽视编译过程中的所有warning，编译完成后可删除ecb-compile-script-init等文件
-; 2)在启动Emacs并require ECB后，执行ecb-byte-compile命令即可
+; 2) 在启动Emacs并require ECB后，执行ecb-byte-compile命令即可
 ;===========================================================================
 (defun my-plugin-ecb-init ()
   (save-excursion
@@ -349,14 +349,14 @@
 ;=========================================================================
 ; http://stackoverflow.com/questions/12922526/tags-for-emacs-relationship-between-etags-ebrowse-cscope-gnu-global-and-exhu
 ; 开源的主要有以下几种：
-; 1)Etags
+; 1) Etags
 ; 功能最为简单，较为少用
-; 2)Ctags
+; 2) Ctags
 ; 能够支持多达41种语言，相比于Etags会生成更多的metadata
 ; 官方主要支持于VIM，对于Emacs而言，由于其无法使用这些额外的metadata，因此功能几乎等同于Etags
-; 3)Cscope
+; 3) Cscope
 ; 对于C/C++和Java而言异常强大，但对其他语言支持不足，且自带用户界面
-; 4)GNU Global，Gtags
+; 4) GNU Global，Gtags
 ; 功能类似于Cscope，优点是实现上独立与任何编辑环境，也因此可集成于绝大多数编辑环境
 ;===========================================================================
 ; GNU Global
