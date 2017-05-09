@@ -179,10 +179,21 @@
               scroll-down-aggressively 0.01)
 (scroll-bar-mode -1) ;; 取消滚动条
 (mouse-avoidance-mode 'animate) ;; 当光标移动至鼠标位置时，为避免遮挡视线，自动移开鼠标
+;; (save-place-mode) ;; 记录光标在每个文件中最后一次访问时所在的位置
 (setq-default line-spacing 0) ;; 行距
-(column-number-mode 1) ;; 在mode-line显示列数
-;; (set-face-background 'default "#C7EDCC") ;; 设置背景颜色
+(column-number-mode) ;; 在mode-line显示列数
 
+(setq default-buffer-file-coding-system 'utf-8)
+(prefer-coding-system 'utf-8)
+
+(show-paren-mode) ;; 左右括号相匹配显示
+(setq show-paren-style 'parentheses)
+(setq debug-on-error t) ;; 显示错误信息
+(fset 'yes-or-no-p 'y-or-n-p) ;; 以y/n替换yes/no
+(setq visible-bell t) ;; 以窗口闪烁的方式代替错误提示音
+(global-visual-line-mode t)
+
+;; (set-face-background 'default "#C7EDCC") ;; 设置背景颜色为绿色护眼色
 ;; 字体的名字源自于.ttf或.otf文件内自带的元信息，包括family和style等
 ;; 以下使用不同的中英文字体和字号的目的是为了提升美观性，例如同一字体下的中文字符通常都比英文字符更高
 (if (eq system-type 'windows-nt)
@@ -202,22 +213,12 @@
 ;; (set-face-attribute 'default nil :family "Microsoft YaHei Mono" :weight 'normal :height 110) ;; 设置字体，包括字号等
 ;; (set-frame-font "10" nil t) ;; 设置字号, 同(set-face-attribute)中的:height
 
-(setq default-buffer-file-coding-system 'utf-8)
-(prefer-coding-system 'utf-8)
-
-(show-paren-mode 1) ;; 左右括号相匹配显示
-(setq show-paren-style 'parentheses)
-(setq debug-on-error t) ;; 显示错误信息
-(fset 'yes-or-no-p 'y-or-n-p) ;; 以y/n替换yes/no
-(setq visible-bell t) ;; 以窗口闪烁的方式代替错误提示音
-(global-visual-line-mode t)
-
 ;; Edit
 (setq-default indent-tabs-mode nil) ;; make indentation commands use space only
 (setq-default tab-width 4)
 ;; (setq tab-always-indent t)
 (electric-indent-mode -1) ;; 取消全局性的自动缩进模式
-(global-highlight-changes-mode 1)
+(global-highlight-changes-mode)
 (setq highlight-changes-global-changes-existing-buffers nil)
 (setq highlight-changes-visibility-initial-state t)
 (setq highlight-changes-face-list nil)
@@ -228,6 +229,7 @@
           (lambda ()
             (delete-trailing-whitespace) ;; 删除每行末尾的空格
             (highlight-changes-remove-highlight (point-min) (point-max))))
+(setq require-final-newline t)
 ;; (global-font-lock-mode -1) ;; 取消全局性的语法高亮模式
 ;; (add-hook 'org-mode-hook 'turn-on-font-lock) ;; 可以通过注册hook的方式在特定模式下启用
 
@@ -271,14 +273,17 @@
 ;; 前者需要TAB键触发，而通常TAB键都会触发新建子窗口呈现补全，所以一般不用此模式
 ;; 后者总是自动呈现，但缺省仅支持前两种补全功能
 ;; 插件Smex的实现就是基于后者对于execute-extended-command的支持
+;; 此外，还有helm模式可以提供补全功能，只不过它并不局限于在minibuff中输出信息
+;; https://github.com/emacs-helm/helm
 (icomplete-mode -1)
 (when (require 'ido nil t)
   (ido-mode t)
   (ido-everywhere -1) ;; 仅使ido支持find-file和switch-to-buffer
-  (setq ido-enable-flex-matching nil)
+  (setq ido-enable-flex-matching t)
   (setq ido-enable-prefix t)
   (setq ido-enter-matching-directory nil))
-;; (uniquify-mode 1) ;; buffer命名
+;; uniquify-mode可以为重名的buffer命名
+(setq uniquify-buffer-name-style 'post-forward-angle-brackets)
 ;; built-in Speedbar (rather than CEDET Speedbar)
 (setq speedbar-use-images nil) ;; 不使用image方式
 (setq speedbar-show-unknown-files t)
@@ -286,65 +291,65 @@
 ;; =============================================================================
 ;; 加载其他配置文件
 (provide 'my-init)
-(setq my-emacs-config-file-path "~/.emacs.d/my-emacs/")
-(mapc (lambda (name)
-        (load (concat my-emacs-config-file-path name) t nil nil t))
-      '(
-        "prog" ;; prog-mode
-        "prog-cc" ;; cc-mode (c-mode, c++-mode, java-mode)
-        "prog-lisp" ;; lisp-mode, emacs-lisp-mode, lisp-interaction-mode
-        "prog-py" ;; python-mode
-        "prog-haskell" ;; haskell-mode
-        "text-tex" ;; tex-mode, latex-mode
-        "web-browser" ;; web browser
-        ))
+(let ((path "~/.emacs.d/my-emacs/"))
+  (mapc (lambda (name)
+          (load (concat path name) t nil nil t))
+        '(
+          "prog" ;; prog-mode
+          "prog-cc" ;; cc-mode (c-mode, c++-mode, java-mode)
+          "prog-lisp" ;; lisp-mode, emacs-lisp-mode, lisp-interaction-mode
+          "prog-py" ;; python-mode
+          "prog-haskell" ;; haskell-mode
+          "text-tex" ;; tex-mode, latex-mode
+          "web-browser" ;; web browser
+          ))
 
-;; =============================================================================
-;; org-mode
-;; -----------------------------------------------------------------------------
-;; (add-to-list 'org-babel-load-languages '(sh . t))
-;; (add-to-list 'org-babel-load-languages '(ruby . t))
-;; (org-babel-do-load-languages 'org-babel-load-languages '((sh . t)))
+  ;; =============================================================================
+  ;; org-mode
+  ;; -----------------------------------------------------------------------------
+  ;; (add-to-list 'org-babel-load-languages '(sh . t))
+  ;; (add-to-list 'org-babel-load-languages '(ruby . t))
+  ;; (org-babel-do-load-languages 'org-babel-load-languages '((sh . t)))
 
-(setq org-list-demote-modify-bullet '(("+" . "-") ("-" . "+") ("*" . "+")))
-(setq org-src-fontify-natively t)
-(setq org-directory "~/.emacs.d/org/")
-(setq org-default-notes-file (concat org-directory "default.org"))
-(setq org-todo-keywords
-      '(
-        (sequence "NEW(n)" "TODO(t)" "DOING(i)" "PEND(p)" "|" "CANCEL(c)" "DONE(d)")
-        (type "HOME(h)" "WORK(w)")
-        ))
-(setq org-todo-keyword-faces
-      '(
-        ("NEW" . (:background "orange" :foreground "black" :weight bold))
-        ("TODO" . (:background "yellow" :foreground "black" :weight bold))
-        ("DOING" . (:background "red" :foreground "black" :weight bold))
-        ("PEND" . (:background "pink" :foreground "black" :weight bold))
-        ("CANCEL" . (:background "lime green" :foreground "black" :weight bold))
-        ("DONE" . (:background "green" :foreground "black" :weight bold))
-        ))
-(let ((my-org-file-task (concat org-directory "task.org")))
-  (setq org-capture-templates
-        `(
-          ("t" "Templates for task")
-          ("tn" "new" entry (file+datetree ,my-org-file-task) "* NEW %? %T %^G\n")
-          ("tt" "todo" entry (file+datetree ,my-org-file-task) "* TODO %? %T %^G\n")
-          ("ti" "doing" entry (file+datetree ,my-org-file-task) "* DOING %? %T %^G\n")
-          ("tp" "pend" entry (file+datetree ,my-org-file-task) "* PEND %? %T %^G\n")
-          ("tc" "cancel" entry (file+datetree ,my-org-file-task) "* CANCEL %? %T %^G\n")
-          ("td" "done" entry (file+datetree ,my-org-file-task) "* DONE %? %T %^G\n")
+  (setq org-list-demote-modify-bullet '(("+" . "-") ("-" . "+") ("*" . "+")))
+  (setq org-src-fontify-natively t)
+  (setq org-directory "~/.emacs.d/org/")
+  (setq org-default-notes-file (concat org-directory "default.org"))
+  (setq org-todo-keywords
+        '(
+          (sequence "NEW(n)" "TODO(t)" "DOING(i)" "PEND(p)" "|" "CANCEL(c)" "DONE(d)")
+          (type "HOME(h)" "WORK(w)")
+          ))
+  (setq org-todo-keyword-faces
+        '(
+          ("NEW" . (:background "orange" :foreground "black" :weight bold))
+          ("TODO" . (:background "yellow" :foreground "black" :weight bold))
+          ("DOING" . (:background "red" :foreground "black" :weight bold))
+          ("PEND" . (:background "pink" :foreground "black" :weight bold))
+          ("CANCEL" . (:background "lime green" :foreground "black" :weight bold))
+          ("DONE" . (:background "green" :foreground "black" :weight bold))
+          ))
+  (let ((my-org-file-task (concat org-directory "task.org")))
+    (setq org-capture-templates
+          `(
+            ("t" "Templates for task")
+            ("tn" "new" entry (file+datetree ,my-org-file-task) "* NEW %? %T %^G\n")
+            ("tt" "todo" entry (file+datetree ,my-org-file-task) "* TODO %? %T %^G\n")
+            ("ti" "doing" entry (file+datetree ,my-org-file-task) "* DOING %? %T %^G\n")
+            ("tp" "pend" entry (file+datetree ,my-org-file-task) "* PEND %? %T %^G\n")
+            ("tc" "cancel" entry (file+datetree ,my-org-file-task) "* CANCEL %? %T %^G\n")
+            ("td" "done" entry (file+datetree ,my-org-file-task) "* DONE %? %T %^G\n")
 
-          ("o" "Templates for note")
-          ("oo" "basic" entry (file+datetree (concat org-directory "note.org")) "* NOTE %? %T %^G\n")
-          ("c" "Templates for calendar")
-          ("cc" "basic" entry (file+datetree (concat org-directory "task.org")) "* CALENDAR %? %T %^G\n")
-          ("p" "Templates for project")
-          ("pp" "basic" entry (file+datetree (concat org-directory "project.org")) "* PROJECT %? %T %^G\n")
-          )))
+            ("o" "Templates for note")
+            ("oo" "basic" entry (file+datetree (concat org-directory "note.org")) "* NOTE %? %T %^G\n")
+            ("c" "Templates for calendar")
+            ("cc" "basic" entry (file+datetree (concat org-directory "task.org")) "* CALENDAR %? %T %^G\n")
+            ("p" "Templates for project")
+            ("pp" "basic" entry (file+datetree (concat org-directory "project.org")) "* PROJECT %? %T %^G\n")
+            )))
 
-(add-hook 'org-mode-hook
-          (lambda ()
-            (progn
-              (setq truncate-lines nil)
-              (org-indent-mode t))))
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (progn
+                (setq truncate-lines nil)
+                (org-indent-mode t))))
