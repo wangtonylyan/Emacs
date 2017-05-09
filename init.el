@@ -37,7 +37,8 @@
   ;; Emacs使用的默认更新源为：("gnu" . "http://elpa.gnu.org/")
   ;; 添加更新源：MELPA每天更新，其包含了绝大多数插件
   ;; (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-  (add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/") t)
+  (add-to-list 'package-archives
+               '("melpa-stable" . "http://stable.melpa.org/packages/") t)
   (setq package-load-list '(;; all
                             ;; 以下插件的声明顺序需符合彼此之间的依赖关系
                             (dash) (epl) (let-alist) (pkg-info) (flycheck)
@@ -130,7 +131,7 @@
   (setq minimap-display-semantic-overlays nil)
   (setq minimap-enlarge-certain-faces nil))
 
-;; ===========================================================================
+;; =============================================================================
 ;; Powerline
 ;; https://github.com/jonathanchu/emacs-powerline
 ;; 其提供了一个漂亮的mode line皮肤，缺点是当字体太多或字太多时，会显示不下所有内容
@@ -141,7 +142,7 @@
         ;; 'curve
         'arrow14))
 
-;; ===========================================================================
+;; =============================================================================
 ;; Paredit
 ;; -----------------------------------------------------------------------------
 (when (and nil (require 'paredit nil t))
@@ -153,7 +154,7 @@
 
 ;; =============================================================================
 ;; 配置杂项
-;; ----------------------------------------------------------------------------
+;; -----------------------------------------------------------------------------
 ;; Account
 (setq user-full-name "TonyLYan")
 (setq user-mail-address "wangtonylyan@outlook.com")
