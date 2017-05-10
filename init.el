@@ -1,12 +1,16 @@
 ;; =============================================================================
 (when (eq system-type 'windows-nt)
-  (setq default-directory "~/")
-  (let ((path "D:/softwares/emacs/libexec/emacs/24.5/i686-pc-mingw32/cmdproxy.exe"))
-    (when (executable-find path)
+  (add-to-list 'exec-path "D:/softwares" t)
+  (let ((path (executable-find
+               "Emacs25/libexec/emacs/24.5/i686-pc-mingw32/cmdproxy.exe")))
+    (when path
       (setq shell-file-name path)
-      (setq shell-command-switch "-c")))
-  (let ((path "D:/softwares/"))
-    (add-to-list 'exec-path path t)))
+      (setq shell-command-switch "-c"))))
+
+(setq default-directory "~"
+      command-line-default-directory "~"
+      ;; user-emacs-directory "~/.emacs.d/" ;; 注意此路径比较特殊，以"/"结尾
+      )
 
 ;; =============================================================================
 ;; 下述内容会因用户在Customize界面的保存操作而由Emacs自动写入
@@ -30,7 +34,7 @@
 ;; 可以通过Emacs24以上版本内置的ELPA工具来安装和管理第三方插件
 ;; 2) 从网上下载、编译、安装第三方插件
 ;; 资源网站: https://github.com/emacsmirror
-;; 通常的安装方式就是将.el源文件放置于'load-path所指定的目录中即可
+;; 通常的安装方式就是将.el源文件放置于'load-path所包含的目录中即可
 ;; -----------------------------------------------------------------------------
 ;; (setq url-proxy-services '(("http" . "10.25.71.1:8080"))) ;; 不支持authentication
 (when (require 'package nil t)
@@ -39,16 +43,21 @@
   ;; (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
   (add-to-list 'package-archives
                '("melpa-stable" . "http://stable.melpa.org/packages/") t)
-  (setq package-load-list '(;; all
-                            ;; 以下插件的声明顺序需符合彼此之间的依赖关系
-                            (dash) (epl) (let-alist) (pkg-info) (flycheck)
-                            (geiser) (paredit) (auctex)
-                            (atom-one-dark-theme t) (material-theme t)
-                            )) ;; 指定由以下方式所加载的插件
+  ;; 以下列表用于设置被允许加载的插件，因此无论是在安装还是使用插件的过程中
+  ;; 都必须提前详细地列举出所有的插件，且要根据插件之间的依赖关系进行先后地声明
+  (setq package-load-list '(all
+                            ;; e.g.
+                            ;; (dash) (epl) (let-alist) (pkg-info) (flycheck)
+                            ;; (atom-one-dark-theme t) (material-theme t)
+                            ))
+  ;; 设置加载上述列表中所指定插件的时机
   (setq package-enable-at-startup nil) ;; 方式1) 随Emacs的启动而自动加载插件
   (package-initialize) ;; 方式2) 主动执行该函数以加载插件
-
-  (setq package-selected-packages '(atom-one-dark-theme))
+  ;; 目前使用此全局变量来管理插件的启用/禁用
+  (setq package-selected-packages '(;; theme
+                                    atom-one-dark-theme
+                                    ;; python
+                                    elpy py-autopep8))
   (when (not package-archive-contents)
     (package-refresh-contents))
   ;; (package-install-selected-packages) ;; (re)install
@@ -57,7 +66,7 @@
             (package-install pkg nil)))
         package-selected-packages))
 ;; 设置安装包的存储目录，该目录也需要被包含至'load-path中
-;; (add-to-list 'package-directory-list "~/.emacs.d/elpa") ;; system-wide dir
+;; (add-to-list 'package-directory-list "~/.emacs.d/elpa" t) ;; system-wide dir
 ;; (setq package-user-dir "~/.emacs.d/elpa") ;; user-wide dir
 
 ;; =============================================================================
@@ -68,8 +77,8 @@
 ;; -----------------------------------------------------------------------------
 ;; 指定第三方主题的安装目录
 (let ((path (concat package-user-dir "/color-theme")))
-  (add-to-list 'custom-theme-load-path path)
-  (add-to-list 'load-path path))
+  (add-to-list 'load-path path t)
+  (add-to-list 'custom-theme-load-path path t))
 
 ((lambda (theme)
    (cond
@@ -97,7 +106,8 @@
 ;; =============================================================================
 ;; Auctex
 ;; -----------------------------------------------------------------------------
-(when (and nil (require 'auctex nil t))
+(when (and (member 'auctex package-selected-packages)
+           (require 'auctex nil t))
   (setq TeX-auto-save t)
   (setq TeX-parse-self t)
   (setq-default TeX-master nil))
@@ -108,7 +118,8 @@
 ;; 其完全基于ido-mode实现，提供了对于execute-extended-command更为强大的支持
 ;; 包括了记录用户操作历史、快速查询输入命令的快捷键及函数说明等功能
 ;; -----------------------------------------------------------------------------
-(when (and nil (require 'smex nil t))
+(when (and (member 'smex package-selected-packages)
+           (require 'smex nil t))
   (global-set-key (kbd "M-x") 'smex)
   (global-set-key (kbd "M-X") 'smex-major-mode-commands)
   ;; 与原M-x快捷键能冲突
@@ -116,11 +127,10 @@
 
 ;; =============================================================================
 ;; Minimap
-;; https://github.com/dustinlacewell/emacs-minimap
-;; 提供一个类似于Sublime编辑器中的minimap功能
 ;; 其全部的可配置选项见于(customize-group minimap)中
 ;; -----------------------------------------------------------------------------
-(when (and nil (require 'minimap nil t))
+(when (and (member 'minimap package-selected-packages)
+           (require 'minimap nil t))
   (setq minimap-always-recenter nil) ;设置为nil才有效?
   (setq minimap-recenter-type 'middle)
   (setq minimap-buffer-name-prefix "MINI") ;不能为空，否则无法启动minimap窗口
@@ -133,10 +143,10 @@
 
 ;; =============================================================================
 ;; Powerline
-;; https://github.com/jonathanchu/emacs-powerline
 ;; 其提供了一个漂亮的mode line皮肤，缺点是当字体太多或字太多时，会显示不下所有内容
 ;; -----------------------------------------------------------------------------
-(when (and nil (require 'powerline nil t))
+(when (and (member 'powerline package-selected-packages)
+           (require 'powerline nil t))
   (setq powerline-arrow-shape
         ;; 'arrow
         ;; 'curve
@@ -145,7 +155,8 @@
 ;; =============================================================================
 ;; Paredit
 ;; -----------------------------------------------------------------------------
-(when (and nil (require 'paredit nil t))
+(when (and (member 'paredit package-selected-packages)
+           (require 'paredit nil t))
   (add-hook 'emacs-lisp-mode-hook       'enable-paredit-mode)
   (add-hook 'lisp-mode-hook             'enable-paredit-mode)
   (add-hook 'lisp-interaction-mode-hook 'enable-paredit-mode)
@@ -160,7 +171,7 @@
 (setq user-mail-address "wangtonylyan@outlook.com")
 
 ;; UI
-;; (setq inhibit-startup-message 1) ;; 取消启动界面
+(setq inhibit-startup-message 1) ;; 取消启动界面
 (tool-bar-mode -1) ;; 取消工具栏
 (setq frame-title-format "emacs@%b") ;; 设置标题栏显示为buffer名字
 ;; 关于smooth scrolling可以参考: http://www.emacswiki.org/emacs/SmoothScrolling
@@ -296,13 +307,13 @@
   (mapc (lambda (name)
           (load (concat path name) t nil nil t))
         '(
-          "prog" ;; prog-mode
-          "prog-cc" ;; cc-mode (c-mode, c++-mode, java-mode)
-          "prog-lisp" ;; lisp-mode, emacs-lisp-mode, lisp-interaction-mode
-          "prog-py" ;; python-mode
-          "prog-haskell" ;; haskell-mode
-          "text-tex" ;; tex-mode, latex-mode
-          "web-browser" ;; web browser
+          ;; "prog" ;; prog-mode
+          ;; "prog-cc" ;; cc-mode (c-mode, c++-mode, java-mode)
+          ;; "prog-lisp" ;; lisp-mode, emacs-lisp-mode, lisp-interaction-mode
+          ;; "prog-py" ;; python-mode
+          ;; "prog-haskell" ;; haskell-mode
+          ;; "text-tex" ;; tex-mode, latex-mode
+          ;; "web-browser" ;; web browser
           ))
 
   ;; =============================================================================
@@ -332,7 +343,7 @@
           ))
   (let ((my-org-file-task (concat org-directory "task.org")))
     (setq org-capture-templates
-          `(
+          '(
             ("t" "Templates for task")
             ("tn" "new" entry (file+datetree ,my-org-file-task) "* NEW %? %T %^G\n")
             ("tt" "todo" entry (file+datetree ,my-org-file-task) "* TODO %? %T %^G\n")
