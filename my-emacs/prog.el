@@ -1,7 +1,8 @@
 (require 'my-init)
+
 ;; =============================================================================
 ;; Yasnippet
-;; 一个类似于宏应用的插件，允许用户自定义宏，并自动将其扩展
+;; 一个宏管理和应用的插件，允许用户自定义宏，并自动将其扩展
 ;; yas的脚本snippet以文件和目录的方式进行管理：每个文件中定义一个宏，每个目录对应于一个模式
 ;; 在yas模式下的文本中通过输入脚本文件名称以激活替换宏
 ;; 而脚本注释中的name属性只是作为替换成功后所呈现出的描述信息，或存在同名文件时的提示选择信息
@@ -9,16 +10,15 @@
 (defun my-plugin-yasnippet-init ()
   (when (and (member 'yasnippet package-selected-packages)
              (require 'yasnippet nil t))
-    (setq yas-snippet-dirs '()) ;; 删除默认值(可选)
-    (add-to-list 'yas-snippet-dirs (concat user-emacs-directory "snippets") t)
-    ;; 为配合auto-complete使用，需禁用以下自身的快捷键补全功能
+    (add-to-list 'yas-snippet-dirs (concat user-emacs-directory "my-emacs/snippets"))
+    ;; 为配合auto-complete或company等插件的使用，需禁用以下自身的快捷键补全功能
     (define-key yas-minor-mode-map (kbd "<tab>") nil)
     (define-key yas-minor-mode-map (kbd "TAB") nil)
-    (setq yas-prompt-functions '(;; yas-x-prompt ;; GTK环境下推荐
-                                 ;; yas-dropdown-prompt
-                                 ;; yas-completing-prompt
-                                 yas-ido-prompt ;; Windows环境下推荐，其余支持不好
-                                 ))
+    ;; 设置解决同名snippet的方式
+    (setq yas-prompt-functions
+          (if (eq system-type 'windows-nt)
+              '(yas-ido-prompt) ;; Windows环境下推荐，其余支持不好
+            '(yas-x-prompt yas-dropdown-prompt)))
     ;; (yas-global-mode 1) ;; 未全局性地启用
     ))
 
@@ -30,13 +30,11 @@
 ;; Company (complete anything)
 ;; http://company-mode.github.io/
 ;; https://github.com/company-mode/company-mode
-;; 一个与auto-complete功能基本类似的补全插件，相比于后者，更新更为频繁，且支持ELPA安装
-;; -----------------------------------------------------------------------------
-(defun my-plugin-company-init ()
-  )
-
-(defun my-plugin-company-start ()
-  )
+;; 一个与auto-complete功能基本类似的补全插件，相比于后者，更新更为频繁
+;; ----------------------------------------------------------------------------
+;; (define-key company-active-map (kbd "TAB") 'company-complete-common-or-cycle)
+;; http://tuhdo.github.io/c-ide.html#sec-2
+;; company的后端有很多，可以任意组合，这个你可以在M-x customize-group company 的Company Backends里面看下
 
 ;; =============================================================================
 ;; Auto-Complete
