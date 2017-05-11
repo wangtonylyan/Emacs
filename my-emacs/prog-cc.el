@@ -4,7 +4,7 @@
 ;; Style
 ;; -----------------------------------------------------------------------------
 (defun my-cc-style-init ()
-  (load-file (concat user-emacs-directory "prog-cc-style.el"))
+  (load-file (concat my-user-emacs-directory "prog-cc-style.el"))
   (define-key c-mode-base-map "\C-m" 'c-context-line-break) ;; 换行后自动缩进
   )
 

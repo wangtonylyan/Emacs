@@ -1,5 +1,7 @@
 (require 'my-init)
 
+(setq my-prog-mode-start-hook '())
+
 ;; =============================================================================
 ;; Yasnippet
 ;; 一个宏管理和应用的插件，允许用户自定义宏，并自动将其扩展
@@ -10,20 +12,21 @@
 (defun my-plugin-yasnippet-init ()
   (when (and (member 'yasnippet package-selected-packages)
              (require 'yasnippet nil t))
-    (add-to-list 'yas-snippet-dirs (concat user-emacs-directory "my-emacs/snippets"))
+    (add-to-list 'yas-snippet-dirs
+                 (concat my-user-emacs-directory "snippets"))
     ;; 为配合auto-complete或company等插件的使用，需禁用以下自身的快捷键补全功能
     (define-key yas-minor-mode-map (kbd "<tab>") nil)
     (define-key yas-minor-mode-map (kbd "TAB") nil)
     ;; 设置解决同名snippet的方式
     (setq yas-prompt-functions
           (if (eq system-type 'windows-nt)
-              '(yas-ido-prompt) ;; Windows环境下推荐，其余支持不好
+              '(yas-ido-prompt yas-dropdown-prompt) ;; Windows环境下推荐，其余支持不好
             '(yas-x-prompt yas-dropdown-prompt)))
-    ;; (yas-global-mode 1) ;; 未全局性地启用
-    ))
+    ;; (yas-global-mode 1)
+    (add-hook 'my-prog-mode-start-hook 'my-plugin-yasnippet-start t)))
 
 (defun my-plugin-yasnippet-start ()
-  (yas-minor-mode 1) ;; 启用Yasnippet，会自动执行(yas-reload-all)
+  (yas-minor-mode 1) ;; 会自动执行(yas-reload-all)
   )
 
 ;; =============================================================================
@@ -35,6 +38,15 @@
 ;; (define-key company-active-map (kbd "TAB") 'company-complete-common-or-cycle)
 ;; http://tuhdo.github.io/c-ide.html#sec-2
 ;; company的后端有很多，可以任意组合，这个你可以在M-x customize-group company 的Company Backends里面看下
+(defun my-plugin-company-init ()
+  (when (and (member 'company package-selected-packages)
+             (require 'company nil t))
+    ;; (customize-group 'company)
+    ;; (global-company-mode 1)
+    (add-hook 'my-prog-mode-start-hook 'my-plugin-company-start t)))
+
+(defun my-plugin-company-start ()
+  (company-mode-on))
 
 ;; =============================================================================
 ;; Auto-Complete
@@ -49,7 +61,8 @@
 (defun my-plugin-auto-complete-init ()
   (when (and (member 'auto-complete package-selected-packages)
              (require 'auto-complete-config nil t))
-    (add-to-list 'ac-dictionary-directories (concat user-emacs-directory "ac-dicts"))
+    (add-to-list 'ac-dictionary-directories
+                 (concat my-user-emacs-directory "ac-dicts"))
     (ac-set-trigger-key "TAB") ;; ac会在输入trigger key后立即强制生效
     (setq ac-trigger-commands '(self-insert-command
                                 backward-delete-char
@@ -106,12 +119,17 @@
                    ))
     ;; 只会在该列表中指定的模式下生效，无论是否全局性地启用
     ;; (setq ac-modes '())
-    ;; (global-auto-complete-mode 1) ;; 未全局性地启用
-    ))
+    ;; (global-auto-complete-mode 1)
+    (add-hook 'my-prog-mode-start-hook 'my-plugin-auto-complete-start t)))
 
 (defun my-plugin-auto-complete-start ()
-  (auto-complete-mode 1) ;; 启用Auto-Complete
-  )
+  (auto-complete-mode 1)
+  ;; 各继承于prog-mode的编程模式在启动时都将重设其buffer-local的ac-sources
+  ;; 方法是各自追加my-prog-ac-sources链表
+  ;; 优点是当同一个buffer多次切换不同的编程模式时，不会彼此影响
+  (setq my-prog-ac-sources
+        (append ac-sources '(ac-source-dictionary
+                             ac-source-yasnippet))))
 
 ;; =============================================================================
 ;; Flycheck
@@ -129,44 +147,43 @@
     (add-hook 'emacs-lisp-mode-hook
               (lambda ()
                 (setq flycheck-idle-change-delay 2.5)
-                (setq flycheck-emacs-lisp-load-path 'inherit)))
+                (setq flycheck-emacs-lisp-load-path 'inherit))
+              t)
+
     ;; (global-flycheck-mode 1)
-    ))
+    (add-hook 'my-prog-mode-start-hook 'my-plugin-flycheck-start t)))
 
 (defun my-plugin-flycheck-start ()
-  (flycheck-mode 1) ;; 启用Flycheck
-  )
+  (flycheck-mode 1))
 
 ;; =============================================================================
 ;; Flymake
 ;; Emacs内置，静态编译检查，效率低，准确度高，依赖于后台编译器的支持
+;; -----------------------------------------------------------------------------
+(defun my-plugin-flymake-init ()
+  (when (and (member 'flymake package-selected-packages)
+             (require 'flymake nil t))
+    (add-hook 'my-prog-mode-start-hook 'my-plugin-flymake-start t)))
 
-;===========================================================================
-;===========================================================================
+(defun my-plugin-flymake-start ()
+  )
+
+;; =============================================================================
+;; =============================================================================
 (defun my-prog-mode-init ()
   (my-plugin-yasnippet-init)
+  (my-plugin-company-init)
   (my-plugin-auto-complete-init)
-  (my-plugin-flycheck-init))
+  (my-plugin-flycheck-init)
+  (my-plugin-flymake-init)
+  (add-hook 'prog-mode-hook 'my-prog-mode-start t))
 
 (defun my-prog-mode-start ()
   (font-lock-mode 1) ;; 启用语法高亮
   (linum-mode 1) ;; 在buffer左边显示行号
-  (when (fboundp 'yas-minor-mode)
-    (my-plugin-yasnippet-start))
-  (when (fboundp 'auto-complete-mode)
-    (my-plugin-auto-complete-start)
-    ;; 各继承于prog-mode的编程模式在启动时都将重设其buffer-local的ac-sources
-    ;; 方法是各自追加my-prog-ac-sources链表
-    ;; 优点是当同一个buffer多次切换不同的编程模式时，不会彼此影响
-    (setq my-prog-ac-sources
-          (append ac-sources '(ac-source-dictionary
-                               ac-source-yasnippet))))
-  (when (fboundp 'flycheck-mode)
-    (my-plugin-flycheck-start)))
+  (run-hooks 'my-prog-mode-start-hook)
+  )
 
-(eval-after-load 'simple ;; /lisp/simple.el
-  '(progn
-     (my-prog-mode-init)
-     (add-hook 'prog-mode-hook 'my-prog-mode-start)))
+(add-hook 'after-init-hook 'my-prog-mode-init t)
 
 (provide 'my-prog)

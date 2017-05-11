@@ -9,8 +9,8 @@
 
 (setq default-directory "~"
       command-line-default-directory "~"
-      ;; user-emacs-directory "~/.emacs.d/" ;; 注意此路径比较特殊，以"/"结尾
-      )
+      user-emacs-directory "~/.emacs.d/" ;; 注意此路径比较特殊，以"/"结尾
+      my-user-emacs-directory (concat user-emacs-directory "my-emacs" "/"))
 
 ;; =============================================================================
 ;; 下述内容会因用户在Customize界面的保存操作而由Emacs自动写入
@@ -38,6 +38,10 @@
 ;; -----------------------------------------------------------------------------
 ;; (setq url-proxy-services '(("http" . "10.25.71.1:8080"))) ;; 不支持authentication
 (when (require 'package nil t)
+  ;; 设置安装包的存储目录，该目录也需要被包含至'load-path中
+  ;; (add-to-list 'package-directory-list "~/.emacs.d/elpa" t) ;; system-wide dir
+  (setq package-user-dir (concat user-emacs-directory "elpa")) ;; user-wide dir
+
   ;; Emacs使用的默认更新源为：("gnu" . "http://elpa.gnu.org/")
   ;; 添加更新源：MELPA每天更新，其包含了绝大多数插件
   ;; (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
@@ -53,23 +57,18 @@
   ;; 设置加载上述列表中所指定插件的时机
   (setq package-enable-at-startup nil) ;; 方式1) 随Emacs的启动而自动加载插件
   (package-initialize) ;; 方式2) 主动执行该函数以加载插件
+
   ;; 目前使用此全局变量来管理插件的启用/禁用
   (setq package-selected-packages '(;; theme
                                     atom-one-dark-theme
                                     ;; programming
                                     yasnippet
+                                    company
                                     ;; python
                                     elpy py-autopep8))
   (when (not package-archive-contents)
     (package-refresh-contents))
-  ;; (package-install-selected-packages) ;; (re)install
-  (mapc (lambda (pkg)
-          (unless (package-installed-p pkg)
-            (package-install pkg nil)))
-        package-selected-packages))
-;; 设置安装包的存储目录，该目录也需要被包含至'load-path中
-;; (add-to-list 'package-directory-list "~/.emacs.d/elpa" t) ;; system-wide dir
-;; (setq package-user-dir "~/.emacs.d/elpa") ;; user-wide dir
+  (package-install-selected-packages))
 
 ;; =============================================================================
 ;; Color Theme
@@ -78,7 +77,7 @@
 ;; 其自带了一些主题，网上还有许多基于该插件独立发布的主题
 ;; -----------------------------------------------------------------------------
 ;; 指定第三方主题的安装目录
-(let ((path (concat package-user-dir "/color-theme")))
+(let ((path (concat my-user-emacs-directory "theme")))
   (add-to-list 'load-path path t)
   (add-to-list 'custom-theme-load-path path t))
 
@@ -245,7 +244,7 @@
             (highlight-changes-remove-highlight (point-min) (point-max))))
 (setq require-final-newline t)
 ;; (global-font-lock-mode -1) ;; 取消全局性的语法高亮模式
-;; (add-hook 'org-mode-hook 'turn-on-font-lock) ;; 可以通过注册hook的方式在特定模式下启用
+;; (add-hook 'xxx-mode-hook 'turn-on-font-lock) ;; 可以通过注册hook的方式在特定模式下启用
 
 ;; Backup and Revert
 (setq make-backup-files t) ;; 启用自动备份
@@ -302,10 +301,11 @@
 (setq speedbar-use-images nil) ;; 不使用image方式
 (setq speedbar-show-unknown-files t)
 
+(provide 'my-init)
+
 ;; =============================================================================
 ;; 加载其他配置文件
-(provide 'my-init)
-(let ((path "~/.emacs.d/my-emacs/"))
+(let ((path my-user-emacs-directory))
   (mapc (lambda (name)
           (load (concat path name) t nil nil t))
         '(
@@ -317,3 +317,5 @@
           ;; "text-tex" ;; tex-mode, latex-mode
           ;; "web-browser" ;; web browser
           )))
+
+(message "emacs init time = %s" (emacs-init-time))

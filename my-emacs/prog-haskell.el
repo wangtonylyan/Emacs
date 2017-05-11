@@ -1,5 +1,7 @@
 (require 'my-prog)
 
+(setq my-prog-haskell-mode-start-hook '())
+
 ;; =============================================================================
 ;; Haskell-Mode
 ;; https://github.com/haskell/haskell-mode
