@@ -1,74 +1,20 @@
 (require 'my-prog)
+
+(setq my-prog-py-mode-start-hook '())
+
 ;; =============================================================================
 ;; 关于Emacs对于Python支持方面的介绍可参考如下：
 ;; https://wiki.python.org/moin/EmacsEditor
 ;; http://emacswiki.org/emacs/PythonProgrammingInEmacs
-;; 总之，Emacs中的Python环境大致可分为以下四种
-;; 其中后两种是作为前两种的功能补充或替换，而并没有提供一套完整齐全的功能：
-;; 1) python.el
-;; 该插件由Emacs社区维护，已集成于Emacs24以上版本中，作为默认的python-mode支持
-;; 设计理念是简洁，尽可能地依赖并契合于Emacs中已有的功能
-;; 2) python-mode.el
-;; 该插件由Python社区维护，其优点包括了能够支持单元测试、IPython等
-;; 设计理念是大而全，尽可能地不依赖并独立于其他工具
-;; 3) Elpy
-;; https://github.com/jorgenschaefer/elpy
-;; 可使用Rope或Jedi作为底层支持
-;; 4) Ropemacs
-;; 使用Rope和Pymacs作为底层支持
-;; -----------------------------------------------------------------------------
-;; python-mode.el
-;; https://launchpad.net/python-mode
-;; https://github.com/emacsmirror/python-mode
-;; -----------------------------------------------------------------------------
-;; Ropemacs
-;; https://github.com/python-rope
-;; 其底层基于Rope和Pymacs，安装步骤为首先安装Rope和Pymacs，最后再安装Ropemacs
-;; 虽安装于Python中，但会在加载时执行Elisp程序，从而为Emacs提供支持
-;; [shell]$ python setup.py install
-;; -----------------------------------------------------------------------------
-;; Rope
-;; https://github.com/python-rope/rope
-;; Rope是一个支持代码重构的Python开发库，提供缩进、补全、跳转等功能
-;; [shell]$ python setup.py install
-;; 配套地还需安装Ropemode，其作为Rope的使用接口
-;; https://github.com/python-rope/ropemode
-;; [shell]$ python setup.py install
-;; -----------------------------------------------------------------------------
-;; Pymacs
-;; version: 0.25
-;; https://github.com/pinard/Pymacs
-;; Pymacs是一款作用如同IPython client的Emacs插件
-;; 其会启动并链接至一个Python解释器，将之作为后台负责执行和计算的kernel
-;; 安装步骤主要参照于其Makefile
-;; [shell]$ python pppp -C ppppconfig.py Pymacs.py.in pppp.rst.in pymacs.el.in pymacs.rst.in contrib tests
-;; [shell]$ python setup.py install
-;; 随后会在当前目录下生成pymacs.el文件，将其移至Emacs的load-path中即可
-;; -----------------------------------------------------------------------------
-(defun my-plugin-ropemacs-init ()
-  (let ((path (concat package-user-dir "/ropemacs")))
-    (when (file-directory-p path)
-      (add-to-list 'load-path path)))
-  (when (and (require 'pymacs nil t)
-             (pymacs-load "ropemacs" "rope-" t))
-    (setq ropemacs-confirm-saving t)
-    (setq ropemacs-enable-autoimport t)
-    (setq ropemacs-autoimport-modules '("os" "sys" "inspect")))
-  ) ;; end of my-plugin-ropemacs-init()
-
-(defun my-plugin-ropemacs-start ()
-  ;; 已自动将(ropemacs-mode)加入python-mode-hook中，因此无需手动启用
-  (when (fboundp 'ropemacs-mode)
-    (when (boundp 'ac-sources)
-      (setq ac-sources
-            (append my-prog-ac-sources '(ac-source-ropemacs)))))
-  ;; Ropemacs代码补全的快捷键与auto-complete不同，默认为M-/，可作为后者的补充
-  ;; 因为后者在某些情况下必须至少输入一个字符，而此时就可以使用前者
-  ) ;; end of my-plugin-ropemacs-start()
+;; https://realpython.com/blog/python/emacs-the-best-python-editor/
 
 ;; =============================================================================
-(defun my-python-mode-init ()
-  (let ((exec "python3"))
+;; python.el
+;; Emacs内置了该插件，并将其作为对python-mode主模式的默认支持
+;; 实现理念是简洁，尽可能地依赖并融合于Emacs中已有的功能
+;; -----------------------------------------------------------------------------
+(defun my-plugin-python-init ()
+  (let ((exec "python3")) ;; python或python3
     (when (eq system-type 'windows-nt)
       (let* ((path (executable-find (concat exec "/python.exe")))
              (dir (when path (file-name-directory path))))
@@ -77,7 +23,6 @@
             (add-to-list 'exec-path dir t))
           (setq exec "python.exe"))))
     (when (executable-find exec)
-      ;; 设置python-mode
       (when (require 'python nil t)
         (remove-hook 'python-mode-hook 'wisent-python-default-setup)
         (setq python-shell-interpreter exec
@@ -88,19 +33,93 @@
               ;; python-shell-completion-module-string-code ""
               ;; python-shell-completion-string-code ""
               ))
-      ;; Ropemacs
-      (my-plugin-ropemacs-init))))
+      (add-hook 'my-prog-py-mode-start-hook 'my-plugin-python-start t))))
 
-(defun my-python-mode-start ()
+(defun my-plugin-python-start ()
+  )
+
+;; =============================================================================
+;; python-mode.el
+;; 该插件用于完全代替python.el，其优点是能够支持单元测试、IPython等额外功能
+;; 实现设计理念是大而全，尽可能地不依赖并独立于其他工具
+;; https://launchpad.net/python-mode
+;; https://github.com/emacsmirror/python-mode
+;; -----------------------------------------------------------------------------
+
+;; 下述插件都依赖于额外的Python库的支持，需要首先安装对应的Python库才能够正常使用
+;; ELPY与Ropemacs这两者所提供的作用类似，一般互斥使用
+;; 两者都提供了对于Python解释器的调用，以及一些Python库的额外支持
+
+;; =============================================================================
+;; ELPY (Emacs Lisp Python Environment)
+;; https://github.com/jorgenschaefer/elpy
+;; 依赖的python库：flake8, jedi
+;; -----------------------------------------------------------------------------
+(defun my-plugin-elpy-init ()
+  (when (and (member 'elpy package-selected-packages)
+             (require 'elpy nil t))
+    ;; 常用快捷键：
+    ;; C-c C-c用于调用Python解释器
+    ;; elpy默认支持并使用Emacs内置的flymake，但可随意地切换成flycheck
+    (when (and (member 'flycheck package-selected-packages)
+               (require 'flycheck nil t))
+      (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+      (add-hook 'elpy-mode-hook 'flycheck-mode))
+    (when (and (member 'py-autopep8 package-selected-packages)
+               (executable-find "autopep8")
+               (require 'py-autopep8 nil t))
+      (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save))
+    ;; (elpy-use-ipython) ;; 还可指定Python解释器
+    ;; (elpy-enable)
+    (add-hook 'my-prog-py-mode-start-hook 'my-plugin-elpy-start t)))
+
+(defun my-plugin-elpy-start ()
+  (elpy-mode 1))
+
+;; =============================================================================
+;; Ropemacs
+;; 依赖的python库：rope, pymacs, ropemacs
+;; 其中pymacs库在安装后会自动生成pymacs.el插件，需要将该插件加入至'load-path中
+;; 而ropemacs库则为Emacs提供了一个使用rope库的子模式ropemacs-mode
+;; 该子模式会随pymacs.el插件的加载而被自动关联至'python-mode-hook中
+;; 即(add-hook 'python-mode-hook 'ropemacs-mode)
+;; 每当roepmacs-mode启用时，一个pymacs客户进程和一个Python解释器将被启动，并彼此相连
+;; 随后Emacs将通过与该客户进程进行通信，从而获取rope库的相关支持
+;; -----------------------------------------------------------------------------
+(defun my-plugin-ropemacs-init ()
+  (when (member 'ropemacs package-selected-packages)
+    (let ((path (concat package-user-dir "/ropemacs")))
+      (when (file-directory-p path)
+        (add-to-list 'load-path path t)))
+    (when (and (require 'pymacs nil t)
+               (pymacs-load "ropemacs" "rope-" t))
+      (setq ropemacs-confirm-saving t
+            ropemacs-enable-autoimport t
+            ropemacs-autoimport-modules '("os" "sys" "inspect"))
+      ;; ropemacs模式中的自动补全快捷键与auto-complete不同，默认为M-/，可作为后者的补充
+      ;; 因为后者在某些情况下必须至少输入一个字符，而此时就可以使用前者
+      (add-hook 'my-prog-py-mode-start-hook 'my-plugin-ropemacs-start t))))
+
+(defun my-plugin-ropemacs-start ()
+  ;; (ropemacs-mode 1) ;; 无需手动启用
+  (when (and (boundp 'ac-sources) (boundp 'my-prog-ac-sources))
+    (setq ac-sources
+          (append my-prog-ac-sources '(ac-source-ropemacs)))))
+
+;; =============================================================================
+;; =============================================================================
+(defun my-prog-py-mode-init ()
+  (my-plugin-python-init)
+  (my-plugin-elpy-init)
+  (my-plugin-ropemacs-init)
+  (add-hook 'python-mode-hook 'my-prog-py-mode-start t))
+
+(defun my-prog-py-mode-start ()
   ;; 将lambda显示为λ
-  (prettify-symbols-mode t)
+  (prettify-symbols-mode 1)
   (setq prettify-symbols-alist '(("lambda" . 955)))
-  (when (fboundp 'ropemacs-mdoe)
-    (my-plugin-ropemacs-start)))
+  (run-hooks 'my-prog-py-mode-start-hook))
 
-(eval-after-load 'python ;; /lisp/progmodes/python.el
-  '(progn
-     (my-python-mode-init)
-     (add-hook 'python-mode-hook 'my-python-mode-start)))
+(eval-after-load 'python '(my-prog-py-mode-init))
 
 (provide 'my-prog-py)

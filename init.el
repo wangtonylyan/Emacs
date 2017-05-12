@@ -4,15 +4,22 @@
   (let ((path (executable-find
                "Emacs25/libexec/emacs/24.5/i686-pc-mingw32/cmdproxy.exe")))
     (when path
-      (setq shell-file-name path)
-      (setq shell-command-switch "-c"))))
+      (setq shell-file-name path
+            shell-command-switch "-c"))))
+
+;; (setq user-init-file "~/.emacs.d/init.el")
+;; (load user-init-file)
 
 (setq default-directory "~"
-      command-line-default-directory "~"
+      command-line-default-directory default-directory
       user-emacs-directory "~/.emacs.d/" ;; 注意此路径比较特殊，以"/"结尾
       my-user-emacs-directory (concat user-emacs-directory "my-emacs" "/"))
+;; (normal-top-level-add-subdirs-to-load-path)
+;; (normal-top-level-add-to-load-path)
 
 ;; =============================================================================
+;; (setq custom-file (concat user-emacs-directory ".emacs-custom.el"))
+;; (load custom-file)
 ;; 下述内容会因用户在Customize界面的保存操作而由Emacs自动写入
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -59,13 +66,17 @@
   (package-initialize) ;; 方式2) 主动执行该函数以加载插件
 
   ;; 目前使用此全局变量来管理插件的启用/禁用
-  (setq package-selected-packages '(;; theme
+  ;; 未包含于ELPA库中的插件也同样通过该链表中进行管理
+  (setq package-selected-packages '(;; 1) theme
                                     atom-one-dark-theme
-                                    ;; programming
-                                    yasnippet
-                                    company
-                                    ;; python
-                                    elpy py-autopep8))
+                                    ;; 2) programming
+                                    yasnippet company
+                                    magit
+                                    ;; flycheck
+                                    ;; 3) python
+                                    elpy py-autopep8
+                                    ;; ropemacs
+                                    ))
   (when (not package-archive-contents)
     (package-refresh-contents))
   (package-install-selected-packages))
@@ -109,8 +120,8 @@
 ;; -----------------------------------------------------------------------------
 (when (and (member 'auctex package-selected-packages)
            (require 'auctex nil t))
-  (setq TeX-auto-save t)
-  (setq TeX-parse-self t)
+  (setq TeX-auto-save t
+        TeX-parse-self t)
   (setq-default TeX-master nil))
 
 ;; =============================================================================
@@ -132,15 +143,15 @@
 ;; -----------------------------------------------------------------------------
 (when (and (member 'minimap package-selected-packages)
            (require 'minimap nil t))
-  (setq minimap-always-recenter nil) ;设置为nil才有效?
-  (setq minimap-recenter-type 'middle)
-  (setq minimap-buffer-name-prefix "MINI") ;不能为空，否则无法启动minimap窗口
-  (setq minimap-hide-fringes t)
-  (setq minimap-hide-scroll-bar t)
-  (setq minimap-update-delay 1.0)
-  (setq minimap-window-location 'right)
-  (setq minimap-display-semantic-overlays nil)
-  (setq minimap-enlarge-certain-faces nil))
+  (setq minimap-always-recenter nil ;; 设置为nil才有效?
+        minimap-recenter-type 'middle
+        minimap-buffer-name-prefix "MINI" ;; 不能为空，否则无法启动minimap窗口
+        minimap-hide-fringes t
+        minimap-hide-scroll-bar t
+        minimap-update-delay 1.0
+        minimap-window-location 'right
+        minimap-display-semantic-overlays nil
+        minimap-enlarge-certain-faces nil))
 
 ;; =============================================================================
 ;; Powerline
@@ -168,8 +179,8 @@
 ;; 配置杂项
 ;; -----------------------------------------------------------------------------
 ;; Account
-(setq user-full-name "TonyLYan")
-(setq user-mail-address "wangtonylyan@outlook.com")
+(setq user-full-name "TonyLYan"
+      user-mail-address "wangtonylyan@outlook.com")
 
 ;; UI
 (setq inhibit-startup-message 1) ;; 取消启动界面
@@ -192,19 +203,19 @@
               scroll-down-aggressively 0.01)
 (scroll-bar-mode -1) ;; 取消滚动条
 (mouse-avoidance-mode 'animate) ;; 当光标移动至鼠标位置时，为避免遮挡视线，自动移开鼠标
-;; (save-place-mode) ;; 记录光标在每个文件中最后一次访问时所在的位置
+;; (save-place-mode 1) ;; 记录光标在每个文件中最后一次访问时所在的位置
 (setq-default line-spacing 0) ;; 行距
-(column-number-mode) ;; 在mode-line显示列数
+(column-number-mode 1) ;; 在mode-line显示列数
 
 (setq default-buffer-file-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
 
-(show-paren-mode) ;; 左右括号相匹配显示
+(show-paren-mode 1) ;; 左右括号相匹配显示
 (setq show-paren-style 'parentheses)
 (setq debug-on-error t) ;; 显示错误信息
 (fset 'yes-or-no-p 'y-or-n-p) ;; 以y/n替换yes/no
 (setq visible-bell t) ;; 以窗口闪烁的方式代替错误提示音
-(global-visual-line-mode t)
+(global-visual-line-mode 1)
 
 ;; (set-face-background 'default "#C7EDCC") ;; 设置背景颜色为绿色护眼色
 ;; 字体的名字源自于.ttf或.otf文件内自带的元信息，包括family和style等
@@ -213,7 +224,8 @@
     (progn
       (if (> emacs-major-version 24)
           (progn
-            ;; Windows系统上的Emacs25版本对中文字体的显示存在问题，打开中文文档时会存在卡顿的现象，必须手动指定中文字体为宋体才可避免。
+            ;; Windows系统上的Emacs25版本对中文字体的显示存在问题，打开中文文档时会存在卡顿的现象
+            ;; 必须手动指定中文字体为宋体才可避免。
             (set-default-font "Consolas 11")
             (set-fontset-font "fontset-default" 'unicode "宋体 10"))
         (progn
@@ -221,21 +233,22 @@
           (set-fontset-font "fontset-default" 'unicode "Microsoft YaHei Mono 10"))))
   (progn
     (set-default-font "YaHei Consolas Hybrid 10")
-    (set-fontset-font "fontset-default" 'unicode "Source Han Serif SC SemiBold 9") ;; 或替换成"Microsoft YaHei Mono 10"
+    (set-fontset-font "fontset-default"
+                      'unicode "Source Han Serif SC SemiBold 9") ;; 或替换成"Microsoft YaHei Mono 10"
     ))
 ;; (set-face-attribute 'default nil :family "Microsoft YaHei Mono" :weight 'normal :height 110) ;; 设置字体，包括字号等
 ;; (set-frame-font "10" nil t) ;; 设置字号, 同(set-face-attribute)中的:height
 
 ;; Edit
-(setq-default indent-tabs-mode nil) ;; make indentation commands use space only
-(setq-default tab-width 4)
+(setq-default indent-tabs-mode nil ;; make indentation commands use space only
+              tab-width 4)
 ;; (setq tab-always-indent t)
 (electric-indent-mode -1) ;; 取消全局性的自动缩进模式
-(global-highlight-changes-mode)
-(setq highlight-changes-global-changes-existing-buffers nil)
-(setq highlight-changes-visibility-initial-state t)
-(setq highlight-changes-face-list nil)
-(setq highlight-changes-colors nil)
+(global-highlight-changes-mode 1)
+(setq highlight-changes-global-changes-existing-buffers nil
+      highlight-changes-visibility-initial-state t
+      highlight-changes-face-list nil
+      highlight-changes-colors nil)
 ;; 每次保存buffer时都将删除现有的改动高亮
 ;; 替换成这两个hook就会无效，原因未知：write-content-functions或write-file-functions
 (add-hook 'before-save-hook
@@ -245,17 +258,19 @@
 (setq require-final-newline t)
 ;; (global-font-lock-mode -1) ;; 取消全局性的语法高亮模式
 ;; (add-hook 'xxx-mode-hook 'turn-on-font-lock) ;; 可以通过注册hook的方式在特定模式下启用
+;; (global-linum-mode 1)
+;; (add-hook 'xxx-mode-hook 'linum-mode)
 
 ;; Backup and Revert
-(setq make-backup-files t) ;; 启用自动备份
-(setq version-control t) ;; 启用版本控制，即可以备份多次
-(setq kept-old-versions 1) ;; 备份最旧的版本个数
-(setq kept-new-versions 1) ;; 备份最新的版本个数
-(setq delete-old-versions t)
-(setq dired-kept-versions 2)
-(setq backup-directory-alist '(("." . "~/.emacs.d.backups"))) ;; 设置备份文件的路径
-(setq backup-by-copying t) ;; 备份设置方式为直接拷贝
-(global-auto-revert-mode t) ;; 当硬盘上的文件被修改后，Emacs会提示用户重新读取该文件
+(setq make-backup-files t ;; 启用自动备份
+      version-control t ;; 启用版本控制，即可以备份多次
+      kept-old-versions 1 ;; 备份最旧的版本个数
+      kept-new-versions 1 ;; 备份最新的版本个数
+      delete-old-versions t
+      dired-kept-versions 2
+      backup-directory-alist '(("." . "~/.emacs.d.backups")) ;; 设置备份文件的路径
+      backup-by-copying t) ;; 备份设置方式为直接拷贝
+(global-auto-revert-mode 1) ;; 当硬盘上的文件被修改后，Emacs会提示用户重新读取该文件
 
 ;; File Extension
 ;; (setq auto-mode-alist (cons '("\\.emacs\\'" . emacs-lisp-mode) auto-mode-alist))
@@ -290,16 +305,16 @@
 ;; https://github.com/emacs-helm/helm
 (icomplete-mode -1)
 (when (require 'ido nil t)
-  (ido-mode t)
+  (ido-mode 1)
   (ido-everywhere -1) ;; 仅使ido支持find-file和switch-to-buffer
-  (setq ido-enable-flex-matching t)
-  (setq ido-enable-prefix t)
-  (setq ido-enter-matching-directory nil))
+  (setq ido-enable-flex-matching t
+        ido-enable-prefix t
+        ido-enter-matching-directory nil))
 ;; uniquify-mode可以为重名的buffer命名
 (setq uniquify-buffer-name-style 'post-forward-angle-brackets)
 ;; built-in Speedbar (rather than CEDET Speedbar)
-(setq speedbar-use-images nil) ;; 不使用image方式
-(setq speedbar-show-unknown-files t)
+(setq speedbar-use-images nil ;; 不使用image方式
+      speedbar-show-unknown-files t)
 
 (provide 'my-init)
 
@@ -312,8 +327,8 @@
           "prog" ;; prog-mode
           ;; "prog-cc" ;; cc-mode (c-mode, c++-mode, java-mode)
           ;; "prog-lisp" ;; lisp-mode, emacs-lisp-mode, lisp-interaction-mode
-          ;; "prog-py" ;; python-mode
-          ;; "prog-haskell" ;; haskell-mode
+          "prog-py" ;; python-mode
+          ;; "prog-hs" ;; haskell-mode
           ;; "text-tex" ;; tex-mode, latex-mode
           ;; "web-browser" ;; web browser
           )))

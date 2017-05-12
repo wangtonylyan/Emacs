@@ -33,20 +33,38 @@
 ;; Company (complete anything)
 ;; http://company-mode.github.io/
 ;; https://github.com/company-mode/company-mode
+;; https://www.emacswiki.org/emacs/CompanyMode
 ;; 一个与auto-complete功能基本类似的补全插件，相比于后者，更新更为频繁
 ;; ----------------------------------------------------------------------------
-;; (define-key company-active-map (kbd "TAB") 'company-complete-common-or-cycle)
-;; http://tuhdo.github.io/c-ide.html#sec-2
-;; company的后端有很多，可以任意组合，这个你可以在M-x customize-group company 的Company Backends里面看下
 (defun my-plugin-company-init ()
   (when (and (member 'company package-selected-packages)
              (require 'company nil t))
     ;; (customize-group 'company)
+    ;; 常用的快捷键：
+    ;; TAB用于补全候选项中的公共字段，RETURN用于补全所选项，C-g用于终止补全
+    ;; (define-key company-active-map (kbd "TAB") 'company-complete-common-or-cycle)
+    ;; 没有必要为每个模式分别启用其独享的后端，因为筛选适用后端的过程非常效率
+    (setq company-backends '(company-elisp
+                             company-bbdb
+                             company-nxml
+                             ;; company-css ;; CSS
+                             company-eclim ;; Eclipse
+                             company-semantic ;; Semantic
+                             company-clang ;; Clang
+                             company-xcode ;; Xcode
+                             company-cmake ;; CMake
+                             company-capf ;; completion-at-point-functions
+                             company-files ;;
+                             (company-dabbrev-code company-gtags company-etags company-keywords)
+                             company-oddmuse
+                             company-dabbrev)
+          company-minimum-prefix-length 1
+          company-idle-delay 0)
     ;; (global-company-mode 1)
     (add-hook 'my-prog-mode-start-hook 'my-plugin-company-start t)))
 
 (defun my-plugin-company-start ()
-  (company-mode-on))
+  (company-mode 1))
 
 ;; =============================================================================
 ;; Auto-Complete
@@ -66,25 +84,24 @@
     (ac-set-trigger-key "TAB") ;; ac会在输入trigger key后立即强制生效
     (setq ac-trigger-commands '(self-insert-command
                                 backward-delete-char
-                                backward-delete-char-untabify))
-    (setq ac-ignore-case 'smart)
-    (setq ac-dwim t) ;; Do What I Mean
-    (setq ac-fuzzy-enable t)
-    (setq ac-candidate-menu-height 8)
-    (ac-linum-workaround)
-    ;; performance
-    (setq ac-auto-start 2) ;; ac会在输入指定个数的字符后自动生效
-    (setq ac-delay 0.5)
-    (setq ac-auto-show-menu nil) ;; 不会自动显示候选词菜单
-    (setq ac-use-comphist t)
-    (setq ac-candidate-limit 15) ;; 最大上限
-    ;; quick help
-    (setq ac-use-quick-help t)
-    (setq ac-quick-help-delay 1.0)
+                                backward-delete-char-untabify)
+          ac-ignore-case 'smart
+          ac-dwim t ;; Do What I Mean
+          ac-fuzzy-enable t
+          ac-candidate-menu-height 8
+          ;; performance
+          ac-auto-start 2 ;; ac会在输入指定个数的字符后自动生效
+          ac-delay 0.5
+          ac-auto-show-menu nil ;; 不会自动显示候选词菜单
+          ac-use-comphist t
+          ac-candidate-limit 15 ;; 最大上限
+          ;; quick help
+          ac-use-quick-help t
+          ac-quick-help-delay 1.0)
+    (ac-linum-workaround) ;; 解决auto-complete与linum两个模式之间的冲突
     ;; source
     ;; auto-complete-config.el文件中定义了大量的扩展source
     ;; 从而使得auto-complete能与更多的插件相集成
-    ;; 应定期更新之，或利用由网友提供的扩展配置，或自定义source
     (set-default 'ac-sources
                  '(;; 以下分类反映的只是目前实际的使用情况，而非各自的局限范围：
                    ac-source-filename
@@ -132,31 +149,6 @@
                              ac-source-yasnippet))))
 
 ;; =============================================================================
-;; Flycheck
-;; version: 0.24
-;; http://www.flycheck.org/
-;; https://github.com/flycheck/flycheck
-;; 静态语义分析，效率高，准确度低，依赖于后台语法解析器(或编译器前端)的支持
-;; 针对不同语言需安装各自相应的后台支持，具体可参见
-;; http://www.flycheck.org/manual/latest/Supported-languages.html
-;; -----------------------------------------------------------------------------
-(defun my-plugin-flycheck-init ()
-  (when (and (member 'flycheck package-selected-packages)
-             (require 'flycheck nil t))
-    ;; 可以通过以下方式定制每种模式，例如设置相应的checker(取自变量flycheck-checkers)
-    (add-hook 'emacs-lisp-mode-hook
-              (lambda ()
-                (setq flycheck-idle-change-delay 2.5)
-                (setq flycheck-emacs-lisp-load-path 'inherit))
-              t)
-
-    ;; (global-flycheck-mode 1)
-    (add-hook 'my-prog-mode-start-hook 'my-plugin-flycheck-start t)))
-
-(defun my-plugin-flycheck-start ()
-  (flycheck-mode 1))
-
-;; =============================================================================
 ;; Flymake
 ;; Emacs内置，静态编译检查，效率低，准确度高，依赖于后台编译器的支持
 ;; -----------------------------------------------------------------------------
@@ -169,20 +161,59 @@
   )
 
 ;; =============================================================================
+;; Flycheck
+;; http://www.flycheck.org/
+;; 静态语义分析，效率高，准确度低，依赖于后台语法解析器(或编译器前端)的支持
+;; 针对不同语言需安装各自相应的后台支持，具体可参见
+;; http://www.flycheck.org/manual/latest/Supported-languages.html
+;; -----------------------------------------------------------------------------
+(defun my-plugin-flycheck-init ()
+  (when (and (member 'flycheck package-selected-packages)
+             (require 'flycheck nil t))
+    ;; 可以通过以下方式定制每种模式，例如设置相应的checker(取自变量flycheck-checkers)
+    (add-hook 'emacs-lisp-mode-hook
+              (lambda ()
+                (setq flycheck-idle-change-delay 2.5
+                      flycheck-emacs-lisp-load-path 'inherit))
+              t)
+    ;; (global-flycheck-mode 1)
+    (add-hook 'my-prog-mode-start-hook 'my-plugin-flycheck-start t)))
+
+(defun my-plugin-flycheck-start ()
+  (flycheck-mode 1))
+
+;; =============================================================================
+;; Magit
+;; https://magit.vc/
+;; https://www.emacswiki.org/emacs/Magit
+;; https://www.masteringemacs.org/article/introduction-magit-emacs-mode-git
+;; -----------------------------------------------------------------------------
+;; (setq magit-auto-revert-mode 0
+;;      magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1)
+;; (global-set-key (kbd "C-c g") 'magit-status)
+(defun my-plugin-magit-init ()
+  (when (and (member 'magit package-selected-packages)
+             (require 'magit nil t))
+    (add-hook 'my-prog-mode-start-hook 'my-plugin-magit-start)))
+
+(defun my-plugin-magit-start ()
+  )
+
+;; =============================================================================
 ;; =============================================================================
 (defun my-prog-mode-init ()
   (my-plugin-yasnippet-init)
   (my-plugin-company-init)
   (my-plugin-auto-complete-init)
-  (my-plugin-flycheck-init)
   (my-plugin-flymake-init)
+  (my-plugin-flycheck-init)
+  (my-plugin-magit-init)
   (add-hook 'prog-mode-hook 'my-prog-mode-start t))
 
 (defun my-prog-mode-start ()
-  (font-lock-mode 1) ;; 启用语法高亮
-  (linum-mode 1) ;; 在buffer左边显示行号
-  (run-hooks 'my-prog-mode-start-hook)
-  )
+  (font-lock-mode 1)
+  (linum-mode 1)
+  (run-hooks 'my-prog-mode-start-hook))
 
 (add-hook 'after-init-hook 'my-prog-mode-init t)
 
