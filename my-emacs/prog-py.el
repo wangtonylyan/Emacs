@@ -22,17 +22,17 @@
           (unless (member dir exec-path)
             (add-to-list 'exec-path dir t))
           (setq exec "python.exe"))))
-    (when (executable-find exec)
-      (when (require 'python nil t)
-        (remove-hook 'python-mode-hook 'wisent-python-default-setup)
-        (setq python-shell-interpreter exec
-              python-shell-interpreter-args "-i"
-              ;; python-shell-prompt-regexp ""
-              ;; python-shell-prompt-output-regexp ""
-              ;; python-shell-completion-setup-code ""
-              ;; python-shell-completion-module-string-code ""
-              ;; python-shell-completion-string-code ""
-              ))
+    (when (and (executable-find exec)
+               (require 'python nil t))
+      (remove-hook 'python-mode-hook 'wisent-python-default-setup)
+      (setq python-shell-interpreter exec
+            python-shell-interpreter-args "-i"
+            ;; python-shell-prompt-regexp ""
+            ;; python-shell-prompt-output-regexp ""
+            ;; python-shell-completion-setup-code ""
+            ;; python-shell-completion-module-string-code ""
+            ;; python-shell-completion-string-code ""
+            )
       (add-hook 'my-prog-py-mode-start-hook 'my-plugin-python-start t))))
 
 (defun my-plugin-python-start ()
@@ -104,7 +104,7 @@
   ;; (ropemacs-mode 1) ;; 无需手动启用
   (when (and (boundp 'ac-sources) (boundp 'my-prog-ac-sources))
     (setq ac-sources
-          (append my-prog-ac-sources '(ac-source-ropemacs)))))
+          (add-to-list my-prog-ac-sources '(ac-source-ropemacs) t))))
 
 ;; =============================================================================
 ;; =============================================================================
@@ -120,6 +120,7 @@
   (setq prettify-symbols-alist '(("lambda" . 955)))
   (run-hooks 'my-prog-py-mode-start-hook))
 
-(eval-after-load 'python '(my-prog-py-mode-init))
+(with-eval-after-load 'python
+  (my-prog-py-mode-init))
 
 (provide 'my-prog-py)

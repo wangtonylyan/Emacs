@@ -17,9 +17,9 @@
 ;; (normal-top-level-add-subdirs-to-load-path)
 ;; (normal-top-level-add-to-load-path)
 
+;; 判断Emacs版本可以基于以下两个变量：'emacs-major-version和'emacs-minor-version
+
 ;; =============================================================================
-;; (setq custom-file (concat user-emacs-directory ".emacs-custom.el"))
-;; (load custom-file)
 ;; 下述内容会因用户在Customize界面的保存操作而由Emacs自动写入
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -34,6 +34,9 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+;; 也可以重新指定写入文件
+;; (setq custom-file (concat user-emacs-directory "emacs-custom.el"))
+;; (load custom-file)
 
 ;; =============================================================================
 ;; 管理和加载全局性的第三方插件
@@ -65,8 +68,7 @@
   (setq package-enable-at-startup nil) ;; 方式1) 随Emacs的启动而自动加载插件
   (package-initialize) ;; 方式2) 主动执行该函数以加载插件
 
-  ;; 目前使用此全局变量来管理插件的启用/禁用
-  ;; 未包含于ELPA库中的插件也同样通过该链表中进行管理
+  ;; 目前使用此全局变量来管理插件的启用/禁用，其中包括了ELPA更新源中所没有的插件
   (setq package-selected-packages '(;; 1) theme
                                     atom-one-dark-theme
                                     ;; 2) programming
@@ -75,6 +77,7 @@
                                     ;; flycheck
                                     ;; 3) python
                                     elpy py-autopep8
+                                    company-jedi
                                     ;; ropemacs
                                     ))
   (when (not package-archive-contents)
@@ -206,35 +209,31 @@
 ;; (save-place-mode 1) ;; 记录光标在每个文件中最后一次访问时所在的位置
 (setq-default line-spacing 0) ;; 行距
 (column-number-mode 1) ;; 在mode-line显示列数
+;; (setq-default fill-column 80) ;; 超过80字符就换行显示
 
 (setq default-buffer-file-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
 
-(show-paren-mode 1) ;; 左右括号相匹配显示
+(show-paren-mode 1) ;; 显示匹配的左右括号
 (setq show-paren-style 'parentheses)
 (setq debug-on-error t) ;; 显示错误信息
 (fset 'yes-or-no-p 'y-or-n-p) ;; 以y/n替换yes/no
 (setq visible-bell t) ;; 以窗口闪烁的方式代替错误提示音
-(global-visual-line-mode 1)
+(global-visual-line-mode -1) ;; 对中文支持不好
 
 ;; (set-face-background 'default "#C7EDCC") ;; 设置背景颜色为绿色护眼色
 ;; 字体的名字源自于.ttf或.otf文件内自带的元信息，包括family和style等
 ;; 以下使用不同的中英文字体和字号的目的是为了提升美观性，例如同一字体下的中文字符通常都比英文字符更高
 (if (eq system-type 'windows-nt)
     (progn
-      (if (> emacs-major-version 24)
-          (progn
-            ;; Windows系统上的Emacs25版本对中文字体的显示存在问题，打开中文文档时会存在卡顿的现象
-            ;; 必须手动指定中文字体为宋体才可避免。
-            (set-default-font "Consolas 11")
-            (set-fontset-font "fontset-default" 'unicode "宋体 10"))
-        (progn
-          (set-default-font "Consolas 11")
-          (set-fontset-font "fontset-default" 'unicode "Microsoft YaHei Mono 10"))))
+      ;; Windows系统上的Emacs25版本对中文字体的显示存在问题，打开中文文档时会存在卡顿的现象
+      ;; 必须手动指定中文字体为宋体才可避免。
+      (set-default-font "Consolas 11")
+      (set-fontset-font "fontset-default" 'unicode "宋体 10"))
   (progn
-    (set-default-font "YaHei Consolas Hybrid 10")
+    (set-default-font "YaHei Consolas Hybrid 11")
     (set-fontset-font "fontset-default"
-                      'unicode "Source Han Serif SC SemiBold 9") ;; 或替换成"Microsoft YaHei Mono 10"
+                      'unicode "Source Han Serif SC SemiBold 10") ;; 或替换成"Microsoft YaHei Mono 10"
     ))
 ;; (set-face-attribute 'default nil :family "Microsoft YaHei Mono" :weight 'normal :height 110) ;; 设置字体，包括字号等
 ;; (set-frame-font "10" nil t) ;; 设置字号, 同(set-face-attribute)中的:height
@@ -250,15 +249,15 @@
       highlight-changes-face-list nil
       highlight-changes-colors nil)
 ;; 每次保存buffer时都将删除现有的改动高亮
-;; 替换成这两个hook就会无效，原因未知：write-content-functions或write-file-functions
+;; 替换成另外两个hook就会无效，原因未知：write-content-functions或write-file-functions
 (add-hook 'before-save-hook
           (lambda ()
             (delete-trailing-whitespace) ;; 删除每行末尾的空格
             (highlight-changes-remove-highlight (point-min) (point-max))))
 (setq require-final-newline t)
-;; (global-font-lock-mode -1) ;; 取消全局性的语法高亮模式
-;; (add-hook 'xxx-mode-hook 'turn-on-font-lock) ;; 可以通过注册hook的方式在特定模式下启用
-;; (global-linum-mode 1)
+(global-font-lock-mode 1) ;; 语法高亮
+;; (add-hook 'xxx-mode-hook 'turn-on-font-lock) ;; (font-lock-mode 1)
+;; (global-linum-mode 1) ;; 左侧行号，推荐仅将其显示于主要的编辑文档中
 ;; (add-hook 'xxx-mode-hook 'linum-mode)
 
 ;; Backup and Revert
@@ -315,6 +314,20 @@
 ;; built-in Speedbar (rather than CEDET Speedbar)
 (setq speedbar-use-images nil ;; 不使用image方式
       speedbar-show-unknown-files t)
+
+;; 调整窗口大小
+((lambda ()
+   ;; 全屏
+   ;; (interactive)
+   ;; (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
+   ;; '(2 "_NET_WM_STATE_FULLSCREEN" 0))
+   ;; 窗口最大化需要分别经过水平和垂直两个方向的最大化
+   (interactive)
+   (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
+                          '(1 "_NET_WM_STATE_MAXIMIZED_HORZ" 0))
+   (interactive)
+   (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
+                          '(1 "_NET_WM_STATE_MAXIMIZED_VERT" 0))))
 
 (provide 'my-init)
 

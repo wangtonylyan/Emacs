@@ -44,7 +44,10 @@
     ;; TAB用于补全候选项中的公共字段，RETURN用于补全所选项，C-g用于终止补全
     ;; (define-key company-active-map (kbd "TAB") 'company-complete-common-or-cycle)
     ;; 没有必要为每个模式分别启用其独享的后端，因为筛选适用后端的过程非常效率
-    (setq company-backends '(company-elisp
+    (setq company-backends `(company-elisp
+                             ,(when (and (member 'company-jedi package-selected-packages)
+                                         (require 'company-jedi nil t))
+                                'company-jedi)
                              company-bbdb
                              company-nxml
                              ;; company-css ;; CSS
@@ -145,8 +148,10 @@
   ;; 方法是各自追加my-prog-ac-sources链表
   ;; 优点是当同一个buffer多次切换不同的编程模式时，不会彼此影响
   (setq my-prog-ac-sources
-        (append ac-sources '(ac-source-dictionary
-                             ac-source-yasnippet))))
+        (add-to-list ac-sources
+                     '(ac-source-dictionary
+                       ac-source-yasnippet)
+                     t)))
 
 ;; =============================================================================
 ;; Flymake
@@ -211,7 +216,7 @@
   (add-hook 'prog-mode-hook 'my-prog-mode-start t))
 
 (defun my-prog-mode-start ()
-  (font-lock-mode 1)
+  (turn-on-font-lock)
   (linum-mode 1)
   (run-hooks 'my-prog-mode-start-hook))
 
