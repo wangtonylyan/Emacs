@@ -1,5 +1,7 @@
 (require 'my-prog)
 
+(setq my-prog-cc-mode-start-hook '())
+
 ;; =============================================================================
 ;; Style
 ;; -----------------------------------------------------------------------------
@@ -17,12 +19,10 @@
   )
 
 ;; =============================================================================
-;; CEDET (Collection of Emacs Development Environment Tools)
+;; CEDET
 ;; -----------------------------------------------------------------------------
 ;; Semantic
-;; 其核心是two parser generators：Bovine和Wisent
-;; 前者可用于支持C、C++、Lisp，而后者(基于GNU Bison实现)则可用于支持Java、Javascript、Python
-;; 利用上述语法分析器所得到的结果，Semantic还进一步地提供了以下一系列扩展功能
+;; 利用其自带的语法分析器所得的结果，还进一步地提供了以下一系列扩展功能
 ;; 与之相比的是，旧版本的Emacs中采用正则表达式作为下述功能的基础支持，就显得比较落后了
 ;; 1) Semantic/Analyzer
 ;; 主要从语法分析的角度提供了代码补全、跳转(浏览)、信息汇总等编程辅助功能
@@ -54,195 +54,194 @@
 ;; 以下配置主要面向于内置版，但基本上能兼容于独立版
 ;; -----------------------------------------------------------------------------
 (defun my-plugin-cedet-init ()
-  (require 'cedet)
+  (when (require 'cedet nil t)
+    ;; -------------------------------------------------------------------------
+    ;; Semantic
+    ;; -------------------------------------------------------------------------
+    ;; 先设置semantic-default-submodes，再调用semantic-mode
+    (setq semantic-default-submodes '(;; SemanticDB
+                                      global-semanticdb-minor-mode
+                                      ;; Idle Scheduler
+                                      global-semantic-idle-scheduler-mode
+                                      global-semantic-idle-summary-mode ;; 基于Smart Summary
+                                      ;; global-semantic-idle-completions-mode ;; 基于Smart Completion
+                                      global-semantic-idle-local-symbol-highlight-mode
+                                      ;; Display and Decoration
+                                      global-semantic-stickyfunc-mode
+                                      global-semantic-highlight-func-mode
+                                      global-semantic-decoration-mode
+                                      ;; Senator
+                                      global-semantic-mru-bookmark-mode ;; mostly recently used
+                                      ;; 未知
+                                      ;; global-cedet-m3-minor-mode
+                                      ;; Debug
+                                      ;; global-semantic-show-unmatched-syntax-mode
+                                      global-semantic-show-parser-state-mode
+                                      ;; global-semantic-highlight-edits-mode
+                                      ))
+    (semantic-mode 1) ;; global minor mode
+    ;; 除此之外，还可以同时利用以下一系列函数来定制Semantic功能
+    ;; (semantic-load-enable-minimum-features)
+    ;; (semantic-load-enable-code-helpers)
+    ;; (semantic-load-enable-guady-code-helpers)
+    ;; (semantic-load-enable-excessive-code-helpers)
+    ;; (semantic-load-enable-semantic-debugging-helpers)
 
-  ;; ---------------------------------------------------------------------------
-  ;; Semantic
-  ;; ---------------------------------------------------------------------------
-  ;; 先设置semantic-default-submodes，再调用semantic-mode
-  (setq semantic-default-submodes '(;; SemanticDB
-                                    global-semanticdb-minor-mode
-                                    ;; Idle Scheduler
-                                    global-semantic-idle-scheduler-mode
-                                    global-semantic-idle-summary-mode ;; 基于Smart Summary
-                                    ;; global-semantic-idle-completions-mode ;; 基于Smart Completion
-                                    global-semantic-idle-local-symbol-highlight-mode
-                                    ;; Display and Decoration
-                                    global-semantic-stickyfunc-mode
-                                    global-semantic-highlight-func-mode
-                                    global-semantic-decoration-mode
-                                    ;; Senator
-                                    global-semantic-mru-bookmark-mode ;; mostly recently used
-                                    ;; 未知
-                                    ;; global-cedet-m3-minor-mode
-                                    ;; Debug
-                                    ;; global-semantic-show-unmatched-syntax-mode
-                                    global-semantic-show-parser-state-mode
-                                    ;; global-semantic-highlight-edits-mode
-                                    ))
-  (semantic-mode 1) ;; global minor mode
-  ;; 除此之外，还可以同时利用以下一系列函数来定制Semantic功能
-  ;; (semantic-load-enable-minimum-features)
-  ;; (semantic-load-enable-code-helpers)
-  ;; (semantic-load-enable-guady-code-helpers)
-  ;; (semantic-load-enable-excessive-code-helpers)
-  ;; (semantic-load-enable-semantic-debugging-helpers)
+    ;; -------------------------------------------------------------------------
+    ;; Idle Scheduler
+    ;; -------------------------------------------------------------------------
+    (setq semantic-idle-scheduler-idle-time 1)
+    (setq semantic-idle-scheduler-max-buffer-size 10000)
+    ;; 以下两个的显示与semantic-idle-summary-mode相冲突，故
+    (setq semantic-idle-scheduler-verbose-flag nil) ;; 前者被禁用
+    (setq semantic-idle-scheduler-no-working-message nil)
+    (setq semantic-idle-scheduler-working-in-modeline-flag t) ;; 后者被转移
+    ;; 比较耗时的任务
+    (setq semantic-idle-scheduler-work-idle-time 30)
+    (setq semantic-idle-work-parse-neighboring-files-flag t)
+    ;; Idle Completion
+    ;; 以何种方式显示
+    (setq semantic-complete-inline-analyzer-idle-displayor-class
+          ;; 'semantic-displayor-ghost ;; inline
+          ;; 'semantic-displayor-tooltip ;; tooltip
+          'semantic-displayor-traditional ;; separate window
+          )
+    ;; 显示多少
+    (setq semantic-displayor-tooltip-mode
+          'standard ;; initial-max-tags
+          ;; 'quiet ;; 只有当数量小于initial-max-tags时才显示
+          ;; 'verbose ;; 显示所有，貌似有bug，慎用
+          )
+    (setq semantic-displayor-tooltip-initial-max-tags 8)
 
-  ;; ---------------------------------------------------------------------------
-  ;; Idle Scheduler
-  ;; ---------------------------------------------------------------------------
-  (setq semantic-idle-scheduler-idle-time 1)
-  (setq semantic-idle-scheduler-max-buffer-size 10000)
-  ;; 以下两个的显示与semantic-idle-summary-mode相冲突，故
-  (setq semantic-idle-scheduler-verbose-flag nil) ;; 前者被禁用
-  (setq semantic-idle-scheduler-no-working-message nil)
-  (setq semantic-idle-scheduler-working-in-modeline-flag t) ;; 后者被转移
-  ;; 比较耗时的任务
-  (setq semantic-idle-scheduler-work-idle-time 30)
-  (setq semantic-idle-work-parse-neighboring-files-flag t)
-  ;; Idle Completion
-  ;; 以何种方式显示
-  (setq semantic-complete-inline-analyzer-idle-displayor-class
-        ;; 'semantic-displayor-ghost ;; inline
-        ;; 'semantic-displayor-tooltip ;; tooltip
-        'semantic-displayor-traditional ;; separate window
-        )
-  ;; 显示多少
-  (setq semantic-displayor-tooltip-mode
-        'standard ;; initial-max-tags
-        ;; 'quiet ;; 只有当数量小于initial-max-tags时才显示
-        ;; 'verbose ;; 显示所有，貌似有bug，慎用
-        )
-  (setq semantic-displayor-tooltip-initial-max-tags 8)
+    ;; -------------------------------------------------------------------------
+    ;; SemanticDB
+    ;; -------------------------------------------------------------------------
+    ;; 数据库文件保存设置
+    ;; (setq semanticdb-default-save-directory nil) ;; 作为缺省路径，仅主动生成的数据库的文件才会保存于此
+    ;; (setq semanticdb-default-file-name "")
+    (setq semanticdb-persistent-path '(always)) ;; 'project为由EDE所管理的项目的路径下
+    ;; 优化SemanticDB的搜索/parse
+    ;; 1) 限定搜索范围
+    (mapc (lambda (mode)
+            (setq-mode-local mode semanticdb-find-default-throttle
+                             '(
+                               file
+                               local
+                               project
+                               system
+                               recursive
+                               unloaded ;; 若搜索到的文件的SemanticDB没有导入/生成，则导入/生成之
+                               omniscience ;; 自己创建的数据库就属于此类
+                               )))
+          '(c-mode c++-mode))
+    ;; 2) 设置上述限定范围中的project类型，主要交由EDE或JDE等组件控制
+    ;; (add-hook semanticdb-project-predicate-functions ) ;; 此项交由EDE设置
+    ;; (add-hook semanticdb-project-root-functions ) ;; 此项交由EDE设置
+    ;; 甚至可以具体指定一些项目的根目录，该变量也会被semantic-project-root-functions中注册的函数修改
+    ;; (setq semanticdb-project-roots '())
+    ;; 3) 设置上述限定范围中的system类型，即变量semantic-dependency-system-include-path
+    ;; 利用gcc的输出信息
+    (when (executable-find "gcc")
+      (require 'semantic/bovine/gcc)
+      (semantic-gcc-setup))
+    ;; 若要完全地自定义，则需先重置，再追加
+    ;; (semantic-reset-system-include 'c-mode)
+    ;; (semantic-reset-system-include 'c++-mode)
+    (mapc (lambda (path)
+            (semantic-add-system-include path 'c-mode)
+            (semantic-add-system-include path 'c++-mode))
+          '(;; 此处可以加入各种常用的第三方库文件路径
+            "." "./include" "./inc" "./common" "./public"
+            ".." "../include" "../inc" "../common" "../public"
+            ;; "C:/MinGW/include"
+            ;; "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
+            ))
+    ;; 若Semantic仍不能正常解析某些符号，则需要进一步做如下指定
+    ;; (add-to-list 'semantic-lex-c-preprocessor-symbol-map '("symbol" . "value"))
+    ;; (add-to-list 'semantic-lex-c-preprocessor-symbol-file  "path/file")
+    ;; (setq semantic-c-obey-conditional-section-parsing-flag nil)
+    ;; 4) 事先主动地为某些常用目录生成数据库，以供复用
+    (setq semanticdb-search-system-databases t)
+    (setq my-semanticdb-list '())
+    ;; 若指定目录已存在数据库文件，则不会重复创建
+    (mapc (lambda (path)
+            (add-to-list 'my-semanticdb-list
+                         (semanticdb-create-database semanticdb-new-database-class path)))
+          '("/usr/include" "/usr/local/include"
+            ;; "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
+            ))
+    ;; 随后每次启动时加载之前已创建的数据库
+    (mapc (lambda (mode)
+            (setq-mode-local mode semanticdb-project-system-databases my-semanticdb-list))
+          '(c-mode c++-mode))
+    ;; 5) 修改SemanticDB后台支持，目前Emacs内置版暂只可依赖于以下两种(独立版还支持使用Cscope)
+    ;; (a) Ebrowse
+    ;; (require 'semantic/db-ebrowse)
+    ;; 作为默认的选择，性能较差
+    ;; (b) GNU Global
+    ;; (require 'semantic/db-global)
+    (require 'cedet-global)
+    (when (eq system-type 'windows-nt)
+      (add-to-list 'exec-path (concat my-emacs-exec-bin-path "global/bin"))
+      )
+    (when (and (executable-find "global")
+               (cedet-gnu-global-version-check t))
+      (require 'semantic/db-global)
+      (semanticdb-enable-gnu-global-databases 'c-mode)
+      (semanticdb-enable-gnu-global-databases 'c++-mode))
 
-  ;; ---------------------------------------------------------------------------
-  ;; SemanticDB
-  ;; ---------------------------------------------------------------------------
-  ;; 数据库文件保存设置
-  ;; (setq semanticdb-default-save-directory nil) ;; 作为缺省路径，仅主动生成的数据库的文件才会保存于此
-  ;; (setq semanticdb-default-file-name "")
-  (setq semanticdb-persistent-path '(always)) ;; 'project为由EDE所管理的项目的路径下
-  ;; 优化SemanticDB的搜索/parse
-  ;; 1) 限定搜索范围
-  (mapc (lambda (mode)
-          (setq-mode-local mode semanticdb-find-default-throttle
-                           '(
-                             file
-                             local
-                             project
-                             system
-                             recursive
-                             unloaded ;; 若搜索到的文件的SemanticDB没有导入/生成，则导入/生成之
-                             omniscience ;; 自己创建的数据库就属于此类
-                             )))
-        '(c-mode c++-mode))
-  ;; 2) 设置上述限定范围中的project类型，主要交由EDE或JDE等组件控制
-  ;; (add-hook semanticdb-project-predicate-functions ) ;; 此项交由EDE设置
-  ;; (add-hook semanticdb-project-root-functions ) ;; 此项交由EDE设置
-  ;; 甚至可以具体指定一些项目的根目录，该变量也会被semantic-project-root-functions中注册的函数修改
-  ;; (setq semanticdb-project-roots '())
-  ;; 3) 设置上述限定范围中的system类型，即变量semantic-dependency-system-include-path
-  ;; 利用gcc的输出信息
-  (when (executable-find "gcc")
-    (require 'semantic/bovine/gcc)
-    (semantic-gcc-setup))
-  ;; 若要完全地自定义，则需先重置，再追加
-  ;; (semantic-reset-system-include 'c-mode)
-  ;; (semantic-reset-system-include 'c++-mode)
-  (mapc (lambda (path)
-          (semantic-add-system-include path 'c-mode)
-          (semantic-add-system-include path 'c++-mode))
-        '(;; 此处可以加入各种常用的第三方库文件路径
-          "." "./include" "./inc" "./common" "./public"
-          ".." "../include" "../inc" "../common" "../public"
-          ;; "C:/MinGW/include"
-          ;; "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
-          ))
-  ;; 若Semantic仍不能正常解析某些符号，则需要进一步做如下指定
-  ;; (add-to-list 'semantic-lex-c-preprocessor-symbol-map '("symbol" . "value"))
-  ;; (add-to-list 'semantic-lex-c-preprocessor-symbol-file  "path/file")
-  ;; (setq semantic-c-obey-conditional-section-parsing-flag nil)
-  ;; 4) 事先主动地为某些常用目录生成数据库，以供复用
-  (setq semanticdb-search-system-databases t)
-  (setq my-semanticdb-list '())
-  ;; 若指定目录已存在数据库文件，则不会重复创建
-  (mapc (lambda (path)
-          (add-to-list 'my-semanticdb-list
-                       (semanticdb-create-database semanticdb-new-database-class path)))
-        '("/usr/include" "/usr/local/include"
-          ;; "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
-          ))
-  ;; 随后每次启动时加载之前已创建的数据库
-  (mapc (lambda (mode)
-          (setq-mode-local mode semanticdb-project-system-databases my-semanticdb-list))
-        '(c-mode c++-mode))
-  ;; 5) 修改SemanticDB后台支持，目前Emacs内置版暂只可依赖于以下两种(独立版还支持使用Cscope)
-  ;; (a) Ebrowse
-  ;; (require 'semantic/db-ebrowse)
-  ;; 作为默认的选择，性能较差
-  ;; (b) GNU Global
-  ;; (require 'semantic/db-global)
-  (require 'cedet-global)
-  (when (eq system-type 'windows-nt)
-    (add-to-list 'exec-path (concat my-emacs-exec-bin-path "global/bin"))
-    )
-  (when (and (executable-find "global")
-             (cedet-gnu-global-version-check t))
-    (require 'semantic/db-global)
-    (semanticdb-enable-gnu-global-databases 'c-mode)
-    (semanticdb-enable-gnu-global-databases 'c++-mode))
+    ;; -------------------------------------------------------------------------
+    ;; EDE
+    ;; -------------------------------------------------------------------------
+    (require 'ede)
+    (global-ede-mode 1) ;; 配合semantic-mode全局性地启用
+    ;; EDE默认使用Unix上的Locate命令来定位文件，此外还支持使用GNU Global
+    ;; 但目前Emacs内置的CEDET中删除了ede-locate.el文件，因此也就不支持修改了
+    ;; (setq ede-locate-setup-options '(ede-locate-global ede-locate-base))
+    ;; 具体项目的EDE信息由prog-cc-ede.emacs配置文件独立地维护
+    (load-file (concat my-emacs-config-file-path "prog-cc-ede.el"))
 
-  ;; ---------------------------------------------------------------------------
-  ;; EDE
-  ;; ---------------------------------------------------------------------------
-  (require 'ede)
-  (global-ede-mode 1) ;; 配合semantic-mode全局性地启用
-  ;; EDE默认使用Unix上的Locate命令来定位文件，此外还支持使用GNU Global
-  ;; 但目前Emacs内置的CEDET中删除了ede-locate.el文件，因此也就不支持修改了
-  ;; (setq ede-locate-setup-options '(ede-locate-global ede-locate-base))
-  ;; 具体项目的EDE信息由prog-cc-ede.emacs配置文件独立地维护
-  (load-file (concat my-emacs-config-file-path "prog-cc-ede.el"))
+    ;; ---------------------------------------------------------------------------
+    ;; Display and Decoration
+    ;; ---------------------------------------------------------------------------
+    (setq semantic-stickyfunc-sticky-classes '(function
+                                               type
+                                               ;; variable
+                                               ;; include
+                                               ;; package
+                                               ))
+    (setq semantic-decoration-styles '(("semantic-tag-boundary" . t)
+                                       ("semantic-decoration-on-private-members" . nil)
+                                       ("semantic-decoration-on-protected-members" . nil)
+                                       ("semantic-decoration-on-includes" . nil)))
 
-  ;; ---------------------------------------------------------------------------
-  ;; Display and Decoration
-  ;; ---------------------------------------------------------------------------
-  (setq semantic-stickyfunc-sticky-classes '(function
-                                             type
-                                             ;; variable
-                                             ;; include
-                                             ;; package
-                                             ))
-  (setq semantic-decoration-styles '(("semantic-tag-boundary" . t)
-                                     ("semantic-decoration-on-private-members" . nil)
-                                     ("semantic-decoration-on-protected-members" . nil)
-                                     ("semantic-decoration-on-includes" . nil)))
+    ;; ---------------------------------------------------------------------------
+    ;; Speedbar
+    ;; ---------------------------------------------------------------------------
+    ;; 此处为CEDET中集成的Speedbar，目前暂未启用
+    ;; (require 'semantic/sb)
 
-  ;; ---------------------------------------------------------------------------
-  ;; Speedbar
-  ;; ---------------------------------------------------------------------------
-  ;; 此处为CEDET中集成的Speedbar，目前暂未启用
-  ;; (require 'semantic/sb)
-
-  ;; ---------------------------------------------------------------------------
-  ;; 代码浏览的相关功能设置(待完善)
-  ;; ---------------------------------------------------------------------------
-  (require 'semantic/ia)
-  (define-key semantic-mode-map "" 'semantic-ia-fast-jump)
-  (define-key semantic-mode-map "" 'semantic-complete-jump)
-  (define-key semantic-mode-map "" 'semantic-complete-jump-local)
-  (define-key semantic-mode-map "" 'semantic-complete-jump-local-members)
-  (define-key semantic-mode-map "" 'semantic-decoration-include-visit) ;; jump to include file
-  (define-key semantic-mode-map "" 'semantic-mrub-switch-tag)
-  (require 'semantic/symref)
-  (define-key semantic-mode-map "" 'semantic-symref)
-  (define-key semantic-mode-map "" 'semantic-symref-symbol)
-  (require 'semantic/senator)
-  (define-key semantic-mode-map "" 'senator-next-tag)
-  (define-key semantic-mode-map "" 'senator-previous-tag)
-  (define-key semantic-mode-map "" 'senator-go-to-up-reference))
+    ;; ---------------------------------------------------------------------------
+    ;; 代码浏览的相关功能设置(待完善)
+    ;; ---------------------------------------------------------------------------
+    (require 'semantic/ia)
+    (define-key semantic-mode-map "" 'semantic-ia-fast-jump)
+    (define-key semantic-mode-map "" 'semantic-complete-jump)
+    (define-key semantic-mode-map "" 'semantic-complete-jump-local)
+    (define-key semantic-mode-map "" 'semantic-complete-jump-local-members)
+    (define-key semantic-mode-map "" 'semantic-decoration-include-visit) ;; jump to include file
+    (define-key semantic-mode-map "" 'semantic-mrub-switch-tag)
+    (require 'semantic/symref)
+    (define-key semantic-mode-map "" 'semantic-symref)
+    (define-key semantic-mode-map "" 'semantic-symref-symbol)
+    (require 'semantic/senator)
+    (define-key semantic-mode-map "" 'senator-next-tag)
+    (define-key semantic-mode-map "" 'senator-previous-tag)
+    (define-key semantic-mode-map "" 'senator-go-to-up-reference)))
 
 (defun my-plugin-cedet-start ()
-  (when (boundp 'ac-sources)
+  (when (and (boundp 'ac-sources) (boundp my-prog-ac-sources))
     (setq ac-sources
           (append my-prog-ac-sources '(ac-source-semantic)))
     (when (and (executable-find "global")
