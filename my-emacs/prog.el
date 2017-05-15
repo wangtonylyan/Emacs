@@ -163,7 +163,7 @@
     (add-hook 'my-prog-mode-start-hook 'my-plugin-flymake-start t)))
 
 (defun my-plugin-flymake-start ()
-  )
+  (flymake-mode-on))
 
 ;; =============================================================================
 ;; Flycheck
