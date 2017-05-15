@@ -69,13 +69,13 @@
   (package-initialize) ;; 方式2) 主动执行该函数以加载插件
 
   ;; 目前使用此全局变量来管理插件的启用/禁用，其中包括了ELPA更新源中所没有的插件
-  (setq package-selected-packages '(;; 1) theme
+  (setq package-selected-packages '(;; 1) enhancement
                                     atom-one-dark-theme
+                                    ido ;; icomplete, anything, helm, smex, ivy
                                     ;; 2) programming
                                     yasnippet company
+                                    flycheck ;; flymake
                                     magit
-                                    ;; flycheck
-                                    ;; 3) python
                                     elpy py-autopep8
                                     company-jedi
                                     ;; ropemacs
@@ -128,21 +128,8 @@
   (setq-default TeX-master nil))
 
 ;; =============================================================================
-;; Smex
-;; https://github.com/nonsequitur/smex
-;; 其完全基于ido-mode实现，提供了对于execute-extended-command更为强大的支持
-;; 包括了记录用户操作历史、快速查询输入命令的快捷键及函数说明等功能
-;; -----------------------------------------------------------------------------
-(when (and (member 'smex package-selected-packages)
-           (require 'smex nil t))
-  (global-set-key (kbd "M-x") 'smex)
-  (global-set-key (kbd "M-X") 'smex-major-mode-commands)
-  ;; 与原M-x快捷键能冲突
-  (global-set-key (kbd "C-x M-x") 'execute-extended-command))
-
-;; =============================================================================
 ;; Minimap
-;; 其全部的可配置选项见于(customize-group minimap)中
+;; 其全部的可配置选项见于(customize-group 'minimap)
 ;; -----------------------------------------------------------------------------
 (when (and (member 'minimap package-selected-packages)
            (require 'minimap nil t))
@@ -274,6 +261,49 @@
 ;; File Extension
 ;; (setq auto-mode-alist (cons '("\\.emacs\\'" . emacs-lisp-mode) auto-mode-alist))
 
+;; 以下插件提供了对于minibuffer中几个常用命令的补全功能
+;; 包括(find-file), (switch-to-buffer), (execute-extended-command)等
+;; 1) icomplete
+;; Emacs内置，需要按下TAB键被动触发，且会将提示的内容呈现于一个新建的子窗口中
+;; 2) Anything
+;; 与icomplete类似，默认情况下同样需要额外地敲击按键或执行命令来触发
+;; 优点是支持额外的源，可以提供更为强大的补全方案
+;; 3) Helm
+;; https://emacs-helm.github.io/helm/
+;; 继承自并已代替了Anything
+;; 4) IDO (interactively do things)
+;; Emacs内置，自动呈现提示内容，但不支持(execute-extended-command)
+;; 5) Smex
+;; 基于IDO来实现，并作为其补充，提供了对于(execute-extended-command)的支持
+;; 此外还提供了记录用户操作历史、快速查询输入命令的快捷键及函数说明等功能
+;; 6) Ivy
+;; 作为find-file-in-project、Swiper等插件的依赖库
+(when (not (member 'icomplete package-selected-packages))
+  (icomplete-mode -1))
+(when (and (member 'ido package-selected-packages)
+           (require 'ido nil t))
+  (ido-mode 1)
+  (ido-everywhere -1) ;; 仅使ido支持find-file和switch-to-buffer
+  (setq ido-enable-flex-matching t
+        ido-enable-prefix t
+        ido-enter-matching-directory nil))
+(when (and (member 'smex package-selected-packages)
+           (require 'smex nil t))
+  (global-set-key (kbd "M-x") 'smex)
+  (global-set-key (kbd "M-X") 'smex-major-mode-commands)
+  ;; 该插件会自动替换原M-x快捷键所绑定的命令，若仍想使用的话可以如下重新绑定之
+  ;; (global-set-key (kbd "C-x M-x") 'execute-extended-command)
+  )
+(when (and (member 'helm package-selected-packages)
+           (require 'helm nil t))
+  )
+
+;; uniquify-mode可以为重名的buffer命名
+(setq uniquify-buffer-name-style 'post-forward-angle-brackets)
+;; built-in Speedbar (rather than CEDET Speedbar)
+(setq speedbar-use-images nil ;; 不使用image方式
+      speedbar-show-unknown-files t)
+
 ;; Key
 (global-set-key (kbd "C-x a") 'mark-whole-buffer)
 (global-set-key (kbd "C-x h") 'windmove-left)
@@ -293,27 +323,6 @@
 (global-set-key (kbd "C-c c") 'org-capture)
 (global-set-key (kbd "C-c a") 'org-agenda)
 (global-unset-key (kbd "C-q"))
-
-;; Mode
-;; icomplete和ido这两个模式都能提供以下在minibuff中的补全功能
-;; find-file, switch-to-buffer, execute-extended-command
-;; 前者需要TAB键触发，而通常TAB键都会触发新建子窗口呈现补全，所以一般不用此模式
-;; 后者总是自动呈现，但缺省仅支持前两种补全功能
-;; 插件Smex的实现就是基于后者对于execute-extended-command的支持
-;; 此外，还有helm模式可以提供补全功能，只不过它并不局限于在minibuff中输出信息
-;; https://github.com/emacs-helm/helm
-(icomplete-mode -1)
-(when (require 'ido nil t)
-  (ido-mode 1)
-  (ido-everywhere -1) ;; 仅使ido支持find-file和switch-to-buffer
-  (setq ido-enable-flex-matching t
-        ido-enable-prefix t
-        ido-enter-matching-directory nil))
-;; uniquify-mode可以为重名的buffer命名
-(setq uniquify-buffer-name-style 'post-forward-angle-brackets)
-;; built-in Speedbar (rather than CEDET Speedbar)
-(setq speedbar-use-images nil ;; 不使用image方式
-      speedbar-show-unknown-files t)
 
 ;; 调整窗口大小
 ((lambda ()
