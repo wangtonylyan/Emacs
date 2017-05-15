@@ -17,26 +17,11 @@
 ;; (normal-top-level-add-subdirs-to-load-path)
 ;; (normal-top-level-add-to-load-path)
 
-;; 判断Emacs版本可以基于以下两个变量：'emacs-major-version和'emacs-minor-version
+;; 指定由(customize)写入配置信息的文件，随后每当Emacs自动写入时就不会再修改当前文件了
+(setq custom-file (concat user-emacs-directory "custom.el"))
+(load custom-file)
 
-;; =============================================================================
-;; 下述内容会因用户在Customize界面的保存操作而由Emacs自动写入
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(current-language-environment "Chinese-GB")
- '(ecb-options-version "2.40"))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-;; 也可以重新指定写入文件
-;; (setq custom-file (concat user-emacs-directory "emacs-custom.el"))
-;; (load custom-file)
+;; 判断Emacs版本可以基于以下两个变量：'emacs-major-version和'emacs-minor-version
 
 ;; =============================================================================
 ;; 管理和加载全局性的第三方插件
@@ -218,9 +203,9 @@
       (set-default-font "Consolas 11")
       (set-fontset-font "fontset-default" 'unicode "宋体 10"))
   (progn
-    (set-default-font "YaHei Consolas Hybrid 11")
+    (set-default-font "YaHei Consolas Hybrid 10")
     (set-fontset-font "fontset-default"
-                      'unicode "Source Han Serif SC SemiBold 10") ;; 或替换成"Microsoft YaHei Mono 10"
+                      'unicode "Source Han Serif SC SemiBold 9") ;; 或替换成"Microsoft YaHei Mono 10"
     ))
 ;; (set-face-attribute 'default nil :family "Microsoft YaHei Mono" :weight 'normal :height 110) ;; 设置字体，包括字号等
 ;; (set-frame-font "10" nil t) ;; 设置字号, 同(set-face-attribute)中的:height

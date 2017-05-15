@@ -175,17 +175,22 @@
 (defun my-plugin-flycheck-init ()
   (when (and (member 'flycheck package-selected-packages)
              (require 'flycheck nil t))
-    ;; 可以通过以下方式定制每种模式，例如设置相应的checker(取自变量flycheck-checkers)
+    (setq flycheck-check-syntax-automatically '(mode-enabled save idle-change)
+          flycheck-idle-change-delay 2.5
+          )
+
+
     (add-hook 'emacs-lisp-mode-hook
               (lambda ()
-                (setq flycheck-idle-change-delay 2.5
+                (setq
                       flycheck-emacs-lisp-load-path 'inherit))
               t)
     ;; (global-flycheck-mode 1)
     (add-hook 'my-prog-mode-start-hook 'my-plugin-flycheck-start t)))
 
 (defun my-plugin-flycheck-start ()
-  (flycheck-mode 1))
+  (flycheck-mode-on-safe) ;; (flycheck-mode 1)
+  )
 
 ;; =============================================================================
 ;; Magit
