@@ -1,4 +1,3 @@
-;; =============================================================================
 (when (eq system-type 'windows-nt)
   (add-to-list 'exec-path "D:/softwares" t)
   (let ((path (executable-find
@@ -58,12 +57,13 @@
                                     atom-one-dark-theme
                                     ido ;; icomplete, anything, helm, smex, ivy
                                     ;; 2) programming
-                                    yasnippet company
+                                    yasnippet
+                                    company ;; auto-complete
                                     flycheck ;; flymake
                                     magit
-                                    elpy py-autopep8
+                                    elpy ;; ropemacs
+                                    py-autopep8
                                     company-jedi
-                                    ;; ropemacs
                                     ))
   (when (not package-archive-contents)
     (package-refresh-contents))
@@ -164,8 +164,7 @@
 ;; 关于smooth scrolling可以参考: http://www.emacswiki.org/emacs/SmoothScrolling
 ;; 其提供的主要解决方案是基于两个插件：smooth-scroll.el和smooth-scrolling.el
 ;; 这里暂不使用平滑滚动，而是通过设置以下变量以尽可能地避免页面滚动时画面的频繁跳动
-(setq redisplay-dont-pause t
-      ;; mouse wheel scrolling
+(setq ;; mouse wheel scrolling
       mouse-wheel-scroll-amount '(3 ((shift) . 1))
       mouse-wheel-progressive-speed nil
       mouse-wheel-follow-mouse t
@@ -183,7 +182,7 @@
 (column-number-mode 1) ;; 在mode-line显示列数
 ;; (setq-default fill-column 80) ;; 超过80字符就换行显示
 
-(setq default-buffer-file-coding-system 'utf-8)
+(setq-default buffer-file-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
 
 (show-paren-mode 1) ;; 显示匹配的左右括号
