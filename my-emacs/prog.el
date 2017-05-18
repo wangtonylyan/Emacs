@@ -173,23 +173,39 @@
 ;; http://www.flycheck.org/manual/latest/Supported-languages.html
 ;; -----------------------------------------------------------------------------
 (defun my-plugin-flycheck-init ()
+  ;; 快捷键前缀：C-c !
+  ;; C-c ! l :: (flycheck-list-errors)
+  ;; RET :: Go to the current error in the source buffer
+  ;; n :: Jump to the next error
+  ;; p :: Jump to the previous error
+  ;; e :: Explain the error
+  ;; f :: Filter the error list by level
+  ;; F :: Remove the filter
+  ;; S :: Sort the error list by the column at point
+  ;; g :: Check the source buffer and update the error list
+  ;; q :: Quit the error list and hide its window
   (when (and (member 'flycheck package-selected-packages)
              (require 'flycheck nil t))
     (setq flycheck-check-syntax-automatically '(mode-enabled save idle-change)
           flycheck-idle-change-delay 2.5
           flycheck-indication-mode nil)
-    (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc))
-    ;; 快捷键前缀：C-c !
-    ;; C-c ! l :: (flycheck-list-errors)
-    ;; RET :: Go to the current error in the source buffer
-    ;; n :: Jump to the next error
-    ;; p :: Jump to the previous error
-    ;; e :: Explain the error
-    ;; f :: Filter the error list by level
-    ;; F :: Remove the filter
-    ;; S :: Sort the error list by the column at point
-    ;; g :: Check the source buffer and update the error list
-    ;; q :: Quit the error list and hide its window
+    (setq-default flycheck-disabled-checkers
+                  (add-to-list 'flycheck-disabled-checkers
+                               'emacs-lisp-checkdoc t))
+
+    (when (and (member 'emacs-lisp flycheck-checkers)
+               (not (member 'emacs-lisp flycheck-disabled-checkers)))
+      (add-hook 'emacs-lisp-mode-hook
+                (lambda ()
+                  (setq flycheck-emacs-lisp-load-path `(,my-user-emacs-directory)))
+                t))
+    (when (and (member 'c/c++-gcc flycheck-checkers)
+               (not (member 'c/c++-gcc flycheck-disabled-checkers)))
+      (add-hook 'c++-mode-hook
+                (lambda ()
+                  (setq flycheck-gcc-language-standard "c++11"))
+                t))
+
     (add-to-list 'display-buffer-alist
                  `(,(rx bos "*Flycheck errors*" eos)
                    (display-buffer-reuse-window
@@ -197,11 +213,6 @@
                    (side            . bottom)
                    (reusable-frames . visible)
                    (window-height   . 0.33)))
-
-    (add-hook 'emacs-lisp-mode-hook
-              (lambda ()
-                (setq flycheck-emacs-lisp-load-path 'inherit))
-              t)
     ;; (global-flycheck-mode 1)
     (add-hook 'my-prog-mode-start-hook 'my-plugin-flycheck-start t)))
 
