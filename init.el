@@ -11,8 +11,10 @@
 
 (setq default-directory "~"
       command-line-default-directory default-directory
-      user-emacs-directory "~/.emacs.d/" ;; 注意此路径比较特殊，以"/"结尾
-      my-user-emacs-directory (concat user-emacs-directory "my-emacs" "/"))
+      ;; 注意此路径比较特殊，以"/"结尾
+      user-emacs-directory "~/.emacs.d/")
+(defconst my-user-emacs-directory (concat user-emacs-directory "my-emacs" "/"))
+
 ;; (normal-top-level-add-subdirs-to-load-path)
 ;; (normal-top-level-add-to-load-path)
 
@@ -55,7 +57,8 @@
   ;; 目前使用此全局变量来管理插件的启用/禁用，其中包括了ELPA更新源中所没有的插件
   (setq package-selected-packages '(;; 1) enhancement
                                     atom-one-dark-theme
-                                    ido ;; icomplete, anything, helm, smex, ivy
+                                    powerline
+                                    helm ;; icomplete, anything, ido, smex, ivy
                                     ;; 2) programming
                                     yasnippet
                                     company ;; auto-complete
@@ -102,6 +105,10 @@
                      (set-terminal-parameter frame 'background-mode mode)
                      (enable-theme 'solarized))))))))
  "atom-one-dark")
+
+(when (and (member 'powerline package-selected-packages)
+           (require 'powerline nil t))
+  (powerline-default-theme))
 
 ;; =============================================================================
 ;; Auctex
@@ -164,12 +171,12 @@
 ;; 关于smooth scrolling可以参考: http://www.emacswiki.org/emacs/SmoothScrolling
 ;; 其提供的主要解决方案是基于两个插件：smooth-scroll.el和smooth-scrolling.el
 ;; 这里暂不使用平滑滚动，而是通过设置以下变量以尽可能地避免页面滚动时画面的频繁跳动
-(setq ;; mouse wheel scrolling
-      mouse-wheel-scroll-amount '(3 ((shift) . 1))
+;; mouse wheel scrolling
+(setq mouse-wheel-scroll-amount '(3 ((shift) . 1))
       mouse-wheel-progressive-speed nil
-      mouse-wheel-follow-mouse t
-      ;; keyboard scrolling
-      scroll-margin 1
+      mouse-wheel-follow-mouse t)
+;; keyboard scrolling
+(setq scroll-margin 1
       scroll-step 3
       scroll-conservatively 10000
       scroll-preserve-screen-position 1)
@@ -245,23 +252,6 @@
 ;; File Extension
 ;; (setq auto-mode-alist (cons '("\\.emacs\\'" . emacs-lisp-mode) auto-mode-alist))
 
-;; 以下插件提供了对于minibuffer中几个常用命令的补全功能
-;; 包括(find-file), (switch-to-buffer), (execute-extended-command)等
-;; 1) icomplete
-;; Emacs内置，需要按下TAB键被动触发，且会将提示的内容呈现于一个新建的子窗口中
-;; 2) Anything
-;; 与icomplete类似，默认情况下同样需要额外地敲击按键或执行命令来触发
-;; 优点是支持额外的源，可以提供更为强大的补全方案
-;; 3) Helm
-;; https://emacs-helm.github.io/helm/
-;; 继承自并已代替了Anything
-;; 4) IDO (interactively do things)
-;; Emacs内置，自动呈现提示内容，但不支持(execute-extended-command)
-;; 5) Smex
-;; 基于IDO来实现，并作为其补充，提供了对于(execute-extended-command)的支持
-;; 此外还提供了记录用户操作历史、快速查询输入命令的快捷键及函数说明等功能
-;; 6) Ivy
-;; 作为find-file-in-project、Swiper等插件的依赖库
 (when (not (member 'icomplete package-selected-packages))
   (icomplete-mode -1))
 (when (and (member 'ido package-selected-packages)
@@ -275,12 +265,40 @@
            (require 'smex nil t))
   (global-set-key (kbd "M-x") 'smex)
   (global-set-key (kbd "M-X") 'smex-major-mode-commands)
-  ;; 该插件会自动替换原M-x快捷键所绑定的命令，若仍想使用的话可以如下重新绑定之
-  ;; (global-set-key (kbd "C-x M-x") 'execute-extended-command)
-  )
+  ;; 该插件会自动替换原M-x快捷键所绑定的命令，若想保留则可重新绑定之
+  (global-set-key (kbd "C-x M-x") 'execute-extended-command))
 (when (and (member 'helm package-selected-packages)
-           (require 'helm nil t))
-  )
+           (require 'helm nil t)
+           (require 'helm-config nil t))
+  ;; Helm提供了一套在功能上与部分Emacs原生命令相重合的命令集
+  ;; 并将其默认绑定在了以'helm-command-prefix-key为前缀的快捷键集中
+  ;; 可以通过输入该前缀来触发相关命令
+  (global-set-key (kbd "C-c h") 'helm-command-prefix) ;; 替换前缀
+  (global-unset-key (kbd "C-x c"))
+  ;; 'helm-execute-persistent-action相比于'helm-select-action更常用
+  (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)
+  (define-key helm-map (kbd "<C-return>") 'helm-select-action)
+  ;; 也可以将部分常用命令直接替换Emacs原快捷键
+  (global-set-key (kbd "M-x") 'helm-M-x)
+  (global-set-key (kbd "M-y") 'helm-show-kill-ring)
+  (global-set-key (kbd "C-x C-f") 'helm-find-files)
+  (global-set-key (kbd "C-x b") 'helm-mini)
+  (global-set-key (kbd "C-x C-b") 'helm-buffers-list)
+  ;; Emacs为文件内搜索提供了isearch和occur两个不同的命令
+  ;; 前者从光标当前所在位置向前/后遍历地搜索，后者则是全局地搜索
+  (global-set-key (kbd "C-s") 'helm-occur)
+  (setq helm-split-window-in-side-p t
+        helm-move-to-line-cycle-in-source t
+        helm-ff-search-library-in-sexp t
+        helm-ff-file-name-history-use-recentf t
+        helm-echo-input-in-header-line t
+        helm-autoresize-max-height 30
+        helm-autoresize-min-height 0
+        helm-M-x-fuzzy-match t
+        helm-buffers-fuzzy-matching t
+        helm-recentf-fuzzy-match t)
+  (helm-autoresize-mode 1)
+  (helm-mode 1))
 
 ;; uniquify-mode可以为重名的buffer命名
 (setq uniquify-buffer-name-style 'post-forward-angle-brackets)
@@ -289,11 +307,11 @@
       speedbar-show-unknown-files t)
 
 ;; Key
-(global-set-key (kbd "C-x a") 'mark-whole-buffer)
-(global-set-key (kbd "C-x h") 'windmove-left)
-(global-set-key (kbd "C-x l") 'windmove-right)
-(global-set-key (kbd "C-x j") 'windmove-down)
-(global-set-key (kbd "C-x k") 'windmove-up)
+(global-set-key (kbd "C-S-a") 'mark-whole-buffer)
+(global-set-key (kbd "C-S-h") 'windmove-left)
+(global-set-key (kbd "C-S-l") 'windmove-right)
+(global-set-key (kbd "C-S-j") 'windmove-down)
+(global-set-key (kbd "C-S-k") 'windmove-up)
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 (global-set-key (kbd "<C-up>") 'text-scale-increase)
@@ -307,6 +325,9 @@
 (global-set-key (kbd "C-c c") 'org-capture)
 (global-set-key (kbd "C-c a") 'org-agenda)
 (global-unset-key (kbd "C-q"))
+;; 与输入法切换键冲突
+(global-set-key (kbd "C-S-SPC") 'set-mark-command)
+(global-unset-key (kbd "C-SPC"))
 
 ;; 调整窗口大小
 ((lambda ()
