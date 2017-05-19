@@ -1,5 +1,8 @@
 (require 'my-prog)
 
+(setq my-prog-lisp-mode-start-hook '())
+
+;; =============================================================================
 (defun my-plugin-lispbox-init ()
   (let ((exec "sbcl"))
     (when (eq system-type 'windows-nt)

@@ -1,6 +1,6 @@
 (require 'my-init)
 
-(setq my-prog-mode-start-hook '())
+(defvar my-prog-mode-start-hook '())
 
 ;; =============================================================================
 ;; Yasnippet
@@ -147,11 +147,11 @@
   ;; 各继承于prog-mode的编程模式在启动时都将重设其buffer-local的ac-sources
   ;; 方法是各自追加my-prog-ac-sources链表
   ;; 优点是当同一个buffer多次切换不同的编程模式时，不会彼此影响
-  (setq my-prog-ac-sources
-        (add-to-list ac-sources
-                     '(ac-source-dictionary
-                       ac-source-yasnippet)
-                     t)))
+  (defvar my-prog-ac-sources
+    (add-to-list ac-sources
+                 '(ac-source-dictionary
+                   ac-source-yasnippet)
+                 t)))
 
 ;; =============================================================================
 ;; Flymake
@@ -232,7 +232,7 @@
 (defun my-plugin-magit-init ()
   (when (and (member 'magit package-selected-packages)
              (require 'magit nil t))
-    (add-hook 'my-prog-mode-start-hook 'my-plugin-magit-start)))
+    (add-hook 'my-prog-mode-start-hook 'my-plugin-magit-start t)))
 
 (defun my-plugin-magit-start ()
   )
