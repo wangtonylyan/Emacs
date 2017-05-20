@@ -59,6 +59,7 @@
                                     atom-one-dark-theme
                                     powerline
                                     helm ;; icomplete, anything, ido, smex, ivy
+                                    ace-jump-mode
                                     ;; 2) programming
                                     yasnippet
                                     company ;; auto-complete
@@ -184,7 +185,9 @@
               scroll-down-aggressively 0.01)
 (scroll-bar-mode -1) ;; 取消滚动条
 (mouse-avoidance-mode 'animate) ;; 当光标移动至鼠标位置时，为避免遮挡视线，自动移开鼠标
+(setq-default cursor-type '(bar . 3))
 ;; (save-place-mode 1) ;; 记录光标在每个文件中最后一次访问时所在的位置
+(global-hl-line-mode 1)
 (setq-default line-spacing 0) ;; 行距
 (column-number-mode 1) ;; 在mode-line显示列数
 ;; (setq-default fill-column 80) ;; 超过80字符就换行显示
@@ -209,18 +212,20 @@
       (set-default-font "Consolas 11")
       (set-fontset-font "fontset-default" 'unicode "宋体 10"))
   (progn
-    (set-default-font "YaHei Consolas Hybrid 10")
+    (set-default-font "YaHei Consolas Hybrid 11")
     (set-fontset-font "fontset-default"
-                      'unicode "Source Han Serif SC SemiBold 9") ;; 或替换成"Microsoft YaHei Mono 10"
+                      'unicode "Source Han Serif SC SemiBold 10") ;; 或替换成"Microsoft YaHei Mono 10"
     ))
 ;; (set-face-attribute 'default nil :family "Microsoft YaHei Mono" :weight 'normal :height 110) ;; 设置字体，包括字号等
 ;; (set-frame-font "10" nil t) ;; 设置字号, 同(set-face-attribute)中的:height
 
 ;; Edit
+(electric-indent-mode -1) ;; 自动缩进
+(electric-pair-mode 1)
+(electric-quote-mode -1)
 (setq-default indent-tabs-mode nil ;; make indentation commands use space only
               tab-width 4)
 ;; (setq tab-always-indent t)
-(electric-indent-mode -1) ;; 取消全局性的自动缩进模式
 (global-highlight-changes-mode 1)
 (setq highlight-changes-global-changes-existing-buffers nil
       highlight-changes-visibility-initial-state t
@@ -324,10 +329,20 @@
 (put 'upcase-region 'disabled nil)
 (global-set-key (kbd "C-c c") 'org-capture)
 (global-set-key (kbd "C-c a") 'org-agenda)
+
 (global-unset-key (kbd "C-q"))
 ;; 与输入法切换键冲突
-(global-set-key (kbd "C-S-SPC") 'set-mark-command)
-(global-unset-key (kbd "C-SPC"))
+;; (global-set-key (kbd "C-S-SPC") 'set-mark-command)
+;; (global-unset-key (kbd "C-SPC"))
+
+;; ace-jump-mode
+(when (and (member 'ace-jump-mode package-selected-packages)
+           (require 'ace-jump-mode nil t))
+  (ace-jump-mode-enable-mark-sync)
+  (global-set-key (kbd "C-x SPC") 'ace-jump-mode-pop-mark)
+  (global-set-key (kbd "C-c SPC") 'ace-jump-char-mode)
+  (global-set-key (kbd "C-c w") 'ace-jump-word-mode)
+  (global-set-key (kbd "C-c l") 'ace-jump-line-mode))
 
 ;; 调整窗口大小
 ((lambda ()
