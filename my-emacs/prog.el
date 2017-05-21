@@ -48,14 +48,14 @@
                              ,(when (and (member 'company-jedi package-selected-packages)
                                          (require 'company-jedi nil t))
                                 'company-jedi)
-                             company-bbdb
-                             company-nxml
-                             ;; company-css ;; CSS
-                             company-eclim ;; Eclipse
+                             ;; company-bbdb ;; Big Brother Database, an address book
+                             ;; company-nxml
                              company-semantic ;; Semantic
                              company-clang ;; Clang
-                             company-xcode ;; Xcode
+                             ;; company-xcode ;; Xcode
                              company-cmake ;; CMake
+                             ;; company-eclim ;; Eclipse
+                             ;; company-css ;; CSS
                              company-capf ;; completion-at-point-functions
                              company-files ;;
                              (company-dabbrev-code company-gtags company-etags company-keywords)
