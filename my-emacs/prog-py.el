@@ -120,7 +120,7 @@
   (setq prettify-symbols-alist '(("lambda" . 955)))
   (run-hooks 'my-prog-py-mode-start-hook))
 
-(with-eval-after-load 'python
-  (my-prog-py-mode-init))
+;; (add-hook 'prog-mode-hook 'my-prog-py-mode-init t)
+(eval-after-load 'python '(my-prog-py-mode-init))
 
 (provide 'my-prog-py)
