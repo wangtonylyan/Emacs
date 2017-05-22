@@ -55,7 +55,9 @@
                                     ace-jump-mode
                                     flyspell
                                     flyspell-correct-helm
-                                    ;; 2) programming
+                                    ;; 2) text
+                                    auctex
+                                    ;; 3) programming
                                     yasnippet
                                     company ;; auto-complete
                                     flycheck ;; flymake
@@ -92,7 +94,8 @@
                    (lambda (frame)
                      (set-frame-parameter frame 'background-mode mode)
                      (set-terminal-parameter frame 'background-mode mode)
-                     (enable-theme 'solarized))))))))
+                     (enable-theme 'solarized))
+                   t))))))
  "atom-one-dark")
 
 (when (and (member 'powerline package-selected-packages)
@@ -108,12 +111,6 @@
           ;; ispell-dictionary "english" ;; default dictionary
           ;; ispell-personal-dictionary ""
           flyspell-issue-message-flag nil)))
-
-(when (and (member 'auctex package-selected-packages)
-           (require 'auctex nil t))
-  (setq TeX-auto-save t
-        TeX-parse-self t)
-  (setq-default TeX-master nil))
 
 (when (and (member 'minimap package-selected-packages)
            (require 'minimap nil t))
@@ -136,11 +133,11 @@
 
 (when (and (member 'paredit package-selected-packages)
            (require 'paredit nil t))
-  (add-hook 'lisp-mode-hook             'enable-paredit-mode)
-  (add-hook 'emacs-lisp-mode-hook       'enable-paredit-mode)
-  (add-hook 'lisp-interaction-mode-hook 'enable-paredit-mode)
-  (add-hook 'scheme-mode-hook           'enable-paredit-mode)
-  (add-hook 'org-mode 'enable-paredit-mode))
+  (add-hook 'lisp-mode-hook 'enable-paredit-mode t)
+  (add-hook 'emacs-lisp-mode-hook 'enable-paredit-mode t)
+  (add-hook 'lisp-interaction-mode-hook 'enable-paredit-mode t)
+  (add-hook 'scheme-mode-hook 'enable-paredit-mode t)
+  (add-hook 'org-mode 'enable-paredit-mode t))
 
 ;; =============================================================================
 ;; 配置杂项
@@ -204,7 +201,7 @@
 (global-hl-line-mode 1)
 (global-visual-line-mode -1) ;; 对中文支持不好
 (show-paren-mode 1) ;; 显示匹配的左右括号
-(electric-pair-mode 1)
+(electric-pair-mode -1)
 (electric-quote-mode -1)
 (electric-indent-mode -1) ;; 自动缩进
 (setq font-lock-maximum-decoration t
@@ -243,7 +240,8 @@
 (add-hook 'before-save-hook
           (lambda ()
             (delete-trailing-whitespace) ;; 删除每行末尾的空格
-            (highlight-changes-remove-highlight (point-min) (point-max))))
+            (highlight-changes-remove-highlight (point-min) (point-max)))
+          t)
 
 (when (not (member 'icomplete package-selected-packages))
   (icomplete-mode -1))
@@ -302,6 +300,7 @@
 (global-set-key (kbd "C-S-l") 'windmove-right)
 (global-set-key (kbd "C-S-j") 'windmove-down)
 (global-set-key (kbd "C-S-k") 'windmove-up)
+(global-unset-key (kbd "C-x o")) ;; (other-window)
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 (global-set-key (kbd "<C-up>") 'text-scale-increase)
@@ -352,13 +351,13 @@
 (let ((path my-user-emacs-directory))
   (mapc (lambda (name)
           (load (concat path name) t nil nil t))
-        '(
+        '(;; prog-mode与text-mode是相互独立的
           "prog" ;; prog-mode
           ;; "prog-cc" ;; cc-mode (c-mode, c++-mode, java-mode)
           ;; "prog-lisp" ;; lisp-mode, emacs-lisp-mode, lisp-interaction-mode
           "prog-py" ;; python-mode
           ;; "prog-hs" ;; haskell-mode
-          ;; "text-tex" ;; tex-mode, latex-mode
+          "text-tex" ;; tex-mode, latex-mode
           ;; "web-browser" ;; web browser
           )))
 
