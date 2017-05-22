@@ -24,14 +24,6 @@
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (load custom-file)
 
-;; =============================================================================
-;; 管理和加载全局性的第三方插件
-;; 1) ELPA (Emacs Lisp Package Archive)
-;; 可以通过Emacs24以上版本内置的ELPA工具来安装和管理第三方插件
-;; 2) 从网上下载、编译、安装第三方插件
-;; 资源网站: https://github.com/emacsmirror
-;; 通常的安装方式就是将.el源文件放置于'load-path所包含的目录中即可
-;; -----------------------------------------------------------------------------
 ;; (setq url-proxy-services '(("http" . "10.25.71.1:8080"))) ;; 不支持authentication
 (when (require 'package nil t)
   ;; 设置安装包的存储目录，该目录也需要被包含至'load-path中
@@ -76,17 +68,10 @@
     (package-refresh-contents))
   (package-install-selected-packages))
 
-;; =============================================================================
-;; Color Theme
-;; http://www.nongnu.org/color-theme/
-;; 该插件已集成于Emacs24以上版本中，作为默认的主题管理组件
-;; 其自带了一些主题，网上还有许多基于该插件独立发布的主题
-;; -----------------------------------------------------------------------------
 ;; 指定第三方主题的安装目录
 (let ((path (concat my-user-emacs-directory "theme")))
   (add-to-list 'load-path path t)
   (add-to-list 'custom-theme-load-path path t))
-
 ((lambda (theme)
    (cond
     ((string-equal "atom-one-dark" theme)
@@ -114,10 +99,6 @@
            (require 'powerline nil t))
   (powerline-default-theme))
 
-;; =============================================================================
-;; Flyspell
-;; Linux系统中默认使用Aspell作为拼写检查工具，http://aspell.net/
-;; Aspell是Ispell的继承者，但Emacs中仍保留了ispell这一模式名
 (let ((exec (executable-find "aspell")))
   (when (and exec
              (member 'flyspell package-selected-packages)
@@ -128,19 +109,12 @@
           ;; ispell-personal-dictionary ""
           flyspell-issue-message-flag nil)))
 
-;; =============================================================================
-;; Auctex
-;; -----------------------------------------------------------------------------
 (when (and (member 'auctex package-selected-packages)
            (require 'auctex nil t))
   (setq TeX-auto-save t
         TeX-parse-self t)
   (setq-default TeX-master nil))
 
-;; =============================================================================
-;; Minimap
-;; 其全部的可配置选项见于(customize-group 'minimap)
-;; -----------------------------------------------------------------------------
 (when (and (member 'minimap package-selected-packages)
            (require 'minimap nil t))
   (setq minimap-always-recenter nil ;; 设置为nil才有效?
@@ -153,10 +127,6 @@
         minimap-display-semantic-overlays nil
         minimap-enlarge-certain-faces nil))
 
-;; =============================================================================
-;; Powerline
-;; 其提供了一个漂亮的mode line皮肤，缺点是当字体太多或字太多时，会显示不下所有内容
-;; -----------------------------------------------------------------------------
 (when (and (member 'powerline package-selected-packages)
            (require 'powerline nil t))
   (setq powerline-arrow-shape
@@ -164,13 +134,10 @@
         ;; 'curve
         'arrow14))
 
-;; =============================================================================
-;; Paredit
-;; -----------------------------------------------------------------------------
 (when (and (member 'paredit package-selected-packages)
            (require 'paredit nil t))
-  (add-hook 'emacs-lisp-mode-hook       'enable-paredit-mode)
   (add-hook 'lisp-mode-hook             'enable-paredit-mode)
+  (add-hook 'emacs-lisp-mode-hook       'enable-paredit-mode)
   (add-hook 'lisp-interaction-mode-hook 'enable-paredit-mode)
   (add-hook 'scheme-mode-hook           'enable-paredit-mode)
   (add-hook 'org-mode 'enable-paredit-mode))
@@ -249,8 +216,6 @@
       highlight-changes-colors nil
       line-move-visual t
       track-eol t
-      ;; 关于smooth scrolling可以参考: http://www.emacswiki.org/emacs/SmoothScrolling
-      ;; 其提供的主要解决方案是基于两个插件：smooth-scroll.el和smooth-scrolling.el
       ;; 这里暂不使用平滑滚动，而是通过设置以下变量以尽可能地避免页面滚动时画面的频繁跳动
       ;; mouse wheel scrolling
       mouse-wheel-scroll-amount '(3 ((shift) . 1))
@@ -313,8 +278,6 @@
   (global-set-key (kbd "C-x C-f") 'helm-find-files)
   (global-set-key (kbd "C-x b") 'helm-mini)
   (global-set-key (kbd "C-x C-b") 'helm-buffers-list)
-  ;; Emacs为文件内搜索提供了isearch和occur两个不同的命令
-  ;; 前者从光标当前所在位置向前/后遍历地搜索，后者则是全局地搜索
   (global-set-key (kbd "C-s") 'helm-occur)
   (setq helm-split-window-in-side-p t
         helm-move-to-line-cycle-in-source t

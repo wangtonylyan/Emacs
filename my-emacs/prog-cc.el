@@ -331,33 +331,7 @@
   )
 
 ;; =============================================================================
-;; Source Code Tagging System
-;; http://stackoverflow.com/questions/12922526/tags-for-emacs-relationship-between-etags-ebrowse-cscope-gnu-global-and-exhu
-;; 开源的主要有以下几种：
-;; 1) Etags
-;; 功能最为简单，较为少用
-;; 2) Ctags
-;; 能够支持多达41种语言，相比于Etags会生成更多的metadata
-;; 官方主要支持于VIM，对于Emacs而言，由于其无法使用这些额外的metadata，因此功能几乎等同于Etags
-;; 3) Cscope
-;; 对于C/C++和Java而言异常强大，但对其他语言支持不足，且自带用户界面
-;; 4) GNU Global，Gtags
-;; 功能类似于Cscope，优点是实现上独立与任何编辑环境，也因此可集成于绝大多数编辑环境
-;; =============================================================================
-;; GNU Global
-;; version: 6.4
-;; http://www.gnu.org/software/global/
-;; http://www.tamacom.com/global.html
-;; 在Emacs环境中，可独立使用，也可作为以下组件的后台支持：
-;; 1) CEDET/Semantic/SemanticDB
-;; 2) CEDET/Semantic/Symref
-;; 3) CEDET/EDE/Locate
-;; 推荐配合Emacs插件ggtags来使用GNU Global
-;; -----------------------------------------------------------------------------
 ;; ggtags
-;; version: 0.8.10
-;; http://elpa.gnu.org/packages/ggtags.html
-;; https://github.com/leoliu/ggtags
 ;; -----------------------------------------------------------------------------
 (defun my-plugin-ggtags-init ()
   (when (require 'ggtags nil t)))
