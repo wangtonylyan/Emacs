@@ -14,18 +14,14 @@
 ;; 实现理念是简洁，尽可能地依赖并融合于Emacs中已有的功能
 ;; -----------------------------------------------------------------------------
 (defun my-plugin-python-init ()
-  (let ((exec "python3")) ;; python或python3
+  (let ((exe "python3")) ;; python或python3
     (when (eq system-type 'windows-nt)
-      (let* ((path (executable-find (concat exec "/python.exe")))
-             (dir (when path (file-name-directory path))))
-        (when dir
-          (unless (member dir exec-path)
-            (add-to-list 'exec-path dir t))
-          (setq exec "python.exe"))))
-    (when (and (executable-find exec)
+      (when (my-func-executable-find exe "python.exe" t)
+        (setq exe "python.exe")))
+    (when (and (executable-find exe)
                (require 'python nil t))
       (remove-hook 'python-mode-hook 'wisent-python-default-setup)
-      (setq python-shell-interpreter exec
+      (setq python-shell-interpreter exe
             python-shell-interpreter-args "-i"
             ;; python-shell-prompt-regexp ""
             ;; python-shell-prompt-output-regexp ""
