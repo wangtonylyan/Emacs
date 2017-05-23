@@ -223,7 +223,9 @@
       scroll-step 3
       scroll-conservatively 10000
       scroll-preserve-screen-position 1
+      truncate-lines nil
       truncate-partial-width-windows nil
+      word-wrap nil
       line-move-visual t
       track-eol t
       require-final-newline t
@@ -256,7 +258,7 @@
 (column-number-mode 1) ;; 在mode-line显示列数
 (scroll-bar-mode -1) ;; 取消滚动条
 (global-hl-line-mode 1)
-(global-visual-line-mode -1) ;; 对中文支持不好
+(global-visual-line-mode 1) ;; 对中文支持不好
 (show-paren-mode 1) ;; 显示匹配的左右括号
 (electric-pair-mode -1)
 (electric-quote-mode -1)
