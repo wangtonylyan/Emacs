@@ -1,9 +1,20 @@
 ;; 判断Emacs版本可以基于以下两个变量：'emacs-major-version和'emacs-minor-version
 
+(defun my-func-executable-find (dir exe &optional add)
+  (let* ((dir (if (and (stringp dir) (string-blank-p dir))
+                  ;; 统一传参的形式
+                  (concat (directory-file-name dir) "/") ""))
+         (path (executable-find (concat dir exe))))
+    (when (file-executable-p path)
+      (when add
+        (add-to-list 'exec-path (directory-file-name path) t))
+      path)))
+
 (when (eq system-type 'windows-nt)
   (add-to-list 'exec-path "D:/softwares" t)
-  (let ((path (executable-find
-               "Emacs25/libexec/emacs/24.5/i686-pc-mingw32/cmdproxy.exe")))
+  (let ((path (my-func-executable-find
+               "Emacs25/libexec/emacs/24.5/i686-pc-mingw32"
+               "cmdproxy.exe")))
     (when path
       (setq shell-file-name path
             shell-command-switch "-c"))))
@@ -11,11 +22,14 @@
 ;; (setq user-init-file "~/.emacs.d/init.el")
 ;; (load user-init-file)
 
-(setq default-directory "~"
-      command-line-default-directory default-directory
-      ;; 注意此路径比较特殊，以"/"结尾
+;; 由于以下两个变量在当前文件被执行时就有buffer-local的初始值了
+;; 因此为使其自此生效，就必须同时修改局部和全局值
+(setq default-directory "~/"
       user-emacs-directory "~/.emacs.d/")
-(defconst my-user-emacs-directory (concat user-emacs-directory "my-emacs" "/"))
+(setq-default default-directory default-directory
+              user-emacs-directory user-emacs-directory)
+(setq command-line-default-directory default-directory)
+(defconst my-user-emacs-directory (concat user-emacs-directory "my-emacs/"))
 
 ;; (normal-top-level-add-subdirs-to-load-path)
 ;; (normal-top-level-add-to-load-path)
@@ -29,7 +43,6 @@
   ;; 设置安装包的存储目录，该目录也需要被包含至'load-path中
   ;; (add-to-list 'package-directory-list "~/.emacs.d/elpa" t) ;; system-wide dir
   (setq package-user-dir (concat user-emacs-directory "elpa")) ;; user-wide dir
-
   ;; Emacs使用的默认更新源为：("gnu" . "http://elpa.gnu.org/")
   ;; 添加更新源：MELPA每天更新，其包含了绝大多数插件
   ;; (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
@@ -45,7 +58,6 @@
   ;; 设置加载上述列表中所指定插件的时机
   (setq package-enable-at-startup nil) ;; 方式1) 随Emacs的启动而自动加载插件
   (package-initialize) ;; 方式2) 主动执行该函数以加载插件
-
   ;; 目前使用此全局变量来管理插件的启用/禁用，其中包括了ELPA更新源中所没有的插件
   (setq package-selected-packages '(;; 1) enhancement
                                     ;; use-package
@@ -102,12 +114,12 @@
            (require 'powerline nil t))
   (powerline-default-theme))
 
-(let ((exec (executable-find "aspell")))
-  (when (and exec
+(let ((exe (executable-find "aspell")))
+  (when (and exe
              (member 'flyspell package-selected-packages)
              (require 'ispell nil t)
              (require 'flyspell nil t))
-    (setq ispell-program-name exec ;; 设置后台支持程序
+    (setq ispell-program-name exe ;; 设置后台支持程序
           ;; ispell-dictionary "english" ;; default dictionary
           ;; ispell-personal-dictionary ""
           flyspell-issue-message-flag nil)))
@@ -142,14 +154,6 @@
 ;; =============================================================================
 ;; 配置杂项
 ;; -----------------------------------------------------------------------------
-(tool-bar-mode -1)
-(menu-bar-mode -1)
-(prefer-coding-system 'utf-8)
-(global-auto-revert-mode 1) ;; 当硬盘上的文件被修改后，Emacs会提示用户重新读取该文件
-(recentf-mode 1)
-(auto-image-file-mode) ;; 允许打开图片
-(auto-compression-mode) ;; 允许查看和写入压缩包
-(defalias 'yes-or-no-p 'y-or-n-p) ;; 以y/n替换yes/no
 (setq user-full-name "TonyLYan"
       user-mail-address "wangtonylyan@outlook.com"
       inhibit-startup-message 1 ;; 取消启动界面
@@ -159,6 +163,11 @@
       echo-keystrokes 0.1
       debug-on-error nil ;; 显示错误信息
       select-enable-clipboard t
+      current-language-environment "Chinese-GB"
+      auto-revert-use-notify t
+      auto-revert-verbose nil
+      auto-revert-stop-on-user-input t
+      auto-revert-interval 5
       delete-by-moving-to-trash t
       make-backup-files t ;; 启用自动备份
       version-control t ;; 启用版本控制，即可以备份多次
@@ -169,6 +178,15 @@
       backup-directory-alist '(("." . "~/.emacs.d.backups"))
       backup-by-copying t)
 (setq-default buffer-file-coding-system 'utf-8)
+(defalias 'yes-or-no-p 'y-or-n-p) ;; 以y/n替换yes/no
+(tool-bar-mode -1)
+(menu-bar-mode -1)
+(prefer-coding-system 'utf-8)
+;; 该模式用于监控磁盘上的文件是否被外部程序修改，并提示用户或自动重新加载该文件
+(global-auto-revert-mode 1)
+(recentf-mode 1)
+(auto-image-file-mode) ;; 允许打开图片
+(auto-compression-mode) ;; 允许查看和写入压缩包
 
 ;; (set-face-background 'default "#C7EDCC") ;; 设置背景颜色为绿色护眼色
 ;; 字体的名字源自于.ttf或.otf文件内自带的元信息，包括family和style等
@@ -187,23 +205,6 @@
 ;; (set-face-attribute 'default nil :family "Microsoft YaHei Mono" :weight 'normal :height 110) ;; 设置字体，包括字号等
 ;; (set-frame-font "10" nil t) ;; 设置字号, 同(set-face-attribute)中的:height
 
-(global-font-lock-mode 1) ;; 语法高亮
-;; (add-hook 'xxx-mode-hook 'turn-on-font-lock) ;; (font-lock-mode 1)
-;; (global-linum-mode 1) ;; 左侧行号，推荐仅将其显示于主要的编辑文档中
-;; (add-hook 'xxx-mode-hook 'linum-mode)
-(global-highlight-changes-mode 1)
-(mouse-avoidance-mode 'animate) ;; 当光标移动至鼠标位置时，为避免遮挡视线，自动移开鼠标
-;; (save-place-mode 1) ;; 记录光标在每个文件中最后一次访问时所在的位置
-(set-cursor-color "white")
-;; (blink-cursor-mode -1)
-(column-number-mode 1) ;; 在mode-line显示列数
-(scroll-bar-mode -1) ;; 取消滚动条
-(global-hl-line-mode 1)
-(global-visual-line-mode -1) ;; 对中文支持不好
-(show-paren-mode 1) ;; 显示匹配的左右括号
-(electric-pair-mode -1)
-(electric-quote-mode -1)
-(electric-indent-mode -1) ;; 自动缩进
 (setq font-lock-maximum-decoration t
       transient-mark-mode t
       shift-select-mode nil
@@ -211,8 +212,7 @@
       highlight-changes-visibility-initial-state t
       highlight-changes-face-list nil
       highlight-changes-colors nil
-      line-move-visual t
-      track-eol t
+      blink-cursor-blinks 0
       ;; 这里暂不使用平滑滚动，而是通过设置以下变量以尽可能地避免页面滚动时画面的频繁跳动
       ;; mouse wheel scrolling
       mouse-wheel-scroll-amount '(3 ((shift) . 1))
@@ -224,6 +224,8 @@
       scroll-conservatively 10000
       scroll-preserve-screen-position 1
       truncate-partial-width-windows nil
+      line-move-visual t
+      track-eol t
       require-final-newline t
       show-paren-style 'parentheses
       tab-always-indent 'complete)
@@ -242,6 +244,23 @@
             (delete-trailing-whitespace) ;; 删除每行末尾的空格
             (highlight-changes-remove-highlight (point-min) (point-max)))
           t)
+(global-font-lock-mode 1) ;; 语法高亮
+;; (add-hook 'xxx-mode-hook 'turn-on-font-lock) ;; (font-lock-mode 1)
+;; (global-linum-mode 1) ;; 左侧行号，推荐仅将其显示于主要的编辑文档中
+;; (add-hook 'xxx-mode-hook 'linum-mode)
+(global-highlight-changes-mode 1)
+(mouse-avoidance-mode 'animate) ;; 当光标移动至鼠标位置时，为避免遮挡视线，自动移开鼠标
+;; (save-place-mode 1) ;; 记录光标在每个文件中最后一次访问时所在的位置
+(set-cursor-color "white")
+;; (blink-cursor-mode -1)
+(column-number-mode 1) ;; 在mode-line显示列数
+(scroll-bar-mode -1) ;; 取消滚动条
+(global-hl-line-mode 1)
+(global-visual-line-mode -1) ;; 对中文支持不好
+(show-paren-mode 1) ;; 显示匹配的左右括号
+(electric-pair-mode -1)
+(electric-quote-mode -1)
+(electric-indent-mode -1) ;; 自动缩进
 
 (when (not (member 'icomplete package-selected-packages))
   (icomplete-mode -1))
@@ -295,6 +314,10 @@
       speedbar-show-unknown-files t)
 
 ;; Key
+;; 命令集前缀
+;; helm :: C-c h
+;; magit :: C-c g
+;; org :: C-c o
 (global-set-key (kbd "C-S-a") 'mark-whole-buffer)
 (global-set-key (kbd "C-S-h") 'windmove-left)
 (global-set-key (kbd "C-S-l") 'windmove-right)
@@ -311,13 +334,13 @@
 (global-unset-key (kbd "C-x C-u")) ;; (upcase-region)
 (put 'downcase-region 'disabled nil) ;; 去除每次执行此命令时的提示，强制执行
 (put 'upcase-region 'disabled nil)
-(global-set-key (kbd "C-c c") 'org-capture)
-(global-set-key (kbd "C-c a") 'org-agenda)
 (global-set-key (kbd "C-q") 'read-only-mode)
 (global-unset-key (kbd "C-x C-q"))
 ;; 与输入法切换键冲突
 ;; (global-set-key (kbd "C-S-SPC") 'set-mark-command)
 ;; (global-unset-key (kbd "C-SPC"))
+(global-set-key (kbd "C-c o c") 'org-capture)
+(global-set-key (kbd "C-c o a") 'org-agenda)
 
 ;; ace-jump-mode
 (when (and (member 'ace-jump-mode package-selected-packages)

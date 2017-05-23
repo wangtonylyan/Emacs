@@ -10,11 +10,9 @@
     ;; 而无需且不能以以下方式被重新加载
     ;; (load "auctex.el" t)
     (when (eq system-type 'windows-nt)
-      (let* ((exec "miktex-texworks.exe")
-             (path (executable-find (concat "MiKTeX/miktex/bin/x64/" exec))))
-        (when path
-          (add-to-list 'exec-path (file-name-directory path) t)
-          (require 'tex-mik nil t))))
+      (when (my-func-executable-find "MiKTeX/miktex/bin/x64"
+                                     "miktex-texworks.exe")
+        (require 'tex-mik nil t)))
     (setq TeX-auto-save t
           TeX-parse-self t)
     ;; (setq-default TeX-master nil)

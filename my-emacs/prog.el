@@ -228,10 +228,19 @@
 ;; -----------------------------------------------------------------------------
 ;; (setq magit-auto-revert-mode 0
 ;;      magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1)
-;; (global-set-key (kbd "C-c g") 'magit-status)
 (defun my-plugin-magit-init ()
   (when (and (member 'magit package-selected-packages)
              (require 'magit nil t))
+    (when (eq system-type 'windows-nt)
+      (let ((path (my-func-executable-find "Git" "git.exe")))
+        (when path
+          (setq magit-git-executable path))))
+    (setq magit-auto-revert-mode t
+          magit-auto-revert-immediately t
+          magit-auto-revert-tracked-only t
+          magit-repository-directories `((,(expand-file-name "project") . 3)
+                                         (,(expand-file-name "Project") . 3)))
+    (global-set-key (kbd "C-c g") 'magit-status)
     (add-hook 'my-prog-mode-start-hook 'my-plugin-magit-start t)))
 
 (defun my-plugin-magit-start ()
