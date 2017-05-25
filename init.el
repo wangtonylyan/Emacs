@@ -25,10 +25,10 @@
 ;; 由于以下两个变量在当前文件被执行时就有buffer-local的初始值了
 ;; 因此为使其自此生效，就必须同时修改局部和全局值
 (setq default-directory "~/"
-      user-emacs-directory "~/.emacs.d/")
+      user-emacs-directory "~/.emacs.d/"
+      command-line-default-directory default-directory)
 (setq-default default-directory default-directory
               user-emacs-directory user-emacs-directory)
-(setq command-line-default-directory default-directory)
 (defconst my-user-emacs-directory (concat user-emacs-directory "my-emacs/"))
 
 ;; (normal-top-level-add-subdirs-to-load-path)
@@ -76,6 +76,7 @@
                                     magit
                                     elpy ;; ropemacs
                                     py-autopep8
+                                    helm-gtags
                                     company-jedi
                                     ))
   (when (not package-archive-contents)
@@ -205,6 +206,23 @@
 ;; (set-face-attribute 'default nil :family "Microsoft YaHei Mono" :weight 'normal :height 110) ;; 设置字体，包括字号等
 ;; (set-frame-font "10" nil t) ;; 设置字号, 同(set-face-attribute)中的:height
 
+(global-font-lock-mode 1) ;; 语法高亮
+;; (add-hook 'xxx-mode-hook 'turn-on-font-lock) ;; (font-lock-mode 1)
+;; (global-linum-mode 1) ;; 左侧行号，推荐仅将其显示于主要的编辑文档中
+;; (add-hook 'xxx-mode-hook 'linum-mode)
+(global-highlight-changes-mode 1)
+(mouse-avoidance-mode 'animate) ;; 当光标移动至鼠标位置时，为避免遮挡视线，自动移开鼠标
+;; (save-place-mode 1) ;; 记录光标在每个文件中最后一次访问时所在的位置
+(set-cursor-color "white")
+;; (blink-cursor-mode -1)
+(column-number-mode 1) ;; 在mode-line显示列数
+(scroll-bar-mode -1) ;; 取消滚动条
+(global-hl-line-mode 1)
+(global-visual-line-mode -1) ;; 对中文支持不好
+(show-paren-mode 1) ;; 显示匹配的左右括号
+(electric-pair-mode -1)
+(electric-quote-mode -1)
+(electric-indent-mode -1) ;; 自动缩进
 (setq font-lock-maximum-decoration t
       transient-mark-mode t
       shift-select-mode nil
@@ -238,6 +256,8 @@
               ;; fill-column 80 ;; 超过80字符就换行显示
               indicate-empty-lines nil
               indent-tabs-mode nil ;; make indentation commands use space only
+              truncate-lines truncate-lines
+              word-wrap word-wrap
               tab-width 4)
 ;; 每次保存buffer时都将删除现有的改动高亮
 ;; 替换成另外两个hook就会无效，原因未知：write-content-functions或write-file-functions
@@ -246,23 +266,6 @@
             (delete-trailing-whitespace) ;; 删除每行末尾的空格
             (highlight-changes-remove-highlight (point-min) (point-max)))
           t)
-(global-font-lock-mode 1) ;; 语法高亮
-;; (add-hook 'xxx-mode-hook 'turn-on-font-lock) ;; (font-lock-mode 1)
-;; (global-linum-mode 1) ;; 左侧行号，推荐仅将其显示于主要的编辑文档中
-;; (add-hook 'xxx-mode-hook 'linum-mode)
-(global-highlight-changes-mode 1)
-(mouse-avoidance-mode 'animate) ;; 当光标移动至鼠标位置时，为避免遮挡视线，自动移开鼠标
-;; (save-place-mode 1) ;; 记录光标在每个文件中最后一次访问时所在的位置
-(set-cursor-color "white")
-;; (blink-cursor-mode -1)
-(column-number-mode 1) ;; 在mode-line显示列数
-(scroll-bar-mode -1) ;; 取消滚动条
-(global-hl-line-mode 1)
-(global-visual-line-mode 1) ;; 对中文支持不好
-(show-paren-mode 1) ;; 显示匹配的左右括号
-(electric-pair-mode -1)
-(electric-quote-mode -1)
-(electric-indent-mode -1) ;; 自动缩进
 
 (when (not (member 'icomplete package-selected-packages))
   (icomplete-mode -1))
