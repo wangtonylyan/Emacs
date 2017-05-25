@@ -60,12 +60,15 @@
     (when (and (member 'flycheck package-selected-packages)
                (require 'flycheck nil t))
       (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-      (add-hook 'elpy-mode-hook 'flycheck-mode t))
+      (add-hook 'elpy-mode-hook 'flycheck-mode-on-safe t))
     (when (and (member 'py-autopep8 package-selected-packages)
                (executable-find "autopep8")
                (require 'py-autopep8 nil t))
       (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save t))
-    ;; (elpy-use-ipython) ;; 还可指定Python解释器
+    (setq elpy-rpc-backend "jedi" ;; rope和jedi这两个库都支持
+          )
+    ;; 指定Python解释器
+    ;; (elpy-use-ipython) ;; (elpy-use-cpython)
     ;; (elpy-enable)
     (add-hook 'my-prog-py-mode-start-hook 'my-plugin-elpy-start t)))
 
