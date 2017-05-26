@@ -10,6 +10,8 @@
         (add-to-list 'exec-path (directory-file-name path) t))
       path)))
 
+(defalias 'my-func-minor-mode-p 'bound-and-true-p)
+
 (when (eq system-type 'windows-nt)
   (add-to-list 'exec-path "D:/softwares" t)
   (let ((path (my-func-executable-find
@@ -59,26 +61,23 @@
   (setq package-enable-at-startup nil) ;; 方式1) 随Emacs的启动而自动加载插件
   (package-initialize) ;; 方式2) 主动执行该函数以加载插件
   ;; 目前使用此全局变量来管理插件的启用/禁用，其中包括了ELPA更新源中所没有的插件
-  (setq package-selected-packages '(;; 1) enhancement
-                                    ;; use-package
+  (setq package-selected-packages '(;; use-package
                                     atom-one-dark-theme
                                     powerline
-                                    helm ;; icomplete, anything, ido, smex, ivy
                                     ace-jump-mode
+                                    helm ;; icomplete, anything, ido, smex, ivy
+                                    ;; helm-gtags
                                     flyspell
                                     flyspell-correct-helm
-                                    ;; 2) text
-                                    auctex
-                                    ;; 3) programming
+                                    flycheck ;; flymake
+                                    helm-flycheck
                                     yasnippet
                                     company ;; auto-complete
-                                    flycheck ;; flymake
+                                    company-jedi
                                     magit
                                     elpy ;; ropemacs
                                     py-autopep8
-                                    helm-gtags
-                                    company-jedi
-                                    ))
+                                    auctex))
   (when (not package-archive-contents)
     (package-refresh-contents))
   (package-install-selected-packages))
@@ -286,6 +285,25 @@
 (when (and (member 'helm package-selected-packages)
            (require 'helm nil t)
            (require 'helm-config nil t))
+  (setq helm-split-window-in-side-p t
+        helm-display-header-line nil
+        helm-echo-input-in-header-line nil
+        helm-autoresize-max-height 30
+        helm-autoresize-min-height 0
+        helm-ff-search-library-in-sexp t
+        helm-ff-file-name-history-use-recentf t
+        helm-mode-fuzzy-match nil ;; global
+        helm-M-x-fuzzy-match t
+        helm-buffers-fuzzy-matching t
+        helm-recentf-fuzzy-match t
+        helm-locate-fuzzy-match t
+        ;; helm-apropos-fuzzy-match t
+        ;; helm-etags-fuzzy-match t
+        helm-move-to-line-cycle-in-source t
+        helm-buffer-skip-remote-checking t
+        ;; 配置该参数可以指定不同的后台支持，包括imenu、ido、smex等
+        ;; helm-completing-read-handlers-alist
+        )
   ;; Helm提供了一套在功能上与部分Emacs原生命令相重合的命令集
   ;; 并将其默认绑定在了以'helm-command-prefix-key为前缀的快捷键集中
   ;; 可以通过输入该前缀来触发相关命令
@@ -298,21 +316,48 @@
   (global-set-key (kbd "M-x") 'helm-M-x)
   (global-set-key (kbd "M-y") 'helm-show-kill-ring)
   (global-set-key (kbd "C-x C-f") 'helm-find-files)
+  (global-set-key (kbd "C-x C-r") 'helm-recentf)
   (global-set-key (kbd "C-x b") 'helm-mini)
   (global-set-key (kbd "C-x C-b") 'helm-buffers-list)
   (global-set-key (kbd "C-s") 'helm-occur)
-  (setq helm-split-window-in-side-p t
-        helm-move-to-line-cycle-in-source t
-        helm-ff-search-library-in-sexp t
-        helm-ff-file-name-history-use-recentf t
-        helm-echo-input-in-header-line t
-        helm-autoresize-max-height 30
-        helm-autoresize-min-height 0
-        helm-M-x-fuzzy-match t
-        helm-buffers-fuzzy-matching t
-        helm-recentf-fuzzy-match t)
+  (define-key minibuffer-local-map (kbd "M-p") 'helm-minibuffer-history)
+  (define-key minibuffer-local-map (kbd "M-n") 'helm-minibuffer-history)
   (helm-autoresize-mode 1)
   (helm-mode 1))
+
+;; 插件helm-gtags在实现上并不依赖于插件ggtags，因此可完全代替之
+(with-eval-after-load 'helm
+  (when (member 'helm-gtags package-selected-packages)
+    ;; 该插件的部分配置项都需要在加载前被设置，因此推荐使用customize
+    ;; 此处为了简便，全部统一在(require)前设置
+    (setq helm-gtags-path-style 'root
+          helm-gtags-ignore-case t
+          helm-gtags-read-only t
+          helm-gtags-highlight-candidate t
+          helm-gtags-display-style 'detail
+          helm-gtags-fuzzy-match nil
+          helm-gtags-direct-helm-completing nil
+          helm-gtags-use-input-at-cursor t
+          helm-gtags-pulse-at-cursor t
+          helm-gtags-auto-update t
+          helm-gtags-update-interval-second 60
+          helm-gtags-prefix-key (kbd "C-c t")
+          ;; 启用以下配置项会使得某些常用快捷键不再绑定于上述前缀中
+          helm-gtags-suggested-key-mapping t)
+    (when (require 'helm-gtags nil t)
+      (add-hook 'c-mode-common-hook
+                (lambda ()
+                  (when (derived-mode-p 'c-mode 'c++-mode 'asm-mode)
+                    (helm-gtags-mode 1)))))
+    (add-hook 'dired-mode-hook 'helm-gtags-mode)
+    (add-hook 'eshell-mode-hook 'helm-gtags-mode)
+    ;; 以下列举了部分快捷键设置，仅供参考
+    (define-key helm-gtags-mode-map (kbd "C-c g a") 'helm-gtags-tags-in-this-function)
+    (define-key helm-gtags-mode-map (kbd "C-j") 'helm-gtags-select)
+    (define-key helm-gtags-mode-map (kbd "M-.") 'helm-gtags-dwim)
+    (define-key helm-gtags-mode-map (kbd "M-,") 'helm-gtags-pop-stack)
+    (define-key helm-gtags-mode-map (kbd "C-c <") 'helm-gtags-previous-history)
+    (define-key helm-gtags-mode-map (kbd "C-c >") 'helm-gtags-next-history)))
 
 ;; built-in Speedbar (rather than CEDET Speedbar)
 (setq speedbar-use-images nil ;; 不使用image方式
@@ -321,6 +366,7 @@
 ;; Key
 ;; 命令集前缀
 ;; helm :: C-c h
+;; helm-gtags :: C-c t
 ;; magit :: C-c g
 ;; org :: C-c o
 (global-set-key (kbd "C-S-a") 'mark-whole-buffer)
