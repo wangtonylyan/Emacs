@@ -68,7 +68,7 @@
                                     helm ;; icomplete, anything, ido, smex, ivy
                                     ;; helm-gtags
                                     flyspell
-                                    flyspell-correct-helm
+                                    ;; flyspell-correct-helm
                                     flycheck ;; flymake
                                     helm-flycheck
                                     yasnippet
@@ -185,8 +185,8 @@
 ;; 该模式用于监控磁盘上的文件是否被外部程序修改，并提示用户或自动重新加载该文件
 (global-auto-revert-mode 1)
 (recentf-mode 1)
-(auto-image-file-mode) ;; 允许打开图片
-(auto-compression-mode) ;; 允许查看和写入压缩包
+(auto-image-file-mode 1) ;; 允许打开图片
+(auto-compression-mode 1) ;; 允许查看和写入压缩包
 
 ;; (set-face-background 'default "#C7EDCC") ;; 设置背景颜色为绿色护眼色
 ;; 字体的名字源自于.ttf或.otf文件内自带的元信息，包括family和style等
