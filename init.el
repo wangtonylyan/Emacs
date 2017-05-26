@@ -10,7 +10,7 @@
         (add-to-list 'exec-path (directory-file-name path) t))
       path)))
 
-(defalias 'my-func-minor-mode-p 'bound-and-true-p)
+(defalias 'my-func-minor-mode-on-p 'bound-and-true-p)
 
 (when (eq system-type 'windows-nt)
   (add-to-list 'exec-path "D:/softwares" t)
