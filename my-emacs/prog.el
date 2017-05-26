@@ -206,13 +206,18 @@
                   (setq flycheck-gcc-language-standard "c++11"))
                 t))
 
+    ;; (flycheck-list-errors)可以列出当前buffer中的所有error，优化显示窗口
     (add-to-list 'display-buffer-alist
                  `(,(rx bos "*Flycheck errors*" eos)
-                   (display-buffer-reuse-window
-                    display-buffer-in-side-window)
+                   (display-buffer-reuse-window display-buffer-in-side-window)
                    (side            . bottom)
                    (reusable-frames . visible)
                    (window-height   . 0.33)))
+    ;; 此外，若是使用插件helm-flycheck，则可以基于helm模式来呈现信息
+    (with-eval-after-load 'helm
+      (if (and (member 'helm-flycheck package-selected-packages)
+               (require 'helm-flycheck nil t))
+          (define-key flycheck-mode-map (kbd "C-c ! l") 'helm-flycheck)))
     ;; (global-flycheck-mode 1)
     (add-hook 'my-prog-mode-start-hook 'my-plugin-flycheck-start t)))
 

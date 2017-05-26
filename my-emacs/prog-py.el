@@ -57,15 +57,14 @@
     ;; 常用快捷键：
     ;; C-c C-c用于调用Python解释器
     ;; elpy默认支持并使用Emacs内置的flymake，但可随意地切换成flycheck
-    (when (and (member 'flycheck package-selected-packages)
-               (require 'flycheck nil t))
+    (with-eval-after-load 'flycheck
       (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
       (add-hook 'elpy-mode-hook 'flycheck-mode-on-safe t))
     (when (and (member 'py-autopep8 package-selected-packages)
                (executable-find "autopep8")
                (require 'py-autopep8 nil t))
       (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save t))
-    (setq elpy-rpc-backend "jedi" ;; rope和jedi这两个库都支持
+    (setq elpy-rpc-backend "jedi" ;; 支持rope和jedi这两个库
           )
     ;; 指定Python解释器
     ;; (elpy-use-ipython) ;; (elpy-use-cpython)
@@ -101,7 +100,8 @@
 
 (defun my-plugin-ropemacs-start ()
   ;; (ropemacs-mode 1) ;; 无需手动启用
-  (when (and (boundp 'ac-sources) (boundp 'my-prog-ac-sources))
+  (when (and (my-func-minor-mode-p auto-complete-mode)
+             (boundp 'ac-sources) (boundp 'my-prog-ac-sources))
     (setq ac-sources
           (add-to-list my-prog-ac-sources '(ac-source-ropemacs) t))))
 
