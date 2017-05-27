@@ -12,6 +12,10 @@
 
 (defalias 'my-func-minor-mode-on-p 'bound-and-true-p)
 
+(defun my-func-package-enabled-p (pkg)
+  (and (member pkg package-selected-packages)
+       (require pkg nil t)))
+
 (when (eq system-type 'windows-nt)
   (add-to-list 'exec-path "D:/softwares" t)
   (let ((path (my-func-executable-find
@@ -64,7 +68,8 @@
   (setq package-selected-packages '(;; use-package
                                     atom-one-dark-theme
                                     powerline
-                                    ace-jump-mode
+                                    avy ;; ace-jump-mode
+                                    ace-pinyin
                                     helm ;; icomplete, anything, ido, smex, ivy
                                     ;; helm-gtags
                                     flyspell
@@ -433,14 +438,23 @@
 (global-set-key (kbd "C-c o c") 'org-capture)
 (global-set-key (kbd "C-c o a") 'org-agenda)
 
-;; ace-jump-mode
-(when (and (member 'ace-jump-mode package-selected-packages)
-           (require 'ace-jump-mode nil t))
+(when (my-func-package-enabled-p 'ace-jump-mode)
   (ace-jump-mode-enable-mark-sync)
   (global-set-key (kbd "C-x SPC") 'ace-jump-mode-pop-mark)
-  (global-set-key (kbd "C-c SPC") 'ace-jump-char-mode)
-  (global-set-key (kbd "C-c w") 'ace-jump-word-mode)
-  (global-set-key (kbd "C-c l") 'ace-jump-line-mode))
+  (global-set-key (kbd "C-c SPC") 'ace-jump-char-mode))
+(when (my-func-package-enabled-p 'avy)
+  ;; (avy-setup-default)
+  (setq avy-timeout-seconds 0.5)
+  (global-set-key (kbd "C-:") 'avy-goto-char) ;; (avy-goto-char-timer)
+  (global-set-key (kbd "C-'") 'avy-pop-mark))
+(let ((plg (or (my-func-package-enabled-p 'ace-jump-mode)
+               (my-func-package-enabled-p 'avy))))
+  (when (and plg (my-func-package-enabled-p 'ace-pinyin))
+    (when (eq plg 'ace-jump-mode)
+      (setq ace-pinyin-use-avy nil)
+      (ace-pinyin-global-mode 1)))
+  (when (eq plg 'avy)
+    (ace-pinyin-global-mode 1)))
 
 ;; File Extension
 ;; (setq auto-mode-alist (cons '("\\.emacs\\'" . emacs-lisp-mode) auto-mode-alist))
