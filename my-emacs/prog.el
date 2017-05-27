@@ -65,8 +65,12 @@
           company-idle-delay 0)
     (define-key company-active-map (kbd "C-n") 'company-select-next)
     (define-key company-active-map (kbd "C-p") 'company-select-previous)
+    (define-key company-active-map (kbd "M-n") nil)
+    (define-key company-active-map (kbd "M-p") nil)
     (define-key company-search-map (kbd "C-n") 'company-select-next)
     (define-key company-search-map (kbd "C-p") 'company-select-previous)
+    (define-key company-search-map (kbd "M-n") nil)
+    (define-key company-search-map (kbd "M-p") nil)
     (define-key company-search-map (kbd "C-t") 'company-search-toggle-filtering)
     ;; (global-company-mode 1)
     (add-hook 'my-prog-mode-start-hook 'my-plugin-company-start t)))
@@ -231,32 +235,6 @@
   )
 
 ;; =============================================================================
-;; Magit
-;; https://magit.vc/
-;; https://www.emacswiki.org/emacs/Magit
-;; https://www.masteringemacs.org/article/introduction-magit-emacs-mode-git
-;; -----------------------------------------------------------------------------
-;; (setq magit-auto-revert-mode 0
-;;      magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1)
-(defun my-plugin-magit-init ()
-  (when (and (member 'magit package-selected-packages)
-             (require 'magit nil t))
-    (when (eq system-type 'windows-nt)
-      (let ((path (my-func-executable-find "Git" "git.exe")))
-        (when path
-          (setq magit-git-executable path))))
-    (setq magit-auto-revert-mode t
-          magit-auto-revert-immediately t
-          magit-auto-revert-tracked-only t
-          magit-repository-directories `((,(expand-file-name "project") . 3)
-                                         (,(expand-file-name "Project") . 3)))
-    (global-set-key (kbd "C-c g") 'magit-status)
-    (add-hook 'my-prog-mode-start-hook 'my-plugin-magit-start t)))
-
-(defun my-plugin-magit-start ()
-  )
-
-;; =============================================================================
 ;; =============================================================================
 (defun my-prog-mode-init ()
   (my-plugin-yasnippet-init)
@@ -264,7 +242,6 @@
   (my-plugin-auto-complete-init)
   (my-plugin-flymake-init)
   (my-plugin-flycheck-init)
-  (my-plugin-magit-init)
   (add-hook 'prog-mode-hook 'my-prog-mode-start t))
 
 (defun my-prog-mode-start ()
