@@ -71,6 +71,8 @@
                                     ;; flyspell-correct-helm
                                     flycheck ;; flymake
                                     helm-flycheck
+                                    projectile
+                                    helm-projectile
                                     yasnippet
                                     company ;; auto-complete
                                     company-jedi
@@ -191,17 +193,20 @@
 ;; (set-face-background 'default "#C7EDCC") ;; 设置背景颜色为绿色护眼色
 ;; 字体的名字源自于.ttf或.otf文件内自带的元信息，包括family和style等
 ;; 以下使用不同的中英文字体和字号的目的是为了提升美观性，例如同一字体下的中文字符通常都比英文字符更高
-(if (eq system-type 'windows-nt)
+(let* ((rslt (< (* (display-pixel-width) (display-pixel-height)) 2000000))
+       (efont (if rslt 10 11))
+       (cfont (if rslt 9 10))
+       (fcnct (lambda (font size) (concat font " " (number-to-string size)))))
+  (if (eq system-type 'windows-nt)
+      (progn
+        ;; Windows系统上的Emacs25版本对中文字体的显示存在问题，打开中文文档时会存在卡顿的现象
+        ;; 必须手动指定中文字体为宋体才可避免。
+        (set-default-font (eval `(,fcnct "Consolas" ,efont)))
+        (set-fontset-font "fontset-default" 'unicode (eval `(,fcnct "宋体" ,cfont))))
     (progn
-      ;; Windows系统上的Emacs25版本对中文字体的显示存在问题，打开中文文档时会存在卡顿的现象
-      ;; 必须手动指定中文字体为宋体才可避免。
-      (set-default-font "Consolas 11")
-      (set-fontset-font "fontset-default" 'unicode "宋体 10"))
-  (progn
-    (set-default-font "YaHei Consolas Hybrid 11")
-    (set-fontset-font "fontset-default"
-                      'unicode "Source Han Serif SC SemiBold 10") ;; 或替换成"Microsoft YaHei Mono 10"
-    ))
+      (set-default-font (eval `(,fcnct "YaHei Consolas Hybrid" ,efont)))
+      (set-fontset-font "fontset-default" 'unicode ;; 或替换成"Microsoft YaHei Mono"
+                        (eval `(,fcnct "Source Han Serif SC SemiBold" ,cfont))))))
 ;; (set-face-attribute 'default nil :family "Microsoft YaHei Mono" :weight 'normal :height 110) ;; 设置字体，包括字号等
 ;; (set-frame-font "10" nil t) ;; 设置字号, 同(set-face-attribute)中的:height
 
@@ -325,6 +330,20 @@
   (helm-autoresize-mode 1)
   (helm-mode 1))
 
+(when (and (member 'projectile package-selected-packages)
+           (require 'projectile nil t))
+  (projectile-global-mode 1)
+  (setq projectile-indexing-method 'alien
+        projectile-enable-caching t)
+  ;; (add-to-list 'projectile-other-file-alist '("html" "js"))
+  (when (member 'helm-projectile package-selected-packages)
+    (with-eval-after-load 'helm
+      (setq helm-projectile-fuzzy-match t)
+      (when (require 'helm-projectile nil t)
+        (setq projectile-completion-system 'helm
+              projectile-switch-project-action 'helm-projectile)
+        (helm-projectile-on)))))
+
 ;; 插件helm-gtags在实现上并不依赖于插件ggtags，因此可完全代替之
 (with-eval-after-load 'helm
   (when (member 'helm-gtags package-selected-packages)
@@ -359,16 +378,37 @@
     (define-key helm-gtags-mode-map (kbd "C-c <") 'helm-gtags-previous-history)
     (define-key helm-gtags-mode-map (kbd "C-c >") 'helm-gtags-next-history)))
 
+;; =============================================================================
+;; Magit
+;; https://magit.vc/
+;; https://www.emacswiki.org/emacs/Magit
+;; https://www.masteringemacs.org/article/introduction-magit-emacs-mode-git
+;; -----------------------------------------------------------------------------
+(when (and (member 'magit package-selected-packages)
+           (require 'magit nil t))
+  (when (eq system-type 'windows-nt)
+    (let ((path (my-func-executable-find "Git" "git.exe")))
+      (when path
+        (setq magit-git-executable path))))
+  (setq magit-auto-revert-mode t
+        magit-auto-revert-immediately t
+        magit-auto-revert-tracked-only t
+        ;; magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1
+        magit-repository-directories `((,(expand-file-name "project") . 3)
+                                       (,(expand-file-name "Project") . 3)))
+  (global-set-key (kbd "C-c g") 'magit-status))
+
 ;; built-in Speedbar (rather than CEDET Speedbar)
 (setq speedbar-use-images nil ;; 不使用image方式
       speedbar-show-unknown-files t)
 
 ;; Key
 ;; 命令集前缀
-;; helm :: C-c h
-;; helm-gtags :: C-c t
-;; magit :: C-c g
-;; org :: C-c o
+;; C-c h :: helm
+;; C-c t :: helm-gtags
+;; C-c p :: projectile, helm-projectile
+;; C-c g :: magit
+;; C-c o :: org
 (global-set-key (kbd "C-S-a") 'mark-whole-buffer)
 (global-set-key (kbd "C-S-h") 'windmove-left)
 (global-set-key (kbd "C-S-l") 'windmove-right)

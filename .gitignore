@@ -6,6 +6,8 @@
 !/site-lisp/*.el
 
 *.elc
+*.eld
+.projectile
 .history
 .ido.last
 ac-comphist.dat
