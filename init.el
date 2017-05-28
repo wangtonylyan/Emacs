@@ -90,7 +90,7 @@
 (eval-when-compile
   (require 'use-package))
 (require 'bind-key)
-;; (require 'diminish)
+(require 'diminish)
 
 ;; 指定第三方主题的安装目录
 (let ((path (concat my-user-emacs-directory "theme")))
