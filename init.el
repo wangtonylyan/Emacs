@@ -1,11 +1,11 @@
 ;; 判断Emacs版本可以基于以下两个变量：'emacs-major-version和'emacs-minor-version
 
 (defun my-func-executable-find (dir exe &optional add)
-  (let* ((dir (if (and (stringp dir) (string-blank-p dir))
+  (let* ((dir (if (and (stringp dir) (> (length dir) 0))
                   ;; 统一传参的形式
                   (concat (directory-file-name dir) "/") ""))
          (path (executable-find (concat dir exe))))
-    (when (file-executable-p path)
+    (when (and path (file-executable-p path))
       (when add
         (add-to-list 'exec-path (directory-file-name path) t))
       path)))
@@ -66,7 +66,7 @@
   (setq package-selected-packages '(atom-one-dark-theme
                                     powerline
                                     avy ;; ace-jump-mode
-                                    ace-pinyin
+                                    ;; ace-pinyin
                                     helm ;; icomplete, anything, ido, smex, ivy
                                     helm-gtags
                                     flyspell
@@ -90,7 +90,7 @@
 (eval-when-compile
   (require 'use-package))
 (require 'bind-key)
-(require 'diminish)
+;; (require 'diminish)
 
 ;; 指定第三方主题的安装目录
 (let ((path (concat my-user-emacs-directory "theme")))
@@ -199,7 +199,7 @@
 ;; (set-face-background 'default "#C7EDCC") ;; 设置背景颜色为绿色护眼色
 ;; 字体的名字源自于.ttf或.otf文件内自带的元信息，包括family和style等
 ;; 以下使用不同的中英文字体和字号的目的是为了提升美观性，例如同一字体下的中文字符通常都比英文字符更高
-(let* ((rslt (< (* (display-pixel-width) (display-pixel-height)) 2000000))
+(let* ((rslt (<= (* (display-pixel-width) (display-pixel-height)) (* 1366 768)))
        (efont (if rslt 10 11))
        (cfont (if rslt 9 10))
        (fcnct (lambda (font size) (concat font " " (number-to-string size)))))
@@ -369,12 +369,11 @@
 (use-package magit
   :if (my-func-package-enabled-p 'magit)
   :bind (("C-c g" . magit-status))
-  :init
+  :config
   (when (eq system-type 'windows-nt)
     (let ((path (my-func-executable-find "Git" "git.exe")))
       (when path
         (setq magit-git-executable path))))
-  :config
   (setq magit-auto-revert-mode t
         magit-auto-revert-immediately t
         magit-auto-revert-tracked-only t
@@ -445,17 +444,18 @@
 ;; (setq auto-mode-alist (cons '("\\.emacs\\'" . emacs-lisp-mode) auto-mode-alist))
 
 ;; 调整窗口大小
-((lambda ()
-   ;; 全屏
-   ;; (interactive)
-   ;; (x-send-client-message nil 0 nil "_NET_WM_STATE" 32 '(2 "_NET_WM_STATE_FULLSCREEN" 0))
-   ;; 窗口最大化需要分别经过水平和垂直两个方向的最大化
-   (interactive)
-   (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
-                          '(1 "_NET_WM_STATE_MAXIMIZED_HORZ" 0))
-   (interactive)
-   (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
-                          '(1 "_NET_WM_STATE_MAXIMIZED_VERT" 0))))
+(when (fboundp 'x-send-client-message)
+  ((lambda ()
+     ;; 全屏
+     ;; (interactive)
+     ;; (x-send-client-message nil 0 nil "_NET_WM_STATE" 32 '(2 "_NET_WM_STATE_FULLSCREEN" 0))
+     ;; 窗口最大化需要分别经过水平和垂直两个方向的最大化
+     (interactive)
+     (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
+                            '(1 "_NET_WM_STATE_MAXIMIZED_HORZ" 0))
+     (interactive)
+     (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
+                            '(1 "_NET_WM_STATE_MAXIMIZED_VERT" 0)))))
 
 (provide 'my-init)
 
