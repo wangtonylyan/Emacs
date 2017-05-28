@@ -10,11 +10,9 @@
         (add-to-list 'exec-path (directory-file-name path) t))
       path)))
 
-(defalias 'my-func-minor-mode-on-p 'bound-and-true-p)
+(defalias 'my-func-package-enabled-p 'package--user-selected-p)
 
-(defun my-func-package-enabled-p (pkg)
-  (and (member pkg package-selected-packages)
-       (require pkg nil t)))
+(defalias 'my-func-minor-mode-on-p 'bound-and-true-p)
 
 (when (eq system-type 'windows-nt)
   (add-to-list 'exec-path "D:/softwares" t)
@@ -65,13 +63,12 @@
   (setq package-enable-at-startup nil) ;; 方式1) 随Emacs的启动而自动加载插件
   (package-initialize) ;; 方式2) 主动执行该函数以加载插件
   ;; 目前使用此全局变量来管理插件的启用/禁用，其中包括了ELPA更新源中所没有的插件
-  (setq package-selected-packages '(;; use-package
-                                    atom-one-dark-theme
+  (setq package-selected-packages '(atom-one-dark-theme
                                     powerline
                                     avy ;; ace-jump-mode
                                     ace-pinyin
                                     helm ;; icomplete, anything, ido, smex, ivy
-                                    ;; helm-gtags
+                                    helm-gtags
                                     flyspell
                                     ;; flyspell-correct-helm
                                     flycheck ;; flymake
@@ -84,10 +81,16 @@
                                     magit
                                     elpy ;; ropemacs
                                     py-autopep8
-                                    auctex))
+                                    auctex
+                                    use-package))
   (when (not package-archive-contents)
     (package-refresh-contents))
   (package-install-selected-packages))
+
+(eval-when-compile
+  (require 'use-package))
+(require 'bind-key)
+(require 'diminish)
 
 ;; 指定第三方主题的安装目录
 (let ((path (concat my-user-emacs-directory "theme")))
@@ -117,22 +120,15 @@
                    t))))))
  "atom-one-dark")
 
-(when (and (member 'powerline package-selected-packages)
-           (require 'powerline nil t))
+(use-package powerline
+  :if (my-func-package-enabled-p 'powerline)
+  :config
+  (setq powerline-arrow-shape 'arrow14)
   (powerline-default-theme))
 
-(let ((exe (executable-find "aspell")))
-  (when (and exe
-             (member 'flyspell package-selected-packages)
-             (require 'ispell nil t)
-             (require 'flyspell nil t))
-    (setq ispell-program-name exe ;; 设置后台支持程序
-          ;; ispell-dictionary "english" ;; default dictionary
-          ;; ispell-personal-dictionary ""
-          flyspell-issue-message-flag nil)))
-
-(when (and (member 'minimap package-selected-packages)
-           (require 'minimap nil t))
+(use-package minimap
+  :if (my-func-package-enabled-p 'minimap)
+  :config
   (setq minimap-always-recenter nil ;; 设置为nil才有效?
         minimap-recenter-type 'middle
         minimap-buffer-name-prefix "MINI" ;; 不能为空，否则无法启动minimap窗口
@@ -143,20 +139,25 @@
         minimap-display-semantic-overlays nil
         minimap-enlarge-certain-faces nil))
 
-(when (and (member 'powerline package-selected-packages)
-           (require 'powerline nil t))
-  (setq powerline-arrow-shape
-        ;; 'arrow
-        ;; 'curve
-        'arrow14))
+(use-package flyspell
+  :if (and (my-func-package-enabled-p 'flyspell)
+           (executable-find "aspell"))
+  :config
+  (setq ispell-program-name (executable-find "aspell") ;; 设置后台支持程序
+        ;; ispell-dictionary "english" ;; default dictionary
+        ;; ispell-personal-dictionary ""
+        flyspell-issue-message-flag nil))
 
-(when (and (member 'paredit package-selected-packages)
-           (require 'paredit nil t))
-  (add-hook 'lisp-mode-hook 'enable-paredit-mode t)
-  (add-hook 'emacs-lisp-mode-hook 'enable-paredit-mode t)
-  (add-hook 'lisp-interaction-mode-hook 'enable-paredit-mode t)
-  (add-hook 'scheme-mode-hook 'enable-paredit-mode t)
-  (add-hook 'org-mode 'enable-paredit-mode t))
+(use-package paredit
+  :if (my-func-package-enabled-p 'paredit)
+  :config
+  (mapc (lambda (hook)
+          (add-hook hook 'enable-paredit-mode t))
+        '(lisp-mode-hook
+          emacs-lisp-mode-hook
+          lisp-interaction-mode-hook
+          scheme-mode-hook
+          org-mode)))
 
 ;; =============================================================================
 ;; 配置杂项
@@ -203,9 +204,9 @@
        (cfont (if rslt 9 10))
        (fcnct (lambda (font size) (concat font " " (number-to-string size)))))
   (if (eq system-type 'windows-nt)
+      ;; Windows系统上的Emacs25版本对中文字体的显示存在问题，打开中文文档时会存在卡顿的现象
+      ;; 必须手动指定中文字体为宋体才可避免。
       (progn
-        ;; Windows系统上的Emacs25版本对中文字体的显示存在问题，打开中文文档时会存在卡顿的现象
-        ;; 必须手动指定中文字体为宋体才可避免。
         (set-default-font (eval `(,fcnct "Consolas" ,efont)))
         (set-fontset-font "fontset-default" 'unicode (eval `(,fcnct "宋体" ,cfont))))
     (progn
@@ -276,25 +277,54 @@
             (highlight-changes-remove-highlight (point-min) (point-max)))
           t)
 
-(when (not (member 'icomplete package-selected-packages))
+(use-package icomplete
+  :if (not (my-func-package-enabled-p 'icomplete))
+  :config
   (icomplete-mode -1))
-(when (and (member 'ido package-selected-packages)
-           (require 'ido nil t))
+
+(use-package ido
+  :if (my-func-package-enabled-p 'ido)
+  :config
   (ido-mode 1)
   (ido-everywhere -1) ;; 仅使ido支持find-file和switch-to-buffer
   (setq ido-enable-prefix t
         ido-enable-flex-matching t
         ido-use-filename-at-point t
         ido-enter-matching-directory nil))
-(when (and (member 'smex package-selected-packages)
-           (require 'smex nil t))
-  (global-set-key (kbd "M-x") 'smex)
-  (global-set-key (kbd "M-X") 'smex-major-mode-commands)
-  ;; 该插件会自动替换原M-x快捷键所绑定的命令，若想保留则可重新绑定之
-  (global-set-key (kbd "C-x M-x") 'execute-extended-command))
-(when (and (member 'helm package-selected-packages)
-           (require 'helm nil t)
-           (require 'helm-config nil t))
+
+(use-package smex
+  :if (my-func-package-enabled-p 'smex)
+  :bind (("M-x" . smex)
+         ("M-X" . smex-major-mode-commands)
+         ;; 该插件会自动替换原M-x快捷键所绑定的命令，若想保留则可重新绑定之
+         ("C-x M-x" . execute-extended-command))
+  :config
+  (smex-initialize))
+
+(use-package helm
+  :if (my-func-package-enabled-p 'helm)
+  ;; Helm提供了一套在功能上与部分Emacs原生命令相重合的命令集
+  ;; 并将其默认绑定在了以'helm-command-prefix-key为前缀的快捷键集中
+  ;; 可以通过输入该前缀来触发相关命令
+  :bind (("C-c h" . helm-command-prefix) ;; 替换前缀
+         ("C-x c")
+         ;; 也可以将部分常用命令直接替换Emacs原快捷键
+         ("M-x" . helm-M-x)
+         ("M-y" . helm-show-kill-ring)
+         ("C-x C-f" . helm-find-files)
+         ("C-x C-r" . helm-recentf)
+         ("C-x b" . helm-mini)
+         ("C-x C-b" . helm-buffers-list)
+         ("C-s" . helm-occur)
+         :map helm-map
+         ;; 'helm-execute-persistent-action相比于'helm-select-action更常用
+         ("<tab>" . helm-execute-persistent-action)
+         ("<C-return>" . helm-select-action)
+         :map minibuffer-local-map
+         ("M-p" . helm-minibuffer-history)
+         ("M-n" . helm-minibuffer-history))
+  :config
+  (require 'helm-config)
   (setq helm-split-window-in-side-p t
         helm-display-header-line nil
         helm-echo-input-in-header-line nil
@@ -314,94 +344,43 @@
         ;; 配置该参数可以指定不同的后台支持，包括imenu、ido、smex等
         ;; helm-completing-read-handlers-alist
         )
-  ;; Helm提供了一套在功能上与部分Emacs原生命令相重合的命令集
-  ;; 并将其默认绑定在了以'helm-command-prefix-key为前缀的快捷键集中
-  ;; 可以通过输入该前缀来触发相关命令
-  (global-set-key (kbd "C-c h") 'helm-command-prefix) ;; 替换前缀
-  (global-unset-key (kbd "C-x c"))
-  ;; 'helm-execute-persistent-action相比于'helm-select-action更常用
-  (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)
-  (define-key helm-map (kbd "<C-return>") 'helm-select-action)
-  ;; 也可以将部分常用命令直接替换Emacs原快捷键
-  (global-set-key (kbd "M-x") 'helm-M-x)
-  (global-set-key (kbd "M-y") 'helm-show-kill-ring)
-  (global-set-key (kbd "C-x C-f") 'helm-find-files)
-  (global-set-key (kbd "C-x C-r") 'helm-recentf)
-  (global-set-key (kbd "C-x b") 'helm-mini)
-  (global-set-key (kbd "C-x C-b") 'helm-buffers-list)
-  (global-set-key (kbd "C-s") 'helm-occur)
-  (define-key minibuffer-local-map (kbd "M-p") 'helm-minibuffer-history)
-  (define-key minibuffer-local-map (kbd "M-n") 'helm-minibuffer-history)
   (helm-autoresize-mode 1)
   (helm-mode 1))
 
-(when (and (member 'projectile package-selected-packages)
-           (require 'projectile nil t))
-  (projectile-global-mode 1)
+(use-package projectile
+  :if (my-func-package-enabled-p 'projectile)
+  :init
   (setq projectile-indexing-method 'alien
-        projectile-enable-caching t)
+        projectile-enable-caching t
+        projectile-keymap-prefix (kbd "C-c p"))
+  :config
+  (projectile-global-mode 1)
   ;; (add-to-list 'projectile-other-file-alist '("html" "js"))
-  (when (member 'helm-projectile package-selected-packages)
-    (with-eval-after-load 'helm
-      (setq helm-projectile-fuzzy-match t)
-      (when (require 'helm-projectile nil t)
-        (setq projectile-completion-system 'helm
-              projectile-switch-project-action 'helm-projectile)
-        (helm-projectile-on)))))
+  (use-package helm-projectile
+    :if (my-func-package-enabled-p 'helm-projectile)
+    :after helm
+    :init
+    (setq helm-projectile-fuzzy-match t)
+    :config
+    (setq projectile-completion-system 'helm
+          projectile-switch-project-action 'helm-projectile)
+    (helm-projectile-on)))
 
-;; 插件helm-gtags在实现上并不依赖于插件ggtags，因此可完全代替之
-(with-eval-after-load 'helm
-  (when (member 'helm-gtags package-selected-packages)
-    ;; 该插件的部分配置项都需要在加载前被设置，因此推荐使用customize
-    ;; 此处为了简便，全部统一在(require)前设置
-    (setq helm-gtags-path-style 'root
-          helm-gtags-ignore-case t
-          helm-gtags-read-only t
-          helm-gtags-highlight-candidate t
-          helm-gtags-display-style 'detail
-          helm-gtags-fuzzy-match nil
-          helm-gtags-direct-helm-completing nil
-          helm-gtags-use-input-at-cursor t
-          helm-gtags-pulse-at-cursor t
-          helm-gtags-auto-update t
-          helm-gtags-update-interval-second 60
-          helm-gtags-prefix-key (kbd "C-c t")
-          ;; 启用以下配置项会使得某些常用快捷键不再绑定于上述前缀中
-          helm-gtags-suggested-key-mapping t)
-    (when (require 'helm-gtags nil t)
-      (add-hook 'c-mode-common-hook
-                (lambda ()
-                  (when (derived-mode-p 'c-mode 'c++-mode 'asm-mode)
-                    (helm-gtags-mode 1)))))
-    (add-hook 'dired-mode-hook 'helm-gtags-mode)
-    (add-hook 'eshell-mode-hook 'helm-gtags-mode)
-    ;; 以下列举了部分快捷键设置，仅供参考
-    (define-key helm-gtags-mode-map (kbd "C-c g a") 'helm-gtags-tags-in-this-function)
-    (define-key helm-gtags-mode-map (kbd "C-j") 'helm-gtags-select)
-    (define-key helm-gtags-mode-map (kbd "M-.") 'helm-gtags-dwim)
-    (define-key helm-gtags-mode-map (kbd "M-,") 'helm-gtags-pop-stack)
-    (define-key helm-gtags-mode-map (kbd "C-c <") 'helm-gtags-previous-history)
-    (define-key helm-gtags-mode-map (kbd "C-c >") 'helm-gtags-next-history)))
-
-;; =============================================================================
-;; Magit
-;; https://magit.vc/
-;; https://www.emacswiki.org/emacs/Magit
-;; https://www.masteringemacs.org/article/introduction-magit-emacs-mode-git
-;; -----------------------------------------------------------------------------
-(when (and (member 'magit package-selected-packages)
-           (require 'magit nil t))
+(use-package magit
+  :if (my-func-package-enabled-p 'magit)
+  :bind (("C-c g" . magit-status))
+  :init
   (when (eq system-type 'windows-nt)
     (let ((path (my-func-executable-find "Git" "git.exe")))
       (when path
         (setq magit-git-executable path))))
+  :config
   (setq magit-auto-revert-mode t
         magit-auto-revert-immediately t
         magit-auto-revert-tracked-only t
         ;; magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1
         magit-repository-directories `((,(expand-file-name "project") . 3)
-                                       (,(expand-file-name "Project") . 3)))
-  (global-set-key (kbd "C-c g") 'magit-status))
+                                       (,(expand-file-name "Project") . 3))))
 
 ;; built-in Speedbar (rather than CEDET Speedbar)
 (setq speedbar-use-images nil ;; 不使用image方式
@@ -438,18 +417,24 @@
 (global-set-key (kbd "C-c o c") 'org-capture)
 (global-set-key (kbd "C-c o a") 'org-agenda)
 
-(when (my-func-package-enabled-p 'ace-jump-mode)
-  (ace-jump-mode-enable-mark-sync)
-  (global-set-key (kbd "C-x SPC") 'ace-jump-mode-pop-mark)
-  (global-set-key (kbd "C-c SPC") 'ace-jump-char-mode))
-(when (my-func-package-enabled-p 'avy)
+(use-package ace-jump-mode
+  :if (my-func-package-enabled-p 'ace-jump-mode)
+  :bind (("C-:" . ace-jump-mode-pop-mark)
+         ("C-'" . ace-jump-char-mode))
+  :config
+  (ace-jump-mode-enable-mark-sync))
+
+(use-package avy
+  :if (my-func-package-enabled-p 'avy)
+  :bind (("C-:" . avy-goto-char-timer) ;; (avy-goto-char)
+         ("C-'" . avy-pop-mark))
+  :config
   ;; (avy-setup-default)
-  (setq avy-timeout-seconds 0.5)
-  (global-set-key (kbd "C-:") 'avy-goto-char) ;; (avy-goto-char-timer)
-  (global-set-key (kbd "C-'") 'avy-pop-mark))
+  (setq avy-timeout-seconds 0.5))
+
 (let ((plg (or (my-func-package-enabled-p 'ace-jump-mode)
                (my-func-package-enabled-p 'avy))))
-  (when (and plg (my-func-package-enabled-p 'ace-pinyin))
+  (when (and nil plg (my-func-package-enabled-p 'ace-pinyin))
     (when (eq plg 'ace-jump-mode)
       (setq ace-pinyin-use-avy nil)
       (ace-pinyin-global-mode 1)))

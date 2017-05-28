@@ -10,23 +10,28 @@
 ;; 而脚本注释中的name属性只是作为替换成功后所呈现出的描述信息，或存在同名文件时的提示选择信息
 ;; -----------------------------------------------------------------------------
 (defun my-plugin-yasnippet-init ()
-  (when (and (member 'yasnippet package-selected-packages)
-             (require 'yasnippet nil t))
+  (use-package yasnippet
+    :if (my-func-package-enabled-p 'yasnippet)
+    :commands (yas-global-mode yas-minor-mode yas-minor-mode-on)
+    :bind (:map yas-minor-mode-map
+                ;; 为配合auto-complete或company等插件的使用，需禁用以下自带的补全快捷键
+                ("<tab>")
+                ("TAB"))
+    :init
+    (add-hook 'my-prog-mode-start-hook 'my-plugin-yasnippet-start t)
+    :config
     (add-to-list 'yas-snippet-dirs
                  (concat my-user-emacs-directory "snippets"))
-    ;; 为配合auto-complete或company等插件的使用，需禁用以下自身的快捷键补全功能
-    (define-key yas-minor-mode-map (kbd "<tab>") nil)
-    (define-key yas-minor-mode-map (kbd "TAB") nil)
     ;; 设置解决同名snippet的方式
     (setq yas-prompt-functions
           (if (eq system-type 'windows-nt)
               '(yas-ido-prompt yas-dropdown-prompt) ;; Windows环境下推荐，其余支持不好
             '(yas-x-prompt yas-dropdown-prompt)))
     ;; (yas-global-mode 1)
-    (add-hook 'my-prog-mode-start-hook 'my-plugin-yasnippet-start t)))
+    ))
 
 (defun my-plugin-yasnippet-start ()
-  (yas-minor-mode 1) ;; 会自动执行(yas-reload-all)
+  (yas-minor-mode-on) ;; 会自动执行(yas-reload-all)
   )
 
 ;; =============================================================================
@@ -37,15 +42,30 @@
 ;; 一个与auto-complete功能基本类似的补全插件，相比于后者，更新更为频繁
 ;; ----------------------------------------------------------------------------
 (defun my-plugin-company-init ()
-  (when (and (member 'company package-selected-packages)
-             (require 'company nil t))
+  (use-package company
+    :if (my-func-package-enabled-p 'company)
+    :commands (global-company-mode company-mode company-mode-on)
+    :bind (:map company-active-map
+                ("C-n" . company-select-next)
+                ("C-p" . company-select-previous)
+                ("M-n")
+                ("M-p")
+                :map company-search-map
+                ("C-n" . company-select-next)
+                ("C-p" . company-select-previous)
+                ("C-t" . company-search-toggle-filtering)
+                ("M-n")
+                ("M-p"))
+    :init
+    (add-hook 'my-prog-mode-start-hook 'my-plugin-company-start t)
+    :config
     ;; (customize-group 'company)
     ;; 常用的快捷键：
     ;; TAB用于补全候选项中的公共字段，RETURN用于补全所选项，C-g用于终止补全
     ;; (define-key company-active-map (kbd "TAB") 'company-complete-common-or-cycle)
     ;; 没有必要为每个模式分别启用其独享的后端，因为筛选适用后端的过程非常效率
     (setq company-backends `(company-elisp
-                             ,(when (and (member 'company-jedi package-selected-packages)
+                             ,(when (and (my-func-package-enabled-p 'company-jedi)
                                          (require 'company-jedi nil t))
                                 'company-jedi)
                              ;; company-bbdb ;; Big Brother Database, an address book
@@ -63,20 +83,11 @@
                              company-dabbrev)
           company-minimum-prefix-length 1
           company-idle-delay 0)
-    (define-key company-active-map (kbd "C-n") 'company-select-next)
-    (define-key company-active-map (kbd "C-p") 'company-select-previous)
-    (define-key company-active-map (kbd "M-n") nil)
-    (define-key company-active-map (kbd "M-p") nil)
-    (define-key company-search-map (kbd "C-n") 'company-select-next)
-    (define-key company-search-map (kbd "C-p") 'company-select-previous)
-    (define-key company-search-map (kbd "M-n") nil)
-    (define-key company-search-map (kbd "M-p") nil)
-    (define-key company-search-map (kbd "C-t") 'company-search-toggle-filtering)
     ;; (global-company-mode 1)
-    (add-hook 'my-prog-mode-start-hook 'my-plugin-company-start t)))
+    ))
 
 (defun my-plugin-company-start ()
-  (company-mode 1))
+  (company-mode-on))
 
 ;; =============================================================================
 ;; Auto-Complete
@@ -89,8 +100,13 @@
 ;; 3) fuzzy-el: 输入匹配纠正
 ;; -----------------------------------------------------------------------------
 (defun my-plugin-auto-complete-init ()
-  (when (and (member 'auto-complete package-selected-packages)
-             (require 'auto-complete-config nil t))
+  (use-package auto-complete
+    :if (my-func-package-enabled-p 'auto-complete)
+    :commands (global-auto-complete-mode auto-complete-mode)
+    :init
+    (add-hook 'my-prog-mode-start-hook 'my-plugin-auto-complete-start t)
+    :config
+    (require 'auto-complete-config)
     (add-to-list 'ac-dictionary-directories
                  (concat my-user-emacs-directory "ac-dicts"))
     (ac-set-trigger-key "TAB") ;; ac会在输入trigger key后立即强制生效
@@ -149,7 +165,7 @@
     ;; 只会在该列表中指定的模式下生效，无论是否全局性地启用
     ;; (setq ac-modes '())
     ;; (global-auto-complete-mode 1)
-    (add-hook 'my-prog-mode-start-hook 'my-plugin-auto-complete-start t)))
+    ))
 
 (defun my-plugin-auto-complete-start ()
   (auto-complete-mode 1)
@@ -167,8 +183,10 @@
 ;; Emacs内置，静态编译检查，效率低，准确度高，依赖于后台编译器的支持
 ;; -----------------------------------------------------------------------------
 (defun my-plugin-flymake-init ()
-  (when (and (member 'flymake package-selected-packages)
-             (require 'flymake nil t))
+  (use-package flymake
+    :if (my-func-package-enabled-p 'flymake)
+    :commands (flymake-mode flymake-mode-on)
+    :init
     (add-hook 'my-prog-mode-start-hook 'my-plugin-flymake-start t)))
 
 (defun my-plugin-flymake-start ()
@@ -181,20 +199,24 @@
 ;; 针对不同语言需安装各自相应的后台支持，具体可参见
 ;; http://www.flycheck.org/manual/latest/Supported-languages.html
 ;; -----------------------------------------------------------------------------
+;; 快捷键前缀：C-c !
+;; C-c ! l :: (flycheck-list-errors)
+;; RET :: Go to the current error in the source buffer
+;; n :: Jump to the next error
+;; p :: Jump to the previous error
+;; e :: Explain the error
+;; f :: Filter the error list by level
+;; F :: Remove the filter
+;; S :: Sort the error list by the column at point
+;; g :: Check the source buffer and update the error list
+;; q :: Quit the error list and hide its window
 (defun my-plugin-flycheck-init ()
-  ;; 快捷键前缀：C-c !
-  ;; C-c ! l :: (flycheck-list-errors)
-  ;; RET :: Go to the current error in the source buffer
-  ;; n :: Jump to the next error
-  ;; p :: Jump to the previous error
-  ;; e :: Explain the error
-  ;; f :: Filter the error list by level
-  ;; F :: Remove the filter
-  ;; S :: Sort the error list by the column at point
-  ;; g :: Check the source buffer and update the error list
-  ;; q :: Quit the error list and hide its window
-  (when (and (member 'flycheck package-selected-packages)
-             (require 'flycheck nil t))
+  (use-package flycheck
+    :if (my-func-package-enabled-p 'flycheck)
+    :commands (global-flycheck-mode flycheck-mode flycheck-mode-on-safe)
+    :init
+    (add-hook 'my-prog-mode-start-hook 'my-plugin-flycheck-start t)
+    :config
     (setq flycheck-check-syntax-automatically '(mode-enabled save idle-change)
           flycheck-idle-change-delay 2.5
           flycheck-indication-mode nil)
@@ -202,14 +224,14 @@
                   (add-to-list 'flycheck-disabled-checkers
                                'emacs-lisp-checkdoc t))
 
-    (when (and (member 'emacs-lisp flycheck-checkers)
-               (not (member 'emacs-lisp flycheck-disabled-checkers)))
+    (when (and (memq 'emacs-lisp flycheck-checkers)
+               (not (memq 'emacs-lisp flycheck-disabled-checkers)))
       (add-hook 'emacs-lisp-mode-hook
                 (lambda ()
                   (setq flycheck-emacs-lisp-load-path `(,my-user-emacs-directory)))
                 t))
-    (when (and (member 'c/c++-gcc flycheck-checkers)
-               (not (member 'c/c++-gcc flycheck-disabled-checkers)))
+    (when (and (memq 'c/c++-gcc flycheck-checkers)
+               (not (memq 'c/c++-gcc flycheck-disabled-checkers)))
       (add-hook 'c++-mode-hook
                 (lambda ()
                   (setq flycheck-gcc-language-standard "c++11"))
@@ -222,17 +244,57 @@
                    (side            . bottom)
                    (reusable-frames . visible)
                    (window-height   . 0.33)))
-    ;; 此外，若是使用插件helm-flycheck，则可以基于helm模式来呈现信息
-    (with-eval-after-load 'helm
-      (if (and (member 'helm-flycheck package-selected-packages)
-               (require 'helm-flycheck nil t))
-          (define-key flycheck-mode-map (kbd "C-c ! l") 'helm-flycheck)))
     ;; (global-flycheck-mode 1)
-    (add-hook 'my-prog-mode-start-hook 'my-plugin-flycheck-start t)))
+    ;; 此外，若是使用插件helm-flycheck，则可以基于helm模式来呈现信息
+    (use-package helm-flycheck
+      :if (my-func-package-enabled-p 'helm-flycheck)
+      :after helm
+      :config
+      (bind-key "C-c ! l" 'helm-flycheck flycheck-mode-map))))
 
 (defun my-plugin-flycheck-start ()
-  (flycheck-mode-on-safe) ;; (flycheck-mode 1)
-  )
+  (flycheck-mode-on-safe))
+
+;; =============================================================================
+;; 插件helm-gtags在实现上并不依赖于插件ggtags，因此可完全代替之
+(defun my-plugin-helm-gtags-init ()
+  (with-eval-after-load 'helm
+    (use-package helm-gtags
+      :if (and (my-func-package-enabled-p 'helm-gtags)
+               (executable-find "gtags"))
+      :commands (helm-gtags-mode)
+      :bind (:map helm-gtags-mode-map ;; 以下仅供参考
+                  ("C-c g a" . helm-gtags-tags-in-this-function)
+                  ("C-j" . helm-gtags-select)
+                  ("M-." . helm-gtags-dwim)
+                  ("M-," . helm-gtags-pop-stack)
+                  ("C-c <" . helm-gtags-previous-history)
+                  ("C-c >" . helm-gtags-next-history))
+      :init
+      (setq helm-gtags-path-style 'root
+            helm-gtags-ignore-case t
+            helm-gtags-read-only t
+            helm-gtags-highlight-candidate t
+            helm-gtags-display-style 'detail
+            helm-gtags-fuzzy-match nil
+            helm-gtags-direct-helm-completing nil
+            helm-gtags-use-input-at-cursor t
+            helm-gtags-pulse-at-cursor t
+            helm-gtags-auto-update t
+            helm-gtags-update-interval-second 60
+            helm-gtags-prefix-key (kbd "C-c t")
+            ;; 启用以下配置项会使得某些常用快捷键不再绑定于上述前缀中
+            helm-gtags-suggested-key-mapping t)
+      (add-hook 'c-mode-common-hook
+                (lambda ()
+                  (when (derived-mode-p 'c-mode 'c++-mode 'asm-mode)
+                    (my-plugin-helm-gtags-start)))
+                t)
+      (add-hook 'dired-mode-hook 'my-plugin-helm-gtags-start t)
+      (add-hook 'eshell-mode-hook 'my-plugin-helm-gtags-start t))))
+
+(defun my-plugin-helm-gtags-start ()
+  (helm-gtags-mode 1))
 
 ;; =============================================================================
 ;; =============================================================================
@@ -242,6 +304,7 @@
   (my-plugin-auto-complete-init)
   (my-plugin-flymake-init)
   (my-plugin-flycheck-init)
+  (my-plugin-helm-gtags-init)
   (add-hook 'prog-mode-hook 'my-prog-mode-start t))
 
 (defun my-prog-mode-start ()
