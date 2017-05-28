@@ -7,7 +7,7 @@
 
 *.elc
 *.eld
-.projectile
+*projectile*
 .history
 .ido.last
 ac-comphist.dat

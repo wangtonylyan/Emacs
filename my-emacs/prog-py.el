@@ -18,8 +18,13 @@
     (when (eq system-type 'windows-nt)
       (when (my-func-executable-find exe "python.exe" t)
         (setq exe "python.exe")))
-    (when (and (executable-find exe)
-               (require 'python nil t))
+    (use-package python
+      :if (executable-find exe)
+      ;; 此函数的执行就是在(load 'python)之后，因此:init与:config的效果理应是等价的
+      ;; 今后可以使用:mode改进当前实现
+      :init
+      (add-hook 'my-prog-py-mode-start-hook 'my-plugin-python-start t)
+      :config
       (remove-hook 'python-mode-hook 'wisent-python-default-setup)
       (setq python-shell-interpreter exe
             python-shell-interpreter-args "-i"
@@ -28,8 +33,7 @@
             ;; python-shell-completion-setup-code ""
             ;; python-shell-completion-module-string-code ""
             ;; python-shell-completion-string-code ""
-            )
-      (add-hook 'my-prog-py-mode-start-hook 'my-plugin-python-start t))))
+            ))))
 
 (defun my-plugin-python-start ()
   )
@@ -52,24 +56,29 @@
 ;; 依赖的python库：flake8, jedi
 ;; -----------------------------------------------------------------------------
 (defun my-plugin-elpy-init ()
-  (when (and (member 'elpy package-selected-packages)
-             (require 'elpy nil t))
-    ;; 常用快捷键：
-    ;; C-c C-c用于调用Python解释器
+  ;; 常用快捷键：
+  ;; C-c C-c用于调用Python解释器
+  (use-package elpy
+    :if (my-func-package-enabled-p 'elpy)
+    :commands (elpy-enable elpy-mode)
+    :init
+    (add-hook 'my-prog-py-mode-start-hook 'my-plugin-elpy-start t)
+    :config
     ;; elpy默认支持并使用Emacs内置的flymake，但可随意地切换成flycheck
     (with-eval-after-load 'flycheck
       (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
       (add-hook 'elpy-mode-hook 'flycheck-mode-on-safe t))
-    (when (and (member 'py-autopep8 package-selected-packages)
-               (executable-find "autopep8")
-               (require 'py-autopep8 nil t))
+    (use-package py-autopep8
+      :if (and (my-func-package-enabled-p 'py-autopep8)
+               (executable-find "autopep8"))
+      :commands (py-autopep8-enable-on-save)
+      :init
       (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save t))
-    (setq elpy-rpc-backend "jedi" ;; 支持rope和jedi这两个库
-          )
+    ;; (setq elpy-rpc-backend "jedi") ;; 支持rope和jedi这两个库
     ;; 指定Python解释器
     ;; (elpy-use-ipython) ;; (elpy-use-cpython)
     ;; (elpy-enable)
-    (add-hook 'my-prog-py-mode-start-hook 'my-plugin-elpy-start t)))
+    ))
 
 (defun my-plugin-elpy-start ()
   (elpy-mode 1))
@@ -85,21 +94,25 @@
 ;; 随后Emacs将通过与该客户进程进行通信，从而获取rope库的相关支持
 ;; -----------------------------------------------------------------------------
 (defun my-plugin-ropemacs-init ()
-  (when (member 'ropemacs package-selected-packages)
+  (use-package ropemacs
+    :if (my-func-package-enabled-p 'ropemacs)
+    :commands (ropemacs-mode)
+    :init
     (let ((path (concat package-user-dir "/ropemacs")))
       (when (file-directory-p path)
         (add-to-list 'load-path path t)))
+    (add-hook 'my-prog-py-mode-start-hook 'my-plugin-ropemacs-start t)
+    :config
     (when (and (require 'pymacs nil t)
                (pymacs-load "ropemacs" "rope-" t))
-      (setq ropemacs-confirm-saving t
-            ropemacs-enable-autoimport t
-            ropemacs-autoimport-modules '("os" "sys" "inspect"))
       ;; ropemacs模式中的自动补全快捷键与auto-complete不同，默认为M-/，可作为后者的补充
       ;; 因为后者在某些情况下必须至少输入一个字符，而此时就可以使用前者
-      (add-hook 'my-prog-py-mode-start-hook 'my-plugin-ropemacs-start t))))
+      (setq ropemacs-confirm-saving t
+            ropemacs-enable-autoimport t
+            ropemacs-autoimport-modules '("os" "sys" "inspect")))))
 
 (defun my-plugin-ropemacs-start ()
-  ;; (ropemacs-mode 1) ;; 无需手动启用
+  ;; (ropemacs-mode 1) ;;无需手动启用
   (when (and (my-func-minor-mode-on-p auto-complete-mode)
              (boundp 'ac-sources) (boundp 'my-prog-ac-sources))
     (setq ac-sources
@@ -119,7 +132,6 @@
   (setq prettify-symbols-alist '(("lambda" . 955)))
   (run-hooks 'my-prog-py-mode-start-hook))
 
-;; (add-hook 'prog-mode-hook 'my-prog-py-mode-init t)
 (eval-after-load 'python '(my-prog-py-mode-init))
 
 (provide 'my-prog-py)
