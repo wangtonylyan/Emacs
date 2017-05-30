@@ -65,8 +65,10 @@
   ;; 目前使用此全局变量来管理插件的启用/禁用，其中包括了ELPA更新源中所没有的插件
   (setq package-selected-packages '(atom-one-dark-theme
                                     powerline
+                                    smart-mode-line
                                     avy ;; ace-jump-mode
                                     ;; ace-pinyin
+                                    sr-speedbar
                                     helm ;; icomplete, anything, ido, smex, ivy
                                     helm-gtags
                                     flyspell
@@ -82,6 +84,7 @@
                                     elpy ;; ropemacs
                                     py-autopep8
                                     auctex
+                                    ;; circe, rcirc
                                     use-package))
   (when (not package-archive-contents)
     (package-refresh-contents))
@@ -125,6 +128,15 @@
   :config
   (setq powerline-arrow-shape 'arrow14)
   (powerline-default-theme))
+
+(use-package smart-mode-line
+  :if (my-func-package-enabled-p 'smart-mode-line)
+  :config
+  (setq sml/theme 'automatic
+        sml/no-confirm-load-theme t
+        sml/shorten-directory t
+        sml/shorten-modes t)
+  (smart-mode-line-enable))
 
 (use-package minimap
   :if (my-func-package-enabled-p 'minimap)
@@ -307,7 +319,6 @@
   ;; 并将其默认绑定在了以'helm-command-prefix-key为前缀的快捷键集中
   ;; 可以通过输入该前缀来触发相关命令
   :bind (("C-c h" . helm-command-prefix) ;; 替换前缀
-         ("C-x c")
          ;; 也可以将部分常用命令直接替换Emacs原快捷键
          ("M-x" . helm-M-x)
          ("M-y" . helm-show-kill-ring)
@@ -315,7 +326,7 @@
          ("C-x C-r" . helm-recentf)
          ("C-x b" . helm-mini)
          ("C-x C-b" . helm-buffers-list)
-         ("C-s" . helm-occur)
+         ("C-o" . helm-occur)
          :map helm-map
          ;; 'helm-execute-persistent-action相比于'helm-select-action更常用
          ("<tab>" . helm-execute-persistent-action)
@@ -325,6 +336,7 @@
          ("M-n" . helm-minibuffer-history))
   :config
   (require 'helm-config)
+  (unbind-key "C-x c")
   (setq helm-split-window-in-side-p t
         helm-display-header-line nil
         helm-echo-input-in-header-line nil
@@ -381,9 +393,14 @@
         magit-repository-directories `((,(expand-file-name "project") . 3)
                                        (,(expand-file-name "Project") . 3))))
 
-;; built-in Speedbar (rather than CEDET Speedbar)
-(setq speedbar-use-images nil ;; 不使用image方式
-      speedbar-show-unknown-files t)
+(use-package sr-speedbar
+  :if (my-func-package-enabled-p 'sr-speedbar)
+  :bind (("C-S-s" . sr-speedbar-toggle)
+         :map speedbar-file-key-map
+         ("<tab>" . speedbar-edit-line))
+  :init
+  (setq speedbar-use-images nil ;; 不使用image方式
+        speedbar-show-unknown-files t))
 
 ;; Key
 ;; 命令集前缀
@@ -392,29 +409,31 @@
 ;; C-c p :: projectile, helm-projectile
 ;; C-c g :: magit
 ;; C-c o :: org
-(global-set-key (kbd "C-S-a") 'mark-whole-buffer)
-(global-set-key (kbd "C-S-h") 'windmove-left)
-(global-set-key (kbd "C-S-l") 'windmove-right)
-(global-set-key (kbd "C-S-j") 'windmove-down)
-(global-set-key (kbd "C-S-k") 'windmove-up)
-(global-unset-key (kbd "C-x o")) ;; (other-window)
-(global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
-(global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
-(global-set-key (kbd "<C-up>") 'text-scale-increase)
-(global-set-key (kbd "<C-down>") 'text-scale-decrease)
-(global-set-key (kbd "C-x C--") 'downcase-region)
-(global-set-key (kbd "C-x C-=") 'upcase-region)
-(global-unset-key (kbd "C-x C-l")) ;; (downcase-region)
-(global-unset-key (kbd "C-x C-u")) ;; (upcase-region)
+(unbind-key "C-x o") ;; (other-window)
+(unbind-key "C-x f") ;; (set-fill-column)
+(unbind-key "C-x C-l") ;; (downcase-region)
+(unbind-key "C-x C-u") ;; (upcase-region)
+(bind-keys ("C-S-a" . mark-whole-buffer)
+           ("C-S-h" . windmove-left)
+           ("C-S-l" . windmove-right)
+           ("C-S-j" . windmove-down)
+           ("C-S-k" . windmove-up)
+           ("<C-wheel-up>" . text-scale-increase)
+           ("<C-wheel-down>" . text-scale-decrease)
+           ("<C-up>" . text-scale-increase)
+           ("<C-down>" . text-scale-decrease)
+           ("C-x C--" . downcase-region)
+           ("C-x C-=" . upcase-region)
+           ("C-q" . read-only-mode))
 (put 'downcase-region 'disabled nil) ;; 去除每次执行此命令时的提示，强制执行
 (put 'upcase-region 'disabled nil)
-(global-set-key (kbd "C-q") 'read-only-mode)
-(global-unset-key (kbd "C-x C-q"))
 ;; 与输入法切换键冲突
 ;; (global-set-key (kbd "C-S-SPC") 'set-mark-command)
 ;; (global-unset-key (kbd "C-SPC"))
-(global-set-key (kbd "C-c o c") 'org-capture)
-(global-set-key (kbd "C-c o a") 'org-agenda)
+
+(use-package org
+  :bind (("C-c o c" . org-capture)
+         ("C-c o a" . org-agenda)))
 
 (use-package ace-jump-mode
   :if (my-func-package-enabled-p 'ace-jump-mode)
@@ -425,7 +444,7 @@
 
 (use-package avy
   :if (my-func-package-enabled-p 'avy)
-  :bind (("C-:" . avy-goto-char-timer) ;; (avy-goto-char)
+  :bind (("C-:" . avy-goto-char) ;; (avy-goto-char-timer)
          ("C-'" . avy-pop-mark))
   :config
   ;; (avy-setup-default)
@@ -458,6 +477,16 @@
                             '(1 "_NET_WM_STATE_MAXIMIZED_VERT" 0)))))
 
 (provide 'my-init)
+
+;; =============================================================================
+(use-package circe
+  :if (my-func-package-enabled-p 'circe)
+  :config
+  (setq circe-network-options '(("Freenode" ;; http://freenode.net/
+                                 :nick ""
+                                 :sasl-username ""
+                                 :sasl-password ""
+                                 :channels ("#emacs" "#c_lang_cn")))))
 
 ;; =============================================================================
 ;; 加载其他配置文件

@@ -15,8 +15,7 @@
     :commands (yas-global-mode yas-minor-mode yas-minor-mode-on)
     :bind (:map yas-minor-mode-map
                 ;; 为配合auto-complete或company等插件的使用，需禁用以下自带的补全快捷键
-                ("<tab>")
-                ("TAB"))
+                ("<tab>"))
     :init
     (add-hook 'my-prog-mode-start-hook 'my-plugin-yasnippet-start t)
     :config
@@ -45,6 +44,9 @@
   (use-package company
     :if (my-func-package-enabled-p 'company)
     :commands (global-company-mode company-mode company-mode-on)
+    ;; 常用的快捷键：
+    ;; <tab>用于补全候选项中的公共字段，<return>用于补全所选项，C-g用于终止补全
+    ;; (define-key company-active-map (kbd "<tab>") 'company-complete-common-or-cycle)
     :bind (:map company-active-map
                 ("C-n" . company-select-next)
                 ("C-p" . company-select-previous)
@@ -60,9 +62,6 @@
     (add-hook 'my-prog-mode-start-hook 'my-plugin-company-start t)
     :config
     ;; (customize-group 'company)
-    ;; 常用的快捷键：
-    ;; TAB用于补全候选项中的公共字段，RETURN用于补全所选项，C-g用于终止补全
-    ;; (define-key company-active-map (kbd "TAB") 'company-complete-common-or-cycle)
     ;; 没有必要为每个模式分别启用其独享的后端，因为筛选适用后端的过程非常效率
     (setq company-backends `(company-elisp
                              ,(when (and (my-func-package-enabled-p 'company-jedi)
@@ -109,7 +108,7 @@
     (require 'auto-complete-config)
     (add-to-list 'ac-dictionary-directories
                  (concat my-user-emacs-directory "ac-dicts"))
-    (ac-set-trigger-key "TAB") ;; ac会在输入trigger key后立即强制生效
+    (ac-set-trigger-key "<tab>") ;; ac会在输入trigger key后立即强制生效
     (setq ac-trigger-commands '(self-insert-command
                                 backward-delete-char
                                 backward-delete-char-untabify)
