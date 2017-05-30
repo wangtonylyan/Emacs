@@ -64,8 +64,9 @@
   (package-initialize) ;; 方式2) 主动执行该函数以加载插件
   ;; 目前使用此全局变量来管理插件的启用/禁用，其中包括了ELPA更新源中所没有的插件
   (setq package-selected-packages '(atom-one-dark-theme
-                                    powerline
-                                    smart-mode-line
+                                    ;; all-the-icons ;; 首次安装后需要额外地安装字体
+                                    powerline ;; smart-mode-line-powerline-theme
+                                    ;; smart-mode-line
                                     avy ;; ace-jump-mode
                                     ;; ace-pinyin
                                     sr-speedbar
@@ -123,16 +124,24 @@
                    t))))))
  "atom-one-dark")
 
+(use-package all-the-icons
+  :if (my-func-package-enabled-p 'all-the-icons)
+  :init
+  (all-the-icons-install-fonts))
+
 (use-package powerline
   :if (my-func-package-enabled-p 'powerline)
   :config
-  (setq powerline-arrow-shape 'arrow14)
+  (setq powerline-default-separator 'contour
+        powerline-default-separator-dir '(left . right))
   (powerline-default-theme))
 
 (use-package smart-mode-line
   :if (my-func-package-enabled-p 'smart-mode-line)
   :config
-  (setq sml/theme 'automatic
+  (setq sml/theme (if (and (my-func-package-enabled-p 'smart-mode-line-powerline-theme)
+                           (require 'smart-mode-line-powerline-theme nil t))
+                      'powerline 'automatic)
         sml/no-confirm-load-theme t
         sml/shorten-directory t
         sml/shorten-modes t)
@@ -334,6 +343,7 @@
          :map minibuffer-local-map
          ("M-p" . helm-minibuffer-history)
          ("M-n" . helm-minibuffer-history))
+  :diminish helm-mode
   :config
   (require 'helm-config)
   (unbind-key "C-x c")
@@ -366,7 +376,7 @@
         projectile-enable-caching t
         projectile-keymap-prefix (kbd "C-c p"))
   :config
-  (projectile-global-mode 1)
+  (projectile-mode 1)
   ;; (add-to-list 'projectile-other-file-alist '("html" "js"))
   (use-package helm-projectile
     :if (my-func-package-enabled-p 'helm-projectile)
