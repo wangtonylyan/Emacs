@@ -85,7 +85,7 @@
                                     elpy ;; ropemacs
                                     py-autopep8
                                     auctex
-                                    ;; circe, rcirc
+                                    erc ;; circe, rcirc
                                     use-package))
   (when (not package-archive-contents)
     (package-refresh-contents))
@@ -298,6 +298,32 @@
             (highlight-changes-remove-highlight (point-min) (point-max)))
           t)
 
+;; Key Binding
+;; 命令集前缀
+;; C-c h :: helm
+;; C-c t :: helm-gtags
+;; C-c p :: projectile, helm-projectile
+;; C-c g :: magit
+;; C-c o :: org
+(unbind-key "C-x o") ;; (other-window)
+(unbind-key "C-x f") ;; (set-fill-column)
+(unbind-key "C-x C-l") ;; (downcase-region)
+(unbind-key "C-x C-u") ;; (upcase-region)
+(bind-keys ("C-S-a" . mark-whole-buffer)
+           ("<C-wheel-up>" . text-scale-increase)
+           ("<C-wheel-down>" . text-scale-decrease)
+           ("<C-up>" . text-scale-increase)
+           ("<C-down>" . text-scale-decrease)
+           ("C-x C--" . downcase-region)
+           ("C-x C-=" . upcase-region)
+           ("C-q" . read-only-mode))
+(windmove-default-keybindings)
+(put 'downcase-region 'disabled nil) ;; 去除每次执行此命令时的提示，强制执行
+(put 'upcase-region 'disabled nil)
+;; 与输入法切换键冲突
+;; (global-set-key (kbd "C-S-SPC") 'set-mark-command)
+;; (global-unset-key (kbd "C-SPC"))
+
 (use-package icomplete
   :if (not (my-func-package-enabled-p 'icomplete))
   :config
@@ -335,18 +361,18 @@
          ("C-x C-r" . helm-recentf)
          ("C-x b" . helm-mini)
          ("C-x C-b" . helm-buffers-list)
-         ("C-o" . helm-occur)
-         :map helm-map
-         ;; 'helm-execute-persistent-action相比于'helm-select-action更常用
-         ("<tab>" . helm-execute-persistent-action)
-         ("<C-return>" . helm-select-action)
-         :map minibuffer-local-map
-         ("M-p" . helm-minibuffer-history)
-         ("M-n" . helm-minibuffer-history))
+         ("C-o" . helm-occur))
   :diminish helm-mode
   :config
   (require 'helm-config)
   (unbind-key "C-x c")
+  (bind-keys :map helm-map
+             ;; 'helm-execute-persistent-action相比于'helm-select-action更常用
+             ("<tab>" . helm-execute-persistent-action)
+             ("<C-return>" . helm-select-action)
+             :map minibuffer-local-map
+             ("M-p" . helm-minibuffer-history)
+             ("M-n" . helm-minibuffer-history))
   (setq helm-split-window-in-side-p t
         helm-display-header-line nil
         helm-echo-input-in-header-line nil
@@ -405,41 +431,13 @@
 
 (use-package sr-speedbar
   :if (my-func-package-enabled-p 'sr-speedbar)
-  :bind (("C-S-s" . sr-speedbar-toggle)
-         :map speedbar-file-key-map
-         ("<tab>" . speedbar-edit-line))
+  :bind (("C-S-s" . sr-speedbar-toggle))
   :init
   (setq speedbar-use-images nil ;; 不使用image方式
-        speedbar-show-unknown-files t))
-
-;; Key
-;; 命令集前缀
-;; C-c h :: helm
-;; C-c t :: helm-gtags
-;; C-c p :: projectile, helm-projectile
-;; C-c g :: magit
-;; C-c o :: org
-(unbind-key "C-x o") ;; (other-window)
-(unbind-key "C-x f") ;; (set-fill-column)
-(unbind-key "C-x C-l") ;; (downcase-region)
-(unbind-key "C-x C-u") ;; (upcase-region)
-(bind-keys ("C-S-a" . mark-whole-buffer)
-           ("C-S-h" . windmove-left)
-           ("C-S-l" . windmove-right)
-           ("C-S-j" . windmove-down)
-           ("C-S-k" . windmove-up)
-           ("<C-wheel-up>" . text-scale-increase)
-           ("<C-wheel-down>" . text-scale-decrease)
-           ("<C-up>" . text-scale-increase)
-           ("<C-down>" . text-scale-decrease)
-           ("C-x C--" . downcase-region)
-           ("C-x C-=" . upcase-region)
-           ("C-q" . read-only-mode))
-(put 'downcase-region 'disabled nil) ;; 去除每次执行此命令时的提示，强制执行
-(put 'upcase-region 'disabled nil)
-;; 与输入法切换键冲突
-;; (global-set-key (kbd "C-S-SPC") 'set-mark-command)
-;; (global-unset-key (kbd "C-SPC"))
+        speedbar-show-unknown-files t)
+  :config
+  (bind-keys :map speedbar-file-key-map
+             ("<tab>" . speedbar-edit-line)))
 
 (use-package org
   :bind (("C-c o c" . org-capture)
@@ -489,6 +487,16 @@
 (provide 'my-init)
 
 ;; =============================================================================
+(use-package erc
+  :if (my-func-package-enabled-p 'erc)
+  :config
+  ;; (unbind-key "<return>" erc-mode-map)
+  (bind-keys :map erc-mode-map
+             ("C-<return>" . erc-send-current-line))
+  (setq erc-autojoin-channels-alist nil ;; '(("freenode.net" "#emacs"))
+        erc-interpret-mirc-color t
+        erc-kill-buffer-on-part t))
+
 (use-package circe
   :if (my-func-package-enabled-p 'circe)
   :config

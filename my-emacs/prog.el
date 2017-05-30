@@ -13,13 +13,12 @@
   (use-package yasnippet
     :if (my-func-package-enabled-p 'yasnippet)
     :commands (yas-global-mode yas-minor-mode yas-minor-mode-on)
-    :bind (:map yas-minor-mode-map
-                ;; 为配合auto-complete或company等插件的使用，需禁用以下自带的补全快捷键
-                ("<tab>"))
     :diminish yas-minor-mode
     :init
     (add-hook 'my-prog-mode-start-hook 'my-plugin-yasnippet-start t)
     :config
+    ;; 为配合auto-complete或company等插件的使用，需禁用以下自带的补全快捷键
+    (unbind-key "<tab>" yas-minor-mode-map)
     (add-to-list 'yas-snippet-dirs
                  (concat my-user-emacs-directory "snippets"))
     ;; 设置解决同名snippet的方式
@@ -45,25 +44,24 @@
   (use-package company
     :if (my-func-package-enabled-p 'company)
     :commands (global-company-mode company-mode company-mode-on)
-    ;; 常用的快捷键：
-    ;; <tab>用于补全候选项中的公共字段，<return>用于补全所选项，C-g用于终止补全
-    ;; (define-key company-active-map (kbd "<tab>") 'company-complete-common-or-cycle)
-    :bind (:map company-active-map
-                ("C-n" . company-select-next)
-                ("C-p" . company-select-previous)
-                ("M-n")
-                ("M-p")
-                :map company-search-map
-                ("C-n" . company-select-next)
-                ("C-p" . company-select-previous)
-                ("C-t" . company-search-toggle-filtering)
-                ("M-n")
-                ("M-p"))
     :diminish company-mode
     :init
     (add-hook 'my-prog-mode-start-hook 'my-plugin-company-start t)
     :config
-    ;; (customize-group 'company)
+    ;; 常用的快捷键：
+    ;; <tab>用于补全候选项中的公共字段，<return>用于补全所选项，C-g用于终止补全
+    ;; (define-key company-active-map (kbd "<tab>") 'company-complete-common-or-cycle)
+    (unbind-key "M-n" company-active-map)
+    (unbind-key "M-p" company-active-map)
+    (unbind-key "M-n" company-search-map)
+    (unbind-key "M-p" company-search-map)
+    (bind-keys :map company-active-map
+               ("C-n" . company-select-next)
+               ("C-p" . company-select-previous)
+               :map company-search-map
+               ("C-n" . company-select-next)
+               ("C-p" . company-select-previous)
+               ("C-t" . company-search-toggle-filtering))
     ;; 没有必要为每个模式分别启用其独享的后端，因为筛选适用后端的过程非常效率
     (setq company-backends `(company-elisp
                              ,(when (and (my-func-package-enabled-p 'company-jedi)
@@ -264,13 +262,6 @@
       :if (and (my-func-package-enabled-p 'helm-gtags)
                (executable-find "gtags"))
       :commands (helm-gtags-mode)
-      :bind (:map helm-gtags-mode-map ;; 以下仅供参考
-                  ("C-c g a" . helm-gtags-tags-in-this-function)
-                  ("C-j" . helm-gtags-select)
-                  ("M-." . helm-gtags-dwim)
-                  ("M-," . helm-gtags-pop-stack)
-                  ("C-c <" . helm-gtags-previous-history)
-                  ("C-c >" . helm-gtags-next-history))
       :init
       (setq helm-gtags-path-style 'root
             helm-gtags-ignore-case t
@@ -292,7 +283,15 @@
                     (my-plugin-helm-gtags-start)))
                 t)
       (add-hook 'dired-mode-hook 'my-plugin-helm-gtags-start t)
-      (add-hook 'eshell-mode-hook 'my-plugin-helm-gtags-start t))))
+      (add-hook 'eshell-mode-hook 'my-plugin-helm-gtags-start t)
+      :config
+      (bind-keys :map helm-gtags-mode-map ;; 以下仅供参考
+                 ("C-c g a" . helm-gtags-tags-in-this-function)
+                 ("C-j" . helm-gtags-select)
+                 ("M-." . helm-gtags-dwim)
+                 ("M-," . helm-gtags-pop-stack)
+                 ("C-c <" . helm-gtags-previous-history)
+                 ("C-c >" . helm-gtags-next-history)))))
 
 (defun my-plugin-helm-gtags-start ()
   (helm-gtags-mode 1))
