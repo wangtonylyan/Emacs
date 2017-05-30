@@ -16,6 +16,7 @@
     :bind (:map yas-minor-mode-map
                 ;; 为配合auto-complete或company等插件的使用，需禁用以下自带的补全快捷键
                 ("<tab>"))
+    :diminish yas-minor-mode
     :init
     (add-hook 'my-prog-mode-start-hook 'my-plugin-yasnippet-start t)
     :config
@@ -58,6 +59,7 @@
                 ("C-t" . company-search-toggle-filtering)
                 ("M-n")
                 ("M-p"))
+    :diminish company-mode
     :init
     (add-hook 'my-prog-mode-start-hook 'my-plugin-company-start t)
     :config
