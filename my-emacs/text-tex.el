@@ -1,3 +1,5 @@
+;; -*- coding: utf-8 -*-
+
 (require 'my-init)
 
 (defvar my-text-tex-mode-start-hook '())
@@ -5,8 +7,8 @@
 
 ;; =============================================================================
 (defun my-plugin-auctex-init ()
-  ;; 该插件在安装后就会随(package-initialize)的执行而被自动加载
-  ;; 而无需且不能以以下方式被重新加载：(load "auctex.el" t)
+  ;; 璇ユ彃浠跺湪瀹夎鍚庡氨浼氶殢(package-initialize)鐨勬墽琛岃�岃鑷姩鍔犺浇
+  ;; 鑰屾棤闇�涓斾笉鑳戒互浠ヤ笅鏂瑰紡琚噸鏂板姞杞斤細(load "auctex.el" t)
   (use-package auctex
     :if (my-func-package-enabled-p 'auctex)
     :commands (reftex-mode TeX-fold-mode)

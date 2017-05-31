@@ -1,8 +1,10 @@
-;; ÅĞ¶ÏEmacs°æ±¾¿ÉÒÔ»ùÓÚÒÔÏÂÁ½¸ö±äÁ¿£º'emacs-major-versionºÍ'emacs-minor-version
+;; -*- coding: utf-8 -*-
+
+;; åˆ¤æ–­Emacsç‰ˆæœ¬å¯ä»¥åŸºäºä»¥ä¸‹ä¸¤ä¸ªå˜é‡ï¼š'emacs-major-versionå’Œ'emacs-minor-version
 
 (defun my-func-executable-find (dir exe &optional add)
   (let* ((dir (if (and (stringp dir) (> (length dir) 0))
-                  ;; Í³Ò»´«²ÎµÄĞÎÊ½
+                  ;; ç»Ÿä¸€ä¼ å‚çš„å½¢å¼
                   (concat (directory-file-name dir) "/") ""))
          (path (executable-find (concat dir exe))))
     (when (and path (file-executable-p path))
@@ -26,8 +28,8 @@
 ;; (setq user-init-file "~/.emacs.d/init.el")
 ;; (load user-init-file)
 
-;; ÓÉÓÚÒÔÏÂÁ½¸ö±äÁ¿ÔÚµ±Ç°ÎÄ¼ş±»Ö´ĞĞÊ±¾ÍÓĞbuffer-localµÄ³õÊ¼ÖµÁË
-;; Òò´ËÎªÊ¹Æä×Ô´ËÉúĞ§£¬¾Í±ØĞëÍ¬Ê±ĞŞ¸Ä¾Ö²¿ºÍÈ«¾ÖÖµ
+;; ç”±äºä»¥ä¸‹ä¸¤ä¸ªå˜é‡åœ¨å½“å‰æ–‡ä»¶è¢«æ‰§è¡Œæ—¶å°±æœ‰buffer-localçš„åˆå§‹å€¼äº†
+;; å› æ­¤ä¸ºä½¿å…¶è‡ªæ­¤ç”Ÿæ•ˆï¼Œå°±å¿…é¡»åŒæ—¶ä¿®æ”¹å±€éƒ¨å’Œå…¨å±€å€¼
 (setq default-directory "~/"
       user-emacs-directory "~/.emacs.d/"
       command-line-default-directory default-directory)
@@ -38,33 +40,33 @@
 ;; (normal-top-level-add-subdirs-to-load-path)
 ;; (normal-top-level-add-to-load-path)
 
-;; Ö¸¶¨ÓÉ(customize)Ğ´ÈëÅäÖÃĞÅÏ¢µÄÎÄ¼ş£¬ËæºóÃ¿µ±Emacs×Ô¶¯Ğ´ÈëÊ±¾Í²»»áÔÙĞŞ¸Äµ±Ç°ÎÄ¼şÁË
+;; æŒ‡å®šç”±(customize)å†™å…¥é…ç½®ä¿¡æ¯çš„æ–‡ä»¶ï¼Œéšåæ¯å½“Emacsè‡ªåŠ¨å†™å…¥æ—¶å°±ä¸ä¼šå†ä¿®æ”¹å½“å‰æ–‡ä»¶äº†
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (load custom-file)
 
-;; (setq url-proxy-services '(("http" . "10.25.71.1:8080"))) ;; ²»Ö§³Öauthentication
+;; (setq url-proxy-services '(("http" . "10.25.71.1:8080"))) ;; ä¸æ”¯æŒauthentication
 (when (require 'package nil t)
-  ;; ÉèÖÃ°²×°°üµÄ´æ´¢Ä¿Â¼£¬¸ÃÄ¿Â¼Ò²ĞèÒª±»°üº¬ÖÁ'load-pathÖĞ
+  ;; è®¾ç½®å®‰è£…åŒ…çš„å­˜å‚¨ç›®å½•ï¼Œè¯¥ç›®å½•ä¹Ÿéœ€è¦è¢«åŒ…å«è‡³'load-pathä¸­
   ;; (add-to-list 'package-directory-list "~/.emacs.d/elpa" t) ;; system-wide dir
   (setq package-user-dir (concat user-emacs-directory "elpa")) ;; user-wide dir
-  ;; EmacsÊ¹ÓÃµÄÄ¬ÈÏ¸üĞÂÔ´Îª£º("gnu" . "http://elpa.gnu.org/")
-  ;; Ìí¼Ó¸üĞÂÔ´£ºMELPAÃ¿Ìì¸üĞÂ£¬Æä°üº¬ÁË¾ø´ó¶àÊı²å¼ş
+  ;; Emacsä½¿ç”¨çš„é»˜è®¤æ›´æ–°æºä¸ºï¼š("gnu" . "http://elpa.gnu.org/")
+  ;; æ·»åŠ æ›´æ–°æºï¼šMELPAæ¯å¤©æ›´æ–°ï¼Œå…¶åŒ…å«äº†ç»å¤§å¤šæ•°æ’ä»¶
   ;; (add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/") t)
   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
   (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
-  ;; ÒÔÏÂÁĞ±íÓÃÓÚÉèÖÃ±»ÔÊĞí¼ÓÔØµÄ²å¼ş£¬Òò´ËÎŞÂÛÊÇÔÚ°²×°»¹ÊÇÊ¹ÓÃ²å¼şµÄ¹ı³ÌÖĞ
-  ;; ¶¼±ØĞëÌáÇ°ÏêÏ¸µØÁĞ¾Ù³öËùÓĞµÄ²å¼ş£¬ÇÒÒª¸ù¾İ²å¼şÖ®¼äµÄÒÀÀµ¹ØÏµ½øĞĞÏÈºóµØÉùÃ÷
+  ;; ä»¥ä¸‹åˆ—è¡¨ç”¨äºè®¾ç½®è¢«å…è®¸åŠ è½½çš„æ’ä»¶ï¼Œå› æ­¤æ— è®ºæ˜¯åœ¨å®‰è£…è¿˜æ˜¯ä½¿ç”¨æ’ä»¶çš„è¿‡ç¨‹ä¸­
+  ;; éƒ½å¿…é¡»æå‰è¯¦ç»†åœ°åˆ—ä¸¾å‡ºæ‰€æœ‰çš„æ’ä»¶ï¼Œä¸”è¦æ ¹æ®æ’ä»¶ä¹‹é—´çš„ä¾èµ–å…³ç³»è¿›è¡Œå…ˆååœ°å£°æ˜
   (setq package-load-list '(all
                             ;; e.g.
                             ;; (dash) (epl) (let-alist) (pkg-info) (flycheck)
                             ;; (atom-one-dark-theme t) (material-theme t)
                             ))
-  ;; ÉèÖÃ¼ÓÔØÉÏÊöÁĞ±íÖĞËùÖ¸¶¨²å¼şµÄÊ±»ú
-  (setq package-enable-at-startup nil) ;; ·½Ê½1) ËæEmacsµÄÆô¶¯¶ø×Ô¶¯¼ÓÔØ²å¼ş
-  (package-initialize) ;; ·½Ê½2) Ö÷¶¯Ö´ĞĞ¸Ãº¯ÊıÒÔ¼ÓÔØ²å¼ş
-  ;; Ä¿Ç°Ê¹ÓÃ´ËÈ«¾Ö±äÁ¿À´¹ÜÀí²å¼şµÄÆôÓÃ/½ûÓÃ£¬ÆäÖĞ°üÀ¨ÁËELPA¸üĞÂÔ´ÖĞËùÃ»ÓĞµÄ²å¼ş
+  ;; è®¾ç½®åŠ è½½ä¸Šè¿°åˆ—è¡¨ä¸­æ‰€æŒ‡å®šæ’ä»¶çš„æ—¶æœº
+  (setq package-enable-at-startup nil) ;; æ–¹å¼1) éšEmacsçš„å¯åŠ¨è€Œè‡ªåŠ¨åŠ è½½æ’ä»¶
+  (package-initialize) ;; æ–¹å¼2) ä¸»åŠ¨æ‰§è¡Œè¯¥å‡½æ•°ä»¥åŠ è½½æ’ä»¶
+  ;; ç›®å‰ä½¿ç”¨æ­¤å…¨å±€å˜é‡æ¥ç®¡ç†æ’ä»¶çš„å¯ç”¨/ç¦ç”¨ï¼Œå…¶ä¸­åŒ…æ‹¬äº†ELPAæ›´æ–°æºä¸­æ‰€æ²¡æœ‰çš„æ’ä»¶
   (setq package-selected-packages '(atom-one-dark-theme
-                                    ;; all-the-icons ;; Ê×´Î°²×°ºóĞèÒª¶îÍâµØ°²×°×ÖÌå
+                                    ;; all-the-icons ;; é¦–æ¬¡å®‰è£…åéœ€è¦é¢å¤–åœ°å®‰è£…å­—ä½“
                                     powerline ;; smart-mode-line-powerline-theme
                                     ;; smart-mode-line
                                     avy ;; ace-jump-mode
@@ -96,7 +98,7 @@
 (require 'bind-key)
 (require 'diminish)
 
-;; Ö¸¶¨µÚÈı·½Ö÷ÌâµÄ°²×°Ä¿Â¼
+;; æŒ‡å®šç¬¬ä¸‰æ–¹ä¸»é¢˜çš„å®‰è£…ç›®å½•
 (let ((path (concat my-user-emacs-directory "theme")))
   (add-to-list 'load-path path t)
   (add-to-list 'custom-theme-load-path path t))
@@ -150,9 +152,9 @@
 (use-package minimap
   :if (my-func-package-enabled-p 'minimap)
   :config
-  (setq minimap-always-recenter nil ;; ÉèÖÃÎªnil²ÅÓĞĞ§?
+  (setq minimap-always-recenter nil ;; è®¾ç½®ä¸ºnilæ‰æœ‰æ•ˆ?
         minimap-recenter-type 'middle
-        minimap-buffer-name-prefix "MINI" ;; ²»ÄÜÎª¿Õ£¬·ñÔòÎŞ·¨Æô¶¯minimap´°¿Ú
+        minimap-buffer-name-prefix "MINI" ;; ä¸èƒ½ä¸ºç©ºï¼Œå¦åˆ™æ— æ³•å¯åŠ¨minimapçª—å£
         minimap-hide-fringes t
         minimap-hide-scroll-bar t
         minimap-update-delay 1.0
@@ -164,7 +166,7 @@
   :if (and (my-func-package-enabled-p 'flyspell)
            (executable-find "aspell"))
   :config
-  (setq ispell-program-name (executable-find "aspell") ;; ÉèÖÃºóÌ¨Ö§³Ö³ÌĞò
+  (setq ispell-program-name (executable-find "aspell") ;; è®¾ç½®åå°æ”¯æŒç¨‹åº
         ;; ispell-dictionary "english" ;; default dictionary
         ;; ispell-personal-dictionary ""
         flyspell-issue-message-flag nil))
@@ -181,16 +183,16 @@
           org-mode)))
 
 ;; =============================================================================
-;; ÅäÖÃÔÓÏî
+;; é…ç½®æ‚é¡¹
 ;; -----------------------------------------------------------------------------
 (setq user-full-name "TonyLYan"
       user-mail-address "wangtonylyan@outlook.com"
-      inhibit-startup-message 1 ;; È¡ÏûÆô¶¯½çÃæ
-      frame-title-format '(buffer-file-name "%f" ("%b")) ;; ÉèÖÃ±êÌâÀ¸ÏÔÊ¾ÎªbufferÃû×Ö
-      uniquify-buffer-name-style 'post-forward-angle-brackets ;; ÖØÃûbufferµÄÃüÃû
-      visible-bell t ;; ÒÔ´°¿ÚÉÁË¸µÄ·½Ê½´úÌæ´íÎóÌáÊ¾Òô
+      inhibit-startup-message 1 ;; å–æ¶ˆå¯åŠ¨ç•Œé¢
+      frame-title-format '(buffer-file-name "%f" ("%b")) ;; è®¾ç½®æ ‡é¢˜æ æ˜¾ç¤ºä¸ºbufferåå­—
+      uniquify-buffer-name-style 'post-forward-angle-brackets ;; é‡åbufferçš„å‘½å
+      visible-bell t ;; ä»¥çª—å£é—ªçƒçš„æ–¹å¼ä»£æ›¿é”™è¯¯æç¤ºéŸ³
       echo-keystrokes 0.1
-      debug-on-error nil ;; ÏÔÊ¾´íÎóĞÅÏ¢
+      debug-on-error nil ;; æ˜¾ç¤ºé”™è¯¯ä¿¡æ¯
       select-enable-clipboard t
       current-language-environment "Chinese-GB"
       auto-revert-use-notify t
@@ -198,62 +200,62 @@
       auto-revert-stop-on-user-input t
       auto-revert-interval 5
       delete-by-moving-to-trash t
-      make-backup-files t ;; ÆôÓÃ×Ô¶¯±¸·İ
-      version-control t ;; ÆôÓÃ°æ±¾¿ØÖÆ£¬¼´¿ÉÒÔ±¸·İ¶à´Î
-      kept-old-versions 1 ;; ±¸·İ×î¾ÉµÄ°æ±¾¸öÊı
-      kept-new-versions 1 ;; ±¸·İ×îĞÂµÄ°æ±¾¸öÊı
+      make-backup-files t ;; å¯ç”¨è‡ªåŠ¨å¤‡ä»½
+      version-control t ;; å¯ç”¨ç‰ˆæœ¬æ§åˆ¶ï¼Œå³å¯ä»¥å¤‡ä»½å¤šæ¬¡
+      kept-old-versions 1 ;; å¤‡ä»½æœ€æ—§çš„ç‰ˆæœ¬ä¸ªæ•°
+      kept-new-versions 1 ;; å¤‡ä»½æœ€æ–°çš„ç‰ˆæœ¬ä¸ªæ•°
       delete-old-versions t
       dired-kept-versions 2
       backup-directory-alist '(("." . "~/.emacs.d.backups"))
       backup-by-copying t)
 (setq-default buffer-file-coding-system 'utf-8)
-(defalias 'yes-or-no-p 'y-or-n-p) ;; ÒÔy/nÌæ»»yes/no
+(defalias 'yes-or-no-p 'y-or-n-p) ;; ä»¥y/næ›¿æ¢yes/no
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (prefer-coding-system 'utf-8)
-;; ¸ÃÄ£Ê½ÓÃÓÚ¼à¿Ø´ÅÅÌÉÏµÄÎÄ¼şÊÇ·ñ±»Íâ²¿³ÌĞòĞŞ¸Ä£¬²¢ÌáÊ¾ÓÃ»§»ò×Ô¶¯ÖØĞÂ¼ÓÔØ¸ÃÎÄ¼ş
+;; è¯¥æ¨¡å¼ç”¨äºç›‘æ§ç£ç›˜ä¸Šçš„æ–‡ä»¶æ˜¯å¦è¢«å¤–éƒ¨ç¨‹åºä¿®æ”¹ï¼Œå¹¶æç¤ºç”¨æˆ·æˆ–è‡ªåŠ¨é‡æ–°åŠ è½½è¯¥æ–‡ä»¶
 (global-auto-revert-mode 1)
 (recentf-mode 1)
-(auto-image-file-mode 1) ;; ÔÊĞí´ò¿ªÍ¼Æ¬
-(auto-compression-mode 1) ;; ÔÊĞí²é¿´ºÍĞ´ÈëÑ¹Ëõ°ü
+(auto-image-file-mode 1) ;; å…è®¸æ‰“å¼€å›¾ç‰‡
+(auto-compression-mode 1) ;; å…è®¸æŸ¥çœ‹å’Œå†™å…¥å‹ç¼©åŒ…
 
-;; (set-face-background 'default "#C7EDCC") ;; ÉèÖÃ±³¾°ÑÕÉ«ÎªÂÌÉ«»¤ÑÛÉ«
-;; ×ÖÌåµÄÃû×ÖÔ´×ÔÓÚ.ttf»ò.otfÎÄ¼şÄÚ×Ô´øµÄÔªĞÅÏ¢£¬°üÀ¨familyºÍstyleµÈ
-;; ÒÔÏÂÊ¹ÓÃ²»Í¬µÄÖĞÓ¢ÎÄ×ÖÌåºÍ×ÖºÅµÄÄ¿µÄÊÇÎªÁËÌáÉıÃÀ¹ÛĞÔ£¬ÀıÈçÍ¬Ò»×ÖÌåÏÂµÄÖĞÎÄ×Ö·ûÍ¨³£¶¼±ÈÓ¢ÎÄ×Ö·û¸ü¸ß
+;; (set-face-background 'default "#C7EDCC") ;; è®¾ç½®èƒŒæ™¯é¢œè‰²ä¸ºç»¿è‰²æŠ¤çœ¼è‰²
+;; å­—ä½“çš„åå­—æºè‡ªäº.ttfæˆ–.otfæ–‡ä»¶å†…è‡ªå¸¦çš„å…ƒä¿¡æ¯ï¼ŒåŒ…æ‹¬familyå’Œstyleç­‰
+;; ä»¥ä¸‹ä½¿ç”¨ä¸åŒçš„ä¸­è‹±æ–‡å­—ä½“å’Œå­—å·çš„ç›®çš„æ˜¯ä¸ºäº†æå‡ç¾è§‚æ€§ï¼Œä¾‹å¦‚åŒä¸€å­—ä½“ä¸‹çš„ä¸­æ–‡å­—ç¬¦é€šå¸¸éƒ½æ¯”è‹±æ–‡å­—ç¬¦æ›´é«˜
 (let* ((rslt (<= (* (display-pixel-width) (display-pixel-height)) (* 1366 768)))
        (efont (if rslt 10 11))
        (cfont (if rslt 9 10))
        (fcnct (lambda (font size) (concat font " " (number-to-string size)))))
   (if (eq system-type 'windows-nt)
-      ;; WindowsÏµÍ³ÉÏµÄEmacs25°æ±¾¶ÔÖĞÎÄ×ÖÌåµÄÏÔÊ¾´æÔÚÎÊÌâ£¬´ò¿ªÖĞÎÄÎÄµµÊ±»á´æÔÚ¿¨¶ÙµÄÏÖÏó
-      ;; ±ØĞëÊÖ¶¯Ö¸¶¨ÖĞÎÄ×ÖÌåÎªËÎÌå²Å¿É±ÜÃâ¡£
+      ;; Windowsç³»ç»Ÿä¸Šçš„Emacs25ç‰ˆæœ¬å¯¹ä¸­æ–‡å­—ä½“çš„æ˜¾ç¤ºå­˜åœ¨é—®é¢˜ï¼Œæ‰“å¼€ä¸­æ–‡æ–‡æ¡£æ—¶ä¼šå­˜åœ¨å¡é¡¿çš„ç°è±¡
+      ;; å¿…é¡»æ‰‹åŠ¨æŒ‡å®šä¸­æ–‡å­—ä½“ä¸ºå®‹ä½“æ‰å¯é¿å…ã€‚
       (progn
         (set-default-font (eval `(,fcnct "Consolas" ,efont)))
-        (set-fontset-font "fontset-default" 'unicode (eval `(,fcnct "ËÎÌå" ,cfont))))
+        (set-fontset-font "fontset-default" 'unicode (eval `(,fcnct "å®‹ä½“" ,cfont))))
     (progn
       (set-default-font (eval `(,fcnct "YaHei Consolas Hybrid" ,efont)))
-      (set-fontset-font "fontset-default" 'unicode ;; »òÌæ»»³É"Microsoft YaHei Mono"
+      (set-fontset-font "fontset-default" 'unicode ;; æˆ–æ›¿æ¢æˆ"Microsoft YaHei Mono"
                         (eval `(,fcnct "Source Han Serif SC SemiBold" ,cfont))))))
-;; (set-face-attribute 'default nil :family "Microsoft YaHei Mono" :weight 'normal :height 110) ;; ÉèÖÃ×ÖÌå£¬°üÀ¨×ÖºÅµÈ
-;; (set-frame-font "10" nil t) ;; ÉèÖÃ×ÖºÅ, Í¬(set-face-attribute)ÖĞµÄ:height
+;; (set-face-attribute 'default nil :family "Microsoft YaHei Mono" :weight 'normal :height 110) ;; è®¾ç½®å­—ä½“ï¼ŒåŒ…æ‹¬å­—å·ç­‰
+;; (set-frame-font "10" nil t) ;; è®¾ç½®å­—å·, åŒ(set-face-attribute)ä¸­çš„:height
 
-(global-font-lock-mode 1) ;; Óï·¨¸ßÁÁ
+(global-font-lock-mode 1) ;; è¯­æ³•é«˜äº®
 ;; (add-hook 'xxx-mode-hook 'turn-on-font-lock) ;; (font-lock-mode 1)
-;; (global-linum-mode 1) ;; ×ó²àĞĞºÅ£¬ÍÆ¼ö½ö½«ÆäÏÔÊ¾ÓÚÖ÷ÒªµÄ±à¼­ÎÄµµÖĞ
+;; (global-linum-mode 1) ;; å·¦ä¾§è¡Œå·ï¼Œæ¨èä»…å°†å…¶æ˜¾ç¤ºäºä¸»è¦çš„ç¼–è¾‘æ–‡æ¡£ä¸­
 ;; (add-hook 'xxx-mode-hook 'linum-mode)
 (global-highlight-changes-mode 1)
-(mouse-avoidance-mode 'animate) ;; µ±¹â±êÒÆ¶¯ÖÁÊó±êÎ»ÖÃÊ±£¬Îª±ÜÃâÕÚµ²ÊÓÏß£¬×Ô¶¯ÒÆ¿ªÊó±ê
-;; (save-place-mode 1) ;; ¼ÇÂ¼¹â±êÔÚÃ¿¸öÎÄ¼şÖĞ×îºóÒ»´Î·ÃÎÊÊ±ËùÔÚµÄÎ»ÖÃ
+(mouse-avoidance-mode 'animate) ;; å½“å…‰æ ‡ç§»åŠ¨è‡³é¼ æ ‡ä½ç½®æ—¶ï¼Œä¸ºé¿å…é®æŒ¡è§†çº¿ï¼Œè‡ªåŠ¨ç§»å¼€é¼ æ ‡
+;; (save-place-mode 1) ;; è®°å½•å…‰æ ‡åœ¨æ¯ä¸ªæ–‡ä»¶ä¸­æœ€åä¸€æ¬¡è®¿é—®æ—¶æ‰€åœ¨çš„ä½ç½®
 (set-cursor-color "white")
 ;; (blink-cursor-mode -1)
-(column-number-mode 1) ;; ÔÚmode-lineÏÔÊ¾ÁĞÊı
-(scroll-bar-mode -1) ;; È¡Ïû¹ö¶¯Ìõ
+(column-number-mode 1) ;; åœ¨mode-lineæ˜¾ç¤ºåˆ—æ•°
+(scroll-bar-mode -1) ;; å–æ¶ˆæ»šåŠ¨æ¡
 (global-hl-line-mode 1)
-(global-visual-line-mode -1) ;; ¶ÔÖĞÎÄÖ§³Ö²»ºÃ
-(show-paren-mode 1) ;; ÏÔÊ¾Æ¥ÅäµÄ×óÓÒÀ¨ºÅ
+(global-visual-line-mode -1) ;; å¯¹ä¸­æ–‡æ”¯æŒä¸å¥½
+(show-paren-mode 1) ;; æ˜¾ç¤ºåŒ¹é…çš„å·¦å³æ‹¬å·
 (electric-pair-mode -1)
 (electric-quote-mode -1)
-(electric-indent-mode -1) ;; ×Ô¶¯Ëõ½ø
+(electric-indent-mode -1) ;; è‡ªåŠ¨ç¼©è¿›
 (setq font-lock-maximum-decoration t
       transient-mark-mode t
       shift-select-mode nil
@@ -262,7 +264,7 @@
       highlight-changes-face-list nil
       highlight-changes-colors nil
       blink-cursor-blinks 0
-      ;; ÕâÀïÔİ²»Ê¹ÓÃÆ½»¬¹ö¶¯£¬¶øÊÇÍ¨¹ıÉèÖÃÒÔÏÂ±äÁ¿ÒÔ¾¡¿ÉÄÜµØ±ÜÃâÒ³Ãæ¹ö¶¯Ê±»­ÃæµÄÆµ·±Ìø¶¯
+      ;; è¿™é‡Œæš‚ä¸ä½¿ç”¨å¹³æ»‘æ»šåŠ¨ï¼Œè€Œæ˜¯é€šè¿‡è®¾ç½®ä»¥ä¸‹å˜é‡ä»¥å°½å¯èƒ½åœ°é¿å…é¡µé¢æ»šåŠ¨æ—¶ç”»é¢çš„é¢‘ç¹è·³åŠ¨
       ;; mouse wheel scrolling
       mouse-wheel-scroll-amount '(3 ((shift) . 1))
       mouse-wheel-progressive-speed t
@@ -283,23 +285,23 @@
 (setq-default cursor-type '(bar . 3)
               scroll-up-aggressively 0.01
               scroll-down-aggressively 0.01
-              line-spacing 0 ;; ĞĞ¾à
-              ;; fill-column 80 ;; ³¬¹ı80×Ö·û¾Í»»ĞĞÏÔÊ¾
+              line-spacing 0 ;; è¡Œè·
+              ;; fill-column 80 ;; è¶…è¿‡80å­—ç¬¦å°±æ¢è¡Œæ˜¾ç¤º
               indicate-empty-lines nil
               indent-tabs-mode nil ;; make indentation commands use space only
               truncate-lines truncate-lines
               word-wrap word-wrap
               tab-width 4)
-;; Ã¿´Î±£´æbufferÊ±¶¼½«É¾³ıÏÖÓĞµÄ¸Ä¶¯¸ßÁÁ
-;; Ìæ»»³ÉÁíÍâÁ½¸öhook¾Í»áÎŞĞ§£¬Ô­ÒòÎ´Öª£ºwrite-content-functions»òwrite-file-functions
+;; æ¯æ¬¡ä¿å­˜bufferæ—¶éƒ½å°†åˆ é™¤ç°æœ‰çš„æ”¹åŠ¨é«˜äº®
+;; æ›¿æ¢æˆå¦å¤–ä¸¤ä¸ªhookå°±ä¼šæ— æ•ˆï¼ŒåŸå› æœªçŸ¥ï¼šwrite-content-functionsæˆ–write-file-functions
 (add-hook 'before-save-hook
           (lambda ()
-            (delete-trailing-whitespace) ;; É¾³ıÃ¿ĞĞÄ©Î²µÄ¿Õ¸ñ
+            (delete-trailing-whitespace) ;; åˆ é™¤æ¯è¡Œæœ«å°¾çš„ç©ºæ ¼
             (highlight-changes-remove-highlight (point-min) (point-max)))
           t)
 
 ;; Key Binding
-;; ÃüÁî¼¯Ç°×º
+;; å‘½ä»¤é›†å‰ç¼€
 ;; C-c h :: helm
 ;; C-c t :: helm-gtags
 ;; C-c p :: projectile, helm-projectile
@@ -318,9 +320,9 @@
            ("C-x C-=" . upcase-region)
            ("C-q" . read-only-mode))
 (windmove-default-keybindings)
-(put 'downcase-region 'disabled nil) ;; È¥³ıÃ¿´ÎÖ´ĞĞ´ËÃüÁîÊ±µÄÌáÊ¾£¬Ç¿ÖÆÖ´ĞĞ
+(put 'downcase-region 'disabled nil) ;; å»é™¤æ¯æ¬¡æ‰§è¡Œæ­¤å‘½ä»¤æ—¶çš„æç¤ºï¼Œå¼ºåˆ¶æ‰§è¡Œ
 (put 'upcase-region 'disabled nil)
-;; ÓëÊäÈë·¨ÇĞ»»¼ü³åÍ»
+;; ä¸è¾“å…¥æ³•åˆ‡æ¢é”®å†²çª
 ;; (global-set-key (kbd "C-S-SPC") 'set-mark-command)
 ;; (global-unset-key (kbd "C-SPC"))
 
@@ -333,7 +335,7 @@
   :if (my-func-package-enabled-p 'ido)
   :config
   (ido-mode 1)
-  (ido-everywhere -1) ;; ½öÊ¹idoÖ§³Öfind-fileºÍswitch-to-buffer
+  (ido-everywhere -1) ;; ä»…ä½¿idoæ”¯æŒfind-fileå’Œswitch-to-buffer
   (setq ido-enable-prefix t
         ido-enable-flex-matching t
         ido-use-filename-at-point t
@@ -343,18 +345,18 @@
   :if (my-func-package-enabled-p 'smex)
   :bind (("M-x" . smex)
          ("M-X" . smex-major-mode-commands)
-         ;; ¸Ã²å¼ş»á×Ô¶¯Ìæ»»Ô­M-x¿ì½İ¼üËù°ó¶¨µÄÃüÁî£¬ÈôÏë±£ÁôÔò¿ÉÖØĞÂ°ó¶¨Ö®
+         ;; è¯¥æ’ä»¶ä¼šè‡ªåŠ¨æ›¿æ¢åŸM-xå¿«æ·é”®æ‰€ç»‘å®šçš„å‘½ä»¤ï¼Œè‹¥æƒ³ä¿ç•™åˆ™å¯é‡æ–°ç»‘å®šä¹‹
          ("C-x M-x" . execute-extended-command))
   :config
   (smex-initialize))
 
 (use-package helm
   :if (my-func-package-enabled-p 'helm)
-  ;; HelmÌá¹©ÁËÒ»Ì×ÔÚ¹¦ÄÜÉÏÓë²¿·ÖEmacsÔ­ÉúÃüÁîÏàÖØºÏµÄÃüÁî¼¯
-  ;; ²¢½«ÆäÄ¬ÈÏ°ó¶¨ÔÚÁËÒÔ'helm-command-prefix-keyÎªÇ°×ºµÄ¿ì½İ¼ü¼¯ÖĞ
-  ;; ¿ÉÒÔÍ¨¹ıÊäÈë¸ÃÇ°×ºÀ´´¥·¢Ïà¹ØÃüÁî
-  :bind (("C-c h" . helm-command-prefix) ;; Ìæ»»Ç°×º
-         ;; Ò²¿ÉÒÔ½«²¿·Ö³£ÓÃÃüÁîÖ±½ÓÌæ»»EmacsÔ­¿ì½İ¼ü
+  ;; Helmæä¾›äº†ä¸€å¥—åœ¨åŠŸèƒ½ä¸Šä¸éƒ¨åˆ†EmacsåŸç”Ÿå‘½ä»¤ç›¸é‡åˆçš„å‘½ä»¤é›†
+  ;; å¹¶å°†å…¶é»˜è®¤ç»‘å®šåœ¨äº†ä»¥'helm-command-prefix-keyä¸ºå‰ç¼€çš„å¿«æ·é”®é›†ä¸­
+  ;; å¯ä»¥é€šè¿‡è¾“å…¥è¯¥å‰ç¼€æ¥è§¦å‘ç›¸å…³å‘½ä»¤
+  :bind (("C-c h" . helm-command-prefix) ;; æ›¿æ¢å‰ç¼€
+         ;; ä¹Ÿå¯ä»¥å°†éƒ¨åˆ†å¸¸ç”¨å‘½ä»¤ç›´æ¥æ›¿æ¢EmacsåŸå¿«æ·é”®
          ("M-x" . helm-M-x)
          ("M-y" . helm-show-kill-ring)
          ("C-x C-f" . helm-find-files)
@@ -367,7 +369,7 @@
   (require 'helm-config)
   (unbind-key "C-x c")
   (bind-keys :map helm-map
-             ;; 'helm-execute-persistent-actionÏà±ÈÓÚ'helm-select-action¸ü³£ÓÃ
+             ;; 'helm-execute-persistent-actionç›¸æ¯”äº'helm-select-actionæ›´å¸¸ç”¨
              ("<tab>" . helm-execute-persistent-action)
              ("<C-return>" . helm-select-action)
              :map minibuffer-local-map
@@ -389,7 +391,7 @@
         ;; helm-etags-fuzzy-match t
         helm-move-to-line-cycle-in-source t
         helm-buffer-skip-remote-checking t
-        ;; ÅäÖÃ¸Ã²ÎÊı¿ÉÒÔÖ¸¶¨²»Í¬µÄºóÌ¨Ö§³Ö£¬°üÀ¨imenu¡¢ido¡¢smexµÈ
+        ;; é…ç½®è¯¥å‚æ•°å¯ä»¥æŒ‡å®šä¸åŒçš„åå°æ”¯æŒï¼ŒåŒ…æ‹¬imenuã€idoã€smexç­‰
         ;; helm-completing-read-handlers-alist
         )
   (helm-autoresize-mode 1)
@@ -433,7 +435,7 @@
   :if (my-func-package-enabled-p 'sr-speedbar)
   :bind (("C-S-s" . sr-speedbar-toggle))
   :init
-  (setq speedbar-use-images nil ;; ²»Ê¹ÓÃimage·½Ê½
+  (setq speedbar-use-images nil ;; ä¸ä½¿ç”¨imageæ–¹å¼
         speedbar-show-unknown-files t)
   :config
   (bind-keys :map speedbar-file-key-map
@@ -470,13 +472,13 @@
 ;; File Extension
 ;; (setq auto-mode-alist (cons '("\\.emacs\\'" . emacs-lisp-mode) auto-mode-alist))
 
-;; µ÷Õû´°¿Ú´óĞ¡
+;; è°ƒæ•´çª—å£å¤§å°
 (when (fboundp 'x-send-client-message)
   ((lambda ()
-     ;; È«ÆÁ
+     ;; å…¨å±
      ;; (interactive)
      ;; (x-send-client-message nil 0 nil "_NET_WM_STATE" 32 '(2 "_NET_WM_STATE_FULLSCREEN" 0))
-     ;; ´°¿Ú×î´ó»¯ĞèÒª·Ö±ğ¾­¹ıË®Æ½ºÍ´¹Ö±Á½¸ö·½ÏòµÄ×î´ó»¯
+     ;; çª—å£æœ€å¤§åŒ–éœ€è¦åˆ†åˆ«ç»è¿‡æ°´å¹³å’Œå‚ç›´ä¸¤ä¸ªæ–¹å‘çš„æœ€å¤§åŒ–
      (interactive)
      (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
                             '(1 "_NET_WM_STATE_MAXIMIZED_HORZ" 0))
@@ -507,11 +509,11 @@
                                  :channels ("#emacs" "#c_lang_cn")))))
 
 ;; =============================================================================
-;; ¼ÓÔØÆäËûÅäÖÃÎÄ¼ş
+;; åŠ è½½å…¶ä»–é…ç½®æ–‡ä»¶
 (let ((path my-user-emacs-directory))
   (mapc (lambda (name)
           (load (concat path name) t nil nil t))
-        '(;; prog-modeÓëtext-modeÊÇÏà»¥¶ÀÁ¢µÄ
+        '(;; prog-modeä¸text-modeæ˜¯ç›¸äº’ç‹¬ç«‹çš„
           "prog" ;; prog-mode
           ;; "prog-cc" ;; cc-mode (c-mode, c++-mode, java-mode)
           ;; "prog-lisp" ;; lisp-mode, emacs-lisp-mode, lisp-interaction-mode
