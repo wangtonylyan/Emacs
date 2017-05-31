@@ -66,13 +66,9 @@
   (package-initialize) ;; 方式2) 主动执行该函数以加载插件
   ;; 目前使用此全局变量来管理插件的启用/禁用，其中包括了ELPA更新源中所没有的插件
   (setq package-selected-packages '(atom-one-dark-theme
-
-                                    ;; spaceline-all-the-icons => spaceline => powerline
-                                    ;;                         => all-the-icons
                                     ;; all-the-icons, all-the-icons-dired
                                     spaceline-all-the-icons ;; powerline, spaceline
                                     ;; smart-mode-line, smart-mode-line-powerline-theme
-
                                     avy ;; ace-jump-mode
                                     ;; ace-pinyin
                                     neotree ;; sr-speedbar
@@ -129,40 +125,6 @@
                      (enable-theme 'solarized))
                    t))))))
  "atom-one-dark")
-
-(use-package all-the-icons
-  :if (my-func-package-enabled-p 'all-the-icons)
-  :init
-  ;; 此插件在首次使用前需要额外地安装字体，执行以下命令会下载所需字体
-  ;; Windows上需手动安装；Linux上会自动安装，即执行$fc-cache -f -v
-  ;; 但目前发现Linux上会因权限问题而导致安装失败，因此仍推荐手动安装
-  ;; 字体下载目录默认为HOME/.local/share/fonts
-  ;; (all-the-icons-install-fonts)
-  )
-
-(use-package powerline
-  :if (my-func-package-enabled-p 'powerline)
-  :config
-  (setq powerline-default-separator 'contour
-        powerline-default-separator-dir '(left . right))
-  (powerline-default-theme))
-
-(use-package smart-mode-line
-  :if (my-func-package-enabled-p 'smart-mode-line)
-  :config
-  (setq sml/theme (if (and (my-func-package-enabled-p 'smart-mode-line-powerline-theme)
-                           (require 'smart-mode-line-powerline-theme nil t))
-                      'powerline 'automatic)
-        sml/no-confirm-load-theme t
-        sml/shorten-directory t
-        sml/shorten-modes t)
-  (smart-mode-line-enable))
-
-(use-package spaceline-all-the-icons
-  :if (my-func-package-enabled-p 'spaceline-all-the-icons)
-  :config
-  (spaceline-all-the-icons-theme)
-  (spaceline-all-the-icons--setup-neotree))
 
 (use-package minimap
   :if (my-func-package-enabled-p 'minimap)
@@ -529,6 +491,23 @@
 ;; File Extension
 ;; (setq auto-mode-alist (cons '("\\.emacs\\'" . emacs-lisp-mode) auto-mode-alist))
 
+(provide 'my-init)
+
+;; 加载其他配置文件
+(let ((path my-user-emacs-directory))
+  (mapc (lambda (name)
+          (load (concat path name) t nil nil t))
+        '(;; prog-mode与text-mode是相互独立的
+          "prog" ;; prog-mode
+          ;; "prog-cc" ;; cc-mode (c-mode, c++-mode, java-mode)
+          ;; "prog-lisp" ;; lisp-mode, emacs-lisp-mode, lisp-interaction-mode
+          "prog-py" ;; python-mode
+          ;; "prog-hs" ;; haskell-mode
+          "text-tex" ;; tex-mode, latex-mode
+          ;; "web-browser" ;; web browser
+          )))
+
+;; =============================================================================
 ;; 调整窗口大小
 (when (fboundp 'x-send-client-message)
   ((lambda ()
@@ -543,9 +522,58 @@
      (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
                             '(1 "_NET_WM_STATE_MAXIMIZED_VERT" 0)))))
 
-(provide 'my-init)
+(use-package all-the-icons
+  :if (or (my-func-package-enabled-p 'all-the-icons)
+          (my-func-package-enabled-p 'spaceline-all-the-icons))
+  :init
+  ;; 此插件在首次使用前需要额外地安装字体，执行以下命令会下载所需字体
+  ;; Windows上需手动安装；Linux上会自动安装，即执行$fc-cache -f -v
+  ;; 但目前发现Linux上会因权限问题而导致安装失败，因此仍推荐手动安装
+  ;; 字体下载目录默认为HOME/.local/share/fonts
+  ;; (all-the-icons-install-fonts)
+  :config
+  (when (my-func-package-enabled-p 'all-the-icons-dired)
+    ))
 
-;; =============================================================================
+(use-package powerline
+  :if (or (my-func-package-enabled-p 'powerline)
+          (my-func-package-enabled-p 'spaceline)
+          (my-func-package-enabled-p 'spaceline-all-the-icons)
+          (my-func-package-enabled-p 'smart-mode-line-powerline-theme))
+  :config
+  (setq powerline-default-separator 'wave
+        powerline-default-separator-dir '(left . right))
+  (when (my-func-package-enabled-p 'powerline)
+    (powerline-default-theme)))
+
+(use-package spaceline
+  :if (or (my-func-package-enabled-p 'spaceline)
+          (my-func-package-enabled-p 'spaceline-all-the-icons))
+  :config
+  (require 'spaceline-config)
+  (when (my-func-package-enabled-p 'spaceline)
+    ;; (spaceline-emacs-theme)
+    (spaceline-spacemacs-theme))
+  (spaceline-helm-mode))
+
+(use-package spaceline-all-the-icons
+  :if (my-func-package-enabled-p 'spaceline-all-the-icons)
+  :config
+  (spaceline-all-the-icons-theme)
+  (spaceline-all-the-icons--setup-neotree))
+
+(use-package smart-mode-line
+  :if (or (my-func-package-enabled-p 'smart-mode-line)
+          (my-func-package-enabled-p 'smart-mode-line-powerline-theme))
+  :config
+  (setq sml/theme (if (and (my-func-package-enabled-p 'smart-mode-line-powerline-theme)
+                           (require 'smart-mode-line-powerline-theme nil t))
+                      'powerline 'automatic)
+        sml/no-confirm-load-theme t
+        sml/shorten-directory t
+        sml/shorten-modes t)
+  (smart-mode-line-enable))
+
 (use-package erc
   :if (my-func-package-enabled-p 'erc)
   :config
@@ -566,18 +594,4 @@
                                  :channels ("#emacs" "#c_lang_cn")))))
 
 ;; =============================================================================
-;; 加载其他配置文件
-(let ((path my-user-emacs-directory))
-  (mapc (lambda (name)
-          (load (concat path name) t nil nil t))
-        '(;; prog-mode与text-mode是相互独立的
-          "prog" ;; prog-mode
-          ;; "prog-cc" ;; cc-mode (c-mode, c++-mode, java-mode)
-          ;; "prog-lisp" ;; lisp-mode, emacs-lisp-mode, lisp-interaction-mode
-          "prog-py" ;; python-mode
-          ;; "prog-hs" ;; haskell-mode
-          "text-tex" ;; tex-mode, latex-mode
-          ;; "web-browser" ;; web browser
-          )))
-
 (message "emacs init time = %s" (emacs-init-time))
