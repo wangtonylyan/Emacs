@@ -66,9 +66,13 @@
   (package-initialize) ;; 方式2) 主动执行该函数以加载插件
   ;; 目前使用此全局变量来管理插件的启用/禁用，其中包括了ELPA更新源中所没有的插件
   (setq package-selected-packages '(atom-one-dark-theme
+
+                                    ;; spaceline-all-the-icons => spaceline => powerline
+                                    ;;                         => all-the-icons
                                     ;; all-the-icons, all-the-icons-dired
-                                    powerline ;; smart-mode-line-powerline-theme
-                                    ;; smart-mode-line
+                                    spaceline-all-the-icons ;; powerline, spaceline
+                                    ;; smart-mode-line, smart-mode-line-powerline-theme
+
                                     avy ;; ace-jump-mode
                                     ;; ace-pinyin
                                     neotree ;; sr-speedbar
@@ -153,6 +157,12 @@
         sml/shorten-directory t
         sml/shorten-modes t)
   (smart-mode-line-enable))
+
+(use-package spaceline-all-the-icons
+  :if (my-func-package-enabled-p 'spaceline-all-the-icons)
+  :config
+  (spaceline-all-the-icons-theme)
+  (spaceline-all-the-icons--setup-neotree))
 
 (use-package minimap
   :if (my-func-package-enabled-p 'minimap)
