@@ -1,13 +1,15 @@
+;; -*- coding: utf-8 -*-
+
 (require 'my-init)
 
 (defvar my-prog-mode-start-hook '())
 
 ;; =============================================================================
 ;; Yasnippet
-;; Ò»¸öºê¹ÜÀíºÍÓ¦ÓÃµÄ²å¼ş£¬ÔÊĞíÓÃ»§×Ô¶¨Òåºê£¬²¢×Ô¶¯½«ÆäÀ©Õ¹
-;; yasµÄ½Å±¾snippetÒÔÎÄ¼şºÍÄ¿Â¼µÄ·½Ê½½øĞĞ¹ÜÀí£ºÃ¿¸öÎÄ¼şÖĞ¶¨ÒåÒ»¸öºê£¬Ã¿¸öÄ¿Â¼¶ÔÓ¦ÓÚÒ»¸öÄ£Ê½
-;; ÔÚyasÄ£Ê½ÏÂµÄÎÄ±¾ÖĞÍ¨¹ıÊäÈë½Å±¾ÎÄ¼şÃû³ÆÒÔ¼¤»îÌæ»»ºê
-;; ¶ø½Å±¾×¢ÊÍÖĞµÄnameÊôĞÔÖ»ÊÇ×÷ÎªÌæ»»³É¹¦ºóËù³ÊÏÖ³öµÄÃèÊöĞÅÏ¢£¬»ò´æÔÚÍ¬ÃûÎÄ¼şÊ±µÄÌáÊ¾Ñ¡ÔñĞÅÏ¢
+;; ä¸€ä¸ªå®ç®¡ç†å’Œåº”ç”¨çš„æ’ä»¶ï¼Œå…è®¸ç”¨æˆ·è‡ªå®šä¹‰å®ï¼Œå¹¶è‡ªåŠ¨å°†å…¶æ‰©å±•
+;; yasçš„è„šæœ¬snippetä»¥æ–‡ä»¶å’Œç›®å½•çš„æ–¹å¼è¿›è¡Œç®¡ç†ï¼šæ¯ä¸ªæ–‡ä»¶ä¸­å®šä¹‰ä¸€ä¸ªå®ï¼Œæ¯ä¸ªç›®å½•å¯¹åº”äºä¸€ä¸ªæ¨¡å¼
+;; åœ¨yasæ¨¡å¼ä¸‹çš„æ–‡æœ¬ä¸­é€šè¿‡è¾“å…¥è„šæœ¬æ–‡ä»¶åç§°ä»¥æ¿€æ´»æ›¿æ¢å®
+;; è€Œè„šæœ¬æ³¨é‡Šä¸­çš„nameå±æ€§åªæ˜¯ä½œä¸ºæ›¿æ¢æˆåŠŸåæ‰€å‘ˆç°å‡ºçš„æè¿°ä¿¡æ¯ï¼Œæˆ–å­˜åœ¨åŒåæ–‡ä»¶æ—¶çš„æç¤ºé€‰æ‹©ä¿¡æ¯
 ;; -----------------------------------------------------------------------------
 (defun my-plugin-yasnippet-init ()
   (use-package yasnippet
@@ -17,20 +19,20 @@
     :init
     (add-hook 'my-prog-mode-start-hook 'my-plugin-yasnippet-start t)
     :config
-    ;; ÎªÅäºÏauto-complete»òcompanyµÈ²å¼şµÄÊ¹ÓÃ£¬Ğè½ûÓÃÒÔÏÂ×Ô´øµÄ²¹È«¿ì½İ¼ü
+    ;; ä¸ºé…åˆauto-completeæˆ–companyç­‰æ’ä»¶çš„ä½¿ç”¨ï¼Œéœ€ç¦ç”¨ä»¥ä¸‹è‡ªå¸¦çš„è¡¥å…¨å¿«æ·é”®
     (unbind-key "<tab>" yas-minor-mode-map)
     (add-to-list 'yas-snippet-dirs
                  (concat my-user-emacs-directory "snippets"))
-    ;; ÉèÖÃ½â¾öÍ¬ÃûsnippetµÄ·½Ê½
+    ;; è®¾ç½®è§£å†³åŒåsnippetçš„æ–¹å¼
     (setq yas-prompt-functions
           (if (eq system-type 'windows-nt)
-              '(yas-ido-prompt yas-dropdown-prompt) ;; Windows»·¾³ÏÂÍÆ¼ö£¬ÆäÓàÖ§³Ö²»ºÃ
+              '(yas-ido-prompt yas-dropdown-prompt) ;; Windowsç¯å¢ƒä¸‹æ¨èï¼Œå…¶ä½™æ”¯æŒä¸å¥½
             '(yas-x-prompt yas-dropdown-prompt)))
     ;; (yas-global-mode 1)
     ))
 
 (defun my-plugin-yasnippet-start ()
-  (yas-minor-mode-on) ;; »á×Ô¶¯Ö´ĞĞ(yas-reload-all)
+  (yas-minor-mode-on) ;; ä¼šè‡ªåŠ¨æ‰§è¡Œ(yas-reload-all)
   )
 
 ;; =============================================================================
@@ -38,7 +40,7 @@
 ;; http://company-mode.github.io/
 ;; https://github.com/company-mode/company-mode
 ;; https://www.emacswiki.org/emacs/CompanyMode
-;; Ò»¸öÓëauto-complete¹¦ÄÜ»ù±¾ÀàËÆµÄ²¹È«²å¼ş£¬Ïà±ÈÓÚºóÕß£¬¸üĞÂ¸üÎªÆµ·±
+;; ä¸€ä¸ªä¸auto-completeåŠŸèƒ½åŸºæœ¬ç±»ä¼¼çš„è¡¥å…¨æ’ä»¶ï¼Œç›¸æ¯”äºåè€…ï¼Œæ›´æ–°æ›´ä¸ºé¢‘ç¹
 ;; ----------------------------------------------------------------------------
 (defun my-plugin-company-init ()
   (use-package company
@@ -48,8 +50,8 @@
     :init
     (add-hook 'my-prog-mode-start-hook 'my-plugin-company-start t)
     :config
-    ;; ³£ÓÃµÄ¿ì½İ¼ü£º
-    ;; <tab>ÓÃÓÚ²¹È«ºòÑ¡ÏîÖĞµÄ¹«¹²×Ö¶Î£¬<return>ÓÃÓÚ²¹È«ËùÑ¡Ïî£¬C-gÓÃÓÚÖÕÖ¹²¹È«
+    ;; å¸¸ç”¨çš„å¿«æ·é”®ï¼š
+    ;; <tab>ç”¨äºè¡¥å…¨å€™é€‰é¡¹ä¸­çš„å…¬å…±å­—æ®µï¼Œ<return>ç”¨äºè¡¥å…¨æ‰€é€‰é¡¹ï¼ŒC-gç”¨äºç»ˆæ­¢è¡¥å…¨
     ;; (define-key company-active-map (kbd "<tab>") 'company-complete-common-or-cycle)
     (unbind-key "M-n" company-active-map)
     (unbind-key "M-p" company-active-map)
@@ -62,7 +64,7 @@
                ("C-n" . company-select-next)
                ("C-p" . company-select-previous)
                ("C-t" . company-search-toggle-filtering))
-    ;; Ã»ÓĞ±ØÒªÎªÃ¿¸öÄ£Ê½·Ö±ğÆôÓÃÆä¶ÀÏíµÄºó¶Ë£¬ÒòÎªÉ¸Ñ¡ÊÊÓÃºó¶ËµÄ¹ı³Ì·Ç³£Ğ§ÂÊ
+    ;; æ²¡æœ‰å¿…è¦ä¸ºæ¯ä¸ªæ¨¡å¼åˆ†åˆ«å¯ç”¨å…¶ç‹¬äº«çš„åç«¯ï¼Œå› ä¸ºç­›é€‰é€‚ç”¨åç«¯çš„è¿‡ç¨‹éå¸¸æ•ˆç‡
     (setq company-backends `(company-elisp
                              ,(when (and (my-func-package-enabled-p 'company-jedi)
                                          (require 'company-jedi nil t))
@@ -92,11 +94,11 @@
 ;; Auto-Complete
 ;; http://auto-complete.org/
 ;; https://github.com/auto-complete
-;; Ò»¸öÄÜ¹»Ö§³Ö¶àÖÖºóÌ¨ÊµÏÖµÄ²¹È«½çÃæ£¬²¢×Ô´øÁËÒ»Ğ©Ö§³Ö¶àÖÖÓïÑÔµÄ²¹È«×Öµä
-;; ¸Ã²å¼şµÄ¿ª·¢±»²ğ·Ö³ÉÁËÒÔÏÂ¼¸¸ö×Ó×é¼ş£¬¿ÉÄÜĞèÒª·Ö±ğµØ¶ÀÁ¢°²×°£º
-;; 1) auto-complete: ²å¼şÖ÷Ìå
-;; 2) popup-el: ÌáÊ¾µ¯³ö´°¿Ú
-;; 3) fuzzy-el: ÊäÈëÆ¥Åä¾ÀÕı
+;; ä¸€ä¸ªèƒ½å¤Ÿæ”¯æŒå¤šç§åå°å®ç°çš„è¡¥å…¨ç•Œé¢ï¼Œå¹¶è‡ªå¸¦äº†ä¸€äº›æ”¯æŒå¤šç§è¯­è¨€çš„è¡¥å…¨å­—å…¸
+;; è¯¥æ’ä»¶çš„å¼€å‘è¢«æ‹†åˆ†æˆäº†ä»¥ä¸‹å‡ ä¸ªå­ç»„ä»¶ï¼Œå¯èƒ½éœ€è¦åˆ†åˆ«åœ°ç‹¬ç«‹å®‰è£…ï¼š
+;; 1) auto-complete: æ’ä»¶ä¸»ä½“
+;; 2) popup-el: æç¤ºå¼¹å‡ºçª—å£
+;; 3) fuzzy-el: è¾“å…¥åŒ¹é…çº æ­£
 ;; -----------------------------------------------------------------------------
 (defun my-plugin-auto-complete-init ()
   (use-package auto-complete
@@ -108,7 +110,7 @@
     (require 'auto-complete-config)
     (add-to-list 'ac-dictionary-directories
                  (concat my-user-emacs-directory "ac-dicts"))
-    (ac-set-trigger-key "<tab>") ;; ac»áÔÚÊäÈëtrigger keyºóÁ¢¼´Ç¿ÖÆÉúĞ§
+    (ac-set-trigger-key "<tab>") ;; acä¼šåœ¨è¾“å…¥trigger keyåç«‹å³å¼ºåˆ¶ç”Ÿæ•ˆ
     (setq ac-trigger-commands '(self-insert-command
                                 backward-delete-char
                                 backward-delete-char-untabify)
@@ -117,20 +119,20 @@
           ac-fuzzy-enable t
           ac-candidate-menu-height 8
           ;; performance
-          ac-auto-start 2 ;; ac»áÔÚÊäÈëÖ¸¶¨¸öÊıµÄ×Ö·ûºó×Ô¶¯ÉúĞ§
+          ac-auto-start 2 ;; acä¼šåœ¨è¾“å…¥æŒ‡å®šä¸ªæ•°çš„å­—ç¬¦åè‡ªåŠ¨ç”Ÿæ•ˆ
           ac-delay 0.5
-          ac-auto-show-menu nil ;; ²»»á×Ô¶¯ÏÔÊ¾ºòÑ¡´Ê²Ëµ¥
+          ac-auto-show-menu nil ;; ä¸ä¼šè‡ªåŠ¨æ˜¾ç¤ºå€™é€‰è¯èœå•
           ac-use-comphist t
-          ac-candidate-limit 15 ;; ×î´óÉÏÏŞ
+          ac-candidate-limit 15 ;; æœ€å¤§ä¸Šé™
           ;; quick help
           ac-use-quick-help t
           ac-quick-help-delay 1.0)
-    (ac-linum-workaround) ;; ½â¾öauto-completeÓëlinumÁ½¸öÄ£Ê½Ö®¼äµÄ³åÍ»
+    (ac-linum-workaround) ;; è§£å†³auto-completeä¸linumä¸¤ä¸ªæ¨¡å¼ä¹‹é—´çš„å†²çª
     ;; source
-    ;; auto-complete-config.elÎÄ¼şÖĞ¶¨ÒåÁË´óÁ¿µÄÀ©Õ¹source
-    ;; ´Ó¶øÊ¹µÃauto-completeÄÜÓë¸ü¶àµÄ²å¼şÏà¼¯³É
+    ;; auto-complete-config.elæ–‡ä»¶ä¸­å®šä¹‰äº†å¤§é‡çš„æ‰©å±•source
+    ;; ä»è€Œä½¿å¾—auto-completeèƒ½ä¸æ›´å¤šçš„æ’ä»¶ç›¸é›†æˆ
     (set-default 'ac-sources
-                 '(;; ÒÔÏÂ·ÖÀà·´Ó³µÄÖ»ÊÇÄ¿Ç°Êµ¼ÊµÄÊ¹ÓÃÇé¿ö£¬¶ø·Ç¸÷×ÔµÄ¾ÖÏŞ·¶Î§£º
+                 '(;; ä»¥ä¸‹åˆ†ç±»åæ˜ çš„åªæ˜¯ç›®å‰å®é™…çš„ä½¿ç”¨æƒ…å†µï¼Œè€Œéå„è‡ªçš„å±€é™èŒƒå›´ï¼š
                    ac-source-filename
                    ac-source-files-in-current-dir
                    ;; ac-source-words-in-buffer
@@ -138,7 +140,7 @@
                    ;; ac-source-words-in-all-buffer
                    ;; ac-source-abbrev ;; Emacs abbreviation
                    ;; ac-source-imenu ;; Emacs imenu
-                   ;; ÒÔÏÂ¸÷Ô´½«ÔÚ¾ßÌåµÄ±à³ÌÄ£Ê½Æô¶¯Ê±±»Ìí¼Ó
+                   ;; ä»¥ä¸‹å„æºå°†åœ¨å…·ä½“çš„ç¼–ç¨‹æ¨¡å¼å¯åŠ¨æ—¶è¢«æ·»åŠ 
                    ;; 1) prog-mode
                    ;; ac-source-dictionary
                    ;; ac-source-yasnippet
@@ -161,16 +163,16 @@
                    ;; ac-source-ghc-mod ;; Haskell
                    ;; ac-source-css-property ;; CSS
                    ))
-    ;; Ö»»áÔÚ¸ÃÁĞ±íÖĞÖ¸¶¨µÄÄ£Ê½ÏÂÉúĞ§£¬ÎŞÂÛÊÇ·ñÈ«¾ÖĞÔµØÆôÓÃ
+    ;; åªä¼šåœ¨è¯¥åˆ—è¡¨ä¸­æŒ‡å®šçš„æ¨¡å¼ä¸‹ç”Ÿæ•ˆï¼Œæ— è®ºæ˜¯å¦å…¨å±€æ€§åœ°å¯ç”¨
     ;; (setq ac-modes '())
     ;; (global-auto-complete-mode 1)
     ))
 
 (defun my-plugin-auto-complete-start ()
   (auto-complete-mode 1)
-  ;; ¸÷¼Ì³ĞÓÚprog-modeµÄ±à³ÌÄ£Ê½ÔÚÆô¶¯Ê±¶¼½«ÖØÉèÆäbuffer-localµÄac-sources
-  ;; ·½·¨ÊÇ¸÷×Ô×·¼Ómy-prog-ac-sourcesÁ´±í
-  ;; ÓÅµãÊÇµ±Í¬Ò»¸öbuffer¶à´ÎÇĞ»»²»Í¬µÄ±à³ÌÄ£Ê½Ê±£¬²»»á±Ë´ËÓ°Ïì
+  ;; å„ç»§æ‰¿äºprog-modeçš„ç¼–ç¨‹æ¨¡å¼åœ¨å¯åŠ¨æ—¶éƒ½å°†é‡è®¾å…¶buffer-localçš„ac-sources
+  ;; æ–¹æ³•æ˜¯å„è‡ªè¿½åŠ my-prog-ac-sourcesé“¾è¡¨
+  ;; ä¼˜ç‚¹æ˜¯å½“åŒä¸€ä¸ªbufferå¤šæ¬¡åˆ‡æ¢ä¸åŒçš„ç¼–ç¨‹æ¨¡å¼æ—¶ï¼Œä¸ä¼šå½¼æ­¤å½±å“
   (defvar my-prog-ac-sources
     (add-to-list ac-sources
                  '(ac-source-dictionary
@@ -179,7 +181,7 @@
 
 ;; =============================================================================
 ;; Flymake
-;; EmacsÄÚÖÃ£¬¾²Ì¬±àÒë¼ì²é£¬Ğ§ÂÊµÍ£¬×¼È·¶È¸ß£¬ÒÀÀµÓÚºóÌ¨±àÒëÆ÷µÄÖ§³Ö
+;; Emacså†…ç½®ï¼Œé™æ€ç¼–è¯‘æ£€æŸ¥ï¼Œæ•ˆç‡ä½ï¼Œå‡†ç¡®åº¦é«˜ï¼Œä¾èµ–äºåå°ç¼–è¯‘å™¨çš„æ”¯æŒ
 ;; -----------------------------------------------------------------------------
 (defun my-plugin-flymake-init ()
   (use-package flymake
@@ -194,11 +196,11 @@
 ;; =============================================================================
 ;; Flycheck
 ;; http://www.flycheck.org/
-;; ¾²Ì¬ÓïÒå·ÖÎö£¬Ğ§ÂÊ¸ß£¬×¼È·¶ÈµÍ£¬ÒÀÀµÓÚºóÌ¨Óï·¨½âÎöÆ÷(»ò±àÒëÆ÷Ç°¶Ë)µÄÖ§³Ö
-;; Õë¶Ô²»Í¬ÓïÑÔĞè°²×°¸÷×ÔÏàÓ¦µÄºóÌ¨Ö§³Ö£¬¾ßÌå¿É²Î¼û
+;; é™æ€è¯­ä¹‰åˆ†æï¼Œæ•ˆç‡é«˜ï¼Œå‡†ç¡®åº¦ä½ï¼Œä¾èµ–äºåå°è¯­æ³•è§£æå™¨(æˆ–ç¼–è¯‘å™¨å‰ç«¯)çš„æ”¯æŒ
+;; é’ˆå¯¹ä¸åŒè¯­è¨€éœ€å®‰è£…å„è‡ªç›¸åº”çš„åå°æ”¯æŒï¼Œå…·ä½“å¯å‚è§
 ;; http://www.flycheck.org/manual/latest/Supported-languages.html
 ;; -----------------------------------------------------------------------------
-;; ¿ì½İ¼üÇ°×º£ºC-c !
+;; å¿«æ·é”®å‰ç¼€ï¼šC-c !
 ;; C-c ! l :: (flycheck-list-errors)
 ;; RET :: Go to the current error in the source buffer
 ;; n :: Jump to the next error
@@ -236,7 +238,7 @@
                   (setq flycheck-gcc-language-standard "c++11"))
                 t))
 
-    ;; (flycheck-list-errors)¿ÉÒÔÁĞ³öµ±Ç°bufferÖĞµÄËùÓĞerror£¬ÓÅ»¯ÏÔÊ¾´°¿Ú
+    ;; (flycheck-list-errors)å¯ä»¥åˆ—å‡ºå½“å‰bufferä¸­çš„æ‰€æœ‰errorï¼Œä¼˜åŒ–æ˜¾ç¤ºçª—å£
     (add-to-list 'display-buffer-alist
                  `(,(rx bos "*Flycheck errors*" eos)
                    (display-buffer-reuse-window display-buffer-in-side-window)
@@ -244,7 +246,7 @@
                    (reusable-frames . visible)
                    (window-height   . 0.33)))
     ;; (global-flycheck-mode 1)
-    ;; ´ËÍâ£¬ÈôÊÇÊ¹ÓÃ²å¼şhelm-flycheck£¬Ôò¿ÉÒÔ»ùÓÚhelmÄ£Ê½À´³ÊÏÖĞÅÏ¢
+    ;; æ­¤å¤–ï¼Œè‹¥æ˜¯ä½¿ç”¨æ’ä»¶helm-flycheckï¼Œåˆ™å¯ä»¥åŸºäºhelmæ¨¡å¼æ¥å‘ˆç°ä¿¡æ¯
     (use-package helm-flycheck
       :if (my-func-package-enabled-p 'helm-flycheck)
       :after helm
@@ -255,7 +257,7 @@
   (flycheck-mode-on-safe))
 
 ;; =============================================================================
-;; ²å¼şhelm-gtagsÔÚÊµÏÖÉÏ²¢²»ÒÀÀµÓÚ²å¼şggtags£¬Òò´Ë¿ÉÍêÈ«´úÌæÖ®
+;; æ’ä»¶helm-gtagsåœ¨å®ç°ä¸Šå¹¶ä¸ä¾èµ–äºæ’ä»¶ggtagsï¼Œå› æ­¤å¯å®Œå…¨ä»£æ›¿ä¹‹
 (defun my-plugin-helm-gtags-init ()
   (with-eval-after-load 'helm
     (use-package helm-gtags
@@ -275,7 +277,7 @@
             helm-gtags-auto-update t
             helm-gtags-update-interval-second 60
             helm-gtags-prefix-key (kbd "C-c t")
-            ;; ÆôÓÃÒÔÏÂÅäÖÃÏî»áÊ¹µÃÄ³Ğ©³£ÓÃ¿ì½İ¼ü²»ÔÙ°ó¶¨ÓÚÉÏÊöÇ°×ºÖĞ
+            ;; å¯ç”¨ä»¥ä¸‹é…ç½®é¡¹ä¼šä½¿å¾—æŸäº›å¸¸ç”¨å¿«æ·é”®ä¸å†ç»‘å®šäºä¸Šè¿°å‰ç¼€ä¸­
             helm-gtags-suggested-key-mapping t)
       (add-hook 'c-mode-common-hook
                 (lambda ()
@@ -285,7 +287,7 @@
       (add-hook 'dired-mode-hook 'my-plugin-helm-gtags-start t)
       (add-hook 'eshell-mode-hook 'my-plugin-helm-gtags-start t)
       :config
-      (bind-keys :map helm-gtags-mode-map ;; ÒÔÏÂ½ö¹©²Î¿¼
+      (bind-keys :map helm-gtags-mode-map ;; ä»¥ä¸‹ä»…ä¾›å‚è€ƒ
                  ("C-c g a" . helm-gtags-tags-in-this-function)
                  ("C-j" . helm-gtags-select)
                  ("M-." . helm-gtags-dwim)

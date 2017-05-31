@@ -1,27 +1,29 @@
+;; -*- coding: utf-8 -*-
+
 (require 'my-prog)
 
 (defvar my-prog-py-mode-start-hook '())
 
 ;; =============================================================================
-;; ¹ØÓÚEmacs¶ÔÓÚPythonÖ§³Ö·½ÃæµÄ½éÉÜ¿É²Î¿¼ÈçÏÂ£º
+;; å…³äºEmacså¯¹äºPythonæ”¯æŒæ–¹é¢çš„ä»‹ç»å¯å‚è€ƒå¦‚ä¸‹ï¼š
 ;; https://wiki.python.org/moin/EmacsEditor
 ;; http://emacswiki.org/emacs/PythonProgrammingInEmacs
 ;; https://realpython.com/blog/python/emacs-the-best-python-editor/
 
 ;; =============================================================================
 ;; python.el
-;; EmacsÄÚÖÃÁË¸Ã²å¼ş£¬²¢½«Æä×÷Îª¶Ôpython-modeÖ÷Ä£Ê½µÄÄ¬ÈÏÖ§³Ö
-;; ÊµÏÖÀíÄîÊÇ¼ò½à£¬¾¡¿ÉÄÜµØÒÀÀµ²¢ÈÚºÏÓÚEmacsÖĞÒÑÓĞµÄ¹¦ÄÜ
+;; Emacså†…ç½®äº†è¯¥æ’ä»¶ï¼Œå¹¶å°†å…¶ä½œä¸ºå¯¹python-modeä¸»æ¨¡å¼çš„é»˜è®¤æ”¯æŒ
+;; å®ç°ç†å¿µæ˜¯ç®€æ´ï¼Œå°½å¯èƒ½åœ°ä¾èµ–å¹¶èåˆäºEmacsä¸­å·²æœ‰çš„åŠŸèƒ½
 ;; -----------------------------------------------------------------------------
 (defun my-plugin-python-init ()
-  (let ((exe "python3")) ;; python»òpython3
+  (let ((exe "python3")) ;; pythonæˆ–python3
     (when (eq system-type 'windows-nt)
       (when (my-func-executable-find exe "python.exe" t)
         (setq exe "python.exe")))
     (use-package python
       :if (executable-find exe)
-      ;; ´Ëº¯ÊıµÄÖ´ĞĞ¾ÍÊÇÔÚ(load 'python)Ö®ºó£¬Òò´Ë:initÓë:configµÄĞ§¹ûÀíÓ¦ÊÇµÈ¼ÛµÄ
-      ;; ½ñºó¿ÉÒÔÊ¹ÓÃ:mode¸Ä½øµ±Ç°ÊµÏÖ
+      ;; æ­¤å‡½æ•°çš„æ‰§è¡Œå°±æ˜¯åœ¨(load 'python)ä¹‹åï¼Œå› æ­¤:initä¸:configçš„æ•ˆæœç†åº”æ˜¯ç­‰ä»·çš„
+      ;; ä»Šåå¯ä»¥ä½¿ç”¨:modeæ”¹è¿›å½“å‰å®ç°
       :init
       (add-hook 'my-prog-py-mode-start-hook 'my-plugin-python-start t)
       :config
@@ -40,31 +42,31 @@
 
 ;; =============================================================================
 ;; python-mode.el
-;; ¸Ã²å¼şÓÃÓÚÍêÈ«´úÌæpython.el£¬ÆäÓÅµãÊÇÄÜ¹»Ö§³Öµ¥Ôª²âÊÔ¡¢IPythonµÈ¶îÍâ¹¦ÄÜ
-;; ÊµÏÖÉè¼ÆÀíÄîÊÇ´ó¶øÈ«£¬¾¡¿ÉÄÜµØ²»ÒÀÀµ²¢¶ÀÁ¢ÓÚÆäËû¹¤¾ß
+;; è¯¥æ’ä»¶ç”¨äºå®Œå…¨ä»£æ›¿python.elï¼Œå…¶ä¼˜ç‚¹æ˜¯èƒ½å¤Ÿæ”¯æŒå•å…ƒæµ‹è¯•ã€IPythonç­‰é¢å¤–åŠŸèƒ½
+;; å®ç°è®¾è®¡ç†å¿µæ˜¯å¤§è€Œå…¨ï¼Œå°½å¯èƒ½åœ°ä¸ä¾èµ–å¹¶ç‹¬ç«‹äºå…¶ä»–å·¥å…·
 ;; https://launchpad.net/python-mode
 ;; https://github.com/emacsmirror/python-mode
 ;; -----------------------------------------------------------------------------
 
-;; ÏÂÊö²å¼ş¶¼ÒÀÀµÓÚ¶îÍâµÄPython¿âµÄÖ§³Ö£¬ĞèÒªÊ×ÏÈ°²×°¶ÔÓ¦µÄPython¿â²ÅÄÜ¹»Õı³£Ê¹ÓÃ
-;; ELPYÓëRopemacsÕâÁ½ÕßËùÌá¹©µÄ×÷ÓÃÀàËÆ£¬Ò»°ã»¥³âÊ¹ÓÃ
-;; Á½Õß¶¼Ìá¹©ÁË¶ÔÓÚPython½âÊÍÆ÷µÄµ÷ÓÃ£¬ÒÔ¼°Ò»Ğ©Python¿âµÄ¶îÍâÖ§³Ö
+;; ä¸‹è¿°æ’ä»¶éƒ½ä¾èµ–äºé¢å¤–çš„Pythonåº“çš„æ”¯æŒï¼Œéœ€è¦é¦–å…ˆå®‰è£…å¯¹åº”çš„Pythonåº“æ‰èƒ½å¤Ÿæ­£å¸¸ä½¿ç”¨
+;; ELPYä¸Ropemacsè¿™ä¸¤è€…æ‰€æä¾›çš„ä½œç”¨ç±»ä¼¼ï¼Œä¸€èˆ¬äº’æ–¥ä½¿ç”¨
+;; ä¸¤è€…éƒ½æä¾›äº†å¯¹äºPythonè§£é‡Šå™¨çš„è°ƒç”¨ï¼Œä»¥åŠä¸€äº›Pythonåº“çš„é¢å¤–æ”¯æŒ
 
 ;; =============================================================================
 ;; ELPY (Emacs Lisp Python Environment)
 ;; https://github.com/jorgenschaefer/elpy
-;; ÒÀÀµµÄpython¿â£ºflake8, jedi
+;; ä¾èµ–çš„pythonåº“ï¼šflake8, jedi
 ;; -----------------------------------------------------------------------------
 (defun my-plugin-elpy-init ()
-  ;; ³£ÓÃ¿ì½İ¼ü£º
-  ;; C-c C-cÓÃÓÚµ÷ÓÃPython½âÊÍÆ÷
+  ;; å¸¸ç”¨å¿«æ·é”®ï¼š
+  ;; C-c C-cç”¨äºè°ƒç”¨Pythonè§£é‡Šå™¨
   (use-package elpy
     :if (my-func-package-enabled-p 'elpy)
     :commands (elpy-enable elpy-mode)
     :init
     (add-hook 'my-prog-py-mode-start-hook 'my-plugin-elpy-start t)
     :config
-    ;; elpyÄ¬ÈÏÖ§³Ö²¢Ê¹ÓÃEmacsÄÚÖÃµÄflymake£¬µ«¿ÉËæÒâµØÇĞ»»³Éflycheck
+    ;; elpyé»˜è®¤æ”¯æŒå¹¶ä½¿ç”¨Emacså†…ç½®çš„flymakeï¼Œä½†å¯éšæ„åœ°åˆ‡æ¢æˆflycheck
     (with-eval-after-load 'flycheck
       (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
       (add-hook 'elpy-mode-hook 'flycheck-mode-on-safe t))
@@ -74,8 +76,8 @@
       :commands (py-autopep8-enable-on-save)
       :init
       (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save t))
-    ;; (setq elpy-rpc-backend "jedi") ;; Ö§³ÖropeºÍjediÕâÁ½¸ö¿â
-    ;; Ö¸¶¨Python½âÊÍÆ÷
+    ;; (setq elpy-rpc-backend "jedi") ;; æ”¯æŒropeå’Œjediè¿™ä¸¤ä¸ªåº“
+    ;; æŒ‡å®šPythonè§£é‡Šå™¨
     ;; (elpy-use-ipython) ;; (elpy-use-cpython)
     ;; (elpy-enable)
     ))
@@ -85,13 +87,13 @@
 
 ;; =============================================================================
 ;; Ropemacs
-;; ÒÀÀµµÄpython¿â£ºrope, pymacs, ropemacs
-;; ÆäÖĞpymacs¿âÔÚ°²×°ºó»á×Ô¶¯Éú³Épymacs.el²å¼ş£¬ĞèÒª½«¸Ã²å¼ş¼ÓÈëÖÁ'load-pathÖĞ
-;; ¶øropemacs¿âÔòÎªEmacsÌá¹©ÁËÒ»¸öÊ¹ÓÃrope¿âµÄ×ÓÄ£Ê½ropemacs-mode
-;; ¸Ã×ÓÄ£Ê½»áËæpymacs.el²å¼şµÄ¼ÓÔØ¶ø±»×Ô¶¯¹ØÁªÖÁ'python-mode-hookÖĞ
-;; ¼´(add-hook 'python-mode-hook 'ropemacs-mode)
-;; Ã¿µ±roepmacs-modeÆôÓÃÊ±£¬Ò»¸öpymacs¿Í»§½ø³ÌºÍÒ»¸öPython½âÊÍÆ÷½«±»Æô¶¯£¬²¢±Ë´ËÏàÁ¬
-;; ËæºóEmacs½«Í¨¹ıÓë¸Ã¿Í»§½ø³Ì½øĞĞÍ¨ĞÅ£¬´Ó¶ø»ñÈ¡rope¿âµÄÏà¹ØÖ§³Ö
+;; ä¾èµ–çš„pythonåº“ï¼šrope, pymacs, ropemacs
+;; å…¶ä¸­pymacsåº“åœ¨å®‰è£…åä¼šè‡ªåŠ¨ç”Ÿæˆpymacs.elæ’ä»¶ï¼Œéœ€è¦å°†è¯¥æ’ä»¶åŠ å…¥è‡³'load-pathä¸­
+;; è€Œropemacsåº“åˆ™ä¸ºEmacsæä¾›äº†ä¸€ä¸ªä½¿ç”¨ropeåº“çš„å­æ¨¡å¼ropemacs-mode
+;; è¯¥å­æ¨¡å¼ä¼šéšpymacs.elæ’ä»¶çš„åŠ è½½è€Œè¢«è‡ªåŠ¨å…³è”è‡³'python-mode-hookä¸­
+;; å³(add-hook 'python-mode-hook 'ropemacs-mode)
+;; æ¯å½“roepmacs-modeå¯ç”¨æ—¶ï¼Œä¸€ä¸ªpymacså®¢æˆ·è¿›ç¨‹å’Œä¸€ä¸ªPythonè§£é‡Šå™¨å°†è¢«å¯åŠ¨ï¼Œå¹¶å½¼æ­¤ç›¸è¿
+;; éšåEmacså°†é€šè¿‡ä¸è¯¥å®¢æˆ·è¿›ç¨‹è¿›è¡Œé€šä¿¡ï¼Œä»è€Œè·å–ropeåº“çš„ç›¸å…³æ”¯æŒ
 ;; -----------------------------------------------------------------------------
 (defun my-plugin-ropemacs-init ()
   (use-package ropemacs
@@ -105,14 +107,14 @@
     :config
     (when (and (require 'pymacs nil t)
                (pymacs-load "ropemacs" "rope-" t))
-      ;; ropemacsÄ£Ê½ÖĞµÄ×Ô¶¯²¹È«¿ì½İ¼üÓëauto-complete²»Í¬£¬Ä¬ÈÏÎªM-/£¬¿É×÷ÎªºóÕßµÄ²¹³ä
-      ;; ÒòÎªºóÕßÔÚÄ³Ğ©Çé¿öÏÂ±ØĞëÖÁÉÙÊäÈëÒ»¸ö×Ö·û£¬¶ø´ËÊ±¾Í¿ÉÒÔÊ¹ÓÃÇ°Õß
+      ;; ropemacsæ¨¡å¼ä¸­çš„è‡ªåŠ¨è¡¥å…¨å¿«æ·é”®ä¸auto-completeä¸åŒï¼Œé»˜è®¤ä¸ºM-/ï¼Œå¯ä½œä¸ºåè€…çš„è¡¥å……
+      ;; å› ä¸ºåè€…åœ¨æŸäº›æƒ…å†µä¸‹å¿…é¡»è‡³å°‘è¾“å…¥ä¸€ä¸ªå­—ç¬¦ï¼Œè€Œæ­¤æ—¶å°±å¯ä»¥ä½¿ç”¨å‰è€…
       (setq ropemacs-confirm-saving t
             ropemacs-enable-autoimport t
             ropemacs-autoimport-modules '("os" "sys" "inspect")))))
 
 (defun my-plugin-ropemacs-start ()
-  ;; (ropemacs-mode 1) ;;ÎŞĞèÊÖ¶¯ÆôÓÃ
+  ;; (ropemacs-mode 1) ;;æ— éœ€æ‰‹åŠ¨å¯ç”¨
   (when (and (my-func-minor-mode-on-p auto-complete-mode)
              (boundp 'ac-sources) (boundp 'my-prog-ac-sources))
     (setq ac-sources
@@ -127,7 +129,7 @@
   (add-hook 'python-mode-hook 'my-prog-py-mode-start t))
 
 (defun my-prog-py-mode-start ()
-  ;; ½«lambdaÏÔÊ¾Îª¦Ë
+  ;; å°†lambdaæ˜¾ç¤ºä¸ºÎ»
   (prettify-symbols-mode 1)
   (setq prettify-symbols-alist '(("lambda" . 955)))
   (run-hooks 'my-prog-py-mode-start-hook))
