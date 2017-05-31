@@ -66,12 +66,12 @@
   (package-initialize) ;; 方式2) 主动执行该函数以加载插件
   ;; 目前使用此全局变量来管理插件的启用/禁用，其中包括了ELPA更新源中所没有的插件
   (setq package-selected-packages '(atom-one-dark-theme
-                                    ;; all-the-icons ;; 首次安装后需要额外地安装字体
+                                    ;; all-the-icons, all-the-icons-dired
                                     powerline ;; smart-mode-line-powerline-theme
                                     ;; smart-mode-line
                                     avy ;; ace-jump-mode
                                     ;; ace-pinyin
-                                    sr-speedbar
+                                    neotree ;; sr-speedbar
                                     helm ;; icomplete, anything, ido, smex, ivy
                                     helm-gtags
                                     flyspell
@@ -129,7 +129,12 @@
 (use-package all-the-icons
   :if (my-func-package-enabled-p 'all-the-icons)
   :init
-  (all-the-icons-install-fonts))
+  ;; 此插件在首次使用前需要额外地安装字体，执行以下命令会下载所需字体
+  ;; Windows上需手动安装；Linux上会自动安装，即执行$fc-cache -f -v
+  ;; 但目前发现Linux上会因权限问题而导致安装失败，因此仍推荐手动安装
+  ;; 字体下载目录默认为HOME/.local/share/fonts
+  ;; (all-the-icons-install-fonts)
+  )
 
 (use-package powerline
   :if (my-func-package-enabled-p 'powerline)
@@ -312,6 +317,10 @@
 (unbind-key "C-x C-l") ;; (downcase-region)
 (unbind-key "C-x C-u") ;; (upcase-region)
 (bind-keys ("C-S-a" . mark-whole-buffer)
+           ("C-S-h" . windmove-left)
+           ("C-S-l" . windmove-right)
+           ("C-S-j" . windmove-down)
+           ("C-S-k" . windmove-up)
            ("<C-wheel-up>" . text-scale-increase)
            ("<C-wheel-down>" . text-scale-decrease)
            ("<C-up>" . text-scale-increase)
@@ -398,11 +407,16 @@
   (helm-mode 1))
 
 (use-package projectile
+  :preface
+  (defvar my-plugin-projectile-switch-hook '())
+  (defun my-plugin-projectile-switch-action ()
+    (run-hooks 'my-plugin-projectile-switch-hook))
   :if (my-func-package-enabled-p 'projectile)
   :init
   (setq projectile-indexing-method 'alien
         projectile-enable-caching t
-        projectile-keymap-prefix (kbd "C-c p"))
+        projectile-keymap-prefix (kbd "C-c p")
+        projectile-switch-project-action 'my-plugin-projectile-switch-action)
   :config
   (projectile-mode 1)
   ;; (add-to-list 'projectile-other-file-alist '("html" "js"))
@@ -410,10 +424,10 @@
     :if (my-func-package-enabled-p 'helm-projectile)
     :after helm
     :init
-    (setq helm-projectile-fuzzy-match t)
+    (setq helm-projectile-fuzzy-match t
+          projectile-completion-system 'helm)
     :config
-    (setq projectile-completion-system 'helm
-          projectile-switch-project-action 'helm-projectile)
+    (add-hook 'my-plugin-projectile-switch-hook 'helm-projectile t)
     (helm-projectile-on)))
 
 (use-package magit
@@ -435,11 +449,44 @@
   :if (my-func-package-enabled-p 'sr-speedbar)
   :bind (("C-S-s" . sr-speedbar-toggle))
   :init
-  (setq speedbar-use-images nil ;; 不使用image方式
-        speedbar-show-unknown-files t)
+  (setq speedbar-use-images nil
+        speedbar-show-unknown-files t
+        ;; speedbar-verbosity-level 0
+        sr-speedbar-right-side nil
+        sr-speedbar-max-width 30
+        sr-speedbar-delete-windows nil
+        sr-speedbar-skip-other-window-p t)
   :config
   (bind-keys :map speedbar-file-key-map
              ("<tab>" . speedbar-edit-line)))
+
+(use-package neotree
+  :preface
+  (defun my-plugin-neotree-toggle ()
+    (interactive)
+    (let ((root (when (and (fboundp 'projectile-project-p)
+                           (fboundp 'projectile-project-root)
+                           (projectile-project-p))
+                  (projectile-project-root)))
+          (file (buffer-file-name)))
+      (neotree-toggle)
+      (if (and root file (neo-global--window-exists-p))
+          (progn
+            (neotree-dir root)
+            (neotree-find file))
+        (message "neotree: could not find projectile project"))))
+  :if (my-func-package-enabled-p 'neotree)
+  :ensure all-the-icons
+  :bind (("C-S-s" . my-plugin-neotree-toggle))
+  :init
+  (setq neo-theme (if (display-graphic-p) 'icons ;; (require 'all-the-icons)
+                    'nerd)
+        neo-smart-open t
+        neo-show-hidden-files nil
+        neo-show-updir-line t
+        neo-window-width 28)
+  :config
+  (add-hook 'my-plugin-projectile-switch-hook 'neotree-projectile-action t))
 
 (use-package org
   :bind (("C-c o c" . org-capture)
