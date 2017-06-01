@@ -36,6 +36,7 @@
 (setq-default default-directory default-directory
               user-emacs-directory user-emacs-directory)
 (defconst my-user-emacs-directory (concat user-emacs-directory "my-emacs/"))
+(defconst my-private-emacs-directory (concat user-emacs-directory ".private/"))
 
 ;; (normal-top-level-add-subdirs-to-load-path)
 ;; (normal-top-level-add-to-load-path)
@@ -71,6 +72,8 @@
                                     ;; smart-mode-line, smart-mode-line-powerline-theme
                                     avy ;; ace-jump-mode
                                     ;; ace-pinyin
+                                    undo-tree
+                                    ;; evil
                                     neotree ;; sr-speedbar
                                     helm ;; icomplete, anything, ido, smex, ivy
                                     helm-gtags
@@ -87,6 +90,7 @@
                                     elpy ;; ropemacs
                                     py-autopep8
                                     auctex
+                                    ;; w3m
                                     erc ;; circe, rcirc
                                     use-package))
   (when (not package-archive-contents)
@@ -488,6 +492,26 @@
   (when (eq plg 'avy)
     (ace-pinyin-global-mode 1)))
 
+(use-package undo-tree
+  :if (my-func-package-enabled-p 'undo-tree)
+  :config
+  (global-undo-tree-mode))
+
+(use-package evil
+  :if (my-func-package-enabled-p 'evil)
+  :config
+  (bind-keys :map evil-normal-state-map
+             ("q" . read-only-mode)
+             ("C-a" . move-beginning-of-line)
+             ("C-e" . move-end-of-line)
+             ("C-S-h" . evil-window-left)
+             ("C-S-l" . evil-window-right)
+             ("C-S-j" . evil-window-down)
+             ("C-S-k" . evil-window-up)
+             ("C-v" . evil-scroll-page-down)
+             ("M-v" . evil-scroll-page-up))
+  (evil-mode 1))
+
 ;; File Extension
 ;; (setq auto-mode-alist (cons '("\\.emacs\\'" . emacs-lisp-mode) auto-mode-alist))
 
@@ -532,7 +556,8 @@
   ;; 字体下载目录默认为HOME/.local/share/fonts
   ;; (all-the-icons-install-fonts)
   :config
-  (when (my-func-package-enabled-p 'all-the-icons-dired)
+  (when (and (my-func-package-enabled-p 'all-the-icons-dired)
+             (require 'all-the-icons-dired nil t))
     ))
 
 (use-package powerline
@@ -551,6 +576,7 @@
           (my-func-package-enabled-p 'spaceline-all-the-icons))
   :config
   (require 'spaceline-config)
+  (setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
   (when (my-func-package-enabled-p 'spaceline)
     ;; (spaceline-emacs-theme)
     (spaceline-spacemacs-theme))
@@ -560,7 +586,8 @@
   :if (my-func-package-enabled-p 'spaceline-all-the-icons)
   :config
   (spaceline-all-the-icons-theme)
-  (spaceline-all-the-icons--setup-neotree))
+  (spaceline-all-the-icons--setup-neotree)
+  (spaceline-all-the-icons--setup-package-updates))
 
 (use-package smart-mode-line
   :if (or (my-func-package-enabled-p 'smart-mode-line)
@@ -573,6 +600,25 @@
         sml/shorten-directory t
         sml/shorten-modes t)
   (smart-mode-line-enable))
+
+(use-package w3m
+  :preface
+  (defvar-local my-plugin-w3m-exe
+    (if (eq system-type 'windows-nt)
+        (my-func-executable-find "w3m" "w3m.exe" t)
+      (executable-find "w3m")))
+  :if (and (my-func-package-enabled-p 'w3m) my-plugin-w3m-exe)
+  :config
+  (setq w3m-home-page "http://www.baidu.com/"
+        w3m-command-arguments '("-cookie" "-F")
+        w3m-quick-start t
+        w3m-use-cookies t
+        w3m-use-favicon t
+        w3m-use-symbol t
+        w3m-default-display-inline-images t
+        w3m-show-graphic-icons-in-header-line nil
+        w3m-show-graphic-icons-in-mode-line nil)
+  (setq browse-url-browser-function 'w3m-browse-url))
 
 (use-package erc
   :if (my-func-package-enabled-p 'erc)
