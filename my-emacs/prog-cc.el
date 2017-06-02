@@ -2,6 +2,16 @@
 
 (setq my-prog-cc-mode-start-hook '())
 
+(add-hook 'after-save-hook
+          (lambda ()
+            (when (and (or (eq major-mode 'c-mode)
+                           (eq major-mode 'c++-mode))
+                       (executable-find "uncrustify"))
+              (auto-revert-notify-rm-watch)
+              (shell-command (concat "uncrustify -l C -c ~/.uncrustify/alps.cfg --no-backup "
+                                     buffer-file-name))
+              (auto-revert-notify-add-watch))))
+
 ;; =============================================================================
 ;; Style
 ;; -----------------------------------------------------------------------------

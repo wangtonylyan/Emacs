@@ -177,9 +177,9 @@
       select-enable-clipboard t
       current-language-environment "Chinese-GB"
       auto-revert-use-notify t
+      auto-revert-interval 1
       auto-revert-verbose nil
       auto-revert-stop-on-user-input t
-      auto-revert-interval 5
       delete-by-moving-to-trash t
       make-backup-files t ;; 启用自动备份
       version-control t ;; 启用版本控制，即可以备份多次
@@ -224,7 +224,8 @@
 ;; (add-hook 'xxx-mode-hook 'turn-on-font-lock) ;; (font-lock-mode 1)
 ;; (global-linum-mode 1) ;; 左侧行号，推荐仅将其显示于主要的编辑文档中
 ;; (add-hook 'xxx-mode-hook 'linum-mode)
-(global-highlight-changes-mode 1)
+(global-hi-lock-mode 1)
+;; (global-highlight-changes-mode 1)
 (mouse-avoidance-mode 'animate) ;; 当光标移动至鼠标位置时，为避免遮挡视线，自动移开鼠标
 ;; (save-place-mode 1) ;; 记录光标在每个文件中最后一次访问时所在的位置
 (set-cursor-color "white")
@@ -243,7 +244,7 @@
       highlight-changes-global-changes-existing-buffers nil
       highlight-changes-visibility-initial-state t
       highlight-changes-face-list nil
-      highlight-changes-colors nil
+      ;; highlight-changes-colors nil
       blink-cursor-blinks 0
       ;; 这里暂不使用平滑滚动，而是通过设置以下变量以尽可能地避免页面滚动时画面的频繁跳动
       ;; mouse wheel scrolling
@@ -273,11 +274,14 @@
               truncate-lines truncate-lines
               word-wrap word-wrap
               tab-width 4)
-;; 每次保存buffer时都将删除现有的改动高亮
-;; 替换成另外两个hook就会无效，原因未知：write-content-functions或write-file-functions
+
 (add-hook 'before-save-hook
           (lambda ()
             (delete-trailing-whitespace) ;; 删除每行末尾的空格
+            (when (derived-mode-p 'prog-mode)
+              (indent-region (point-min) (point-max)))
+            ;; 每次保存buffer时都将删除现有的改动高亮
+            ;; 替换成另外两个hook就会无效，原因未知：write-content-functions或write-file-functions
             (highlight-changes-remove-highlight (point-min) (point-max)))
           t)
 
@@ -288,10 +292,12 @@
 ;; C-c p :: projectile, helm-projectile
 ;; C-c g :: magit
 ;; C-c o :: org
+;; C-c i :: highlight
 (unbind-key "C-x o") ;; (other-window)
 (unbind-key "C-x f") ;; (set-fill-column)
 (unbind-key "C-x C-l") ;; (downcase-region)
 (unbind-key "C-x C-u") ;; (upcase-region)
+(unbind-key "M-s h")
 (bind-keys ("C-S-a" . mark-whole-buffer)
            ("C-S-h" . windmove-left)
            ("C-S-l" . windmove-right)
@@ -303,7 +309,12 @@
            ("<C-down>" . text-scale-decrease)
            ("C-x C--" . downcase-region)
            ("C-x C-=" . upcase-region)
-           ("C-q" . read-only-mode))
+           ("C-q" . read-only-mode)
+           ("C-c i i" . highlight-symbol-at-point)
+           ("C-c i p" . highlight-phrase)
+           ("C-c i r" . highlight-regexp)
+           ("C-c i l" . highlight-lines-matching-regexp)
+           ("C-c i u" . unhighlight-regexp))
 (windmove-default-keybindings)
 (put 'downcase-region 'disabled nil) ;; 去除每次执行此命令时的提示，强制执行
 (put 'upcase-region 'disabled nil)
@@ -494,8 +505,11 @@
 
 (use-package undo-tree
   :if (my-func-package-enabled-p 'undo-tree)
+  :init
+  (setq undo-tree-visualizer-diff nil
+        undo-tree-visualizer-relative-timestamps nil)
   :config
-  (global-undo-tree-mode))
+  (global-undo-tree-mode 1))
 
 (use-package evil
   :if (my-func-package-enabled-p 'evil)
