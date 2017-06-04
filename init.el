@@ -278,7 +278,7 @@
 (add-hook 'before-save-hook
           (lambda ()
             (delete-trailing-whitespace) ;; 删除每行末尾的空格
-            (when (derived-mode-p 'prog-mode)
+            (when (derived-mode-p 'lisp-mode 'emacs-lisp-mode)
               (indent-region (point-min) (point-max)))
             ;; 每次保存buffer时都将删除现有的改动高亮
             ;; 替换成另外两个hook就会无效，原因未知：write-content-functions或write-file-functions
@@ -361,16 +361,8 @@
          ("C-x C-b" . helm-buffers-list)
          ("C-o" . helm-occur))
   :diminish helm-mode
-  :config
+  :init
   (require 'helm-config)
-  (unbind-key "C-x c")
-  (bind-keys :map helm-map
-             ;; 'helm-execute-persistent-action相比于'helm-select-action更常用
-             ("<tab>" . helm-execute-persistent-action)
-             ("<C-return>" . helm-select-action)
-             :map minibuffer-local-map
-             ("M-p" . helm-minibuffer-history)
-             ("M-n" . helm-minibuffer-history))
   (setq helm-split-window-in-side-p t
         helm-display-header-line nil
         helm-echo-input-in-header-line nil
@@ -386,10 +378,22 @@
         ;; helm-apropos-fuzzy-match t
         ;; helm-etags-fuzzy-match t
         helm-move-to-line-cycle-in-source t
+        helm-follow-input-idle-delay 0.5
+        helm-follow-mode-persistent nil
+        ;; helm-source-names-using-follow '("Occur")
         helm-buffer-skip-remote-checking t
         ;; 配置该参数可以指定不同的后台支持，包括imenu、ido、smex等
         ;; helm-completing-read-handlers-alist
         )
+  :config
+  (unbind-key "C-x c")
+  (bind-keys :map helm-map
+             ("<tab>" . helm-execute-persistent-action)
+             ("M-x" . helm-select-action)
+             ("<C-tab>" . helm-follow-mode)
+             :map minibuffer-local-map
+             ("M-p" . helm-minibuffer-history)
+             ("M-n" . helm-minibuffer-history))
   (helm-autoresize-mode 1)
   (helm-mode 1))
 
@@ -488,7 +492,7 @@
 
 (use-package avy
   :if (my-func-package-enabled-p 'avy)
-  :bind (("C-:" . avy-goto-char) ;; (avy-goto-char-timer)
+  :bind (("C-:" . avy-goto-char-timer) ;; (avy-goto-char)
          ("C-'" . avy-pop-mark))
   :config
   ;; (avy-setup-default)
