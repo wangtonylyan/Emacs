@@ -288,7 +288,7 @@
 ;; Key Binding
 ;; 命令集前缀
 ;; C-c h :: helm
-;; C-c t :: helm-gtags
+;; C-c c :: helm-gtags
 ;; C-c p :: projectile, helm-projectile
 ;; C-c g :: magit
 ;; C-c o :: org
@@ -413,6 +413,7 @@
   ;; (add-to-list 'projectile-other-file-alist '("html" "js"))
   (use-package helm-projectile
     :if (my-func-package-enabled-p 'helm-projectile)
+    :demand t ;; 初始化后就立即启用，基于project的方式管理各类文件
     :after helm
     :init
     (setq helm-projectile-fuzzy-match t
