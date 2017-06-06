@@ -1,15 +1,22 @@
+;; -*- coding: utf-8 -*-
+
 (require 'my-prog-cc)
 
 ;; =============================================================================
-;; 1) ¶ÔÓÚ¸´ÔÓµÄÏîÄ¿£¬Ó¦ÀûÓÃede-newĞÂ½¨²¢ÀûÓÃProject.edeÎÄ¼ş¶¨ÖÆ
-;; ede-project-directoriesµÄ×÷ÓÃ£º
-;; (a) Ò»·½ÃæÊÇËõĞ¡edeËÑË÷µÄ·¶Î§ÒÔÌá¸ßĞÔÄÜ
-;; (b) ÁíÒ»·½ÃæÊÇÏŞÖÆede-new¿ÉÒÔÉúĞ§µÄ·¶Î§
-(setq ede-project-directories '())
-(add-to-list 'ede-project-directories (expand-file-name "~/projects"))
+;; 1) å¯¹äºå¤æ‚çš„é¡¹ç›®ï¼Œåº”åˆ©ç”¨ede-newæ–°å»ºå¹¶åˆ©ç”¨Project.edeæ–‡ä»¶å®šåˆ¶
+;; ede-project-directoriesçš„ä½œç”¨ï¼š
+;; (a) ä¸€æ–¹é¢æ˜¯ç¼©å°edeæœç´¢çš„èŒƒå›´ä»¥æé«˜æ€§èƒ½
+;; (b) å¦ä¸€æ–¹é¢æ˜¯é™åˆ¶ede-newå¯ä»¥ç”Ÿæ•ˆçš„èŒƒå›´
+(defvar my-ede-project-dirs '())
+
+(mapc (lambda (dir)
+        (when (file-directory-p dir)
+          (add-to-list 'my-ede-project-dirs (expand-file-name dir) t)))
+      (mapcar (lambda (dir) (concat default-directory dir))
+              '("project" "projects" "Project" "Projects")))
 
 ;; =============================================================================
-;; 2) ¶ÔÓÚ¼òµ¥µÄÏîÄ¿£¬Ó¦ÀûÓÃÒÔÏÂº¯ÊıĞÂ½¨²¢¶¨ÖÆ
+;; 2) å¯¹äºç®€å•çš„é¡¹ç›®ï¼Œåº”åˆ©ç”¨ä»¥ä¸‹å‡½æ•°æ–°å»ºå¹¶å®šåˆ¶
 (let ((root "~/projects/workspace-eclipse/evolution/evolution/evo_btappl/.project"))
   (when (file-exists-p root)
     (ede-cpp-root-project "evo_btappl"

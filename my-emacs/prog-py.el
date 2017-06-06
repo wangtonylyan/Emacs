@@ -98,6 +98,7 @@
 (defun my-plugin-ropemacs-init ()
   (use-package ropemacs
     :if (my-func-package-enabled-p 'ropemacs)
+    :demand t
     :commands (ropemacs-mode)
     :init
     (let ((path (concat package-user-dir "/ropemacs")))

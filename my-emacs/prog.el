@@ -70,7 +70,7 @@
                                          (require 'company-jedi nil t))
                                 'company-jedi)
                              company-semantic ;; Semantic
-                             company-clang ;; Clang
+                             ;; company-clang ;; Clang
                              ;; company-eclim ;; Eclipse
                              ;; company-xcode ;; Xcode
                              company-cmake ;; CMake
@@ -95,10 +95,6 @@
 ;; http://auto-complete.org/
 ;; https://github.com/auto-complete
 ;; 一个能够支持多种后台实现的补全界面，并自带了一些支持多种语言的补全字典
-;; 该插件的开发被拆分成了以下几个子组件，可能需要分别地独立安装：
-;; 1) auto-complete: 插件主体
-;; 2) popup-el: 提示弹出窗口
-;; 3) fuzzy-el: 输入匹配纠正
 ;; -----------------------------------------------------------------------------
 (defun my-plugin-auto-complete-init ()
   (use-package auto-complete
@@ -107,7 +103,7 @@
     :init
     (add-hook 'my-prog-mode-start-hook 'my-plugin-auto-complete-start t)
     :config
-    (require 'auto-complete-config)
+    (ac-config-default)
     (add-to-list 'ac-dictionary-directories
                  (concat my-user-emacs-directory "ac-dicts"))
     (ac-set-trigger-key "<tab>") ;; ac会在输入trigger key后立即强制生效

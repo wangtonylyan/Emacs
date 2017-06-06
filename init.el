@@ -171,7 +171,7 @@
       inhibit-startup-message 1 ;; 取消启动界面
       frame-title-format '(buffer-file-name "%f" ("%b")) ;; 设置标题栏显示为buffer名字
       uniquify-buffer-name-style 'post-forward-angle-brackets ;; 重名buffer的命名
-      visible-bell t ;; 以窗口闪烁的方式代替错误提示音
+      visible-bell nil ;; 以窗口闪烁的方式代替错误提示音
       echo-keystrokes 0.1
       debug-on-error nil ;; 显示错误信息
       select-enable-clipboard t
@@ -542,7 +542,7 @@
           (load (concat path name) t nil nil t))
         '(;; prog-mode与text-mode是相互独立的
           "prog" ;; prog-mode
-          ;; "prog-cc" ;; cc-mode (c-mode, c++-mode, java-mode)
+          "prog-cc" ;; cc-mode (c-mode, c++-mode, java-mode)
           ;; "prog-lisp" ;; lisp-mode, emacs-lisp-mode, lisp-interaction-mode
           "prog-py" ;; python-mode
           ;; "prog-hs" ;; haskell-mode
