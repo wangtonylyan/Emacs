@@ -36,6 +36,7 @@
 ;; 以下设置仅针对于C和C++
 (defun my-plugin-cedet-init()
   (use-package cedet
+    :demand t
     :commands (semantic-mode semantic-toggle-minor-mode-globally)
     :init
     (setq semantic-default-submodes '(;; Idle Scheduler
@@ -92,17 +93,6 @@
                                                   unloaded ;; 若搜索到的文件的SemanticDB没有导入/生成，则导入/生成之
                                                   omniscience ;; 自己创建的数据库就属于此类
                                                   )
-          ;; 可以预先主动地对某些目录生成数据库，以便今后复用
-          semanticdb-search-system-databases t
-          semanticdb-project-system-databases
-          (let ((lst '()))
-            (mapcar (lambda (path)
-                      (add-to-list 'lst
-                                   (semanticdb-create-database semanticdb-new-database-class path)
-                                   t))
-                    '("/usr/include" "/usr/local/include"
-                      ;; "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
-                      )))
           ;; -------------------------------------------------------------------
           semantic-stickyfunc-sticky-classes '(function type) ;; variable, include, package
           semantic-decoration-styles '(("semantic-tag-boundary" . t)
@@ -116,6 +106,17 @@
       :commands (cedet-gnu-global-version-check))
     (add-hook 'my-prog-cc-mode-start-hook 'my-plugin-cedet-start t)
     :config
+    (semantic-mode 1) ;; global minor mode
+    ;; 可以预先主动地对某些目录生成数据库，以便今后复用
+    (setq semanticdb-search-system-databases t
+          semanticdb-project-system-databases
+          (let ((lst '()))
+            (mapcar (lambda (path)
+                      (add-to-list 'lst
+                                   (semanticdb-create-database semanticdb-new-database-class path)
+                                   t))
+                    ;; e.g. "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
+                    '("/usr/include" "/usr/local/include"))))
     ;; 设置'semanticdb-find-default-throttle中的'project，主要交由EDE或JDE等组件控制
     ;; (add-hook semanticdb-project-predicate-functions ) ;; 此项交由EDE设置
     ;; (add-hook semanticdb-project-root-functions ) ;; 此项交由EDE设置
@@ -179,31 +180,21 @@
       (load-file (concat my-user-emacs-directory "prog-cc-ede.el")))))
 
 (defun my-plugin-cedet-start ()
-  (semantic-mode 1)
   (when (bound-and-true-p ac-sources)
     (add-to-list 'ac-sources (if (cedet-gnu-global-version-check t)
                                  'ac-source-gtags 'ac-source-semantic) t)))
 
 ;; =============================================================================
 ;; ECB (Emacs Code Browser)
-;; 将源代码下载并解压缩至load-path下，即可使用，以下编译过程可提高执行性能(可选)
-;; 1) 修改或仿照make.bat文件中的内容
-;; 首先ECB目录下创建ecb-compile-script-init文件，并写入下述脚本
-;; (add-to-list 'load-path "E:/.emacs.d/site-lisp/ecb") ;ECB所在目录
-;; (add-to-list 'load-path "D:/softwares/Emacs/lisp/cedet") ;CEDET所在目录
-;; (load-file "D:/softwares/Emacs/lisp/cedet/cedet.el") ;加载CEDET核心文件
-;; (require 'ecb)
-;; (setq debug-on-error t)
-;; 最终执行以下shell命令即可完成ECB的编译工作
-;; [$] cd E:/.emacs.d/site-lisp/ecb
-;; [$] emacs -Q -l ecb-compile-script-init --eval "(ecb-byte-compile t)"
-;; 忽视编译过程中的所有warning，编译完成后可删除ecb-compile-script-init等文件
-;; 2) 在启动Emacs并require ECB后，执行ecb-byte-compile命令即可
-;; -----------------------------------------------------------------------------
 (defun my-plugin-ecb-init ()
-  (save-excursion
-    (add-to-list 'load-path (concat my-emacs-plugin-load-path "ecb"))
-    (when (require 'ecb nil t)
+  (use-package ecb
+    :if (my-func-package-enabled-p 'ecb)
+    :demand t
+    :commands (ecb-minor-mode)
+    :init
+    (add-hook 'my-prog-cc-mode-start-hook 'my-plugin-ecb-start t)
+    :config
+    (save-excursion
       (unless (boundp 'stack-trace-on-error)
         (defvar stack-trace-on-error nil)) ;; 兼容性
       (setq ecb-layout-name "left15"
@@ -213,27 +204,25 @@
             ecb-primary-secondary-mouse-buttons 'mouse-1--C-mouse-1
             ecb-tip-of-the-day nil
             ;; ecb-auto-compatibility-check nil
-            )
-      ;; directories window
-      (setq ecb-source-path '("~"))
-      (setq ecb-tree-buffer-style 'image)
-      (setq ecb-auto-expand-directory-tree 'best)
-      (setq ecb-excluded-directories-regexps '("^\\(\\.\\|\\.\\.\\)$"))
-      (setq ecb-show-sources-in-directories-buffer '("left15"))
-      ;; sources window
-      ;; (setq ecb-source-file-regexps '())
-      ;; (setq ecb-sources-exclude-cvsignore '())
-      ;; methods window
-      (setq ecb-process-non-semantic-files nil) ;; 禁用non-semantic-sources
-      ;; history window
-      ;; (setq ecb-history-exclude-file-regexps '())
-      ;; compilation window
-      (setq ecb-compile-window-height 0.2
+            ;; directories window
+            ecb-source-path '("~")
+            ecb-tree-buffer-style 'image
+            ecb-auto-expand-directory-tree 'best
+            ecb-excluded-directories-regexps '("^\\(\\.\\|\\.\\.\\)$")
+            ecb-show-sources-in-directories-buffer '("left15")
+            ;; sources window
+            ;; ecb-source-file-regexps '()
+            ;; ecb-sources-exclude-cvsignore '()
+            ;; methods window
+            ecb-process-non-semantic-files nil ;; 禁用non-semantic-sources
+            ;; history window
+            ;; ecb-history-exclude-file-regexps '()
+            ;; compilation window
+            ecb-compile-window-height 0.2
             ecb-compile-window-width 'edit-window
             ecb-compile-window-temporally-enlarge 'both
             ecb-enlarged-compilation-window-max-height 0.5
-            )
-      (setq ecb-compilation-buffer-names ;; 以下名称的buffer内容将被呈现于该窗口
+            ecb-compilation-buffer-names ;; 以下名称的buffer内容将被呈现于该窗口
             (append ecb-compilation-buffer-names '(("*Process List*")
                                                    ("*Proced*")
                                                    (".notes")
@@ -246,8 +235,8 @@
                                                    ("*Org Agenda*")
                                                    ("*EMMS Playlist*")
                                                    ("*Moccur*")
-                                                   ("*Directory"))))
-      (setq ecb-compilation-major-modes ;; 以下模式的buffer内容将被呈现于该窗口
+                                                   ("*Directory")))
+            ecb-compilation-major-modes ;; 以下模式的buffer内容将被呈现于该窗口
             (append ecb-compilation-major-modes '(change-log-mode
                                                   calendar-mode
                                                   diary-mode
@@ -289,43 +278,22 @@
             helm-gtags-prefix-key (kbd "C-c c")
             ;; 启用以下配置项会使得某些常用快捷键不再绑定于上述前缀中
             helm-gtags-suggested-key-mapping t)
-      (add-hook 'c-mode-common-hook
-                (lambda ()
-                  (when (derived-mode-p 'c-mode 'c++-mode)
-                    (my-plugin-helm-gtags-start)))
-                t)
-      (add-hook 'dired-mode-hook 'my-plugin-helm-gtags-start t)
-      (add-hook 'eshell-mode-hook 'my-plugin-helm-gtags-start t)
+      (add-hook 'my-prog-cc-mode-start-hook 'my-plugin-helm-gtags-start t)
       :config
       (bind-keys :map helm-gtags-mode-map ;; 以下仅供参考
                  ("M-." . helm-gtags-dwim)
                  ("M-," . helm-gtags-pop-stack)
                  ("C-j" . helm-gtags-select)
-
                  ("C-c c s" . helm-gtags-find-symbol)
                  ("C-c c r" . helm-gtags-find-rtag)
                  ("C-c c a" . helm-gtags-tags-in-this-function)
-
-
-                 helm-gtags-find-files
-                 helm-gtags-show-stack
-
-
-                 ("C-c <" . helm-gtags-previous-history)
-                 ("C-c >" . helm-gtags-next-history)))))
+                 ;; ("" . helm-gtags-find-files)
+                 ;; ("" . helm-gtags-show-stack)
+                 ("C-c c <" . helm-gtags-previous-history)
+                 ("C-c c >" . helm-gtags-next-history)))))
 
 (defun my-plugin-helm-gtags-start ()
   (helm-gtags-mode 1))
-
-;; =============================================================================
-;; ggtags
-(defun my-plugin-ggtags-init ()
-  (use-package ggtags
-    :disabled
-    :commands (ggtags-mode)))
-
-(defun my-plugin-ggtags-start ()
-  (ggtags-mode 1))
 
 ;; =============================================================================
 ;; =============================================================================
@@ -338,7 +306,6 @@
   (my-plugin-cedet-init)
   (my-plugin-ecb-init)
   (my-plugin-helm-gtags-init)
-  (my-plugin-ggtags-init)
   (add-hook 'c-mode-hook 'my-prog-cc-mode-start)
   (add-hook 'c++-mode-hook 'my-prog-cc-mode-start))
 
