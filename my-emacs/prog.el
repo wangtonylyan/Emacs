@@ -69,17 +69,17 @@
                              ,(when (and (my-func-package-enabled-p 'company-jedi)
                                          (require 'company-jedi nil t))
                                 'company-jedi)
-                             ;; company-bbdb ;; Big Brother Database, an address book
-                             ;; company-nxml
                              company-semantic ;; Semantic
                              company-clang ;; Clang
+                             ;; company-eclim ;; Eclipse
                              ;; company-xcode ;; Xcode
                              company-cmake ;; CMake
-                             ;; company-eclim ;; Eclipse
                              ;; company-css ;; CSS
                              company-capf ;; completion-at-point-functions
-                             company-files ;;
+                             company-files
                              (company-dabbrev-code company-gtags company-etags company-keywords)
+                             ;; company-nxml
+                             ;; company-bbdb ;; Big Brother Database, an address book
                              company-oddmuse
                              company-dabbrev)
           company-minimum-prefix-length 1
@@ -131,38 +131,39 @@
     ;; source
     ;; auto-complete-config.el文件中定义了大量的扩展source
     ;; 从而使得auto-complete能与更多的插件相集成
-    (set-default 'ac-sources
-                 '(;; 以下分类反映的只是目前实际的使用情况，而非各自的局限范围：
-                   ac-source-filename
-                   ac-source-files-in-current-dir
-                   ;; ac-source-words-in-buffer
-                   ac-source-words-in-same-mode-buffers
-                   ;; ac-source-words-in-all-buffer
-                   ;; ac-source-abbrev ;; Emacs abbreviation
-                   ;; ac-source-imenu ;; Emacs imenu
-                   ;; 以下各源将在具体的编程模式启动时被添加
-                   ;; 1) prog-mode
-                   ;; ac-source-dictionary
-                   ;; ac-source-yasnippet
-                   ;; 2) lisp-mode
-                   ;; ac-source-slime
-                   ;; 3) emacs-lisp-mode
-                   ;; ac-source-functions
-                   ;; ac-source-variables
-                   ;; ac-source-symbols
-                   ;; ac-source-features ;; (require)
-                   ;; 4) c-mode, c++-mode
-                   ;; ac-source-semantic
-                   ;; ac-source-semantic-raw
-                   ;; ac-source-gtags
-                   ;; 5) java-mode
-                   ;; ac-source-eclim
-                   ;; 6) python-mode
-                   ;; ac-source-ropemacs
-                   ;; 7) other languages
-                   ;; ac-source-ghc-mod ;; Haskell
-                   ;; ac-source-css-property ;; CSS
-                   ))
+    (setq ac-sources
+          '(;; 以下分类反映的只是目前实际的使用情况，而非各自的局限范围：
+            ac-source-filename
+            ac-source-files-in-current-dir
+            ;; ac-source-words-in-buffer
+            ac-source-words-in-same-mode-buffers
+            ;; ac-source-words-in-all-buffer
+            ;; ac-source-abbrev ;; Emacs abbreviation
+            ;; ac-source-imenu ;; Emacs imenu
+            ac-source-dictionary
+            ;; 以下各源将在具体的编程模式启动时被添加
+            ;; 1) prog-mode
+            ;; ac-source-yasnippet
+            ;; 2) lisp-mode
+            ;; ac-source-slime
+            ;; 3) emacs-lisp-mode
+            ;; ac-source-functions
+            ;; ac-source-variables
+            ;; ac-source-symbols
+            ;; ac-source-features ;; (require)
+            ;; 4) c-mode, c++-mode
+            ;; ac-source-semantic
+            ;; ac-source-semantic-raw
+            ;; ac-source-gtags
+            ;; 5) java-mode
+            ;; ac-source-eclim
+            ;; 6) python-mode
+            ;; ac-source-ropemacs
+            ;; 7) other languages
+            ;; ac-source-ghc-mod ;; Haskell
+            ;; ac-source-css-property ;; CSS
+            ))
+    (setq-default ac-sources ac-sources)
     ;; 只会在该列表中指定的模式下生效，无论是否全局性地启用
     ;; (setq ac-modes '())
     ;; (global-auto-complete-mode 1)
@@ -170,14 +171,8 @@
 
 (defun my-plugin-auto-complete-start ()
   (auto-complete-mode 1)
-  ;; 各继承于prog-mode的编程模式在启动时都将重设其buffer-local的ac-sources
-  ;; 方法是各自追加my-prog-ac-sources链表
-  ;; 优点是当同一个buffer多次切换不同的编程模式时，不会彼此影响
-  (defvar my-prog-ac-sources
-    (add-to-list ac-sources
-                 '(ac-source-dictionary
-                   ac-source-yasnippet)
-                 t)))
+  ;; 各继承于prog-mode的编程模式在启动时都将设置其buffer-local的'ac-sources
+  (add-to-list 'ac-sources 'ac-source-yasnippet t))
 
 ;; =============================================================================
 ;; Flymake
@@ -257,48 +252,6 @@
   (flycheck-mode-on-safe))
 
 ;; =============================================================================
-;; 插件helm-gtags在实现上并不依赖于插件ggtags，因此可完全代替之
-(defun my-plugin-helm-gtags-init ()
-  (with-eval-after-load 'helm
-    (use-package helm-gtags
-      :if (and (my-func-package-enabled-p 'helm-gtags)
-               (executable-find "gtags"))
-      :commands (helm-gtags-mode)
-      :init
-      (setq helm-gtags-path-style 'root
-            helm-gtags-ignore-case t
-            helm-gtags-read-only t
-            helm-gtags-highlight-candidate t
-            helm-gtags-display-style 'detail
-            helm-gtags-fuzzy-match nil
-            helm-gtags-direct-helm-completing nil
-            helm-gtags-use-input-at-cursor t
-            helm-gtags-pulse-at-cursor t
-            helm-gtags-auto-update t
-            helm-gtags-update-interval-second 60
-            helm-gtags-prefix-key (kbd "C-c t")
-            ;; 启用以下配置项会使得某些常用快捷键不再绑定于上述前缀中
-            helm-gtags-suggested-key-mapping t)
-      (add-hook 'c-mode-common-hook
-                (lambda ()
-                  (when (derived-mode-p 'c-mode 'c++-mode 'asm-mode)
-                    (my-plugin-helm-gtags-start)))
-                t)
-      (add-hook 'dired-mode-hook 'my-plugin-helm-gtags-start t)
-      (add-hook 'eshell-mode-hook 'my-plugin-helm-gtags-start t)
-      :config
-      (bind-keys :map helm-gtags-mode-map ;; 以下仅供参考
-                 ("C-c g a" . helm-gtags-tags-in-this-function)
-                 ("C-j" . helm-gtags-select)
-                 ("M-." . helm-gtags-dwim)
-                 ("M-," . helm-gtags-pop-stack)
-                 ("C-c <" . helm-gtags-previous-history)
-                 ("C-c >" . helm-gtags-next-history)))))
-
-(defun my-plugin-helm-gtags-start ()
-  (helm-gtags-mode 1))
-
-;; =============================================================================
 ;; =============================================================================
 (defun my-prog-mode-init ()
   (my-plugin-yasnippet-init)
@@ -306,7 +259,6 @@
   (my-plugin-auto-complete-init)
   (my-plugin-flymake-init)
   (my-plugin-flycheck-init)
-  (my-plugin-helm-gtags-init)
   (add-hook 'prog-mode-hook 'my-prog-mode-start t))
 
 (defun my-prog-mode-start ()

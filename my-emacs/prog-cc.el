@@ -1,288 +1,214 @@
+;; -*- coding: utf-8 -*-
+
 (require 'my-prog)
 
-(setq my-prog-cc-mode-start-hook '())
+(defvar my-prog-cc-mode-start-hook '())
 
-(add-hook 'after-save-hook
-          (lambda ()
-            (when (and (or (eq major-mode 'c-mode)
-                           (eq major-mode 'c++-mode))
-                       (executable-find "uncrustify"))
-              (auto-revert-notify-rm-watch)
-              (shell-command (concat "uncrustify -l C -c ~/.uncrustify/alps.cfg --no-backup "
-                                     buffer-file-name))
-              (auto-revert-notify-add-watch))))
+(when nil
+  (add-hook 'after-save-hook
+            (lambda ()
+              (when (and (or (eq major-mode 'c-mode)
+                             (eq major-mode 'c++-mode))
+                         (executable-find "uncrustify"))
+                (auto-revert-notify-rm-watch)
+                (shell-command (concat "uncrustify -l C -c ~/.uncrustify/alps.cfg --no-backup "
+                                       buffer-file-name))
+                (auto-revert-notify-add-watch)))))
 
 ;; =============================================================================
 ;; Style
 ;; -----------------------------------------------------------------------------
 (defun my-cc-style-init ()
   (load-file (concat my-user-emacs-directory "prog-cc-style.el"))
-  (define-key c-mode-base-map "\C-m" 'c-context-line-break) ;; »»ĞĞºó×Ô¶¯Ëõ½ø
+  (define-key c-mode-base-map "\C-m" 'c-context-line-break) ;; æ¢è¡Œåè‡ªåŠ¨ç¼©è¿›
   )
 
 (defun my-cc-style-start ()
-  (c-set-style "my-c-style") ;; Ò²¿ÉÒÔÍ¨¹ı(setq c-default-style)ÊµÏÖ
-  (c-toggle-syntactic-indentation 1) ;; ÆôÓÃ¸ù¾İÓï·¨Ëõ½ø£¬·ñÔòÈÎºÎ»ùÓÚÓï·¨µÄstyle¶¼½«Ê§Ğ§
-  (c-toggle-auto-newline 1) ;; ÆôÓÃauto newline
-  (c-toggle-electric-state 1) ;; °´ÏÂÄ³Ğ©·ûºÅÈçsemicolonºó×Ô¶¯¸ñÊ½»¯µ±Ç°ĞĞ
-  ;; (read-only-mode 1) ;; ²»ÍÆ¼öÔÚÕâÀïÆôÓÃÖ»¶ÁÄ£Ê½£¬»áÓëÆäËû²å¼ş³åÍ»
+  (c-set-style "my-c-style") ;; ä¹Ÿå¯ä»¥é€šè¿‡(setq c-default-style)å®ç°
+  (c-toggle-syntactic-indentation 1) ;; å¯ç”¨æ ¹æ®è¯­æ³•ç¼©è¿›ï¼Œå¦åˆ™ä»»ä½•åŸºäºè¯­æ³•çš„styleéƒ½å°†å¤±æ•ˆ
+  (c-toggle-auto-newline 1) ;; å¯ç”¨auto newline
+  (c-toggle-electric-state 1) ;; æŒ‰ä¸‹æŸäº›ç¬¦å·å¦‚semicolonåè‡ªåŠ¨æ ¼å¼åŒ–å½“å‰è¡Œ
+  ;; (read-only-mode 1) ;; ä¸æ¨èåœ¨è¿™é‡Œå¯ç”¨åªè¯»æ¨¡å¼ï¼Œä¼šä¸å…¶ä»–æ’ä»¶å†²çª
   )
 
 ;; =============================================================================
 ;; CEDET
-;; -----------------------------------------------------------------------------
-;; Semantic
-;; ÀûÓÃÆä×Ô´øµÄÓï·¨·ÖÎöÆ÷ËùµÃµÄ½á¹û£¬»¹½øÒ»²½µØÌá¹©ÁËÒÔÏÂÒ»ÏµÁĞÀ©Õ¹¹¦ÄÜ
-;; ÓëÖ®Ïà±ÈµÄÊÇ£¬¾É°æ±¾µÄEmacsÖĞ²ÉÓÃÕıÔò±í´ïÊ½×÷ÎªÏÂÊö¹¦ÄÜµÄ»ù´¡Ö§³Ö£¬¾ÍÏÔµÃ±È½ÏÂäºóÁË
-;; 1) Semantic/Analyzer
-;; Ö÷Òª´ÓÓï·¨·ÖÎöµÄ½Ç¶ÈÌá¹©ÁË´úÂë²¹È«¡¢Ìø×ª(ä¯ÀÀ)¡¢ĞÅÏ¢»ã×ÜµÈ±à³Ì¸¨Öú¹¦ÄÜ
-;; semantic-ia-complete-symbol
-;; semantic-ia-complete-symbol-menu
-;; semantic-ia-complete-tip
-;; semantic-complete-analyze-inline
-;; semantic-complete-analyze-inline-idle
-;; semantic-analyze-possible-completions
-;; semantic-ia-fast-jump
-;; 2) Senator (SEmantic/NAvigaTOR)
-;; ÆäÌá¹©µÄ¹¦ÄÜÓëAnalyzerÀàËÆ£¬µ«ÊµÏÖ·½Ê½ÉÏ¸üÎª¼òµ¥
-;; Ò²Òò´Ëµ¼ÖÂÆä½á¹ûÍùÍù×¼È·¶È½ÏµÍ£¬µ«ÏìÓ¦ËÙ¶È¸ü¿ì
-;; senator-complete-symbol
-;; senator-completion-menu-popup
-;; 3) Semantic/Symref (SYMbol REFerence)
-;; ÆäÌá¹©µÄÊÇ²éÑ¯Ä³¸ö·ûºÅÔÚÏîÄ¿´úÂëÖĞ±»ÒıÓÃµ½µÄËùÓĞµØ·½£¬µ«Ö÷Òª×÷ÎªÇ°¶Ë½Ó¿Ú
-;; ¶øºóÌ¨ÊµÏÖÔòÍêÈ«»ùÓÚÍâ²¿¹¤¾ß£¬°üÀ¨ÁËGNU Global¡¢Cscope¡¢find/grep
-;; 4) Idle Scheduler
-;; ÔÚÓÃ»§²Ù×÷ÏĞÖÃÊ±£¬ÊµÊ©Óï·¨·ÖÎö¡¢SemanticDBÉú³É¡¢ĞÅÏ¢ÌáÊ¾µÈÈÎÎñ
-;; Ö÷Òª»ùÓÚµÄÊÇSemantic/Analyzer
-;; 5) SemanticDB
-;; ÆäÒÔÎÄ¼şµÄĞÎÊ½£¬±£´æÁËÓÉparser»òtagging systemËùÉú³ÉµÄ±êÇ©ĞÅÏ¢
-;; ÓÚÊÇ£¬´úÂë²¹È«¡¢Ìø×ª¡¢ĞÅÏ¢»ã×ÜµÈ¹¦ÄÜµÄÊµÏÖ£¬²»½ö¿ÉÒÔ»ùÓÚÊµÊ±µÄÓï·¨·ÖÎö
-;; Ò²¿ÉÒÔÍ¨¹ı¸´ÓÃÊı¾İ¿âµÄ·½Ê½£¬´Ó¶øÒ²¾ÍÌá¸ßÁËÕâĞ©³£ÓÃ¹¦ÄÜµÄÖ´ĞĞĞ§ÂÊ
-;; ´ËÍâ£¬ÒÔSemanticµÄÊä³ö×÷ÎªÊäÈëÔ´£¬Ëü»¹ÄÜÓëĞí¶à·ÇCEDET¼¯ºÏÖĞµÄ²å¼şÅäºÏÊ¹ÓÃ
-;; ÆäÖĞ×î³£ÓÃµÄ¾Í°üÀ¨ÁËauto-complete, eassist
-;; -----------------------------------------------------------------------------
-;; ÒÔÏÂÅäÖÃÖ÷ÒªÃæÏòÓÚÄÚÖÃ°æ£¬µ«»ù±¾ÉÏÄÜ¼æÈİÓÚ¶ÀÁ¢°æ
-;; -----------------------------------------------------------------------------
-(defun my-plugin-cedet-init ()
-  (when (require 'cedet nil t)
-    ;; -------------------------------------------------------------------------
-    ;; Semantic
-    ;; -------------------------------------------------------------------------
-    ;; ÏÈÉèÖÃsemantic-default-submodes£¬ÔÙµ÷ÓÃsemantic-mode
-    (setq semantic-default-submodes '(;; SemanticDB
-                                      global-semanticdb-minor-mode
-                                      ;; Idle Scheduler
+;; ä»¥ä¸‹è®¾ç½®ä»…é’ˆå¯¹äºCå’ŒC++
+(defun my-plugin-cedet-init()
+  (use-package cedet
+    :commands (semantic-mode semantic-toggle-minor-mode-globally)
+    :init
+    (setq semantic-default-submodes '(;; Idle Scheduler
                                       global-semantic-idle-scheduler-mode
-                                      global-semantic-idle-summary-mode ;; »ùÓÚSmart Summary
-                                      ;; global-semantic-idle-completions-mode ;; »ùÓÚSmart Completion
+                                      global-semantic-idle-summary-mode ;; åŸºäºSmart Summary
                                       global-semantic-idle-local-symbol-highlight-mode
+                                      ;; global-semantic-idle-completions-mode ;; åŸºäºSmart Completionï¼Œç”¨companyæ›¿ä»£
+                                      ;; global-semantic-idle-breadcrumbs-mode
+                                      ;; SemanticDB
+                                      global-semanticdb-minor-mode
                                       ;; Display and Decoration
                                       global-semantic-stickyfunc-mode
                                       global-semantic-highlight-func-mode
                                       global-semantic-decoration-mode
                                       ;; Senator
                                       global-semantic-mru-bookmark-mode ;; mostly recently used
-                                      ;; Î´Öª
-                                      ;; global-cedet-m3-minor-mode
                                       ;; Debug
                                       ;; global-semantic-show-unmatched-syntax-mode
                                       global-semantic-show-parser-state-mode
                                       ;; global-semantic-highlight-edits-mode
-                                      ))
-    (semantic-mode 1) ;; global minor mode
-    ;; ³ı´ËÖ®Íâ£¬»¹¿ÉÒÔÍ¬Ê±ÀûÓÃÒÔÏÂÒ»ÏµÁĞº¯ÊıÀ´¶¨ÖÆSemantic¹¦ÄÜ
-    ;; (semantic-load-enable-minimum-features)
-    ;; (semantic-load-enable-code-helpers)
-    ;; (semantic-load-enable-guady-code-helpers)
-    ;; (semantic-load-enable-excessive-code-helpers)
-    ;; (semantic-load-enable-semantic-debugging-helpers)
-
-    ;; -------------------------------------------------------------------------
-    ;; Idle Scheduler
-    ;; -------------------------------------------------------------------------
-    (setq semantic-idle-scheduler-idle-time 1)
-    (setq semantic-idle-scheduler-max-buffer-size 10000)
-    ;; ÒÔÏÂÁ½¸öµÄÏÔÊ¾Óësemantic-idle-summary-modeÏà³åÍ»£¬¹Ê
-    (setq semantic-idle-scheduler-verbose-flag nil) ;; Ç°Õß±»½ûÓÃ
-    (setq semantic-idle-scheduler-no-working-message nil)
-    (setq semantic-idle-scheduler-working-in-modeline-flag t) ;; ºóÕß±»×ªÒÆ
-    ;; ±È½ÏºÄÊ±µÄÈÎÎñ
-    (setq semantic-idle-scheduler-work-idle-time 30)
-    (setq semantic-idle-work-parse-neighboring-files-flag t)
-    ;; Idle Completion
-    ;; ÒÔºÎÖÖ·½Ê½ÏÔÊ¾
-    (setq semantic-complete-inline-analyzer-idle-displayor-class
+                                      ;; æœªçŸ¥
+                                      ;; global-cedet-m3-minor-mode
+                                      )
+          ;; é™¤äº†è®¾ç½®'semantic-default-submodesï¼Œè¿˜å¯è°ƒç”¨ä»¥ä¸‹å‡½æ•°æ¥å¯ç”¨æ”¯æŒæŒ‡å®šåŠŸèƒ½çš„å­æ¨¡å—
+          ;; (semantic-load-enable-minimum-features)
+          ;; (semantic-load-enable-code-helpers)
+          ;; (semantic-load-enable-guady-code-helpers)
+          ;; (semantic-load-enable-excessive-code-helpers)
+          ;; (semantic-load-enable-semantic-debugging-helpers)
+          ;; -------------------------------------------------------------------
+          semantic-complete-inline-analyzer-idle-displayor-class ;; ä»¥ä½•ç§æ–¹å¼æ˜¾ç¤º
           ;; 'semantic-displayor-ghost ;; inline
           ;; 'semantic-displayor-tooltip ;; tooltip
           'semantic-displayor-traditional ;; separate window
-          )
-    ;; ÏÔÊ¾¶àÉÙ
-    (setq semantic-displayor-tooltip-mode
+          semantic-displayor-tooltip-mode ;; æ˜¾ç¤ºå¤šå°‘
+          ;; 'quiet ;; åªæœ‰å½“æ•°é‡å°äºinitial-max-tagsæ—¶æ‰æ˜¾ç¤º
+          ;; 'verbose ;; æ˜¾ç¤ºæ‰€æœ‰ï¼Œè²Œä¼¼æœ‰bugï¼Œæ…ç”¨
           'standard ;; initial-max-tags
-          ;; 'quiet ;; Ö»ÓĞµ±ÊıÁ¿Ğ¡ÓÚinitial-max-tagsÊ±²ÅÏÔÊ¾
-          ;; 'verbose ;; ÏÔÊ¾ËùÓĞ£¬Ã²ËÆÓĞbug£¬É÷ÓÃ
-          )
-    (setq semantic-displayor-tooltip-initial-max-tags 8)
-
-    ;; -------------------------------------------------------------------------
-    ;; SemanticDB
-    ;; -------------------------------------------------------------------------
-    ;; Êı¾İ¿âÎÄ¼ş±£´æÉèÖÃ
-    ;; (setq semanticdb-default-save-directory nil) ;; ×÷ÎªÈ±Ê¡Â·¾¶£¬½öÖ÷¶¯Éú³ÉµÄÊı¾İ¿âµÄÎÄ¼ş²Å»á±£´æÓÚ´Ë
-    ;; (setq semanticdb-default-file-name "")
-    (setq semanticdb-persistent-path '(always)) ;; 'projectÎªÓÉEDEËù¹ÜÀíµÄÏîÄ¿µÄÂ·¾¶ÏÂ
-    ;; ÓÅ»¯SemanticDBµÄËÑË÷/parse
-    ;; 1) ÏŞ¶¨ËÑË÷·¶Î§
-    (mapc (lambda (mode)
-            (setq-mode-local mode semanticdb-find-default-throttle
-                             '(
-                               file
-                               local
-                               project
-                               system
-                               recursive
-                               unloaded ;; ÈôËÑË÷µ½µÄÎÄ¼şµÄSemanticDBÃ»ÓĞµ¼Èë/Éú³É£¬Ôòµ¼Èë/Éú³ÉÖ®
-                               omniscience ;; ×Ô¼º´´½¨µÄÊı¾İ¿â¾ÍÊôÓÚ´ËÀà
-                               )))
-          '(c-mode c++-mode))
-    ;; 2) ÉèÖÃÉÏÊöÏŞ¶¨·¶Î§ÖĞµÄprojectÀàĞÍ£¬Ö÷Òª½»ÓÉEDE»òJDEµÈ×é¼ş¿ØÖÆ
-    ;; (add-hook semanticdb-project-predicate-functions ) ;; ´ËÏî½»ÓÉEDEÉèÖÃ
-    ;; (add-hook semanticdb-project-root-functions ) ;; ´ËÏî½»ÓÉEDEÉèÖÃ
-    ;; ÉõÖÁ¿ÉÒÔ¾ßÌåÖ¸¶¨Ò»Ğ©ÏîÄ¿µÄ¸ùÄ¿Â¼£¬¸Ã±äÁ¿Ò²»á±»semantic-project-root-functionsÖĞ×¢²áµÄº¯ÊıĞŞ¸Ä
-    ;; (setq semanticdb-project-roots '())
-    ;; 3) ÉèÖÃÉÏÊöÏŞ¶¨·¶Î§ÖĞµÄsystemÀàĞÍ£¬¼´±äÁ¿semantic-dependency-system-include-path
-    ;; ÀûÓÃgccµÄÊä³öĞÅÏ¢
-    (when (executable-find "gcc")
-      (require 'semantic/bovine/gcc)
-      (semantic-gcc-setup))
-    ;; ÈôÒªÍêÈ«µØ×Ô¶¨Òå£¬ÔòĞèÏÈÖØÖÃ£¬ÔÙ×·¼Ó
-    ;; (semantic-reset-system-include 'c-mode)
-    ;; (semantic-reset-system-include 'c++-mode)
-    (mapc (lambda (path)
-            (semantic-add-system-include path 'c-mode)
-            (semantic-add-system-include path 'c++-mode))
-          '(;; ´Ë´¦¿ÉÒÔ¼ÓÈë¸÷ÖÖ³£ÓÃµÄµÚÈı·½¿âÎÄ¼şÂ·¾¶
-            "." "./include" "./inc" "./common" "./public"
-            ".." "../include" "../inc" "../common" "../public"
-            ;; "C:/MinGW/include"
-            ;; "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
-            ))
-    ;; ÈôSemanticÈÔ²»ÄÜÕı³£½âÎöÄ³Ğ©·ûºÅ£¬ÔòĞèÒª½øÒ»²½×öÈçÏÂÖ¸¶¨
-    ;; (add-to-list 'semantic-lex-c-preprocessor-symbol-map '("symbol" . "value"))
-    ;; (add-to-list 'semantic-lex-c-preprocessor-symbol-file  "path/file")
-    ;; (setq semantic-c-obey-conditional-section-parsing-flag nil)
-    ;; 4) ÊÂÏÈÖ÷¶¯µØÎªÄ³Ğ©³£ÓÃÄ¿Â¼Éú³ÉÊı¾İ¿â£¬ÒÔ¹©¸´ÓÃ
-    (setq semanticdb-search-system-databases t)
-    (setq my-semanticdb-list '())
-    ;; ÈôÖ¸¶¨Ä¿Â¼ÒÑ´æÔÚÊı¾İ¿âÎÄ¼ş£¬Ôò²»»áÖØ¸´´´½¨
-    (mapc (lambda (path)
-            (add-to-list 'my-semanticdb-list
-                         (semanticdb-create-database semanticdb-new-database-class path)))
-          '("/usr/include" "/usr/local/include"
-            ;; "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
-            ))
-    ;; ËæºóÃ¿´ÎÆô¶¯Ê±¼ÓÔØÖ®Ç°ÒÑ´´½¨µÄÊı¾İ¿â
-    (mapc (lambda (mode)
-            (setq-mode-local mode semanticdb-project-system-databases my-semanticdb-list))
-          '(c-mode c++-mode))
-    ;; 5) ĞŞ¸ÄSemanticDBºóÌ¨Ö§³Ö£¬Ä¿Ç°EmacsÄÚÖÃ°æÔİÖ»¿ÉÒÀÀµÓÚÒÔÏÂÁ½ÖÖ(¶ÀÁ¢°æ»¹Ö§³ÖÊ¹ÓÃCscope)
-    ;; (a) Ebrowse
-    ;; (require 'semantic/db-ebrowse)
-    ;; ×÷ÎªÄ¬ÈÏµÄÑ¡Ôñ£¬ĞÔÄÜ½Ï²î
-    ;; (b) GNU Global
-    ;; (require 'semantic/db-global)
-    (require 'cedet-global)
-    (when (eq system-type 'windows-nt)
-      (add-to-list 'exec-path (concat my-emacs-exec-bin-path "global/bin"))
-      )
-    (when (and (executable-find "global")
-               (cedet-gnu-global-version-check t))
-      (require 'semantic/db-global)
-      (semanticdb-enable-gnu-global-databases 'c-mode)
-      (semanticdb-enable-gnu-global-databases 'c++-mode))
-
-    ;; -------------------------------------------------------------------------
-    ;; EDE
-    ;; -------------------------------------------------------------------------
-    (require 'ede)
-    (global-ede-mode 1) ;; ÅäºÏsemantic-modeÈ«¾ÖĞÔµØÆôÓÃ
-    ;; EDEÄ¬ÈÏÊ¹ÓÃUnixÉÏµÄLocateÃüÁîÀ´¶¨Î»ÎÄ¼ş£¬´ËÍâ»¹Ö§³ÖÊ¹ÓÃGNU Global
-    ;; µ«Ä¿Ç°EmacsÄÚÖÃµÄCEDETÖĞÉ¾³ıÁËede-locate.elÎÄ¼ş£¬Òò´ËÒ²¾Í²»Ö§³ÖĞŞ¸ÄÁË
-    ;; (setq ede-locate-setup-options '(ede-locate-global ede-locate-base))
-    ;; ¾ßÌåÏîÄ¿µÄEDEĞÅÏ¢ÓÉprog-cc-ede.emacsÅäÖÃÎÄ¼ş¶ÀÁ¢µØÎ¬»¤
-    (load-file (concat my-emacs-config-file-path "prog-cc-ede.el"))
-
-    ;; ---------------------------------------------------------------------------
-    ;; Display and Decoration
-    ;; ---------------------------------------------------------------------------
-    (setq semantic-stickyfunc-sticky-classes '(function
-                                               type
-                                               ;; variable
-                                               ;; include
-                                               ;; package
-                                               ))
-    (setq semantic-decoration-styles '(("semantic-tag-boundary" . t)
+          semantic-displayor-tooltip-initial-max-tags 8
+          ;; -------------------------------------------------------------------
+          semantic-idle-scheduler-idle-time 1
+          semantic-idle-scheduler-work-idle-time 30
+          semantic-idle-scheduler-max-buffer-size 10240
+          semantic-idle-scheduler-verbose-flag nil ;; ä¸semantic-idle-summary-modeå†²çªï¼Œæ•…ç¦ç”¨
+          ;; æ¯”è¾ƒè€—æ—¶çš„ä»»åŠ¡
+          semantic-idle-work-update-headers-flag t
+          semantic-idle-work-parse-neighboring-files-flag t
+          ;; -------------------------------------------------------------------
+          ;; ä½œä¸ºç¼ºçœè·¯å¾„ï¼Œä»…ä¸»åŠ¨ç”Ÿæˆçš„æ•°æ®åº“çš„æ–‡ä»¶æ‰ä¼šä¿å­˜äºæ­¤
+          semanticdb-default-save-directory (concat user-emacs-directory "semanticdb")
+          ;; semanticdb-default-file-name ""
+          semanticdb-persistent-path '(always)
+          semanticdb-find-default-throttle '(file local project system recursive
+                                                  unloaded ;; è‹¥æœç´¢åˆ°çš„æ–‡ä»¶çš„SemanticDBæ²¡æœ‰å¯¼å…¥/ç”Ÿæˆï¼Œåˆ™å¯¼å…¥/ç”Ÿæˆä¹‹
+                                                  omniscience ;; è‡ªå·±åˆ›å»ºçš„æ•°æ®åº“å°±å±äºæ­¤ç±»
+                                                  )
+          ;; å¯ä»¥é¢„å…ˆä¸»åŠ¨åœ°å¯¹æŸäº›ç›®å½•ç”Ÿæˆæ•°æ®åº“ï¼Œä»¥ä¾¿ä»Šåå¤ç”¨
+          semanticdb-search-system-databases t
+          semanticdb-project-system-databases
+          (let ((lst '()))
+            (mapcar (lambda (path)
+                      (add-to-list 'lst
+                                   (semanticdb-create-database semanticdb-new-database-class path)
+                                   t))
+                    '("/usr/include" "/usr/local/include"
+                      ;; "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
+                      )))
+          ;; -------------------------------------------------------------------
+          semantic-stickyfunc-sticky-classes '(function type) ;; variable, include, package
+          semantic-decoration-styles '(("semantic-tag-boundary" . t)
                                        ("semantic-decoration-on-private-members" . nil)
                                        ("semantic-decoration-on-protected-members" . nil)
-                                       ("semantic-decoration-on-includes" . nil)))
-
-    ;; ---------------------------------------------------------------------------
-    ;; Speedbar
-    ;; ---------------------------------------------------------------------------
-    ;; ´Ë´¦ÎªCEDETÖĞ¼¯³ÉµÄSpeedbar£¬Ä¿Ç°ÔİÎ´ÆôÓÃ
-    ;; (require 'semantic/sb)
-
-    ;; ---------------------------------------------------------------------------
-    ;; ´úÂëä¯ÀÀµÄÏà¹Ø¹¦ÄÜÉèÖÃ(´ıÍêÉÆ)
-    ;; ---------------------------------------------------------------------------
-    (require 'semantic/ia)
-    (define-key semantic-mode-map "" 'semantic-ia-fast-jump)
-    (define-key semantic-mode-map "" 'semantic-complete-jump)
-    (define-key semantic-mode-map "" 'semantic-complete-jump-local)
-    (define-key semantic-mode-map "" 'semantic-complete-jump-local-members)
-    (define-key semantic-mode-map "" 'semantic-decoration-include-visit) ;; jump to include file
-    (define-key semantic-mode-map "" 'semantic-mrub-switch-tag)
-    (require 'semantic/symref)
-    (define-key semantic-mode-map "" 'semantic-symref)
-    (define-key semantic-mode-map "" 'semantic-symref-symbol)
-    (require 'semantic/senator)
-    (define-key semantic-mode-map "" 'senator-next-tag)
-    (define-key semantic-mode-map "" 'senator-previous-tag)
-    (define-key semantic-mode-map "" 'senator-go-to-up-reference)))
+                                       ("semantic-decoration-on-includes" . nil))
+          ;; -------------------------------------------------------------------
+          semantic-c-obey-conditional-section-parsing-flag t)
+    (setq-default semantic-stickyfunc-sticky-classes semantic-stickyfunc-sticky-classes)
+    (use-package cedet-global
+      :commands (cedet-gnu-global-version-check))
+    (add-hook 'my-prog-cc-mode-start-hook 'my-plugin-cedet-start t)
+    :config
+    ;; è®¾ç½®'semanticdb-find-default-throttleä¸­çš„'projectï¼Œä¸»è¦äº¤ç”±EDEæˆ–JDEç­‰ç»„ä»¶æ§åˆ¶
+    ;; (add-hook semanticdb-project-predicate-functions ) ;; æ­¤é¡¹äº¤ç”±EDEè®¾ç½®
+    ;; (add-hook semanticdb-project-root-functions ) ;; æ­¤é¡¹äº¤ç”±EDEè®¾ç½®
+    ;; è®¾ç½®'semanticdb-find-default-throttleä¸­çš„'systemï¼Œå¯ä»¥åˆ©ç”¨ç¼–è¯‘å™¨çš„å·²æœ‰é…ç½®
+    ;; ç”šè‡³å¯ä»¥å…·ä½“æŒ‡å®šä¸€äº›é¡¹ç›®çš„æ ¹ç›®å½•ï¼Œè¯¥å˜é‡ä¹Ÿä¼šè¢«semantic-project-root-functionsä¸­æ³¨å†Œçš„å‡½æ•°ä¿®æ”¹
+    ;; (setq semanticdb-project-roots '())
+    (use-package semantic/bovine/gcc
+      :if (executable-find "gcc")
+      :config
+      (semantic-gcc-setup))
+    ;; è‹¥è¦å®Œå…¨åœ°è‡ªå®šä¹‰ï¼Œåˆ™éœ€å…ˆé‡ç½®å†è¿½åŠ ï¼Œä¾‹å¦‚(semantic-reset-system-include 'c-mode)
+    (semantic-add-system-include "/usr/include")
+    (semantic-add-system-include "/usr/local/include")
+    (semantic-add-system-include "/usr/include/boost" 'c++-mode)
+    ;; æŒ‡å®šç”¨äºæ”¯æŒSemanticDBçš„tagging systemï¼Œé»˜è®¤ä½¿ç”¨çš„æ˜¯Ebrowse
+    (use-package semantic/db-ebrowse ;; Ebrowse
+      :disabled)
+    (use-package semantic/db-global ;; GNU Global
+      :if (cedet-gnu-global-version-check t)
+      :config
+      (semanticdb-enable-gnu-global-databases 'c-mode)
+      (semanticdb-enable-gnu-global-databases 'c++-mode))
+    ;; ä»¥ä¸‹æ˜¯ä»£ç æµè§ˆåŠŸèƒ½çš„ç›¸å…³è®¾ç½®ï¼Œå¾…å®Œå–„
+    (use-package semantic/ia
+      :disabled
+      :config
+      (bind-key :map semantic-mode-map
+                ("" . semantic-ia-fast-jump)
+                ("" . semantic-complete-jump)
+                ("" . semantic-complete-jump-local)
+                ("" . semantic-complete-jump-local-members)
+                ("" . semantic-decoration-include-visit) ;; jump to include file
+                ("" . semantic-mrub-switch-tag)))
+    (use-package semantic/symref
+      :disabled
+      :config
+      (bind-key :map semantic-mode-map
+                ("" . semantic-symref)
+                ("" . semantic-symref-symbol)))
+    (use-package semantic/senator
+      :disabled
+      :config
+      (bind-key :map semantic-mode-map
+                ("" . senator-next-tag)
+                ("" . senator-previous-tag)
+                ("" . senator-jump)
+                ("" . senator-go-to-up-reference)))
+    ;; è‹¥Semanticå§‹ç»ˆä¸èƒ½æ­£å¸¸è§£ææŸäº›ç‰¹å®šçš„ç¬¦å·ï¼Œåˆ™ä½œå¦‚ä¸‹è®¾ç½®
+    ;; (add-to-list 'semantic-lex-c-preprocessor-symbol-map '("symbol" . "value"))
+    ;; (add-to-list 'semantic-lex-c-preprocessor-symbol-file  "path/file")
+    (use-package semantic/sb ;; æ­¤ä¸ºCEDETä¸­å†…ç½®çš„Speedbarï¼Œä¸å¯ç”¨
+      :disabled)
+    (use-package ede
+      :disabled
+      :config
+      (global-ede-mode 1) ;; é…åˆsemantic-modeå…¨å±€æ€§åœ°å¯ç”¨
+      ;; EDEé»˜è®¤ä½¿ç”¨Unixä¸Šçš„Locateå‘½ä»¤æ¥å®šä½æ–‡ä»¶ï¼Œæ­¤å¤–è¿˜æ”¯æŒä½¿ç”¨GNU Global
+      ;; ä½†ç›®å‰Emacså†…ç½®çš„CEDETä¸­åˆ é™¤äº†ede-locate.elæ–‡ä»¶ï¼Œå› æ­¤ä¹Ÿå°±ä¸æ”¯æŒä¿®æ”¹äº†
+      ;; (setq ede-locate-setup-options '(ede-locate-global ede-locate-base))
+      ;; å…·ä½“é¡¹ç›®çš„EDEä¿¡æ¯ç”±prog-cc-ede.emacsé…ç½®æ–‡ä»¶ç‹¬ç«‹åœ°ç»´æŠ¤
+      (load-file (concat my-user-emacs-directory "prog-cc-ede.el")))))
 
 (defun my-plugin-cedet-start ()
-  (when (and (boundp 'ac-sources) (boundp my-prog-ac-sources))
-    (setq ac-sources
-          (append my-prog-ac-sources '(ac-source-semantic)))
-    (when (and (executable-find "global")
-               (cedet-gnu-global-version-check t))
-      (add-to-list 'ac-sources 'ac-source-gtags))))
+  (semantic-mode 1)
+  (when (bound-and-true-p ac-sources)
+    (add-to-list 'ac-sources (if (cedet-gnu-global-version-check t)
+                                 'ac-source-gtags 'ac-source-semantic) t)))
 
 ;; =============================================================================
 ;; ECB (Emacs Code Browser)
-;; ½«Ô´´úÂëÏÂÔØ²¢½âÑ¹ËõÖÁload-pathÏÂ£¬¼´¿ÉÊ¹ÓÃ£¬ÒÔÏÂ±àÒë¹ı³Ì¿ÉÌá¸ßÖ´ĞĞĞÔÄÜ(¿ÉÑ¡)
-;; 1) ĞŞ¸Ä»ò·ÂÕÕmake.batÎÄ¼şÖĞµÄÄÚÈİ
-;; Ê×ÏÈECBÄ¿Â¼ÏÂ´´½¨ecb-compile-script-initÎÄ¼ş£¬²¢Ğ´ÈëÏÂÊö½Å±¾
-;; (add-to-list 'load-path "E:/.emacs.d/site-lisp/ecb") ;ECBËùÔÚÄ¿Â¼
-;; (add-to-list 'load-path "D:/softwares/Emacs/lisp/cedet") ;CEDETËùÔÚÄ¿Â¼
-;; (load-file "D:/softwares/Emacs/lisp/cedet/cedet.el") ;¼ÓÔØCEDETºËĞÄÎÄ¼ş
+;; å°†æºä»£ç ä¸‹è½½å¹¶è§£å‹ç¼©è‡³load-pathä¸‹ï¼Œå³å¯ä½¿ç”¨ï¼Œä»¥ä¸‹ç¼–è¯‘è¿‡ç¨‹å¯æé«˜æ‰§è¡Œæ€§èƒ½(å¯é€‰)
+;; 1) ä¿®æ”¹æˆ–ä»¿ç…§make.batæ–‡ä»¶ä¸­çš„å†…å®¹
+;; é¦–å…ˆECBç›®å½•ä¸‹åˆ›å»ºecb-compile-script-initæ–‡ä»¶ï¼Œå¹¶å†™å…¥ä¸‹è¿°è„šæœ¬
+;; (add-to-list 'load-path "E:/.emacs.d/site-lisp/ecb") ;ECBæ‰€åœ¨ç›®å½•
+;; (add-to-list 'load-path "D:/softwares/Emacs/lisp/cedet") ;CEDETæ‰€åœ¨ç›®å½•
+;; (load-file "D:/softwares/Emacs/lisp/cedet/cedet.el") ;åŠ è½½CEDETæ ¸å¿ƒæ–‡ä»¶
 ;; (require 'ecb)
 ;; (setq debug-on-error t)
-;; ×îÖÕÖ´ĞĞÒÔÏÂshellÃüÁî¼´¿ÉÍê³ÉECBµÄ±àÒë¹¤×÷
+;; æœ€ç»ˆæ‰§è¡Œä»¥ä¸‹shellå‘½ä»¤å³å¯å®ŒæˆECBçš„ç¼–è¯‘å·¥ä½œ
 ;; [$] cd E:/.emacs.d/site-lisp/ecb
 ;; [$] emacs -Q -l ecb-compile-script-init --eval "(ecb-byte-compile t)"
-;; ºöÊÓ±àÒë¹ı³ÌÖĞµÄËùÓĞwarning£¬±àÒëÍê³Éºó¿ÉÉ¾³ıecb-compile-script-initµÈÎÄ¼ş
-;; 2) ÔÚÆô¶¯Emacs²¢require ECBºó£¬Ö´ĞĞecb-byte-compileÃüÁî¼´¿É
+;; å¿½è§†ç¼–è¯‘è¿‡ç¨‹ä¸­çš„æ‰€æœ‰warningï¼Œç¼–è¯‘å®Œæˆåå¯åˆ é™¤ecb-compile-script-initç­‰æ–‡ä»¶
+;; 2) åœ¨å¯åŠ¨Emacså¹¶require ECBåï¼Œæ‰§è¡Œecb-byte-compileå‘½ä»¤å³å¯
 ;; -----------------------------------------------------------------------------
 (defun my-plugin-ecb-init ()
   (save-excursion
     (add-to-list 'load-path (concat my-emacs-plugin-load-path "ecb"))
     (when (require 'ecb nil t)
       (unless (boundp 'stack-trace-on-error)
-        (defvar stack-trace-on-error nil)) ;; ¼æÈİĞÔ
+        (defvar stack-trace-on-error nil)) ;; å…¼å®¹æ€§
       (setq ecb-layout-name "left15"
             ;; ecb-toggle-layout-sequence '()
-            ;; ecb-layout-window-sizes nil ;; ÍÆ¼öÍ¨¹ıµ÷ÓÃecb-change-layoutÃüÁî£¬ÒÔ½»»¥Ê½µÄ·½Ê½ĞŞ¸Ä
+            ;; ecb-layout-window-sizes nil ;; æ¨èé€šè¿‡è°ƒç”¨ecb-change-layoutå‘½ä»¤ï¼Œä»¥äº¤äº’å¼çš„æ–¹å¼ä¿®æ”¹
             ecb-windows-width 0.2
             ecb-primary-secondary-mouse-buttons 'mouse-1--C-mouse-1
             ecb-tip-of-the-day nil
@@ -298,7 +224,7 @@
       ;; (setq ecb-source-file-regexps '())
       ;; (setq ecb-sources-exclude-cvsignore '())
       ;; methods window
-      (setq ecb-process-non-semantic-files nil) ;; ½ûÓÃnon-semantic-sources
+      (setq ecb-process-non-semantic-files nil) ;; ç¦ç”¨non-semantic-sources
       ;; history window
       ;; (setq ecb-history-exclude-file-regexps '())
       ;; compilation window
@@ -307,7 +233,7 @@
             ecb-compile-window-temporally-enlarge 'both
             ecb-enlarged-compilation-window-max-height 0.5
             )
-      (setq ecb-compilation-buffer-names ;; ÒÔÏÂÃû³ÆµÄbufferÄÚÈİ½«±»³ÊÏÖÓÚ¸Ã´°¿Ú
+      (setq ecb-compilation-buffer-names ;; ä»¥ä¸‹åç§°çš„bufferå†…å®¹å°†è¢«å‘ˆç°äºè¯¥çª—å£
             (append ecb-compilation-buffer-names '(("*Process List*")
                                                    ("*Proced*")
                                                    (".notes")
@@ -321,7 +247,7 @@
                                                    ("*EMMS Playlist*")
                                                    ("*Moccur*")
                                                    ("*Directory"))))
-      (setq ecb-compilation-major-modes ;; ÒÔÏÂÄ£Ê½µÄbufferÄÚÈİ½«±»³ÊÏÖÓÚ¸Ã´°¿Ú
+      (setq ecb-compilation-major-modes ;; ä»¥ä¸‹æ¨¡å¼çš„bufferå†…å®¹å°†è¢«å‘ˆç°äºè¯¥çª—å£
             (append ecb-compilation-major-modes '(change-log-mode
                                                   calendar-mode
                                                   diary-mode
@@ -341,55 +267,84 @@
   )
 
 ;; =============================================================================
+;; æ’ä»¶ggtagså’Œhelm-gtagséƒ½æ˜¯å¯¹äºGNU Globalçš„æ”¯æŒï¼Œä¸”ä¸¤è€…ç›¸äº’ç‹¬ç«‹ï¼Œå®ç°ä¸Šäº’ä¸ä¾èµ–
+(defun my-plugin-helm-gtags-init ()
+  (with-eval-after-load 'helm
+    (use-package helm-gtags
+      :if (and (my-func-package-enabled-p 'helm-gtags)
+               (executable-find "gtags"))
+      :commands (helm-gtags-mode)
+      :init
+      (setq helm-gtags-path-style 'root
+            helm-gtags-ignore-case t
+            helm-gtags-read-only t
+            helm-gtags-highlight-candidate t
+            helm-gtags-display-style 'detail
+            helm-gtags-fuzzy-match nil
+            helm-gtags-direct-helm-completing nil
+            helm-gtags-use-input-at-cursor t
+            helm-gtags-pulse-at-cursor t
+            helm-gtags-auto-update t
+            helm-gtags-update-interval-second 60
+            helm-gtags-prefix-key (kbd "C-c c")
+            ;; å¯ç”¨ä»¥ä¸‹é…ç½®é¡¹ä¼šä½¿å¾—æŸäº›å¸¸ç”¨å¿«æ·é”®ä¸å†ç»‘å®šäºä¸Šè¿°å‰ç¼€ä¸­
+            helm-gtags-suggested-key-mapping t)
+      (add-hook 'c-mode-common-hook
+                (lambda ()
+                  (when (derived-mode-p 'c-mode 'c++-mode)
+                    (my-plugin-helm-gtags-start)))
+                t)
+      (add-hook 'dired-mode-hook 'my-plugin-helm-gtags-start t)
+      (add-hook 'eshell-mode-hook 'my-plugin-helm-gtags-start t)
+      :config
+      (bind-keys :map helm-gtags-mode-map ;; ä»¥ä¸‹ä»…ä¾›å‚è€ƒ
+                 ("M-." . helm-gtags-dwim)
+                 ("M-," . helm-gtags-pop-stack)
+                 ("C-j" . helm-gtags-select)
+
+                 ("C-c c s" . helm-gtags-find-symbol)
+                 ("C-c c r" . helm-gtags-find-rtag)
+                 ("C-c c a" . helm-gtags-tags-in-this-function)
+
+
+                 helm-gtags-find-files
+                 helm-gtags-show-stack
+
+
+                 ("C-c <" . helm-gtags-previous-history)
+                 ("C-c >" . helm-gtags-next-history)))))
+
+(defun my-plugin-helm-gtags-start ()
+  (helm-gtags-mode 1))
+
+;; =============================================================================
 ;; ggtags
-;; -----------------------------------------------------------------------------
 (defun my-plugin-ggtags-init ()
-  (when (require 'ggtags nil t)))
+  (use-package ggtags
+    :disabled
+    :commands (ggtags-mode)))
 
 (defun my-plugin-ggtags-start ()
-  (ggtags-mode 1) ;; local minor mode
-  )
+  (ggtags-mode 1))
 
 ;; =============================================================================
 ;; =============================================================================
-(defun my-cc-mode-init ()
+(defun my-prog-cc-mode-init ()
   (my-cc-style-init)
-  ;; ËùÓĞÒÀÀµÓÚCEDETµÄ²å¼ş¶¼±ØĞëÔÚCEDETÖ®ºó±»¼ÓÔØ/ÆôÓÃ
-  ;; ·ñÔòÆä»á×Ô¶¯¼ÓÔØ/ÆôÓÃCEDET£¬µ¼ÖÂÉÏÊö¶ÔÓÚCEDETµÄÉèÖÃÊ§Ğ§
-  ;; ËùÓĞÓëCEDETÏà»¥¹ØÁªµÄ²å¼şµÄ¼ÓÔØ/Æô¶¯Ë³Ğò½«ÔÚ´Ë±»ÏÔÊ¾µØÖ¸¶¨
-  ;; ¶ø²»ÊÇÒ²²»Ó¦ÒÀÀµÓÚhookµÄÖ´ĞĞË³Ğò
+  ;; æ‰€æœ‰ä¾èµ–äºCEDETçš„æ’ä»¶éƒ½å¿…é¡»åœ¨CEDETä¹‹åè¢«åŠ è½½/å¯ç”¨
+  ;; å¦åˆ™å…¶ä¼šè‡ªåŠ¨åŠ è½½/å¯ç”¨CEDETï¼Œå¯¼è‡´ä¸Šè¿°å¯¹äºCEDETçš„è®¾ç½®å¤±æ•ˆ
+  ;; æ‰€æœ‰ä¸CEDETç›¸äº’å…³è”çš„æ’ä»¶çš„åŠ è½½/å¯åŠ¨é¡ºåºå°†åœ¨æ­¤è¢«æ˜¾ç¤ºåœ°æŒ‡å®š
+  ;; è€Œä¸æ˜¯ä¹Ÿä¸åº”ä¾èµ–äºhookçš„æ‰§è¡Œé¡ºåº
   (my-plugin-cedet-init)
-  (my-plugin-ecb-init))
+  (my-plugin-ecb-init)
+  (my-plugin-helm-gtags-init)
+  (my-plugin-ggtags-init)
+  (add-hook 'c-mode-hook 'my-prog-cc-mode-start)
+  (add-hook 'c++-mode-hook 'my-prog-cc-mode-start))
 
-(defun my-cc-mode-start ()
-  (my-cc-style-start)
-  (when (fboundp 'semantic-mode)
-    (my-plugin-cedet-start)
-    (my-plugin-ecb-start)))
+(defun my-prog-cc-mode-start ()
+  (run-hooks 'my-prog-cc-mode-start-hook))
 
-(eval-after-load 'cc-mode ;; /lisp/progmodes/cc-mode.el
-  '(progn
-     (add-hook 'c-initialization-hook 'my-cc-mode-init)
-     (add-hook 'c-mode-hook 'my-cc-mode-start)
-     (add-hook 'c++-mode-hook 'my-cc-mode-start)))
-
-;; =============================================================================
-;; JDEE (Java Development Environment for Emacs)
-;; version: 2.4.2
-;; http://jdee.sourceforge.net/
-;; https://github.com/emacsmirror/jdee
-;; -----------------------------------------------------------------------------
-(defun my-plugin-jdee-init ()
-  (add-to-list 'load-path (concat my-emacs-plugin-load-path "jdee/lisp"))
-  (load "jde")
-  ;; ÅäÖÃJDK»·¾³
-  (setq jde-jdk-environment-variable nil)
-  (setq jde-jdk-registry '(("1.8.0" . "C:/Program Files/Java/jdk1.8.0_40"))) ;; ¿ÉÒÔ×¢²á¶à¸öJDK°æ±¾
-  (setq jde-jdk '("1.8.0")) ;; Ö¸¶¨µ±Ç°Ê¹ÓÃµÄJDK°æ±¾
-  )
-
-(defun my-plugin-jdee-start ()
-  (when (boundp 'ac-sources)
-    (setq ac-sources (append my-prog-ac-sources '(ac-source-eclim)))))
+(eval-after-load 'cc-mode '(add-hook 'c-initialization-hook 'my-prog-cc-mode-init))
 
 (provide 'my-prog-cc)

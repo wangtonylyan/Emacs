@@ -115,10 +115,8 @@
 
 (defun my-plugin-ropemacs-start ()
   ;; (ropemacs-mode 1) ;;无需手动启用
-  (when (and (my-func-minor-mode-on-p auto-complete-mode)
-             (boundp 'ac-sources) (boundp 'my-prog-ac-sources))
-    (setq ac-sources
-          (add-to-list my-prog-ac-sources '(ac-source-ropemacs) t))))
+  (when (bound-and-true-p ac-sources)
+    (add-to-list 'ac-sources 'ac-source-ropemacs t)))
 
 ;; =============================================================================
 ;; =============================================================================
