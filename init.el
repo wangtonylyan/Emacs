@@ -585,7 +585,7 @@
           (my-func-package-enabled-p 'spaceline-all-the-icons)
           (my-func-package-enabled-p 'smart-mode-line-powerline-theme))
   :config
-  (setq powerline-default-separator 'wave
+  (setq powerline-default-separator 'arrow
         powerline-default-separator-dir '(left . right))
   (when (my-func-package-enabled-p 'powerline)
     (powerline-default-theme)))
