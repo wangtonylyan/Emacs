@@ -5,16 +5,17 @@
 
 (defvar my-prog-cc-mode-start-hook '())
 
-(when nil
-  (add-hook 'after-save-hook
-            (lambda ()
-              (when (and (or (eq major-mode 'c-mode)
-                             (eq major-mode 'c++-mode))
-                         (executable-find "uncrustify"))
-                (auto-revert-notify-rm-watch)
-                (shell-command (concat "uncrustify -l C -c ~/.uncrustify/alps.cfg --no-backup "
-                                       buffer-file-name))
-                (auto-revert-notify-add-watch)))))
+(defun my-func-cc-uncrustify ()
+  (interactive)
+  (let ((exe "uncrustify")
+        (cfg "~/.uncrustify/alps.cfg"))
+    (if (and (or (eq major-mode 'c-mode)
+                 (eq major-mode 'c++-mode))
+             (executable-find exe)
+             (file-exists-p cfg))
+        (message (shell-command-to-string
+                  (concat exe " -l C -c " cfg " --no-backup " buffer-file-name)))
+      (message "uncrustify unsupported!"))))
 
 ;; =============================================================================
 ;; CC-mode
