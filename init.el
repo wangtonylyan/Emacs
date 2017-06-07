@@ -73,6 +73,7 @@
                                     avy ;; ace-jump-mode
                                     ;; ace-pinyin
                                     undo-tree
+                                    highlight-thing
                                     ;; evil
                                     neotree ;; sr-speedbar
                                     helm ;; icomplete, anything, ido, smex, ivy
@@ -175,7 +176,6 @@
       echo-keystrokes 0.1
       debug-on-error nil ;; 显示错误信息
       select-enable-clipboard t
-      current-language-environment "Chinese-GB"
       auto-revert-use-notify t
       auto-revert-interval 1
       auto-revert-verbose nil
@@ -189,37 +189,53 @@
       dired-kept-versions 2
       backup-directory-alist '(("." . "~/.emacs.d.backups"))
       backup-by-copying t)
-(setq-default buffer-file-coding-system 'utf-8)
 (defalias 'yes-or-no-p 'y-or-n-p) ;; 以y/n替换yes/no
 (tool-bar-mode -1)
 (menu-bar-mode -1)
-(prefer-coding-system 'utf-8)
 ;; 该模式用于监控磁盘上的文件是否被外部程序修改，并提示用户或自动重新加载该文件
 (global-auto-revert-mode 1)
 (recentf-mode 1)
 (auto-image-file-mode 1) ;; 允许打开图片
 (auto-compression-mode 1) ;; 允许查看和写入压缩包
 
+;; -----------------------------------------------------------------------------
+;; 字符集和编码的名称可查询：'language-info-alist
+(set-language-environment "Chinese-GB18030")
+(prefer-coding-system 'utf-8)
 ;; (set-face-background 'default "#C7EDCC") ;; 设置背景颜色为绿色护眼色
 ;; 字体的名字源自于.ttf或.otf文件内自带的元信息，包括family和style等
-;; 以下使用不同的中英文字体和字号的目的是为了提升美观性，例如同一字体下的中文字符通常都比英文字符更高
-(let* ((rslt (<= (* (display-pixel-width) (display-pixel-height)) (* 1366 768)))
-       (efont (if rslt 10 11))
-       (cfont (if rslt 9 10))
-       (fcnct (lambda (font size) (concat font " " (number-to-string size)))))
+;; 英文字体：Consolas
+;; 中文字体：SimSun，MicrosoftYaHei，SourceHanSerifSC (思源宋体简体中文)，SourceHanSansSC (思源黑体简体中文)
+;; 混合字体：YaHeiConsolasHybrid，MicrosoftYaHeiMono
+;; Emacs中设置中文字体有以下几种方案
+;; 1) 默认编码：英文字体，中文编码：中文字体
+;; 此方案存在的缺陷在于，中英文字体高度不同，导致含有中文字体的行与纯英文字体的行之间行距不均
+(add-to-list 'face-font-rescale-alist '("SimSun" . 0.8) t)
+(add-to-list 'face-font-rescale-alist '("YaHeiConsolasHybrid" . 0.8) t)
+;; 2) 默认编码：中英文混合字体
+;; 网上提供的混合字体，通常都不支持粗体、斜体等格式
+
+;; http://emacser.com/torture-emacs.htm
+(let* ((rsltn (<= (* (display-pixel-width) (display-pixel-height)) (* 1366 768)))
+       (efont (if rsltn 16 17))
+       (cfont (if rsltn 13 14)))
   (if (eq system-type 'windows-nt)
       ;; Windows系统上的Emacs25版本对中文字体的显示存在问题，打开中文文档时会存在卡顿的现象
       ;; 必须手动指定中文字体为宋体才可避免。
       (progn
-        (set-default-font (eval `(,fcnct "Consolas" ,efont)))
-        (set-fontset-font "fontset-default" 'unicode (eval `(,fcnct "宋体" ,cfont))))
+        (set-frame-font (font-spec :family "Consolas" :size efont))
+        (set-fontset-font "fontset-default" 'han (font-spec :family "SimSun" :size cfont)))
     (progn
-      (set-default-font (eval `(,fcnct "YaHei Consolas Hybrid" ,efont)))
-      (set-fontset-font "fontset-default" 'unicode ;; 或替换成"Microsoft YaHei Mono"
-                        (eval `(,fcnct "Source Han Serif SC SemiBold" ,cfont))))))
-;; (set-face-attribute 'default nil :family "Microsoft YaHei Mono" :weight 'normal :height 110) ;; 设置字体，包括字号等
-;; (set-frame-font "10" nil t) ;; 设置字号, 同(set-face-attribute)中的:height
+      ;; e.g. 设置字体的方式有以下三种
+      ;; (set-frame-font (font-spec))
+      ;; (set-face-attribute 'default nil :font (font-spec))
+      (set-face-font 'default (font-spec :family "Consolas" :size efont))
+      ;; 'charset-script-alist
+      (set-fontset-font "fontset-default" 'han (font-spec :family "YaheiConsolasHybrid" :size cfont)))))
 
+(setq-default line-spacing 1)
+
+;; -----------------------------------------------------------------------------
 (global-font-lock-mode 1) ;; 语法高亮
 ;; (add-hook 'xxx-mode-hook 'turn-on-font-lock) ;; (font-lock-mode 1)
 ;; (global-linum-mode 1) ;; 左侧行号，推荐仅将其显示于主要的编辑文档中
@@ -325,6 +341,9 @@
 ;; 与输入法切换键冲突
 ;; (global-set-key (kbd "C-S-SPC") 'set-mark-command)
 ;; (global-unset-key (kbd "C-SPC"))
+
+;; File Extension
+;; (setq auto-mode-alist (cons '("\\.emacs\\'" . emacs-lisp-mode) auto-mode-alist))
 
 (use-package icomplete
   :if (not (my-func-package-enabled-p 'icomplete))
@@ -518,7 +537,21 @@
   (setq undo-tree-visualizer-diff nil
         undo-tree-visualizer-relative-timestamps nil)
   :config
+  (bind-keys :map undo-tree-visualizer-mode-map
+             ("C-p" . undo-tree-visualize-undo-to-x)
+             ("C-n" . undo-tree-visualize-redo-to-x))
   (global-undo-tree-mode 1))
+
+(use-package highlight-thing
+  :if (my-func-package-enabled-p 'highlight-thing)
+  :init
+  (setq highlight-thing-what-thing 'symbol
+        highlight-thing-exclude-thing-under-point nil
+        highlight-thing-delay-seconds 0.5
+        highlight-thing-limit-to-defun t
+        highlight-thing-case-sensitive-p t)
+  :config
+  (add-hook 'prog-mode-hook 'highlight-thing-mode))
 
 (use-package evil
   :if (my-func-package-enabled-p 'evil)
@@ -535,8 +568,25 @@
              ("M-v" . evil-scroll-page-up))
   (evil-mode 1))
 
-;; File Extension
-;; (setq auto-mode-alist (cons '("\\.emacs\\'" . emacs-lisp-mode) auto-mode-alist))
+(use-package eshell
+  :config
+  ;; (add-to-list 'eshell-visual-commands)
+  (bind-key "C-c e" (lambda ()
+                      (interactive)
+                      (if (eq major-mode 'eshell-mode)
+                          (progn
+                            (insert "exit")
+                            (eshell-send-input)
+                            (delete-window))
+                        (progn
+                          (let* ((dir (if (buffer-file-name)
+                                          (file-name-directory (buffer-file-name))
+                                        default-directory))
+                                 (name (car (last (split-string dir "/" t)))))
+                            (split-window-vertically (- (/ (window-total-height) 3)))
+                            (other-window 1)
+                            (eshell "new")
+                            (rename-buffer (concat "*eshell: " name "*"))))))))
 
 (provide 'my-init)
 
@@ -561,6 +611,8 @@
      ;; 全屏
      ;; (interactive)
      ;; (x-send-client-message nil 0 nil "_NET_WM_STATE" 32 '(2 "_NET_WM_STATE_FULLSCREEN" 0))
+     ;; 或
+     ;; (set-frame-parameter nil 'fullscreen 'fullboth)
      ;; 窗口最大化需要分别经过水平和垂直两个方向的最大化
      (interactive)
      (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
