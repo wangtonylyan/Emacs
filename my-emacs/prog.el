@@ -258,7 +258,6 @@
   (add-hook 'prog-mode-hook 'my-prog-mode-start t))
 
 (defun my-prog-mode-start ()
-  (turn-on-font-lock)
   (linum-mode 1)
   (run-hooks 'my-prog-mode-start-hook))
 

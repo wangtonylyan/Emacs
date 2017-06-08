@@ -210,30 +210,29 @@
 ;; Emacs中设置中文字体有以下几种方案
 ;; 1) 默认编码：英文字体，中文编码：中文字体
 ;; 此方案存在的缺陷在于，中英文字体高度不同，导致含有中文字体的行与纯英文字体的行之间行距不均
-(add-to-list 'face-font-rescale-alist '("SimSun" . 0.8) t)
-(add-to-list 'face-font-rescale-alist '("YaHeiConsolasHybrid" . 0.8) t)
+;; 但以下设置又不能生效
+;; (add-to-list 'face-font-rescale-alist '("SimSun" . 0.8) t)
 ;; 2) 默认编码：中英文混合字体
-;; 网上提供的混合字体，通常都不支持粗体、斜体等格式
+;; 网上提供的混合字体，拥有统一的行高，但通常都不能完善地支持斜体、粗体等形式
 
 ;; http://emacser.com/torture-emacs.htm
 (let* ((rsltn (<= (* (display-pixel-width) (display-pixel-height)) (* 1366 768)))
-       (efont (if rsltn 16 17))
-       (cfont (if rsltn 13 14)))
+       ;; 针对中英文字体分别设置两种字号
+       (efont (if rsltn 14 15))
+       (cfont (if rsltn 12 13)))
   (if (eq system-type 'windows-nt)
       ;; Windows系统上的Emacs25版本对中文字体的显示存在问题，打开中文文档时会存在卡顿的现象
       ;; 必须手动指定中文字体为宋体才可避免。
       (progn
-        (set-frame-font (font-spec :family "Consolas" :size efont))
+        (set-face-font 'default (font-spec :family "Consolas" :size efont))
         (set-fontset-font "fontset-default" 'han (font-spec :family "SimSun" :size cfont)))
     (progn
       ;; e.g. 设置字体的方式有以下三种
       ;; (set-frame-font (font-spec))
       ;; (set-face-attribute 'default nil :font (font-spec))
-      (set-face-font 'default (font-spec :family "Consolas" :size efont))
+      (set-face-font 'default (font-spec :family "YaHeiConsolasHybrid" :size efont))
       ;; 'charset-script-alist
-      (set-fontset-font "fontset-default" 'han (font-spec :family "YaheiConsolasHybrid" :size cfont)))))
-
-(setq-default line-spacing 1)
+      (set-fontset-font "fontset-default" 'han (font-spec :family "YaHeiConsolasHybrid" :size cfont)))))
 
 ;; -----------------------------------------------------------------------------
 (global-font-lock-mode 1) ;; 语法高亮
@@ -241,6 +240,7 @@
 ;; (global-linum-mode 1) ;; 左侧行号，推荐仅将其显示于主要的编辑文档中
 ;; (add-hook 'xxx-mode-hook 'linum-mode)
 (global-hi-lock-mode 1)
+(global-hl-line-mode 1)
 ;; (global-highlight-changes-mode 1)
 (mouse-avoidance-mode 'animate) ;; 当光标移动至鼠标位置时，为避免遮挡视线，自动移开鼠标
 ;; (save-place-mode 1) ;; 记录光标在每个文件中最后一次访问时所在的位置
@@ -248,8 +248,7 @@
 ;; (blink-cursor-mode -1)
 (column-number-mode 1) ;; 在mode-line显示列数
 (scroll-bar-mode -1) ;; 取消滚动条
-(global-hl-line-mode 1)
-(global-visual-line-mode -1) ;; 对中文支持不好
+(global-visual-line-mode 1) ;; 对中文支持不好
 (show-paren-mode 1) ;; 显示匹配的左右括号
 (electric-pair-mode -1)
 (electric-quote-mode -1)
@@ -283,7 +282,7 @@
 (setq-default cursor-type '(bar . 3)
               scroll-up-aggressively 0.01
               scroll-down-aggressively 0.01
-              line-spacing 0 ;; 行距
+              line-spacing 1 ;; 行距
               ;; fill-column 80 ;; 超过80字符就换行显示
               indicate-empty-lines nil
               indent-tabs-mode nil ;; make indentation commands use space only
@@ -551,6 +550,8 @@
         highlight-thing-limit-to-defun t
         highlight-thing-case-sensitive-p t)
   :config
+  (global-hl-line-mode -1)
+  (add-hook 'text-mode-hook 'hl-line-mode)
   (add-hook 'prog-mode-hook 'highlight-thing-mode))
 
 (use-package evil
