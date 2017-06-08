@@ -66,10 +66,11 @@
   (setq package-enable-at-startup nil) ;; 方式1) 随Emacs的启动而自动加载插件
   (package-initialize) ;; 方式2) 主动执行该函数以加载插件
   ;; 目前使用此全局变量来管理插件的启用/禁用，其中包括了ELPA更新源中所没有的插件
-  (setq package-selected-packages '(atom-one-dark-theme
-                                    ;; all-the-icons, all-the-icons-dired
+  (setq package-selected-packages '(;; all-the-icons-dired
                                     spaceline-all-the-icons ;; powerline, spaceline
                                     ;; smart-mode-line, smart-mode-line-powerline-theme
+                                    zenburn-theme ;; atom-one-dark-theme, doom-themes, solarized-theme
+                                    doom-themes-neotree
                                     avy ;; ace-jump-mode
                                     ;; ace-pinyin
                                     undo-tree
@@ -102,34 +103,6 @@
   (require 'use-package))
 (require 'bind-key)
 (require 'diminish)
-
-;; 指定第三方主题的安装目录
-(let ((path (concat my-user-emacs-directory "theme")))
-  (add-to-list 'load-path path t)
-  (add-to-list 'custom-theme-load-path path t))
-((lambda (theme)
-   (cond
-    ((string-equal "atom-one-dark" theme)
-     (when (require 'atom-one-dark-theme nil t)
-       (load-theme 'atom-one-dark t)))
-    ((string-prefix-p "material" theme)
-     (when (require 'material-theme nil t)
-       (cond
-        ((string-match-p "dark" theme)
-         (load-theme 'material t))
-        ((string-match-p "light" theme)
-         (load-theme 'material-light t)))))
-    ((string-prefix-p "solarized" theme)
-     (when (require 'solarized nil t)
-       (let ((mode (if (string-match-p "dark" theme) 'dark 'light)))
-         (load-theme 'solarized t)
-         (add-hook 'after-make-frame-functions
-                   (lambda (frame)
-                     (set-frame-parameter frame 'background-mode mode)
-                     (set-terminal-parameter frame 'background-mode mode)
-                     (enable-theme 'solarized))
-                   t))))))
- "atom-one-dark")
 
 (use-package minimap
   :if (my-func-package-enabled-p 'minimap)
@@ -225,14 +198,16 @@
       ;; 必须手动指定中文字体为宋体才可避免。
       (progn
         (set-face-font 'default (font-spec :family "Consolas" :size efont))
-        (set-fontset-font "fontset-default" 'han (font-spec :family "SimSun" :size cfont)))
+        (set-fontset-font "fontset-default" 'han
+                          (font-spec :family "SimSun" :size cfont) nil 'prepend))
     (progn
       ;; e.g. 设置字体的方式有以下三种
       ;; (set-frame-font (font-spec))
       ;; (set-face-attribute 'default nil :font (font-spec))
       (set-face-font 'default (font-spec :family "YaHeiConsolasHybrid" :size efont))
       ;; 'charset-script-alist
-      (set-fontset-font "fontset-default" 'han (font-spec :family "YaHeiConsolasHybrid" :size cfont)))))
+      (set-fontset-font "fontset-default" 'han
+                        (font-spec :family "YaHeiConsolasHybrid" :size cfont) nil 'prepend))))
 
 ;; -----------------------------------------------------------------------------
 (global-font-lock-mode 1) ;; 语法高亮
@@ -244,11 +219,12 @@
 ;; (global-highlight-changes-mode 1)
 (mouse-avoidance-mode 'animate) ;; 当光标移动至鼠标位置时，为避免遮挡视线，自动移开鼠标
 ;; (save-place-mode 1) ;; 记录光标在每个文件中最后一次访问时所在的位置
-(set-cursor-color "white")
+(set-cursor-color "gold")
 ;; (blink-cursor-mode -1)
 (column-number-mode 1) ;; 在mode-line显示列数
 (scroll-bar-mode -1) ;; 取消滚动条
-(global-visual-line-mode 1) ;; 对中文支持不好
+(global-visual-line-mode -1) ;; 对中文支持不好
+(add-hook 'text-mode-hook 'visual-line-mode t)
 (show-paren-mode 1) ;; 显示匹配的左右括号
 (electric-pair-mode -1)
 (electric-quote-mode -1)
@@ -547,7 +523,7 @@
   (setq highlight-thing-what-thing 'symbol
         highlight-thing-exclude-thing-under-point nil
         highlight-thing-delay-seconds 0.5
-        highlight-thing-limit-to-defun t
+        highlight-thing-limit-to-defun nil
         highlight-thing-case-sensitive-p t)
   :config
   (global-hl-line-mode -1)
@@ -623,8 +599,7 @@
                             '(1 "_NET_WM_STATE_MAXIMIZED_VERT" 0)))))
 
 (use-package all-the-icons
-  :if (or (my-func-package-enabled-p 'all-the-icons)
-          (my-func-package-enabled-p 'spaceline-all-the-icons))
+  :ensure t
   :init
   ;; 此插件在首次使用前需要额外地安装字体，执行以下命令会下载所需字体
   ;; Windows上需手动安装；Linux上会自动安装，即执行$fc-cache -f -v
@@ -633,14 +608,10 @@
   ;; (all-the-icons-install-fonts)
   :config
   (when (and (my-func-package-enabled-p 'all-the-icons-dired)
-             (require 'all-the-icons-dired nil t))
-    ))
+             (require 'all-the-icons-dired nil t))))
 
 (use-package powerline
-  :if (or (my-func-package-enabled-p 'powerline)
-          (my-func-package-enabled-p 'spaceline)
-          (my-func-package-enabled-p 'spaceline-all-the-icons)
-          (my-func-package-enabled-p 'smart-mode-line-powerline-theme))
+  :ensure t
   :config
   (setq powerline-default-separator 'arrow
         powerline-default-separator-dir '(left . right))
@@ -648,21 +619,20 @@
     (powerline-default-theme)))
 
 (use-package spaceline
-  :if (or (my-func-package-enabled-p 'spaceline)
-          (my-func-package-enabled-p 'spaceline-all-the-icons))
+  :ensure t
   :config
   (require 'spaceline-config)
   (setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
   (when (my-func-package-enabled-p 'spaceline)
     ;; (spaceline-emacs-theme)
     (spaceline-spacemacs-theme))
-  (spaceline-helm-mode))
+  (eval-after-load 'helm '(spaceline-helm-mode)))
 
 (use-package spaceline-all-the-icons
   :if (my-func-package-enabled-p 'spaceline-all-the-icons)
   :config
   (spaceline-all-the-icons-theme)
-  (spaceline-all-the-icons--setup-neotree)
+  ;; (spaceline-all-the-icons--setup-neotree)
   (spaceline-all-the-icons--setup-package-updates))
 
 (use-package smart-mode-line
@@ -677,6 +647,47 @@
         sml/shorten-modes t)
   (smart-mode-line-enable))
 
+(let ((path (concat my-user-emacs-directory "theme")))
+  (add-to-list 'load-path path t)
+  (add-to-list 'custom-theme-load-path path t))
+(use-package atom-one-dark-theme
+  :if (my-func-package-enabled-p 'atom-one-dark-theme)
+  :config
+  (load-theme 'atom-one-dark t))
+(use-package doom-themes
+  :if (my-func-package-enabled-p 'doom-themes)
+  :config
+  (setq doom-themes-enable-bold nil
+        doom-themes-enable-italic nil)
+  (load-theme 'doom-one t)
+  ;; (load-theme 'doom-vibrant t)
+  ;; (load-theme 'doom-spacegrey t)
+  ;; (doom-themes-neotree-config)
+  (when visible-bell
+    (doom-themes-visual-bell-config)))
+(use-package solarized-theme
+  :if (my-func-package-enabled-p 'solarized-theme)
+  :config
+  ;; (load-theme 'solarized-light t)
+  (load-theme 'solarized-dark t))
+(use-package zenburn-theme
+  :if (my-func-package-enabled-p 'zenburn-theme)
+  :config
+  (load-theme 'zenburn t))
+
+(when (my-func-package-enabled-p 'neotree)
+  (with-eval-after-load 'neotree
+    (cond
+     ((my-func-package-enabled-p 'doom-themes-neotree)
+      (use-package doom-themes
+        :config
+        (doom-themes-neotree-config)))
+     ((my-func-package-enabled-p 'spaceline-all-the-icons)
+      (use-package spaceline-all-the-icons
+        :config
+        (spaceline-all-the-icons--setup-neotree))))))
+
+;; =============================================================================
 (use-package w3m
   :preface
   (defvar-local my-plugin-w3m-exe
@@ -717,3 +728,14 @@
 
 ;; =============================================================================
 (message "emacs init time = %s" (emacs-init-time))
+
+
+(use-package preproc-font-lock
+  :commands (preproc-font-lock-global-mode preproc-font-lock-mode)
+  :config
+  (add-hook 'c-mode-common-hook 'modern-c++-font-lock-mode t))
+
+(use-package modern-cpp-font-lock
+  :commands (modern-c++-font-lock-global-mode modern-c++-font-lock-mode)
+  :config
+  (add-hook 'c-mode-common-hook 'modern-c++-font-lock-mode t))
