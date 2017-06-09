@@ -71,6 +71,7 @@
                                     ;; smart-mode-line, smart-mode-line-powerline-theme
                                     zenburn-theme ;; atom-one-dark-theme, doom-themes, solarized-theme
                                     doom-themes-neotree
+                                    rainbow-delimiters
                                     avy ;; ace-jump-mode
                                     ;; ace-pinyin
                                     undo-tree
@@ -183,7 +184,7 @@
 ;; Emacs中设置中文字体有以下几种方案
 ;; 1) 默认编码：英文字体，中文编码：中文字体
 ;; 此方案存在的缺陷在于，中英文字体高度不同，导致含有中文字体的行与纯英文字体的行之间行距不均
-;; 但以下设置又不能生效
+;; 而以下设置又不知为何无法生效
 ;; (add-to-list 'face-font-rescale-alist '("SimSun" . 0.8) t)
 ;; 2) 默认编码：中英文混合字体
 ;; 网上提供的混合字体，拥有统一的行高，但通常都不能完善地支持斜体、粗体等形式
@@ -290,12 +291,15 @@
 (unbind-key "C-x C-u") ;; (upcase-region)
 (unbind-key "M-<") ;; (beginning-of-buffer)
 (unbind-key "M->") ;; (end-of-buffer)
+(unbind-key "C-M-v") ;; (scroll-other-window)
 (unbind-key "M-s h")
 (bind-keys ("C-S-a" . mark-whole-buffer)
            ("C-S-h" . windmove-left)
            ("C-S-l" . windmove-right)
            ("C-S-j" . windmove-down)
            ("C-S-k" . windmove-up)
+           ("C-S-n" . scroll-other-window)
+           ("C-S-p" . scroll-other-window-down)
            ("C-<" . beginning-of-buffer)
            ("C->" . end-of-buffer)
            ("<C-wheel-up>" . text-scale-increase)
@@ -686,6 +690,14 @@
       (use-package spaceline-all-the-icons
         :config
         (spaceline-all-the-icons--setup-neotree))))))
+
+(use-package rainbow-delimiters
+  :if (my-func-package-enabled-p 'rainbow-delimiters)
+  :init
+  (setq rainbow-delimiters-max-face-count 9
+        rainbow-delimiters-outermost-only-face-count 0)
+  :config
+  (add-hook 'prog-mode-hook 'rainbow-delimiters-mode t))
 
 ;; =============================================================================
 (use-package w3m
