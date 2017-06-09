@@ -69,9 +69,10 @@
   (setq package-selected-packages '(;; all-the-icons-dired
                                     spaceline-all-the-icons ;; powerline, spaceline
                                     ;; smart-mode-line, smart-mode-line-powerline-theme
-                                    zenburn-theme ;; atom-one-dark-theme, doom-themes, solarized-theme
-                                    doom-themes-neotree
+                                    github-theme ;; atom-one-dark-theme, doom-themes, solarized-theme, zenburn-theme
+                                    ;; doom-themes-neotree
                                     rainbow-delimiters
+                                    rainbow-identifiers
                                     avy ;; ace-jump-mode
                                     ;; ace-pinyin
                                     undo-tree
@@ -669,6 +670,13 @@
   ;; (doom-themes-neotree-config)
   (when visible-bell
     (doom-themes-visual-bell-config)))
+(use-package github-theme
+  :if (my-func-package-enabled-p 'github-theme)
+  :init
+  (setq github-override-colors-alist '(("github-white" . "#f0f0f0")
+                                       ("github-text" . "#222222")))
+  :config
+  (load-theme 'github t))
 (use-package solarized-theme
   :if (my-func-package-enabled-p 'solarized-theme)
   :config
@@ -691,6 +699,7 @@
         :config
         (spaceline-all-the-icons--setup-neotree))))))
 
+;; 嵌套的括号通过大小而不仅是颜色来进行区分
 (use-package rainbow-delimiters
   :if (my-func-package-enabled-p 'rainbow-delimiters)
   :init
@@ -698,6 +707,14 @@
         rainbow-delimiters-outermost-only-face-count 0)
   :config
   (add-hook 'prog-mode-hook 'rainbow-delimiters-mode t))
+
+;; 修改默认字体颜色，从而将文字与符号区分开来
+(use-package rainbow-identifiers
+  :if (my-func-package-enabled-p 'rainbow-identifiers)
+  :init
+  (setq rainbow-identifiers-face-count 1)
+  :config
+  (add-hook 'prog-mode-hook 'rainbow-identifiers-mode t))
 
 ;; =============================================================================
 (use-package w3m
@@ -740,14 +757,3 @@
 
 ;; =============================================================================
 (message "emacs init time = %s" (emacs-init-time))
-
-
-(use-package preproc-font-lock
-  :commands (preproc-font-lock-global-mode preproc-font-lock-mode)
-  :config
-  (add-hook 'c-mode-common-hook 'modern-c++-font-lock-mode t))
-
-(use-package modern-cpp-font-lock
-  :commands (modern-c++-font-lock-global-mode modern-c++-font-lock-mode)
-  :config
-  (add-hook 'c-mode-common-hook 'modern-c++-font-lock-mode t))
