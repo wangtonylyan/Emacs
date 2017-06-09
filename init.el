@@ -71,6 +71,7 @@
                                     ;; smart-mode-line, smart-mode-line-powerline-theme
                                     github-theme ;; atom-one-dark-theme, doom-themes, solarized-theme, zenburn-theme
                                     ;; doom-themes-neotree
+                                    nlinum-hl
                                     rainbow-delimiters
                                     rainbow-identifiers
                                     avy ;; ace-jump-mode
@@ -147,6 +148,7 @@
       inhibit-startup-message 1 ;; 取消启动界面
       frame-title-format '(buffer-file-name "%f" ("%b")) ;; 设置标题栏显示为buffer名字
       uniquify-buffer-name-style 'post-forward-angle-brackets ;; 重名buffer的命名
+      help-window-select t
       visible-bell nil ;; 以窗口闪烁的方式代替错误提示音
       echo-keystrokes 0.1
       debug-on-error nil ;; 显示错误信息
@@ -193,8 +195,8 @@
 ;; http://emacser.com/torture-emacs.htm
 (let* ((rsltn (<= (* (display-pixel-width) (display-pixel-height)) (* 1366 768)))
        ;; 针对中英文字体分别设置两种字号
-       (efont (if rsltn 14 15))
-       (cfont (if rsltn 12 13)))
+       (efont (if rsltn 15 16))
+       (cfont (if rsltn 13 14)))
   (if (eq system-type 'windows-nt)
       ;; Windows系统上的Emacs25版本对中文字体的显示存在问题，打开中文文档时会存在卡顿的现象
       ;; 必须手动指定中文字体为宋体才可避免。
@@ -221,7 +223,7 @@
 ;; (global-highlight-changes-mode 1)
 (mouse-avoidance-mode 'animate) ;; 当光标移动至鼠标位置时，为避免遮挡视线，自动移开鼠标
 ;; (save-place-mode 1) ;; 记录光标在每个文件中最后一次访问时所在的位置
-(set-cursor-color "gold")
+;; (set-cursor-color "gold")
 ;; (blink-cursor-mode -1)
 (column-number-mode 1) ;; 在mode-line显示列数
 (scroll-bar-mode -1) ;; 取消滚动条
@@ -674,6 +676,7 @@
   :if (my-func-package-enabled-p 'github-theme)
   :init
   (setq github-override-colors-alist '(("github-white" . "#f0f0f0")
+                                       ("github-comment" . "#009e73")
                                        ("github-text" . "#222222")))
   :config
   (load-theme 'github t))
@@ -698,6 +701,16 @@
       (use-package spaceline-all-the-icons
         :config
         (spaceline-all-the-icons--setup-neotree))))))
+
+(use-package nlinum-hl
+  :if (my-func-package-enabled-p 'nlinum-hl)
+  :config
+  (run-with-idle-timer 5 t 'nlinum-hl-flush-window)
+  (run-with-idle-timer 30 t 'nlinum-hl-flush-all-windows)
+  (add-hook 'focus-in-hook 'nlinum-hl-flush-all-windows)
+  (add-hook 'focus-out-hook 'nlinum-hl-flush-all-windows)
+  (advice-add 'select-window :before 'nlinum-hl-do-flush)
+  (advice-add 'select-window :after 'nlinum-hl-do-flush))
 
 ;; 嵌套的括号通过大小而不仅是颜色来进行区分
 (use-package rainbow-delimiters
