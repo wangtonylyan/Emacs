@@ -19,4 +19,5 @@
  '(rainbow-delimiters-depth-6-face ((t (:foreground "#709870" :height 1.25))))
  '(rainbow-delimiters-depth-7-face ((t (:foreground "#709870" :height 1.2))))
  '(rainbow-delimiters-depth-8-face ((t (:foreground "#709870" :height 1.15))))
- '(rainbow-delimiters-depth-9-face ((t (:foreground "#709870" :height 1.1)))))
+ '(rainbow-delimiters-depth-9-face ((t (:foreground "#709870" :height 1.1))))
+ '(rainbow-identifiers-identifier-1 ((t (:foreground "#333333")))))

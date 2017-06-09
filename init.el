@@ -77,9 +77,11 @@
                                     avy ;; ace-jump-mode
                                     ;; ace-pinyin
                                     undo-tree
+                                    smart-hungry-delete
                                     highlight-thing
                                     ;; evil
                                     neotree ;; sr-speedbar
+                                    ;; sublimity, minimap
                                     helm ;; icomplete, anything, ido, smex, ivy
                                     helm-gtags
                                     flyspell
@@ -107,6 +109,16 @@
 (require 'bind-key)
 (require 'diminish)
 
+(use-package sublimity
+  :if (my-func-package-enabled-p 'sublimity)
+  :commands (sublimity-global-mode sublimity-mode)
+  :init
+  (setq sublimity-map-set-delay 3)
+  :config
+  ;; (require 'sublimity-scroll)
+  ;; (require 'sublimity-attractive)
+  (require 'sublimity-map nil t))
+
 (use-package minimap
   :if (my-func-package-enabled-p 'minimap)
   :config
@@ -116,7 +128,7 @@
         minimap-hide-fringes t
         minimap-hide-scroll-bar t
         minimap-update-delay 1.0
-        minimap-window-location 'right
+        minimap-window-location 'left
         minimap-display-semantic-overlays nil
         minimap-enlarge-certain-faces nil))
 
@@ -524,6 +536,11 @@
              ("C-n" . undo-tree-visualize-redo-to-x))
   (global-undo-tree-mode 1))
 
+(use-package smart-hungry-delete
+  :if (my-func-package-enabled-p 'smart-hungry-delete)
+  :bind (("<backspace>" . smart-hungry-delete-backward-char)
+		 ("C-d" . smart-hungry-delete-forward-char)))
+
 (use-package highlight-thing
   :if (my-func-package-enabled-p 'highlight-thing)
   :init
@@ -675,9 +692,9 @@
 (use-package github-theme
   :if (my-func-package-enabled-p 'github-theme)
   :init
-  (setq github-override-colors-alist '(("github-white" . "#f0f0f0")
+  (setq github-override-colors-alist '(("github-white" . "#fBf9e1")
                                        ("github-comment" . "#009e73")
-                                       ("github-text" . "#222222")))
+                                       ("github-text" . "#000000")))
   :config
   (load-theme 'github t))
 (use-package solarized-theme
