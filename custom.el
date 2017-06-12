@@ -20,5 +20,4 @@
  '(rainbow-delimiters-depth-7-face ((t (:foreground "#709870" :height 1.2))))
  '(rainbow-delimiters-depth-8-face ((t (:foreground "#709870" :height 1.15))))
  '(rainbow-delimiters-depth-9-face ((t (:foreground "#709870" :height 1.1))))
- ;; light theme: #333333, dark theme: #CCCCCC
  '(rainbow-identifiers-identifier-1 ((t (:foreground "#CCCCCC")))))
