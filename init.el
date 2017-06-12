@@ -744,6 +744,8 @@
 (use-package rainbow-identifiers
   :if (my-func-package-enabled-p 'rainbow-identifiers)
   :init
+  ;; dark theme: '(rainbow-identifiers-identifier-1 ((t (:foreground "#CCCCCC"))))
+  ;; light theme: '(rainbow-identifiers-identifier-1 ((t (:foreground "#333333"))))
   (setq rainbow-identifiers-face-count 1)
   :config
   (add-hook 'prog-mode-hook 'rainbow-identifiers-mode t))
