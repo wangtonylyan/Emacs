@@ -117,8 +117,8 @@
                                       global-semanticdb-minor-mode
                                       ;; Display and Decoration
                                       global-semantic-stickyfunc-mode
-                                      global-semantic-highlight-func-mode
-                                      global-semantic-decoration-mode
+                                      ;; global-semantic-highlight-func-mode
+                                      ;; global-semantic-decoration-mode
                                       ;; Senator
                                       global-semantic-mru-bookmark-mode ;; mostly recently used
                                       ;; Debug
@@ -162,18 +162,18 @@
                                                   omniscience ;; 自己创建的数据库就属于此类
                                                   )
           ;; -------------------------------------------------------------------
-          semantic-stickyfunc-sticky-classes '(function type) ;; variable, include, package
           semantic-decoration-styles '(("semantic-tag-boundary" . t)
                                        ("semantic-decoration-on-private-members" . nil)
                                        ("semantic-decoration-on-protected-members" . nil)
                                        ("semantic-decoration-on-includes" . nil))
           ;; -------------------------------------------------------------------
           semantic-c-obey-conditional-section-parsing-flag t)
-    (setq-default semantic-stickyfunc-sticky-classes semantic-stickyfunc-sticky-classes)
     (use-package cedet-global
       :commands (cedet-gnu-global-version-check))
     (add-hook 'my-prog-cc-mode-start-hook 'my-plugin-cedet-start t)
     :config
+    (setq semantic-stickyfunc-sticky-classes '(function type)) ;; variable, include, package
+    (setq-default semantic-stickyfunc-sticky-classes semantic-stickyfunc-sticky-classes)
     (semantic-mode 1) ;; global minor mode
     ;; 可以预先主动地对某些目录生成数据库，以便今后复用
     (setq semanticdb-search-system-databases t

@@ -211,7 +211,7 @@
     :config
     (setq flycheck-check-syntax-automatically '(mode-enabled save idle-change)
           flycheck-idle-change-delay 2.5
-          flycheck-indication-mode nil)
+          flycheck-indication-mode 'right-fringe)
     (setq-default flycheck-disabled-checkers
                   (add-to-list 'flycheck-disabled-checkers
                                'emacs-lisp-checkdoc t))
