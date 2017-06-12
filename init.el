@@ -72,6 +72,7 @@
                                     zenburn-theme ;; atom-one-dark-theme, doom-themes, github-theme, solarized-theme
                                     ;; doom-themes-neotree
                                     nlinum-hl
+                                    yascroll
                                     rainbow-delimiters
                                     rainbow-identifiers
                                     avy ;; ace-jump-mode
@@ -80,8 +81,11 @@
                                     smart-hungry-delete
                                     highlight-thing
                                     ;; evil
+                                    bm
+                                    helm-bm
                                     neotree ;; sr-speedbar
                                     ;; sublimity, minimap
+                                    buffer-move
                                     helm ;; icomplete, anything, ido, smex, ivy
                                     helm-gtags
                                     flyspell
@@ -97,6 +101,7 @@
                                     elpy ;; ropemacs
                                     py-autopep8
                                     auctex
+                                    pdf-tools
                                     ;; w3m
                                     erc ;; circe, rcirc
                                     use-package))
@@ -163,7 +168,7 @@
       help-window-select t
       visible-bell nil ;; 以窗口闪烁的方式代替错误提示音
       echo-keystrokes 0.1
-      debug-on-error nil ;; 显示错误信息
+      debug-on-error t ;; 显示错误信息
       select-enable-clipboard t
       auto-revert-use-notify t
       auto-revert-interval 1
@@ -233,6 +238,7 @@
 (global-hi-lock-mode 1)
 (global-hl-line-mode 1)
 ;; (global-highlight-changes-mode 1)
+(winner-mode 1)
 (mouse-avoidance-mode 'animate) ;; 当光标移动至鼠标位置时，为避免遮挡视线，自动移开鼠标
 ;; (save-place-mode 1) ;; 记录光标在每个文件中最后一次访问时所在的位置
 ;; (set-cursor-color "gold")
@@ -259,6 +265,7 @@
       mouse-wheel-progressive-speed t
       mouse-wheel-follow-mouse t
       ;; keyboard scrolling
+      scroll-bar-adjust-thumb-portion nil
       scroll-margin 1
       scroll-step 3
       scroll-conservatively 10000
@@ -300,6 +307,7 @@
 ;; C-c g :: magit
 ;; C-c o :: org
 ;; C-c i :: highlight
+;; C-c b :: bm, helm-bm
 (unbind-key "C-x o") ;; (other-window)
 (unbind-key "C-x f") ;; (set-fill-column)
 (unbind-key "C-x C-l") ;; (downcase-region)
@@ -307,6 +315,8 @@
 (unbind-key "M-<") ;; (beginning-of-buffer)
 (unbind-key "M->") ;; (end-of-buffer)
 (unbind-key "C-M-v") ;; (scroll-other-window)
+(unbind-key "C-x <left>") ;; (previous-buffer)
+(unbind-key "C-x <right>") ;; (next-buffer)
 (unbind-key "M-s h")
 (bind-keys ("C-S-a" . mark-whole-buffer)
            ("C-S-h" . windmove-left)
@@ -315,6 +325,8 @@
            ("C-S-k" . windmove-up)
            ("C-S-n" . scroll-other-window)
            ("C-S-p" . scroll-other-window-down)
+           ("C-S-u" . previous-buffer)
+           ("C-S-r" . next-buffer)
            ("C-<" . beginning-of-buffer)
            ("C->" . end-of-buffer)
            ("<C-wheel-up>" . text-scale-increase)
@@ -469,6 +481,38 @@
   (bind-keys :map speedbar-file-key-map
              ("<tab>" . speedbar-edit-line)))
 
+(use-package bm
+  :if (my-func-package-enabled-p 'bm)
+  :bind (("C-c b m" . bookmark-set)
+         ("C-c b d" . bookmark-delete)
+         ("C-c b r" . bookmark-rename)
+         ("C-c b l" . bookmark-bmenu-list)
+         ("C-c b n" . bm-next)
+         ("C-c b p" . bm-previous)
+         ("C-c b t" . bm-toggle))
+  :config
+  (unbind-key "C-x r")
+  (setq bm-marker 'bm-marker-left
+        bm-cycle-all-buffers t
+        temporary-bookmark-p t
+        bm-buffer-persistence t
+        bm-restore-repository-on-load t
+        bm-repository-file (concat user-emacs-directory "bm-repository"))
+  (setq-default bm-buffer-persistence bm-buffer-persistence)
+  (add-hook' after-init-hook 'bm-repository-load)
+  (add-hook 'find-file-hooks 'bm-buffer-restore)
+  (add-hook 'kill-buffer-hook 'bm-buffer-save)
+  (add-hook 'kill-emacs-hook '(lambda nil
+                                (bm-buffer-save-all)
+                                (bm-repository-save)))
+  (add-hook 'after-save-hook 'bm-buffer-save)
+  (add-hook 'after-revert-hook 'bm-buffer-restore)
+  (use-package helm-bm
+    :if (my-func-package-enabled-p 'helm-bm)
+    :demand t
+    :after helm
+    :bind (("C-c b b" . helm-bm))))
+
 (use-package neotree
   :preface
   (defun my-plugin-neotree-toggle ()
@@ -496,6 +540,13 @@
         neo-window-width 28)
   :config
   (add-hook 'my-plugin-projectile-switch-hook 'neotree-projectile-action t))
+
+(use-package buffer-move
+  :if (my-func-package-enabled-p 'buffer-move)
+  :bind (("<C-S-up>" . buf-move-up)
+         ("<C-S-down>" . buf-move-down)
+         ("<C-S-left>" . buf-move-left)
+         ("<C-S-right>" . buf-move-right)))
 
 (use-package org
   :bind (("C-c o c" . org-capture)
@@ -532,6 +583,7 @@
         undo-tree-visualizer-relative-timestamps nil)
   :config
   (bind-keys :map undo-tree-visualizer-mode-map
+             ("<return>" . undo-tree-visualizer-quit)
              ("C-p" . undo-tree-visualize-undo-to-x)
              ("C-n" . undo-tree-visualize-redo-to-x))
   (global-undo-tree-mode 1))
@@ -539,7 +591,7 @@
 (use-package smart-hungry-delete
   :if (my-func-package-enabled-p 'smart-hungry-delete)
   :bind (("<backspace>" . smart-hungry-delete-backward-char)
-		 ("C-d" . smart-hungry-delete-forward-char)))
+         ("C-d" . smart-hungry-delete-forward-char)))
 
 (use-package highlight-thing
   :if (my-func-package-enabled-p 'highlight-thing)
@@ -730,6 +782,13 @@
   (add-hook 'focus-out-hook 'nlinum-hl-flush-all-windows)
   (advice-add 'select-window :before 'nlinum-hl-do-flush)
   (advice-add 'select-window :after 'nlinum-hl-do-flush))
+
+(use-package yascroll
+  :if (my-func-package-enabled-p 'yascroll)
+  :init
+  (setq yascroll:delay-to-hide nil)
+  :config
+  (global-yascroll-bar-mode 1))
 
 ;; 嵌套的括号通过大小而不仅是颜色来进行区分
 (use-package rainbow-delimiters
