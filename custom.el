@@ -10,7 +10,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(highlight-thing ((t (:box (:line-width -1 :color "#709870")))))
+ '(highlight-thing ((t (:box (:line-width -1 :color "DarkGray")))))
  '(rainbow-delimiters-depth-1-face ((t (:foreground "#709870" :height 1.5))))
  '(rainbow-delimiters-depth-2-face ((t (:foreground "#709870" :height 1.45))))
  '(rainbow-delimiters-depth-3-face ((t (:foreground "#709870" :height 1.4))))
@@ -20,4 +20,5 @@
  '(rainbow-delimiters-depth-7-face ((t (:foreground "#709870" :height 1.2))))
  '(rainbow-delimiters-depth-8-face ((t (:foreground "#709870" :height 1.15))))
  '(rainbow-delimiters-depth-9-face ((t (:foreground "#709870" :height 1.1))))
- '(rainbow-identifiers-identifier-1 ((t (:foreground "#333333")))))
+ ;; light theme: #333333, dark theme: #CCCCCC
+ '(rainbow-identifiers-identifier-1 ((t (:foreground "#CCCCCC")))))

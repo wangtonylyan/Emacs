@@ -69,7 +69,7 @@
   (setq package-selected-packages '(;; all-the-icons-dired
                                     spaceline-all-the-icons ;; powerline, spaceline
                                     ;; smart-mode-line, smart-mode-line-powerline-theme
-                                    github-theme ;; atom-one-dark-theme, doom-themes, solarized-theme, zenburn-theme
+                                    zenburn-theme ;; atom-one-dark-theme, doom-themes, github-theme, solarized-theme
                                     ;; doom-themes-neotree
                                     nlinum-hl
                                     rainbow-delimiters
@@ -692,8 +692,8 @@
 (use-package github-theme
   :if (my-func-package-enabled-p 'github-theme)
   :init
-  (setq github-override-colors-alist '(("github-white" . "#fBf9e1")
-                                       ("github-comment" . "#009e73")
+  (setq github-override-colors-alist '(("github-white" . "#FBF9E1")
+                                       ("github-comment" . "#009E73")
                                        ("github-text" . "#000000")))
   :config
   (load-theme 'github t))
@@ -704,6 +704,8 @@
   (load-theme 'solarized-dark t))
 (use-package zenburn-theme
   :if (my-func-package-enabled-p 'zenburn-theme)
+  :init
+  (setq zenburn-override-colors-alist '(("zenburn-fg" . "#EDEDDD")))
   :config
   (load-theme 'zenburn t))
 
