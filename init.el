@@ -98,6 +98,7 @@
                                     company ;; auto-complete
                                     company-jedi
                                     magit
+                                    stickyfunc-enhance
                                     elpy ;; ropemacs
                                     py-autopep8
                                     auctex
@@ -168,7 +169,7 @@
       help-window-select t
       visible-bell nil ;; 以窗口闪烁的方式代替错误提示音
       echo-keystrokes 0.1
-      debug-on-error t ;; 显示错误信息
+      debug-on-error nil ;; 显示错误信息
       select-enable-clipboard t
       auto-revert-use-notify t
       auto-revert-interval 1

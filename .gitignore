@@ -10,8 +10,7 @@
 *projectile*
 *recentf*
 .history
-.ido.last
-ido.last
+*ido.last*
 ac-comphist.dat
 bookmarks
 ede-projects.el
