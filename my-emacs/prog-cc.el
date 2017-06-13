@@ -109,14 +109,14 @@
     :init
     (setq semantic-default-submodes '(;; Idle Scheduler
                                       global-semantic-idle-scheduler-mode
-                                      global-semantic-idle-summary-mode ;; 基于Smart Summary
+                                      ;; global-semantic-idle-summary-mode ;; 基于Smart Summary
                                       global-semantic-idle-local-symbol-highlight-mode
                                       ;; global-semantic-idle-completions-mode ;; 基于Smart Completion，用company替代
                                       ;; global-semantic-idle-breadcrumbs-mode
                                       ;; SemanticDB
                                       global-semanticdb-minor-mode
                                       ;; Display and Decoration
-                                      global-semantic-stickyfunc-mode
+                                      global-semantic-stickyfunc-mode ;; (use-package stickyfunc-enhance)
                                       ;; global-semantic-highlight-func-mode
                                       ;; global-semantic-decoration-mode
                                       ;; Senator
@@ -174,6 +174,9 @@
     :config
     (setq semantic-stickyfunc-sticky-classes '(function type)) ;; variable, include, package
     (setq-default semantic-stickyfunc-sticky-classes semantic-stickyfunc-sticky-classes)
+    (use-package stickyfunc-enhance
+      :if (my-func-package-enabled-p 'stickyfunc-enhance)
+      :demand t)
     (semantic-mode 1) ;; global minor mode
     ;; 可以预先主动地对某些目录生成数据库，以便今后复用
     (setq semanticdb-search-system-databases t
@@ -188,7 +191,7 @@
     ;; 设置'semanticdb-find-default-throttle中的'project，主要交由EDE或JDE等组件控制
     ;; (add-hook semanticdb-project-predicate-functions ) ;; 此项交由EDE设置
     ;; (add-hook semanticdb-project-root-functions ) ;; 此项交由EDE设置
-    ;; 设置'semanticdb-find-default-throttle中的'system，可以利用编译器的已有配置
+    ;; 设置'semanticdb-find-default-throttle中的'system，可以利用编译器的输出信息
     ;; 甚至可以具体指定一些项目的根目录，该变量也会被semantic-project-root-functions中注册的函数修改
     ;; (setq semanticdb-project-roots '())
     (use-package semantic/bovine/gcc
@@ -232,20 +235,29 @@
                 ("" . senator-previous-tag)
                 ("" . senator-jump)
                 ("" . senator-go-to-up-reference)))
-    ;; 若Semantic始终不能正常解析某些特定的符号，则作如下设置
+    ;; 若Semantic始终不能正常解析某些特定的符号，则可作如下设置
     ;; (add-to-list 'semantic-lex-c-preprocessor-symbol-map '("symbol" . "value"))
     ;; (add-to-list 'semantic-lex-c-preprocessor-symbol-file  "path/file")
     (use-package semantic/sb ;; 此为CEDET中内置的Speedbar，不启用
       :disabled)
     (use-package ede
-      :disabled
       :config
-      (global-ede-mode 1) ;; 配合semantic-mode全局性地启用
       ;; EDE默认使用Unix上的Locate命令来定位文件，此外还支持使用GNU Global
-      ;; 但目前Emacs内置的CEDET中删除了ede-locate.el文件，因此也就不支持修改了
+      ;; 但目前Emacs内置的CEDET中删除了ede-locate.el文件，因此也就暂不支持后者了
       ;; (setq ede-locate-setup-options '(ede-locate-global ede-locate-base))
-      ;; 具体项目的EDE信息由prog-cc-ede.emacs配置文件独立地维护
-      (load-file (concat my-user-emacs-directory "prog-cc-ede.el")))))
+      ;; 1. 对于复杂的项目，应利用ede-new新建并利用Project.ede文件定制
+      ;; 2. 对于简单的项目，应利用以下脚本定制
+      (let ((root "~/project/github/Emacs/README.md"))
+        (when (file-exists-p root)
+          (ede-cpp-root-project "evo_btappl" ;; name
+                                :file root ;; anchor
+                                ;; :include-path '("/include")
+                                ;; :system-include-path '("")
+                                ;; :spp-table '(("MACRO1" . "VALUE1"))
+                                )))
+      ;; 具体项目的EDE信息由每台机器上的ede-projects.el配置文件独立地维护
+      (load (concat my-user-emacs-directory "ede-projects.el") t nil t t)
+      (global-ede-mode 1))))
 
 (defun my-plugin-cedet-start ()
   (when (bound-and-true-p ac-sources)
