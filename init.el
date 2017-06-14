@@ -74,7 +74,6 @@
                                     ;; nlinum-hl
                                     ;; yascroll
                                     buffer-move
-                                    tile
                                     rainbow-delimiters
                                     rainbow-identifiers
                                     avy ;; ace-jump-mode
@@ -309,7 +308,7 @@
 ;; C-c o :: org
 ;; C-c i :: highlight
 ;; C-c b :: bm, helm-bm
-;; C-c w :: window layout: windmove, winner, buffer-move, tile
+;; C-c w :: window layout: windmove, winner, buffer-move
 (unbind-key "C-x f") ;; (set-fill-column)
 (unbind-key "C-x C-l") ;; (downcase-region)
 (unbind-key "C-x C-u") ;; (upcase-region)
@@ -366,13 +365,6 @@
          ("C-c w l" . buf-move-right)
          ("C-c w k" . buf-move-up)
          ("C-c w j" . buf-move-down)))
-(use-package tile
-  :if (my-func-package-enabled-p 'tile)
-  :bind (("C-c w w" . tiling-cycle)
-         ("C-c w b" . tiling-tile-left)
-         ("C-c w f" . tiling-tile-right)
-         ("C-c w p" . tiling-tile-up)
-         ("C-c w n" . tiling-tile-down)))
 
 (use-package icomplete
   :if (not (my-func-package-enabled-p 'icomplete))
