@@ -71,8 +71,10 @@
                                     ;; smart-mode-line, smart-mode-line-powerline-theme
                                     zenburn-theme ;; atom-one-dark-theme, doom-themes, github-theme, solarized-theme
                                     ;; doom-themes-neotree
-                                    nlinum-hl
-                                    yascroll
+                                    ;; nlinum-hl
+                                    ;; yascroll
+                                    buffer-move
+                                    tile
                                     rainbow-delimiters
                                     rainbow-identifiers
                                     avy ;; ace-jump-mode
@@ -85,7 +87,6 @@
                                     helm-bm
                                     neotree ;; sr-speedbar
                                     ;; sublimity, minimap
-                                    buffer-move
                                     helm ;; icomplete, anything, ido, smex, ivy
                                     helm-gtags
                                     flyspell
@@ -239,7 +240,6 @@
 (global-hi-lock-mode 1)
 (global-hl-line-mode 1)
 ;; (global-highlight-changes-mode 1)
-(winner-mode 1)
 (mouse-avoidance-mode 'animate) ;; 当光标移动至鼠标位置时，为避免遮挡视线，自动移开鼠标
 ;; (save-place-mode 1) ;; 记录光标在每个文件中最后一次访问时所在的位置
 ;; (set-cursor-color "gold")
@@ -309,27 +309,15 @@
 ;; C-c o :: org
 ;; C-c i :: highlight
 ;; C-c b :: bm, helm-bm
-(unbind-key "C-x o") ;; (other-window)
+;; C-c w :: window layout: windmove, winner, buffer-move, tile
 (unbind-key "C-x f") ;; (set-fill-column)
 (unbind-key "C-x C-l") ;; (downcase-region)
 (unbind-key "C-x C-u") ;; (upcase-region)
-(unbind-key "M-<") ;; (beginning-of-buffer)
-(unbind-key "M->") ;; (end-of-buffer)
 (unbind-key "C-M-v") ;; (scroll-other-window)
-(unbind-key "C-x <left>") ;; (previous-buffer)
-(unbind-key "C-x <right>") ;; (next-buffer)
 (unbind-key "M-s h")
 (bind-keys ("C-S-a" . mark-whole-buffer)
-           ("C-S-h" . windmove-left)
-           ("C-S-l" . windmove-right)
-           ("C-S-j" . windmove-down)
-           ("C-S-k" . windmove-up)
-           ("C-S-n" . scroll-other-window)
-           ("C-S-p" . scroll-other-window-down)
-           ("C-S-u" . previous-buffer)
-           ("C-S-r" . next-buffer)
-           ("C-<" . beginning-of-buffer)
-           ("C->" . end-of-buffer)
+           ("C-M-p" . scroll-other-window-down)
+           ("C-M-n" . scroll-other-window)
            ("<C-wheel-up>" . text-scale-increase)
            ("<C-wheel-down>" . text-scale-decrease)
            ("<C-up>" . text-scale-increase)
@@ -342,7 +330,6 @@
            ("C-c i r" . highlight-regexp)
            ("C-c i l" . highlight-lines-matching-regexp)
            ("C-c i u" . unhighlight-regexp))
-(windmove-default-keybindings)
 (put 'downcase-region 'disabled nil) ;; 去除每次执行此命令时的提示，强制执行
 (put 'upcase-region 'disabled nil)
 ;; 与输入法切换键冲突
@@ -351,6 +338,41 @@
 
 ;; File Extension
 ;; (setq auto-mode-alist (cons '("\\.emacs\\'" . emacs-lisp-mode) auto-mode-alist))
+
+(winner-mode 1)
+(unbind-key "C-x o") ;; (other-window)
+(unbind-key "C-x <left>") ;; (previous-buffer)
+(unbind-key "C-x <right>") ;; (next-buffer)
+(bind-keys ("C-+" . enlarge-window)
+           ("C-_" . shrink-window)
+           ("C-=" . enlarge-window-horizontally)
+           ("C--" . shrink-window-horizontally))
+(use-package windmove
+  :demand t
+  :bind (("C-S-h" . windmove-left)
+         ("C-S-l" . windmove-right)
+         ("C-S-k" . windmove-up)
+         ("C-S-j" . windmove-down))
+  :config
+  ;; <shift-up/down/left/right>
+  (windmove-default-keybindings))
+(use-package winner
+  :demand t
+  :bind (("C-c w u" . winner-undo)
+         ("C-c w r" . winner-redo)))
+(use-package buffer-move
+  :if (my-func-package-enabled-p 'buffer-move)
+  :bind (("C-c w h" . buf-move-left)
+         ("C-c w l" . buf-move-right)
+         ("C-c w k" . buf-move-up)
+         ("C-c w j" . buf-move-down)))
+(use-package tile
+  :if (my-func-package-enabled-p 'tile)
+  :bind (("C-c w w" . tiling-cycle)
+         ("C-c w b" . tiling-tile-left)
+         ("C-c w f" . tiling-tile-right)
+         ("C-c w p" . tiling-tile-up)
+         ("C-c w n" . tiling-tile-down)))
 
 (use-package icomplete
   :if (not (my-func-package-enabled-p 'icomplete))
@@ -542,13 +564,6 @@
   :config
   (add-hook 'my-plugin-projectile-switch-hook 'neotree-projectile-action t))
 
-(use-package buffer-move
-  :if (my-func-package-enabled-p 'buffer-move)
-  :bind (("<C-S-up>" . buf-move-up)
-         ("<C-S-down>" . buf-move-down)
-         ("<C-S-left>" . buf-move-left)
-         ("<C-S-right>" . buf-move-right)))
-
 (use-package org
   :bind (("C-c o c" . org-capture)
          ("C-c o a" . org-agenda)))
@@ -587,6 +602,7 @@
              ("<return>" . undo-tree-visualizer-quit)
              ("C-p" . undo-tree-visualize-undo-to-x)
              ("C-n" . undo-tree-visualize-redo-to-x))
+  (unbind-key "C-_" undo-tree-map)
   (global-undo-tree-mode 1))
 
 (use-package smart-hungry-delete
@@ -789,6 +805,7 @@
   :init
   (setq yascroll:delay-to-hide nil)
   :config
+  (add-to-list 'yascroll:disabled-modes 'neotree-mode)
   (global-yascroll-bar-mode 1))
 
 ;; 嵌套的括号通过大小而不仅是颜色来进行区分
