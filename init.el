@@ -558,7 +558,9 @@
 
 (use-package org
   :bind (("C-c o c" . org-capture)
-         ("C-c o a" . org-agenda)))
+         ("C-c o a" . org-agenda))
+  :config
+  (add-hook 'org-mode-hook 'org-indent-mode))
 
 (use-package ace-jump-mode
   :if (my-func-package-enabled-p 'ace-jump-mode)
@@ -820,6 +822,13 @@
   (add-hook 'prog-mode-hook 'rainbow-identifiers-mode t))
 
 ;; =============================================================================
+(use-package pdf-tools
+  :if (my-func-package-enabled-p 'pdf-tools)
+  :init
+  (setq pdf-view-continuous t)
+  :config
+  (pdf-tools-install))
+
 (use-package w3m
   :preface
   (defvar-local my-plugin-w3m-exe

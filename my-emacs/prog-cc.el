@@ -261,8 +261,9 @@
 
 (defun my-plugin-cedet-start ()
   (when (bound-and-true-p ac-sources)
-    (add-to-list 'ac-sources (if (cedet-gnu-global-version-check t)
-                                 'ac-source-gtags 'ac-source-semantic) t)))
+    (set (make-local-variable 'ac-sources)
+         (add-to-list 'ac-sources (if (cedet-gnu-global-version-check t)
+                                      'ac-source-gtags 'ac-source-semantic) t))))
 
 ;; =============================================================================
 ;; ECB (Emacs Code Browser)

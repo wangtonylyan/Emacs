@@ -66,6 +66,7 @@
     :init
     (add-hook 'my-prog-py-mode-start-hook 'my-plugin-elpy-start t)
     :config
+    (setq elpy-modules (delq 'elpy-module-highlight-indentation elpy-modules))
     ;; elpy默认支持并使用Emacs内置的flymake，但可随意地切换成flycheck
     (with-eval-after-load 'flycheck
       (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
@@ -117,7 +118,8 @@
 (defun my-plugin-ropemacs-start ()
   ;; (ropemacs-mode 1) ;;无需手动启用
   (when (bound-and-true-p ac-sources)
-    (add-to-list 'ac-sources 'ac-source-ropemacs t)))
+    (set (make-local-variable 'ac-sources)
+         (add-to-list 'ac-sources 'ac-source-ropemacs t))))
 
 ;; =============================================================================
 ;; =============================================================================
