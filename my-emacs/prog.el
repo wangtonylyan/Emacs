@@ -69,18 +69,20 @@
                              ,(when (and (my-func-package-enabled-p 'company-jedi)
                                          (require 'company-jedi nil t))
                                 'company-jedi)
-                             company-semantic ;; Semantic
-                             ;; company-clang ;; Clang
+                             (company-semantic ;; Semantic
+                              ;; company-clang ;; Clang
+                              company-gtags
+                              company-etags)
                              ;; company-eclim ;; Eclipse
                              ;; company-xcode ;; Xcode
                              company-cmake ;; CMake
                              ;; company-css ;; CSS
-                             company-capf ;; completion-at-point-functions
+                             (company-dabbrev-code company-keywords)
                              company-files
-                             (company-dabbrev-code company-gtags company-etags company-keywords)
+                             company-capf ;; completion-at-point-functions
                              ;; company-nxml
                              ;; company-bbdb ;; Big Brother Database, an address book
-                             company-oddmuse
+                             ;; company-oddmuse
                              company-dabbrev)
           company-minimum-prefix-length 1
           company-idle-delay 0)
@@ -168,7 +170,8 @@
 (defun my-plugin-auto-complete-start ()
   (auto-complete-mode 1)
   ;; 各继承于prog-mode的编程模式在启动时都将设置其buffer-local的'ac-sources
-  (add-to-list 'ac-sources 'ac-source-yasnippet t))
+  (set (make-local-variable 'ac-sources)
+       (add-to-list 'ac-sources 'ac-source-yasnippet t)))
 
 ;; =============================================================================
 ;; Flymake
