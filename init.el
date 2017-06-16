@@ -101,6 +101,8 @@
                                     stickyfunc-enhance
                                     elpy ;; ropemacs
                                     py-autopep8
+                                    haskell-mode
+                                    flycheck-haskell
                                     auctex
                                     pdf-tools
                                     ;; w3m
@@ -145,7 +147,10 @@
   (setq ispell-program-name (executable-find "aspell") ;; 设置后台支持程序
         ;; ispell-dictionary "english" ;; default dictionary
         ;; ispell-personal-dictionary ""
-        flyspell-issue-message-flag nil))
+        flyspell-issue-message-flag nil)
+  (add-hook 'text-mode-hook 'flyspell-mode t)
+  (add-hook 'prog-mode-hook 'flyspell-prog-mode t)
+  (add-to-list 'ispell-skip-region-alist '("^#+BEGIN_SRC" . "^#+END_SRC") t))
 
 (use-package paredit
   :if (my-func-package-enabled-p 'paredit)
@@ -560,7 +565,7 @@
   :bind (("C-c o c" . org-capture)
          ("C-c o a" . org-agenda))
   :config
-  (add-hook 'org-mode-hook 'org-indent-mode))
+  (add-hook 'org-mode-hook 'org-indent-mode t))
 
 (use-package ace-jump-mode
   :if (my-func-package-enabled-p 'ace-jump-mode)
@@ -614,8 +619,8 @@
         highlight-thing-case-sensitive-p t)
   :config
   (global-hl-line-mode -1)
-  (add-hook 'text-mode-hook 'hl-line-mode)
-  (add-hook 'prog-mode-hook 'highlight-thing-mode))
+  (add-hook 'text-mode-hook 'hl-line-mode t)
+  (add-hook 'prog-mode-hook 'highlight-thing-mode t))
 
 (use-package evil
   :if (my-func-package-enabled-p 'evil)
@@ -663,7 +668,7 @@
           "prog-cc" ;; cc-mode (c-mode, c++-mode, java-mode)
           ;; "prog-lisp" ;; lisp-mode, emacs-lisp-mode, lisp-interaction-mode
           "prog-py" ;; python-mode
-          ;; "prog-hs" ;; haskell-mode
+          "prog-hs" ;; haskell-mode
           "text-tex" ;; tex-mode, latex-mode
           ;; "web-browser" ;; web browser
           )))
