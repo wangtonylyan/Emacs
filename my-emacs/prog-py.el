@@ -27,14 +27,17 @@
       :init
       (add-hook 'my-prog-py-mode-start-hook 'my-plugin-python-start t)
       :config
+      (bind-keys :map python-mode-map
+                 ("<backspace>" . python-indent-dedent-line-backspace))
       (remove-hook 'python-mode-hook 'wisent-python-default-setup)
       (setq python-shell-interpreter exe
             python-shell-interpreter-args "-i"
-            ;; python-shell-prompt-regexp ""
+            ;; python-shell-interpreter-args "--pylab=osx --pdb --nosep --classic"
+            ;; python-shell-prompt-regexp ">>> "
             ;; python-shell-prompt-output-regexp ""
-            ;; python-shell-completion-setup-code ""
-            ;; python-shell-completion-module-string-code ""
-            ;; python-shell-completion-string-code ""
+            ;; python-shell-completion-setup-code "from IPython.core.completerlib import module_completion"
+            ;; python-shell-completion-module-string-code "';'.join(module_completion('''%s'''))\n"
+            ;; python-shell-completion-string-code "';'.join(get_ipython().Completer.all_completions('''%s'''))\n"
             ))))
 
 (defun my-plugin-python-start ()
@@ -55,18 +58,24 @@
 ;; =============================================================================
 ;; ELPY (Emacs Lisp Python Environment)
 ;; https://github.com/jorgenschaefer/elpy
-;; 依赖的python库：flake8, jedi
+;; 依赖的python库：jedi, flake8, autopep8
 ;; -----------------------------------------------------------------------------
 (defun my-plugin-elpy-init ()
-  ;; 常用快捷键：
-  ;; C-c C-c用于调用Python解释器
   (use-package elpy
     :if (my-func-package-enabled-p 'elpy)
     :commands (elpy-enable elpy-mode)
     :init
+    (eval-after-load 'python '(elpy-enable))
     (add-hook 'my-prog-py-mode-start-hook 'my-plugin-elpy-start t)
-    :config
-    (setq elpy-modules (delq 'elpy-module-highlight-indentation elpy-modules))
+    :config ;; (elpy-config)
+    (bind-keys :map elpy-mode-map
+               ("C-c C-c" . elpy-shell-send-region-or-buffer))
+    (setq elpy-rpc-python-command python-shell-interpreter
+          elpy-rpc-backend "jedi" ;; 支持jedi和rope这两个库
+          elpy-modules (delq 'elpy-module-highlight-indentation elpy-modules))
+    (setq-default elpy-rpc-python-command elpy-rpc-python-command
+                  elpy-rpc-backend elpy-rpc-backend)
+    ;; (elpy-use-ipython) ;; (elpy-use-cpython) ;; 指定Python解释器
     ;; elpy默认支持并使用Emacs内置的flymake，但可随意地切换成flycheck
     (with-eval-after-load 'flycheck
       (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
@@ -76,15 +85,11 @@
                (executable-find "autopep8"))
       :commands (py-autopep8-enable-on-save)
       :init
-      (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save t))
-    ;; (setq elpy-rpc-backend "jedi") ;; 支持rope和jedi这两个库
-    ;; 指定Python解释器
-    ;; (elpy-use-ipython) ;; (elpy-use-cpython)
-    ;; (elpy-enable)
-    ))
+      (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save t))))
 
 (defun my-plugin-elpy-start ()
-  (elpy-mode 1))
+  ;; (elpy-mode 1) ;; 由(elpy-enable)追加
+  )
 
 ;; =============================================================================
 ;; Ropemacs

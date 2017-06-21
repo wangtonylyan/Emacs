@@ -100,6 +100,7 @@
                                     magit
                                     stickyfunc-enhance
                                     elpy ;; ropemacs
+                                    flycheck-pyflakes
                                     py-autopep8
                                     haskell-mode
                                     flycheck-haskell
@@ -606,8 +607,11 @@
 
 (use-package smart-hungry-delete
   :if (my-func-package-enabled-p 'smart-hungry-delete)
+  :demand t
   :bind (("<backspace>" . smart-hungry-delete-backward-char)
-         ("C-d" . smart-hungry-delete-forward-char)))
+         ("C-d" . smart-hungry-delete-forward-char))
+  :config
+  (smart-hungry-delete-add-default-hooks))
 
 (use-package highlight-thing
   :if (my-func-package-enabled-p 'highlight-thing)
