@@ -210,15 +210,14 @@
     :if (my-func-package-enabled-p 'flycheck)
     :commands (global-flycheck-mode flycheck-mode flycheck-mode-on-safe)
     :init
-    (add-hook 'my-prog-mode-start-hook 'my-plugin-flycheck-start t)
-    :config
     (setq flycheck-check-syntax-automatically '(mode-enabled save idle-change)
+          flycheck-checker-error-threshold 20
           flycheck-idle-change-delay 2.5
           flycheck-indication-mode 'right-fringe)
-    (setq-default flycheck-disabled-checkers
-                  (add-to-list 'flycheck-disabled-checkers
-                               'emacs-lisp-checkdoc t))
-
+    (add-hook 'my-prog-mode-start-hook 'my-plugin-flycheck-start t)
+    :config
+    (add-to-list 'flycheck-disabled-checkers 'emacs-lisp-checkdoc)
+    (flycheck-error-list-set-filter 'error)
     (when (and (memq 'emacs-lisp flycheck-checkers)
                (not (memq 'emacs-lisp flycheck-disabled-checkers)))
       (add-hook 'emacs-lisp-mode-hook
@@ -231,6 +230,15 @@
                 (lambda ()
                   (setq flycheck-gcc-language-standard "c++11"))
                 t))
+    (use-package flycheck-pyflakes
+      :if (my-func-package-enabled-p 'flycheck-pyflakes)
+      :config
+      (add-to-list 'flycheck-disabled-checkers 'python-flake8)
+      (add-to-list 'flycheck-disabled-checkers 'python-pylint))
+    (when (and (memq 'python-flake8 flycheck-checkers)
+               (not (memq 'python-flake8 flycheck-disabled-checkers)))
+      (add-to-list 'flycheck-flake8-error-level-alist '("^E305$" . info) t))
+    (setq-default flycheck-disabled-checkers flycheck-disabled-checkers)
 
     ;; (flycheck-list-errors)可以列出当前buffer中的所有error，优化显示窗口
     (add-to-list 'display-buffer-alist
