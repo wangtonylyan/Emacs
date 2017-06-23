@@ -5,18 +5,6 @@
 
 (defvar my-prog-cc-mode-start-hook '())
 
-(defun my-func-cc-uncrustify ()
-  (interactive)
-  (let ((exe "uncrustify")
-        (cfg "~/.uncrustify/alps.cfg"))
-    (if (and (or (eq major-mode 'c-mode)
-                 (eq major-mode 'c++-mode))
-             (executable-find exe)
-             (file-exists-p cfg))
-        (message (shell-command-to-string
-                  (concat exe " -l C -c " cfg " --no-backup " buffer-file-name)))
-      (message "uncrustify unsupported!"))))
-
 ;; =============================================================================
 ;; CC-mode
 (defun my-plugin-cc-mode-init ()
