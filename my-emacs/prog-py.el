@@ -58,7 +58,8 @@
 ;; =============================================================================
 ;; ELPY (Emacs Lisp Python Environment)
 ;; https://github.com/jorgenschaefer/elpy
-;; 依赖的python库：jedi, flake8, autopep8
+;; 必要的Python库：jedi, flake8, autopep8, virtualenv
+;; 可选的Python库：virtualenvwrapper
 ;; -----------------------------------------------------------------------------
 (defun my-plugin-elpy-init ()
   (use-package elpy
@@ -85,7 +86,11 @@
                (executable-find "autopep8"))
       :commands (py-autopep8-enable-on-save)
       :init
-      (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save t))))
+      (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save t))
+    ;; ELPY所默认依赖的插件，基于Python库virtualenvwrapper
+    (use-package pyvenv
+      ;; 目前使用virtualenvwrapper插件替代
+      :disabled t)))
 
 (defun my-plugin-elpy-start ()
   ;; (elpy-mode 1) ;; 由(elpy-enable)追加
@@ -127,11 +132,41 @@
          (add-to-list 'ac-sources 'ac-source-ropemacs t))))
 
 ;; =============================================================================
+;; 插件virtualenvwrapper是Python同名库的Elisp实现，可完全替代后者
+;; 插件auto-virtualenvwrapper则是对于插件virtualenvwrapper的封装
+(defun my-plugin-auto-virtualenvwrapper-init ()
+  (use-package auto-virtualenvwrapper
+    :if (my-func-package-enabled-p 'auto-virtualenvwrapper)
+    :ensure virtualenvwrapper
+    :commands (auto-virtualenvwrapper-activate
+               venv-projectile-auto-workon venv-workon venv-lsvirtualenv)
+    :init
+    ;; note that setting `venv-location` is not necessary if you
+    ;; use the default location (`~/.virtualenvs`), or if the
+    ;; the environment variable `WORKON_HOME` points to the right place
+    ;; (setq venv-location '("/path/")) ;; (venv-set-location)
+    (setq venv-dirlookup-names '(".venv" "venv"))
+    (with-eval-after-load 'projectile
+      ;; 自动启用此插件的前提是，使用projectile切换项目后必须首先打开.py文件
+      ;; 否则就需要手动执行(venv-workon)等命令
+      (add-hook 'projectile-find-file-hook
+                ;; (venv-projectile-auto-workon)
+                'auto-virtualenvwrapper-activate t))
+    (add-hook 'my-prog-py-mode-start-hook 'my-plugin-auto-virtualenvwrapper-start t)
+    :config
+    (venv-initialize-interactive-shells)
+    (venv-initialize-eshell)))
+
+(defun my-plugin-auto-virtualenvwrapper-start ()
+  )
+
+;; =============================================================================
 ;; =============================================================================
 (defun my-prog-py-mode-init ()
   (my-plugin-python-init)
   (my-plugin-elpy-init)
   (my-plugin-ropemacs-init)
+  (my-plugin-auto-virtualenvwrapper-init)
   (add-hook 'python-mode-hook 'my-prog-py-mode-start t))
 
 (defun my-prog-py-mode-start ()

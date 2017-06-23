@@ -102,8 +102,10 @@
                                     elpy ;; ropemacs
                                     flycheck-pyflakes
                                     py-autopep8
+                                    auto-virtualenvwrapper ;; virtualenvwrapper
                                     haskell-mode
                                     flycheck-haskell
+                                    web-mode
                                     auctex
                                     pdf-tools
                                     ;; w3m
@@ -560,7 +562,8 @@
         neo-show-updir-line t
         neo-window-width 28)
   :config
-  (add-hook 'my-plugin-projectile-switch-hook 'neotree-projectile-action t))
+  (when (bound-and-true-p my-plugin-projectile-switch-hook)
+    (add-hook 'my-plugin-projectile-switch-hook 'neotree-projectile-action t)))
 
 (use-package org
   :bind (("C-c o c" . org-capture)
@@ -673,6 +676,7 @@
           ;; "prog-lisp" ;; lisp-mode, emacs-lisp-mode, lisp-interaction-mode
           "prog-py" ;; python-mode
           "prog-hs" ;; haskell-mode
+          "prog-web" ;; web-mode
           "text-tex" ;; tex-mode, latex-mode
           ;; "web-browser" ;; web browser
           )))
