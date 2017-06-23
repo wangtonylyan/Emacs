@@ -2,6 +2,30 @@
 
 (require 'my-init)
 
+(defun my-func-prog-mode-beautify ()
+  (interactive)
+  (cond
+   ((or (eq major-mode 'c-mode)
+        (eq major-mode 'c++-mode))
+    (let ((exe "uncrustify")
+          (cfg "~/.uncrustify/alps.cfg"))
+      (if (and (executable-find exe)
+               (file-exists-p cfg))
+          (message (shell-command-to-string
+                    (concat exe " -l C -c " cfg " --no-backup " buffer-file-name)))
+        (message "uncrustify unsupported!"))))
+   ((eq major-mode 'python-mode)
+    (if (and (my-func-package-enabled-p 'py-autopep8)
+             (executable-find "autopep8")
+             (fboundp 'py-autopep8-buffer))
+        (py-autopep8-buffer)
+      (message "autopep8 unsupported!")))
+   ((derived-mode-p 'web-mode)
+    (if (my-func-package-enabled-p 'web-beautify)
+        (web-beautify-html)
+      (message "html-beautify unsupported!")))
+   (t (message "current major mode unsupported!"))))
+
 (defvar my-prog-mode-start-hook '())
 
 ;; =============================================================================

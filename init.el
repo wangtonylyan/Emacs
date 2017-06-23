@@ -562,6 +562,18 @@
         neo-show-updir-line t
         neo-window-width 28)
   :config
+  (bind-keys :map neotree-mode-map
+             ("n" . neotree-next-line)
+             ("p" . neotree-previous-line)
+             ("C-n" . neotree-select-next-sibling-node)
+             ("C-p" . neotree-select-previous-sibling-node)
+             ("u" . neotree-select-up-node)
+             ("a" . neotree-hidden-file-toggle))
+  (unbind-key "s" neotree-mode-map)
+  (unbind-key "S" neotree-mode-map)
+  (unbind-key "D" neotree-mode-map)
+  (unbind-key "H" neotree-mode-map)
+  (unbind-key "U" neotree-mode-map)
   (when (bound-and-true-p my-plugin-projectile-switch-hook)
     (add-hook 'my-plugin-projectile-switch-hook 'neotree-projectile-action t)))
 
