@@ -24,3 +24,6 @@ smex-items
 /.idea
 /.private
 /.python-environments
+/.virtualenvs
+/.venv
+/venv
