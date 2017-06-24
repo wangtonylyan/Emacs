@@ -5,12 +5,13 @@
 (defun my-func-executable-find (dir exe &optional add)
   (let* ((dir (if (and (stringp dir) (> (length dir) 0))
                   ;; 统一传参的形式
-                  (concat (directory-file-name dir) "/") ""))
+                  (file-name-as-directory dir) ""))
          (path (executable-find (concat dir exe))))
     (when (and path (file-executable-p path))
       (when add
-        (add-to-list 'exec-path (directory-file-name path) t))
-      path)))
+        (add-to-list 'exec-path (directory-file-name
+                                 (file-name-directory path) t))
+        path))))
 
 (defalias 'my-func-package-enabled-p 'package--user-selected-p)
 
@@ -37,6 +38,8 @@
               user-emacs-directory user-emacs-directory)
 (defconst my-user-emacs-directory (concat user-emacs-directory "my-emacs/"))
 (defconst my-private-emacs-directory (concat user-emacs-directory ".private/"))
+
+(load (concat my-private-emacs-directory "init.el") t)
 
 ;; (normal-top-level-add-subdirs-to-load-path)
 ;; (normal-top-level-add-to-load-path)
@@ -219,10 +222,12 @@
 ;; 网上提供的混合字体，拥有统一的行高，但通常都不能完善地支持斜体、粗体等形式
 
 ;; http://emacser.com/torture-emacs.htm
-(let* ((rsltn (<= (* (display-pixel-width) (display-pixel-height)) (* 1366 768)))
+(let* ((rsltn (* (display-pixel-width) (display-pixel-height)))
        ;; 针对中英文字体分别设置两种字号
-       (efont (if rsltn 15 16))
-       (cfont (if rsltn 13 14)))
+       (efont (cond ((<= rsltn (* 1366 768)) 13)
+                    ((<= rsltn (* 1920 1080)) 14)
+                    (t 15)))
+       (cfont (- efont 2)))
   (if (eq system-type 'windows-nt)
       ;; Windows系统上的Emacs25版本对中文字体的显示存在问题，打开中文文档时会存在卡顿的现象
       ;; 必须手动指定中文字体为宋体才可避免。
