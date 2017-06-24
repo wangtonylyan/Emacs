@@ -3,6 +3,18 @@
 
 (require 'my-prog)
 
+;; replace built-in CEDET with an external one, if exists
+;; $git clone http://git.code.sf.net/p/cedet/git cedet
+;; $make
+(when (bound-and-true-p my-private-project-root-directory)
+  (let* ((path (file-name-as-directory
+                (concat my-private-project-root-directory "cedet")))
+         (file (concat path "cedet-devel-load.el")))
+    (when (file-exists-p file)
+      (load-file file)
+      (add-to-list 'load-path (concat path "contrib"))
+      (add-to-list 'Info-directory-list (concat path "doc/info/")))))
+
 (defvar my-prog-cc-mode-start-hook '())
 
 ;; =============================================================================
@@ -95,10 +107,20 @@
     :demand t
     :commands (semantic-mode semantic-toggle-minor-mode-globally)
     :init
+    ;; 由于(semantic-mode)是全局性的，为避免其对其他语言也执行语法分析
+    ;; 因此应避免全局性地启用以下子模式
+    (add-hook 'c-mode-common-hook 'semantic-idle-scheduler-mode t)
+    (add-hook 'c-mode-common-hook 'semantic-idle-local-symbol-highlight-mode t)
+    ;; 除了设置'semantic-default-submodes，还可调用以下函数来启用支持指定功能的子模块
+    ;; (semantic-load-enable-minimum-features)
+    ;; (semantic-load-enable-code-helpers)
+    ;; (semantic-load-enable-guady-code-helpers)
+    ;; (semantic-load-enable-excessive-code-helpers)
+    ;; (semantic-load-enable-semantic-debugging-helpers)
     (setq semantic-default-submodes '(;; Idle Scheduler
-                                      global-semantic-idle-scheduler-mode
+                                      ;; global-semantic-idle-scheduler-mode
                                       ;; global-semantic-idle-summary-mode ;; 基于Smart Summary
-                                      global-semantic-idle-local-symbol-highlight-mode
+                                      ;; global-semantic-idle-local-symbol-highlight-mode
                                       ;; global-semantic-idle-completions-mode ;; 基于Smart Completion，用company替代
                                       ;; global-semantic-idle-breadcrumbs-mode
                                       ;; SemanticDB
@@ -107,21 +129,16 @@
                                       global-semantic-stickyfunc-mode ;; (use-package stickyfunc-enhance)
                                       ;; global-semantic-highlight-func-mode
                                       ;; global-semantic-decoration-mode
+                                      ;; global-semantic-tag-folding-mode ;; (require 'semantic-tag-folding)
                                       ;; Senator
-                                      global-semantic-mru-bookmark-mode ;; mostly recently used
+                                      ;; global-semantic-mru-bookmark-mode ;; mostly recently used
                                       ;; Debug
                                       ;; global-semantic-show-unmatched-syntax-mode
-                                      global-semantic-show-parser-state-mode
+                                      ;; global-semantic-show-parser-state-mode
                                       ;; global-semantic-highlight-edits-mode
-                                      ;; 未知
+                                      ;; Mouse Context Menu
                                       ;; global-cedet-m3-minor-mode
                                       )
-          ;; 除了设置'semantic-default-submodes，还可调用以下函数来启用支持指定功能的子模块
-          ;; (semantic-load-enable-minimum-features)
-          ;; (semantic-load-enable-code-helpers)
-          ;; (semantic-load-enable-guady-code-helpers)
-          ;; (semantic-load-enable-excessive-code-helpers)
-          ;; (semantic-load-enable-semantic-debugging-helpers)
           ;; -------------------------------------------------------------------
           semantic-complete-inline-analyzer-idle-displayor-class ;; 以何种方式显示
           ;; 'semantic-displayor-ghost ;; inline
@@ -145,10 +162,8 @@
           semanticdb-default-save-directory (concat user-emacs-directory "semanticdb")
           ;; semanticdb-default-file-name ""
           semanticdb-persistent-path '(always)
-          semanticdb-find-default-throttle '(file local project system recursive
-                                                  unloaded ;; 若搜索到的文件的SemanticDB没有导入/生成，则导入/生成之
-                                                  omniscience ;; 自己创建的数据库就属于此类
-                                                  )
+          ;; 可以预先主动地对某些目录生成数据库，以便今后复用
+          semanticdb-search-system-databases t
           ;; -------------------------------------------------------------------
           semantic-decoration-styles '(("semantic-tag-boundary" . t)
                                        ("semantic-decoration-on-private-members" . nil)
@@ -160,22 +175,30 @@
       :commands (cedet-gnu-global-version-check))
     (add-hook 'my-prog-cc-mode-start-hook 'my-plugin-cedet-start t)
     :config
-    (setq semantic-stickyfunc-sticky-classes '(function type)) ;; variable, include, package
-    (setq-default semantic-stickyfunc-sticky-classes semantic-stickyfunc-sticky-classes)
+    (semantic-mode 1) ;; global minor mode
     (use-package stickyfunc-enhance
       :if (my-func-package-enabled-p 'stickyfunc-enhance)
       :demand t)
-    (semantic-mode 1) ;; global minor mode
-    ;; 可以预先主动地对某些目录生成数据库，以便今后复用
-    (setq semanticdb-search-system-databases t
-          semanticdb-project-system-databases
-          (let ((lst '()))
-            (mapcar (lambda (path)
-                      (add-to-list 'lst
-                                   (semanticdb-create-database semanticdb-new-database-class path)
-                                   t))
-                    ;; e.g. "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
-                    '("/usr/include" "/usr/local/include"))))
+    (mapc (lambda (mode)
+            (setq-mode-local mode
+                             semantic-stickyfunc-sticky-classes
+                             '(type function) ;; variable, include, package
+                             semanticdb-find-default-throttle
+                             '(file local project system recursive
+                                    ;; 若搜索到的文件的SemanticDB没有导入/生成，则导入/生成之
+                                    unloaded
+                                    ;; 自己创建的数据库就属于此类
+                                    omniscience)
+                             semanticdb-project-system-databases
+                             (let ((lst '()))
+                               (mapcar (lambda (path)
+                                         (add-to-list 'lst
+                                                      (semanticdb-create-database
+                                                       semanticdb-new-database-class path)
+                                                      t))
+                                       ;; e.g. "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
+                                       '("/usr/include" "/usr/local/include")))))
+          '(c-mode c++-mode))
     ;; 设置'semanticdb-find-default-throttle中的'project，主要交由EDE或JDE等组件控制
     ;; (add-hook semanticdb-project-predicate-functions ) ;; 此项交由EDE设置
     ;; (add-hook semanticdb-project-root-functions ) ;; 此项交由EDE设置
@@ -187,8 +210,10 @@
       :config
       (semantic-gcc-setup))
     ;; 若要完全地自定义，则需先重置再追加，例如(semantic-reset-system-include 'c-mode)
-    (semantic-add-system-include "/usr/include")
-    (semantic-add-system-include "/usr/local/include")
+    (semantic-add-system-include "/usr/include" 'c-mode)
+    (semantic-add-system-include "/usr/include" 'c++-mode)
+    (semantic-add-system-include "/usr/local/include" 'c-mode)
+    (semantic-add-system-include "/usr/local/include" 'c++-mode)
     (semantic-add-system-include "/usr/include/boost" 'c++-mode)
     ;; 指定用于支持SemanticDB的tagging system，默认使用的是Ebrowse
     (use-package semantic/db-ebrowse ;; Ebrowse
@@ -375,12 +400,11 @@
   (my-plugin-cedet-init)
   (my-plugin-ecb-init)
   (my-plugin-helm-gtags-init)
-  (add-hook 'c-mode-hook 'my-prog-cc-mode-start)
-  (add-hook 'c++-mode-hook 'my-prog-cc-mode-start))
+  (add-hook 'c-mode-common-hook 'my-prog-cc-mode-start t))
 
 (defun my-prog-cc-mode-start ()
   (run-hooks 'my-prog-cc-mode-start-hook))
 
-(eval-after-load 'cc-mode '(add-hook 'c-initialization-hook 'my-prog-cc-mode-init))
+(eval-after-load 'cc-mode '(add-hook 'c-initialization-hook 'my-prog-cc-mode-init t))
 
 (provide 'my-prog-cc)
