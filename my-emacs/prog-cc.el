@@ -400,7 +400,8 @@
   (my-plugin-cedet-init)
   (my-plugin-ecb-init)
   (my-plugin-helm-gtags-init)
-  (add-hook 'c-mode-common-hook 'my-prog-cc-mode-start t))
+  (add-hook 'c-mode-hook 'my-prog-cc-mode-start t)
+  (add-hook 'c++-mode-hook 'my-prog-cc-mode-start t))
 
 (defun my-prog-cc-mode-start ()
   (run-hooks 'my-prog-cc-mode-start-hook))
