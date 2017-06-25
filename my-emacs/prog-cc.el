@@ -180,15 +180,11 @@
                               '(file local project system recursive
                                      unloaded omniscience)
                               semanticdb-project-system-databases
-                              (let ((lst '()))
-                                (mapcar (lambda (path)
-                                          (add-to-list 'lst
-                                                       (semanticdb-create-database
-                                                        semanticdb-new-database-class path)
-                                                       t))
-                                        ;; e.g. "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
-                                        '("/usr/include" "/usr/local/include")))))
-                      t))
+                              (mapcar (lambda (path)
+                                        (semanticdb-create-database
+                                         semanticdb-new-database-class path))
+                                      ;; e.g. "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
+                                      '("/usr/include" "/usr/local/include")))) t))
           '(c-mode-hook c++-mode-hook))
     ;; 设置'semanticdb-find-default-throttle中的'project，主要交由EDE或JDE等组件控制
     ;; (add-hook semanticdb-project-predicate-functions ) ;; 此项交由EDE设置
@@ -271,8 +267,9 @@
                                   ;; :system-include-path '("")
                                   ;; :spp-table '(("MACRO1" . "VALUE1"))
                                   ))))
-      ;; 具体项目的EDE信息由每台机器上的ede-projects.el配置文件独立地维护
-      (load (concat my-user-emacs-directory "ede-projects.el") t nil t t)
+      ;; 具体项目的EDE信息由每个系统中的ede-projects.el文件独立地维护
+      (when (bound-and-true-p my-private-project-ede-config-file)
+        (load my-private-project-ede-config-file t nil t t))
       (global-ede-mode 1))))
 
 (defun my-plugin-cedet-start ()
