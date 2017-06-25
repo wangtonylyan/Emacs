@@ -40,6 +40,11 @@
 (defconst my-private-emacs-directory (concat user-emacs-directory ".private/"))
 
 (load (concat my-private-emacs-directory "init.el") t)
+;; ******************** sample ********************
+;; (defconst my-private-project-root-directory "~/project/")
+;; (defconst my-private-project-ede-config-file
+;;   (concat my-private-project-root-directory "ede-projects.el"))
+;; ************************************************
 
 ;; (normal-top-level-add-subdirs-to-load-path)
 ;; (normal-top-level-add-to-load-path)
