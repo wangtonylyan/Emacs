@@ -107,10 +107,10 @@
     :demand t
     :commands (semantic-mode semantic-toggle-minor-mode-globally)
     :init
-    ;; 由于(semantic-mode)是全局性的，为避免其对其他语言也执行语法分析
-    ;; 因此应避免全局性地启用以下子模式
-    (add-hook 'c-mode-common-hook 'semantic-idle-scheduler-mode t)
-    (add-hook 'c-mode-common-hook 'semantic-idle-local-symbol-highlight-mode t)
+    ;; 由于(semantic-mode)是全局性的，为避免其对其他语言也提供支持
+    ;; 因此应局部性地启用部分子模式，即将其加入至'my-prog-cc-mode-start-hook中
+    ;; 但目前发现idle相关的几个子模式必须全局性地启用，可能是由于被其他子模式所依赖的缘故
+    ;; (add-hook 'my-prog-cc-mode-start-hook 'semantic-idle-scheduler-mode t)
     ;; 除了设置'semantic-default-submodes，还可调用以下函数来启用支持指定功能的子模块
     ;; (semantic-load-enable-minimum-features)
     ;; (semantic-load-enable-code-helpers)
@@ -118,9 +118,9 @@
     ;; (semantic-load-enable-excessive-code-helpers)
     ;; (semantic-load-enable-semantic-debugging-helpers)
     (setq semantic-default-submodes '(;; Idle Scheduler
-                                      ;; global-semantic-idle-scheduler-mode
+                                      global-semantic-idle-scheduler-mode
                                       ;; global-semantic-idle-summary-mode ;; 基于Smart Summary
-                                      ;; global-semantic-idle-local-symbol-highlight-mode
+                                      global-semantic-idle-local-symbol-highlight-mode
                                       ;; global-semantic-idle-completions-mode ;; 基于Smart Completion，用company替代
                                       ;; global-semantic-idle-breadcrumbs-mode
                                       ;; SemanticDB
@@ -171,6 +171,31 @@
                                        ("semantic-decoration-on-includes" . nil))
           ;; -------------------------------------------------------------------
           semantic-c-obey-conditional-section-parsing-flag t)
+    (mapc (lambda (hook) ;; 不知为何使用CEDET中定义的(setq-mode-local)无法生效
+            (add-hook hook
+                      (lambda ()
+                        (setq semantic-stickyfunc-sticky-classes
+                              '(type function) ;; variable, include, package
+                              semanticdb-find-default-throttle
+                              '(file local project system recursive
+                                     unloaded omniscience)
+                              semanticdb-project-system-databases
+                              (let ((lst '()))
+                                (mapcar (lambda (path)
+                                          (add-to-list 'lst
+                                                       (semanticdb-create-database
+                                                        semanticdb-new-database-class path)
+                                                       t))
+                                        ;; e.g. "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
+                                        '("/usr/include" "/usr/local/include")))))
+                      t))
+          '(c-mode-hook c++-mode-hook))
+    ;; 设置'semanticdb-find-default-throttle中的'project，主要交由EDE或JDE等组件控制
+    ;; (add-hook semanticdb-project-predicate-functions ) ;; 此项交由EDE设置
+    ;; (add-hook semanticdb-project-root-functions ) ;; 此项交由EDE设置
+    ;; 设置'semanticdb-find-default-throttle中的'system，可以利用编译器的输出信息
+    ;; 甚至可以具体指定一些项目的根目录，该变量也会被semantic-project-root-functions中注册的函数修改
+    ;; (setq semanticdb-project-roots '())
     (use-package cedet-global
       :commands (cedet-gnu-global-version-check))
     (add-hook 'my-prog-cc-mode-start-hook 'my-plugin-cedet-start t)
@@ -179,32 +204,6 @@
     (use-package stickyfunc-enhance
       :if (my-func-package-enabled-p 'stickyfunc-enhance)
       :demand t)
-    (mapc (lambda (mode)
-            (setq-mode-local mode
-                             semantic-stickyfunc-sticky-classes
-                             '(type function) ;; variable, include, package
-                             semanticdb-find-default-throttle
-                             '(file local project system recursive
-                                    ;; 若搜索到的文件的SemanticDB没有导入/生成，则导入/生成之
-                                    unloaded
-                                    ;; 自己创建的数据库就属于此类
-                                    omniscience)
-                             semanticdb-project-system-databases
-                             (let ((lst '()))
-                               (mapcar (lambda (path)
-                                         (add-to-list 'lst
-                                                      (semanticdb-create-database
-                                                       semanticdb-new-database-class path)
-                                                      t))
-                                       ;; e.g. "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
-                                       '("/usr/include" "/usr/local/include")))))
-          '(c-mode c++-mode))
-    ;; 设置'semanticdb-find-default-throttle中的'project，主要交由EDE或JDE等组件控制
-    ;; (add-hook semanticdb-project-predicate-functions ) ;; 此项交由EDE设置
-    ;; (add-hook semanticdb-project-root-functions ) ;; 此项交由EDE设置
-    ;; 设置'semanticdb-find-default-throttle中的'system，可以利用编译器的输出信息
-    ;; 甚至可以具体指定一些项目的根目录，该变量也会被semantic-project-root-functions中注册的函数修改
-    ;; (setq semanticdb-project-roots '())
     (use-package semantic/bovine/gcc
       :if (executable-find "gcc")
       :config
@@ -253,6 +252,9 @@
     ;; (add-to-list 'semantic-lex-c-preprocessor-symbol-file  "path/file")
     (use-package semantic/sb ;; 此为CEDET中内置的Speedbar，不启用
       :disabled)
+    (use-package semantic-tag-folding
+      :config
+      (global-semantic-tag-folding-mode 1))
     (use-package ede
       :config
       ;; EDE默认使用Unix上的Locate命令来定位文件，此外还支持使用GNU Global
@@ -260,14 +262,15 @@
       ;; (setq ede-locate-setup-options '(ede-locate-global ede-locate-base))
       ;; 1. 对于复杂的项目，应利用ede-new新建并利用Project.ede文件定制
       ;; 2. 对于简单的项目，应利用以下脚本定制
-      (let ((root "~/project/github/Emacs/README.md"))
-        (when (file-exists-p root)
-          (ede-cpp-root-project "evo_btappl" ;; name
-                                :file root ;; anchor
-                                ;; :include-path '("/include")
-                                ;; :system-include-path '("")
-                                ;; :spp-table '(("MACRO1" . "VALUE1"))
-                                )))
+      (when (bound-and-true-p my-private-project-root-directory)
+        (let ((root (concat my-private-project-root-directory "Emacs/README.md")))
+          (when (file-exists-p root)
+            (ede-cpp-root-project "evo_btappl" ;; name
+                                  :file root ;; anchor
+                                  ;; :include-path '("/include")
+                                  ;; :system-include-path '("")
+                                  ;; :spp-table '(("MACRO1" . "VALUE1"))
+                                  ))))
       ;; 具体项目的EDE信息由每台机器上的ede-projects.el配置文件独立地维护
       (load (concat my-user-emacs-directory "ede-projects.el") t nil t t)
       (global-ede-mode 1))))
