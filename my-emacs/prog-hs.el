@@ -6,25 +6,34 @@
 
 ;; =============================================================================
 ;; haskell-mode
-;; GHC :: Glasgow Haskell Compiler
-;; GHCi :: Glasgow Haskell Compiler interactive
-;; Cabal :: 类似于Ubuntu apt-get、python pip、Ruby gem
-
 (defun my-plugin-haskell-mode-init ()
   (use-package haskell-mode
     :if (my-func-package-enabled-p 'haskell-mode)
     :init
     (setq haskell-process-path-ghci "ghci"
           haskell-process-path-cabal "cabal"
+          ;; $sudo apt-get install haskell-stack
           ;; haskell-process-path-stack "stack"
-          haskell-stylish-on-save t ;; $ cabal install stylish-haskell
+
+          haskell-stylish-on-save t
+          ;; $cabal install stylish-haskell
           haskell-mode-stylish-haskell-path "~/.cabal/bin/stylish-haskell"
+
           haskell-process-suggest-remove-import-lines t
           haskell-process-auto-import-loaded-modules t
-          haskell-process-log t)
+          haskell-process-log t
+
+          haskell-interactive-types-for-show-ambiguous nil
+
+          )
     :config
-    (setq haskell-indentation-electric-flag t)
-    (setq-default haskell-indentation-electric-flag haskell-indentation-electric-flag)
+    (bind-keys :map haskell-mode-map
+               ("C-c C-c" . haskell-compile)
+               :map haskell-cabal-mode-map
+               ("C-c C-c" . haskell-compile))
+
+
+
     ;; (add-hook 'haskell-mode-hook 'turn-on-haskell-indent) ;; obsoleted
     (add-hook 'haskell-mode-hook 'haskell-indentation-mode) ;; (turn-on-haskell-indentation)
     (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
@@ -33,6 +42,7 @@
     ))
 
 (defun my-plugin-haskell-mode-start ()
+  (setq haskell-indentation-electric-flag t)
   )
 
 ;; =============================================================================
