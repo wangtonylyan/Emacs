@@ -240,20 +240,30 @@
           flycheck-indication-mode 'right-fringe)
     (add-hook 'my-prog-mode-start-hook 'my-plugin-flycheck-start t)
     :config
-    (add-to-list 'flycheck-disabled-checkers 'emacs-lisp-checkdoc)
     (flycheck-error-list-set-filter 'error)
+    ;; (flycheck-list-errors)可以列出当前buffer中的所有error，优化显示窗口
+    (add-to-list 'display-buffer-alist
+                 `(,(rx bos "*Flycheck errors*" eos)
+                   (display-buffer-reuse-window display-buffer-in-side-window)
+                   (side            . bottom)
+                   (reusable-frames . visible)
+                   (window-height   . 0.33)))
+    ;; Lisp
+    (add-to-list 'flycheck-disabled-checkers 'emacs-lisp-checkdoc)
     (when (and (memq 'emacs-lisp flycheck-checkers)
                (not (memq 'emacs-lisp flycheck-disabled-checkers)))
       (add-hook 'emacs-lisp-mode-hook
                 (lambda ()
                   (setq flycheck-emacs-lisp-load-path `(,my-user-emacs-directory)))
                 t))
+    ;; C/C++
     (when (and (memq 'c/c++-gcc flycheck-checkers)
                (not (memq 'c/c++-gcc flycheck-disabled-checkers)))
       (add-hook 'c++-mode-hook
                 (lambda ()
                   (setq flycheck-gcc-language-standard "c++11"))
                 t))
+    ;; Python
     (use-package flycheck-pyflakes
       :if (my-func-package-enabled-p 'flycheck-pyflakes)
       :config
@@ -262,15 +272,17 @@
     (when (and (memq 'python-flake8 flycheck-checkers)
                (not (memq 'python-flake8 flycheck-disabled-checkers)))
       (add-to-list 'flycheck-flake8-error-level-alist '("^E305$" . info) t))
+    ;; Haskell
+    (when (and (memq 'haskell-hlint flycheck-checkers)
+               (not (memq 'haskell-hlint flycheck-disabled-checkers))
+               (my-func-executable-find "" "hlint"))
+      ;; 'flycheck-haskell-stack-ghc-executable
+      ;; 'flycheck-haskell-ghc-executable
+      ;; 'flycheck-haskell-hlint-executable
+      (add-to-list 'flycheck-disabled-checkers 'haskell-stack-ghc)
+      (add-to-list 'flycheck-disabled-checkers 'haskell-ghc))
     (setq-default flycheck-disabled-checkers flycheck-disabled-checkers)
 
-    ;; (flycheck-list-errors)可以列出当前buffer中的所有error，优化显示窗口
-    (add-to-list 'display-buffer-alist
-                 `(,(rx bos "*Flycheck errors*" eos)
-                   (display-buffer-reuse-window display-buffer-in-side-window)
-                   (side            . bottom)
-                   (reusable-frames . visible)
-                   (window-height   . 0.33)))
     ;; (global-flycheck-mode 1)
     ;; 此外，若是使用插件helm-flycheck，则可以基于helm模式来呈现信息
     (use-package helm-flycheck

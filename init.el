@@ -10,8 +10,8 @@
     (when (and path (file-executable-p path))
       (when add
         (add-to-list 'exec-path (directory-file-name
-                                 (file-name-directory path) t))
-        path))))
+                                 (file-name-directory path) t)))
+      path)))
 
 (defalias 'my-func-package-enabled-p 'package--user-selected-p)
 
@@ -112,6 +112,7 @@
                                     py-autopep8
                                     auto-virtualenvwrapper ;; virtualenvwrapper
                                     haskell-mode
+                                    hindent
                                     flycheck-haskell
                                     web-mode
                                     auctex
@@ -161,7 +162,7 @@
         flyspell-issue-message-flag nil)
   (add-hook 'text-mode-hook 'flyspell-mode t)
   (add-hook 'prog-mode-hook 'flyspell-prog-mode t)
-  (add-to-list 'ispell-skip-region-alist '("^#+BEGIN_SRC" . "^#+END_SRC") t))
+  (add-to-list 'ispell-skip-region-alist '("^#+BEGIN" . "^#+END") t))
 
 (use-package paredit
   :if (my-func-package-enabled-p 'paredit)
