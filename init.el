@@ -2,7 +2,7 @@
 
 ;; 判断Emacs版本可以基于以下两个变量：'emacs-major-version和'emacs-minor-version
 
-(defun my-func-executable-find (dir exe &optional add)
+(defun my-func-executable-find (exe &optional dir add)
   (let* ((dir (if (and (stringp dir) (> (length dir) 0))
                   ;; 统一传参的形式
                   (file-name-as-directory dir) ""))
@@ -19,9 +19,8 @@
 
 (when (eq system-type 'windows-nt)
   (add-to-list 'exec-path "D:/softwares" t)
-  (let ((path (my-func-executable-find
-               "Emacs25/libexec/emacs/24.5/i686-pc-mingw32"
-               "cmdproxy.exe")))
+  (let ((path (my-func-executable-find "cmdproxy.exe"
+                                       "Emacs25/libexec/emacs/24.5/i686-pc-mingw32")))
     (when path
       (setq shell-file-name path
             shell-command-switch "-c"))))
@@ -117,7 +116,7 @@
                                     web-mode
                                     auctex
                                     pdf-tools
-                                    ;; w3m
+                                    w3m
                                     erc ;; circe, rcirc
                                     use-package))
   (when (not package-archive-contents)
@@ -490,7 +489,7 @@
   :bind (("C-c g" . magit-status))
   :config
   (when (eq system-type 'windows-nt)
-    (let ((path (my-func-executable-find "Git" "git.exe")))
+    (let ((path (my-func-executable-find "git.exe" "Git")))
       (when path
         (setq magit-git-executable path))))
   (setq magit-auto-revert-mode t
@@ -869,7 +868,7 @@
   :preface
   (defvar-local my-plugin-w3m-exe
     (if (eq system-type 'windows-nt)
-        (my-func-executable-find "w3m" "w3m.exe" t)
+        (my-func-executable-find "w3m.exe" "w3m" t)
       (executable-find "w3m")))
   :if (and (my-func-package-enabled-p 'w3m) my-plugin-w3m-exe)
   :config
@@ -882,7 +881,8 @@
         w3m-default-display-inline-images t
         w3m-show-graphic-icons-in-header-line nil
         w3m-show-graphic-icons-in-mode-line nil)
-  (setq browse-url-browser-function 'w3m-browse-url))
+  (setq browse-url-browser-function 'w3m-browse-url)
+  (add-hook 'w3m-mode-hook 'visual-line-mode t))
 
 (use-package erc
   :if (my-func-package-enabled-p 'erc)
