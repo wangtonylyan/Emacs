@@ -18,7 +18,7 @@
 (defun my-plugin-python-init ()
   (let ((exe "python3")) ;; python或python3
     (when (eq system-type 'windows-nt)
-      (when (my-func-executable-find exe "python.exe" t)
+      (when (my-func-executable-find "python.exe" exe t)
         (setq exe "python.exe")))
     (use-package python
       :if (executable-find exe)

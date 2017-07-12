@@ -275,7 +275,7 @@
     ;; Haskell
     (when (and (memq 'haskell-hlint flycheck-checkers)
                (not (memq 'haskell-hlint flycheck-disabled-checkers))
-               (my-func-executable-find "" "hlint"))
+               (my-func-executable-find "hlint"))
       ;; 'flycheck-haskell-stack-ghc-executable
       ;; 'flycheck-haskell-ghc-executable
       ;; 'flycheck-haskell-hlint-executable
