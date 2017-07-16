@@ -590,6 +590,8 @@
 (use-package org
   :bind (("C-c o c" . org-capture)
          ("C-c o a" . org-agenda))
+  :init
+  (setq org-src-fontify-natively t)
   :config
   (add-hook 'org-mode-hook 'org-indent-mode t))
 
