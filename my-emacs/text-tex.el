@@ -16,8 +16,8 @@
     (add-hook 'my-text-tex-mode-start-hook 'my-plugin-auctex-start t)
     :config
     (when (eq system-type 'windows-nt)
-      (when (my-func-executable-find "MiKTeX/miktex/bin/x64"
-                                     "miktex-texworks.exe")
+      (when (my-func-executable-find "miktex-texworks.exe"
+                                     "MiKTeX/miktex/bin/x64")
         (require 'tex-mik nil t)))
     (setq TeX-auto-save t
           TeX-parse-self t)
