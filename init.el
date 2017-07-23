@@ -83,6 +83,7 @@
                                     buffer-move
                                     rainbow-delimiters
                                     rainbow-identifiers
+                                    ;; fill-column-indicator, whitespace
                                     avy ;; ace-jump-mode
                                     ;; ace-pinyin
                                     undo-tree
@@ -115,7 +116,7 @@
                                     flycheck-haskell
                                     web-mode
                                     auctex
-                                    pdf-tools
+                                    ;; pdf-tools
                                     w3m
                                     erc ;; circe, rcirc
                                     use-package))
@@ -186,6 +187,8 @@
       visible-bell nil ;; 以窗口闪烁的方式代替错误提示音
       echo-keystrokes 0.1
       debug-on-error nil ;; 显示错误信息
+      debug-on-signal nil
+      debug-on-quit nil
       select-enable-clipboard t
       auto-revert-use-notify t
       auto-revert-interval 1
@@ -857,6 +860,23 @@
   (setq rainbow-identifiers-face-count 1)
   :config
   (add-hook 'prog-mode-hook 'rainbow-identifiers-mode t))
+
+(use-package whitespace
+  :if (my-func-package-enabled-p 'whitespace)
+  :init
+  (setq whitespace-style '(face lines-tail)
+        whitespace-line-column 80))
+
+(use-package fill-column-indicator
+  :if (my-func-package-enabled-p 'fill-column-indicator)
+  :init
+  (setq fci-rule-use-dashes nil
+        fci-rule-column 100)
+  :config
+  (define-globalized-minor-mode global-fci-mode fci-mode
+    ;; 避免在special buffers、dired、shell等特殊模式下启用
+    (lambda () (when buffer-file-name (fci-mode 1))))
+  (global-fci-mode 1))
 
 ;; =============================================================================
 (use-package pdf-tools
