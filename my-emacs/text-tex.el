@@ -6,15 +6,17 @@
 (defvar my-text-tex-mode-start-mode 'tex-mode)
 
 ;; =============================================================================
+;; TeXlive ::
+;; RefTeX :: Emacs自带，用于管理资源的引用
+;; AUCTeX :: 综合性的插件集，包括了如下组件
+;; preview-latex :: 预览
 (defun my-plugin-auctex-init ()
   ;; 该插件在安装后就会随(package-initialize)的执行而被自动加载
-  ;; 而无需且不能以以下方式被重新加载：(load "auctex.el" t)
-  (use-package auctex
-    :if (my-func-package-enabled-p 'auctex)
-    :commands (reftex-mode TeX-fold-mode)
-    :init
+  ;; 而无需且不能以以下方式被重新加载：(load "auctex.el")
+  (when (my-func-package-enabled-p 'auctex) ;; (use-package)
+    ;; :init
     (add-hook 'my-text-tex-mode-start-hook 'my-plugin-auctex-start t)
-    :config
+    ;; :config
     (when (eq system-type 'windows-nt)
       (when (my-func-executable-find "miktex-texworks.exe"
                                      "MiKTeX/miktex/bin/x64")
