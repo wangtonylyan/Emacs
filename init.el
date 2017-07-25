@@ -117,7 +117,7 @@
                                     web-mode
                                     auctex
                                     ;; pdf-tools
-                                    w3m
+                                    ;; w3m
                                     erc ;; circe, rcirc
                                     use-package))
   (when (not package-archive-contents)
@@ -298,12 +298,14 @@
       track-eol t
       require-final-newline t
       show-paren-style 'parentheses
+      blink-matching-paren t
+      blink-matching-paren-on-screen t
       tab-always-indent 'complete)
 (setq-default cursor-type '(bar . 3)
               scroll-up-aggressively 0.01
               scroll-down-aggressively 0.01
               line-spacing 1 ;; 行距
-              ;; fill-column 80 ;; 超过80字符就换行显示
+              fill-column 100 ;; 在auto-fill-mode模式下，超过指定字符就会被强制换行
               indicate-empty-lines nil
               indent-tabs-mode nil ;; make indentation commands use space only
               truncate-lines truncate-lines
@@ -322,6 +324,7 @@
 
 ;; Key Binding
 ;; 命令集前缀
+;; 以C-c加单个字母为前缀，且全局性key map的前缀互不相同
 ;; C-c h :: helm
 ;; C-c c :: helm-gtags
 ;; C-c p :: projectile, helm-projectile
@@ -500,7 +503,9 @@
         magit-auto-revert-tracked-only t
         ;; magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1
         magit-repository-directories `((,(expand-file-name "project") . 3)
-                                       (,(expand-file-name "Project") . 3))))
+                                       (,(expand-file-name "Project") . 3)
+                                       (,(expand-file-name "projects") . 3)
+                                       (,(expand-file-name "Projects") . 3))))
 
 (use-package sr-speedbar
   :if (my-func-package-enabled-p 'sr-speedbar)

@@ -30,6 +30,7 @@
           haskell-interactive-types-for-show-ambiguous nil
           ;; haskell-compile-command ""
           haskell-compile-cabal-build-command "stack build")
+    (add-hook 'my-prog-hs-mode-start-hook 'my-plugin-haskell-mode-start t)
     :config
     (bind-keys :map haskell-mode-map
                ("M-." . haskell-mode-jump-to-def-or-tag) ;; (haskell-mode-tag-find)
