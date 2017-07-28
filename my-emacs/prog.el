@@ -28,6 +28,18 @@
 
 (defvar my-prog-mode-start-hook '())
 
+(defun my-plugin-prog-mode-init ()
+  (use-package prog-mode
+    :init
+    (add-hook 'my-prog-mode-start-hook 'my-plugin-prog-mode-start t)
+    (setq prettify-symbols-unprettify-at-point 'right-edge)
+    :config
+    ;; lambda=λ
+    (add-to-list 'prettify-symbols-alist '("lambda" . 955))))
+
+(defun my-plugin-prog-mode-start ()
+  )
+
 ;; =============================================================================
 ;; Yasnippet
 ;; 一个宏管理和应用的插件，允许用户自定义宏，并自动将其扩展
@@ -297,6 +309,7 @@
 ;; =============================================================================
 ;; =============================================================================
 (defun my-prog-mode-init ()
+  (my-plugin-prog-mode-init)
   (my-plugin-yasnippet-init)
   (my-plugin-company-init)
   (my-plugin-auto-complete-init)

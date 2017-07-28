@@ -30,13 +30,17 @@
           TeX-auto-save t
           TeX-parse-self t
           TeX-PDF-from-DVI nil
-          ;; edit
+          TeX-check-engine t
+          TeX-check-TeX t
+          TeX-show-compilation t
+          TeX-file-line-error t
+          TeX-ispell-extend-skip-list t ;; ispell-tex-skip-alists
+          TeX-auto-untabify t
           TeX-electric-math (cons "$" "$")
           TeX-electric-sub-and-superscript t
           TeX-arg-right-insert-p t
           LaTeX-electric-left-right-brace t
           LaTeX-math-abbrev-prefix "`"
-          ;; indent
           TeX-brace-indent-level 2
           LaTeX-indent-level 2
           LaTeX-item-indent -2)
@@ -49,9 +53,13 @@
       (bind-keys :map LaTeX-mode-map
                  ;; output
                  ("C-c C-c" . TeX-command-master)
+                 ("C-c C-b" . TeX-command-buffer)
                  ("C-c C-a" . TeX-command-run-all)
                  ("C-c C-t C-p" . TeX-PDF-mode)
                  ("C-c C-t C-i" . TeX-interactive-mode)
+                 ("C-c C-t C-s" . TeX-source-correlate-mode)
+                 ("C-c C-v" . TeX-view)
+                 ("C-c C-k" . TeX-kill-job)
                  ;; edit
                  ("C-c C-f" . TeX-font) ;; C-b, C-i, C-e, C-s
                  ("C-c C-s" . LaTeX-section)
@@ -59,12 +67,14 @@
                  ("C-c ]" . LaTeX-close-environment)
                  ("C-M-a" . LaTeX-find-matching-begin)
                  ("C-M-e" . LaTeX-find-matching-end))
+      (unbind-key "C-c C-r" LaTeX-mode-map) ;; (TeX-command-region)
+      (unbind-key "C-c C-z" LaTeX-mode-map) ;; (TeX-command-section)
       (add-hook 'LaTeX-mode-hook 'turn-on-auto-fill t)
       (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode t))))
 
 (defun my-plugin-auctex-start ()
-  (reftex-mode t)
-  (TeX-fold-mode t))
+  (reftex-mode 1)
+  (TeX-fold-mode 1))
 
 
 ;; =============================================================================
@@ -75,8 +85,8 @@
     (add-hook hook 'my-text-tex-mode-start t)))
 
 (defun my-text-tex-mode-start ()
-  (font-lock-mode 1)
   (linum-mode 1)
+  (prettify-symbols-mode 1)
   (run-hooks 'my-text-tex-mode-start-hook))
 
 (eval-after-load 'tex '(my-text-tex-mode-init))
