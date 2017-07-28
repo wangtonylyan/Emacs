@@ -170,9 +170,7 @@
   (add-hook 'python-mode-hook 'my-prog-py-mode-start t))
 
 (defun my-prog-py-mode-start ()
-  ;; 将lambda显示为λ
   (prettify-symbols-mode 1)
-  (setq prettify-symbols-alist '(("lambda" . 955)))
   (run-hooks 'my-prog-py-mode-start-hook))
 
 (eval-after-load 'python '(my-prog-py-mode-init))
