@@ -213,6 +213,7 @@
 (auto-compression-mode 1) ;; 允许查看和写入压缩包
 
 ;; -----------------------------------------------------------------------------
+;; 若打开的中文文件中仍然存在乱码，则尝试执行(revert-buffer-with-coding-system 'gb18030)
 ;; 字符集和编码的名称可查询：'language-info-alist
 (set-language-environment "Chinese-GB18030")
 (prefer-coding-system 'utf-8)
