@@ -43,7 +43,7 @@
           LaTeX-math-abbrev-prefix "`"
           TeX-brace-indent-level 2
           LaTeX-indent-level 2
-          LaTeX-item-indent -2)
+          LaTeX-item-indent 0)
     (setq-default TeX-engine TeX-engine
                   TeX-master TeX-master
                   TeX-PDF-from-DVI TeX-PDF-from-DVI)
@@ -70,7 +70,10 @@
       (unbind-key "C-c C-r" LaTeX-mode-map) ;; (TeX-command-region)
       (unbind-key "C-c C-z" LaTeX-mode-map) ;; (TeX-command-section)
       (add-hook 'LaTeX-mode-hook 'turn-on-auto-fill t)
-      (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode t))))
+      (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode t))
+    (let ((newline '("\\newline" . 8232)))
+      (when (member newline tex--prettify-symbols-alist)
+        (setq tex--prettify-symbols-alist (delete newline tex--prettify-symbols-alist))))))
 
 (defun my-plugin-auctex-start ()
   (reftex-mode 1)
