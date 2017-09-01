@@ -69,7 +69,7 @@
                  ("C-M-e" . LaTeX-find-matching-end))
       (unbind-key "C-c C-r" LaTeX-mode-map) ;; (TeX-command-region)
       (unbind-key "C-c C-z" LaTeX-mode-map) ;; (TeX-command-section)
-      (add-hook 'LaTeX-mode-hook 'turn-on-auto-fill t)
+      ;; (add-hook 'LaTeX-mode-hook 'turn-on-auto-fill t) ;; comment to avoid auto line break
       (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode t))
     (let ((newline '("\\newline" . 8232)))
       (when (member newline tex--prettify-symbols-alist)
