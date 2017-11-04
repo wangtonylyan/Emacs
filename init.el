@@ -233,9 +233,9 @@
 ;; http://emacser.com/torture-emacs.htm
 (let* ((rsltn (* (display-pixel-width) (display-pixel-height)))
        ;; 针对中英文字体分别设置两种字号
-       (efont (cond ((<= rsltn (* 1600 900)) 13)
-                    ((<= rsltn (* 1920 1080)) 14)
-                    (t 15)))
+       (efont (cond ((<= rsltn (* 1600 900)) 12)
+                    ((<= rsltn (* 1920 1080)) 13)
+                    (t 14)))
        (cfont (- efont 2)))
   (if (eq system-type 'windows-nt)
       ;; Windows系统上的Emacs25版本对中文字体的显示存在问题，打开中文文档时会存在卡顿的现象
