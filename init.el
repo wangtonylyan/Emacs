@@ -61,7 +61,7 @@
   ;; 添加更新源：MELPA每天更新，其包含了绝大多数插件
   ;; (add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/") t)
   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-  (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+  ;; (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
   ;; 以下列表用于设置被允许加载的插件，因此无论是在安装还是使用插件的过程中
   ;; 都必须提前详细地列举出所有的插件，且要根据插件之间的依赖关系进行先后地声明
   (setq package-load-list '(all
@@ -127,7 +127,7 @@
 (eval-when-compile
   (require 'use-package))
 (require 'bind-key)
-(require 'diminish)
+(require 'diminish nil t)
 
 (use-package sublimity
   :if (my-func-package-enabled-p 'sublimity)
