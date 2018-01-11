@@ -92,7 +92,7 @@
                                     ;; evil
                                     bm
                                     helm-bm
-                                    neotree ;; sr-speedbar
+                                    ;; neotree, sr-speedbar
                                     ;; sublimity, minimap
                                     helm ;; icomplete, anything, ido, smex, ivy
                                     helm-gtags
@@ -734,9 +734,9 @@
 (use-package all-the-icons
   :ensure t
   :init
-  ;; 此插件在首次使用前需要额外地安装字体，执行以下命令会下载所需字体
-  ;; Windows上需手动安装；Linux上会自动安装，即执行$fc-cache -f -v
-  ;; 但目前发现Linux上会因权限问题而导致安装失败，因此仍推荐手动安装
+  ;; 此插件在首次使用前需要额外地安装字体，否则启用后mode-line中的图片会显示为乱码
+  ;; 执行以下命令会自动下载并安装所需字体，Windows上只能手动执行
+  ;; 但目前发现Linux上会因权限问题而导致安装失败，因此仍推荐手动执行
   ;; 字体下载目录默认为HOME/.local/share/fonts
   ;; (all-the-icons-install-fonts)
   :config
