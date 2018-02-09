@@ -107,14 +107,20 @@
                                     company-jedi
                                     magit
                                     stickyfunc-enhance
+                                    ;; Python
                                     elpy ;; ropemacs
                                     flycheck-pyflakes
                                     py-autopep8
                                     auto-virtualenvwrapper ;; virtualenvwrapper
+                                    ;; Haskell
                                     haskell-mode
                                     hindent
                                     flycheck-haskell
+                                    ;; Standard ML
+                                    sml-mode
+                                    ;; HTML
                                     web-mode
+                                    ;; LaTeX
                                     auctex
                                     ;; pdf-tools
                                     ;; w3m
@@ -933,3 +939,19 @@
 
 ;; =============================================================================
 (message "emacs init time = %s" (emacs-init-time))
+
+;; =============================================================================
+;; http://www.smlnj.org/doc/Emacs/sml-mode.html
+(use-package sml-mode
+  :if (my-func-package-enabled-p 'sml-mode)
+  :init
+  (add-to-list 'load-path "/usr/local/sml/bin") ;; path to executable (sml.bat on Windows)
+  (add-to-list 'auto-mode-alist '("\\.sml$" . sml-mode))
+  (add-to-list 'auto-mode-alist '("\\.sig$" . sml-mode))
+  (add-hook 'sml-mode-hook
+            (lambda ()
+              (setq indent-tabs-mode nil
+                    sml-indent-args 2)))
+  :config
+  (bind-keys :map sml-mode-map
+             ("M-SPC" . just-one-space)))
