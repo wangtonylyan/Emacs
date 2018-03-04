@@ -122,7 +122,7 @@
                                     web-mode
                                     ;; LaTeX
                                     auctex
-                                    ;; pdf-tools
+                                    pdf-tools
                                     ;; w3m
                                     erc ;; circe, rcirc
                                     use-package))
