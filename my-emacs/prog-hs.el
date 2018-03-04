@@ -15,7 +15,7 @@
   (use-package haskell-mode
     :if (my-func-package-enabled-p 'haskell-mode)
     :init
-    (setq haskell-process-type 'auto
+    (setq haskell-process-type 'stack-ghci ;; rely entirely on Stack
           haskell-process-path-ghci "ghci"
           haskell-process-path-cabal "cabal"
           haskell-process-path-stack "stack"
@@ -37,7 +37,7 @@
                ("C-c C-c" . haskell-compile)
                ;; ("" . haskell-interactive-switch)
                ("C-c C-l" . haskell-process-load-file) ;; (haskell-process-load-or-reload)
-               ("" . haskell-process-restart) ;; (haskell-process-clear)
+               ("C-c C-r" . haskell-process-restart) ;; (haskell-process-clear)
                ("" . haskell-process-do-type)
                ("" . haskell-process-do-info)
                ("" . haskell-navigate-imports)
