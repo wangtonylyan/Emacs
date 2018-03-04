@@ -117,7 +117,7 @@
                                     hindent
                                     flycheck-haskell
                                     ;; Standard ML
-                                    sml-mode
+                                    ;; sml-mode
                                     ;; HTML
                                     web-mode
                                     ;; LaTeX
