@@ -119,12 +119,12 @@
                                     ;; Standard ML
                                     ;; sml-mode
                                     ;; HTML
-                                    web-mode
+                                    ;; web-mode
                                     ;; LaTeX
-                                    auctex
-                                    pdf-tools
+                                    ;; auctex
+                                    ;; pdf-tools
                                     ;; w3m
-                                    erc ;; circe, rcirc
+                                    ;; erc ;; circe, rcirc
                                     use-package))
   (when (not package-archive-contents)
     (package-refresh-contents))
