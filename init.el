@@ -76,13 +76,13 @@
   (setq package-selected-packages '(;; all-the-icons-dired
                                     spaceline-all-the-icons ;; powerline, spaceline
                                     ;; smart-mode-line, smart-mode-line-powerline-theme
-                                    zenburn-theme ;; atom-one-dark-theme, doom-themes, github-theme, solarized-theme
+                                    solarized-theme ;; atom-one-dark-theme, doom-themes, github-theme, zenburn-theme
                                     ;; doom-themes-neotree
                                     ;; nlinum-hl
                                     ;; yascroll
                                     buffer-move
                                     rainbow-delimiters
-                                    rainbow-identifiers
+                                    rainbow-identifiers ;; 会覆盖配色主题所使用的字体颜色
                                     ;; fill-column-indicator, whitespace
                                     avy ;; ace-jump-mode
                                     ;; ace-pinyin
@@ -658,6 +658,7 @@
 (use-package highlight-thing
   :if (my-func-package-enabled-p 'highlight-thing)
   :init
+  ;; '(highlight-thing ((t (:background "#4A4A4A"))))
   (setq highlight-thing-what-thing 'symbol
         highlight-thing-exclude-thing-under-point nil
         highlight-thing-delay-seconds 0.5
@@ -814,9 +815,12 @@
   (load-theme 'github t))
 (use-package solarized-theme
   :if (my-func-package-enabled-p 'solarized-theme)
+  :init
+  (setq solarized-high-contrast-mode-line t
+        solarized-use-more-italic t)
   :config
-  ;; (load-theme 'solarized-light t)
-  (load-theme 'solarized-dark t))
+  ;; (load-theme 'solarized-dark t)
+  (load-theme 'solarized-light t))
 (use-package zenburn-theme
   :if (my-func-package-enabled-p 'zenburn-theme)
   :init

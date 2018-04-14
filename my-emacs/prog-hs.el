@@ -28,8 +28,12 @@
           haskell-tags-on-save t
           haskell-hasktags-path "hasktags"
           haskell-interactive-types-for-show-ambiguous nil
-          ;; haskell-compile-command ""
-          haskell-compile-cabal-build-command "stack build")
+          ;; (haskell-compile)执行的是以下三个命令之一，前两者都用于Cabal所管理的项目
+          ;; 目前暂没有发现更多的配置选项，以支持定制Stack环境内的GHC
+          ;; 因此采用以下临时性方案，建议多使用(haskell-process-*)相关命令
+          ;; haskell-compile-cabal-build-command
+          ;; haskell-compile-cabal-build-alt-command
+          haskell-compile-command "stack ghc %s")
     (add-hook 'my-prog-hs-mode-start-hook 'my-plugin-haskell-mode-start t)
     :config
     (bind-keys :map haskell-mode-map
