@@ -20,7 +20,7 @@
           haskell-process-path-cabal "cabal"
           haskell-process-path-stack "stack"
           haskell-process-suggest-remove-import-lines t
-          haskell-process-suggest-hoogle-imports (when (my-func-executable-find "hoogle") t)
+          haskell-process-suggest-hoogle-imports t
           haskell-process-auto-import-loaded-modules t
           haskell-process-log t ;; *haskell-process-log* buffer
           haskell-stylish-on-save t
