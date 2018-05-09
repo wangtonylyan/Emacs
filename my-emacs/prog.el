@@ -247,9 +247,9 @@
     :commands (global-flycheck-mode flycheck-mode flycheck-mode-on-safe)
     :init
     (setq flycheck-check-syntax-automatically '(mode-enabled save idle-change)
-          flycheck-checker-error-threshold 20
+          flycheck-checker-error-threshold 200
           flycheck-idle-change-delay 2.5
-          flycheck-indication-mode 'right-fringe)
+          flycheck-indication-mode 'left-fringe)
     (add-hook 'my-prog-mode-start-hook 'my-plugin-flycheck-start t)
     :config
     (flycheck-error-list-set-filter 'error)
@@ -285,6 +285,10 @@
                (not (memq 'python-flake8 flycheck-disabled-checkers)))
       (add-to-list 'flycheck-flake8-error-level-alist '("^E305$" . info) t))
     ;; Haskell
+    (use-package flycheck-haskell
+      :if (my-func-package-enabled-p 'flycheck-haskell)
+      :init
+      (add-hook 'flycheck-mode-hook 'flycheck-haskell-setup))
     (when (and (memq 'haskell-hlint flycheck-checkers)
                (not (memq 'haskell-hlint flycheck-disabled-checkers))
                (my-func-executable-find "hlint"))
@@ -294,7 +298,6 @@
       (add-to-list 'flycheck-disabled-checkers 'haskell-stack-ghc)
       (add-to-list 'flycheck-disabled-checkers 'haskell-ghc))
     (setq-default flycheck-disabled-checkers flycheck-disabled-checkers)
-
     ;; (global-flycheck-mode 1)
     ;; 此外，若是使用插件helm-flycheck，则可以基于helm模式来呈现信息
     (use-package helm-flycheck

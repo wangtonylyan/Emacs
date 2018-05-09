@@ -1,16 +1,17 @@
 ;; -*- coding: utf-8 -*-
 
-;; 判断Emacs版本可以基于以下两个变量：'emacs-major-version和'emacs-minor-version
+;; 判断Emacs版本可以基于两个变量：'emacs-major-version和'emacs-minor-version
 
 (defun my-func-executable-find (exe &optional dir add)
-  (let* ((dir (if (and (stringp dir) (> (length dir) 0))
+  (let* ((dir (if (and (stringp dir) (> (length dir) 0)
+                       (file-directory-p dir))
                   ;; 统一传参的形式
                   (file-name-as-directory dir) ""))
          (path (executable-find (concat dir exe))))
     (when (and path (file-executable-p path))
       (when add
-        (add-to-list 'exec-path (directory-file-name
-                                 (file-name-directory path) t)))
+        (add-to-list 'exec-path
+                     (directory-file-name (file-name-directory path))))
       path)))
 
 (defalias 'my-func-package-enabled-p 'package--user-selected-p)
@@ -18,12 +19,23 @@
 (defalias 'my-func-minor-mode-on-p 'bound-and-true-p)
 
 (when (eq system-type 'windows-nt)
-  (add-to-list 'exec-path "D:/softwares" t)
+  (mapc (lambda (dir)
+          (when (and (file-directory-p dir)
+                     (file-accessible-directory-p dir))
+            (add-to-list 'exec-path dir)))
+        '("D:/softwares"))
   (let ((path (my-func-executable-find "cmdproxy.exe"
                                        "Emacs25/libexec/emacs/24.5/i686-pc-mingw32")))
     (when path
       (setq shell-file-name path
             shell-command-switch "-c"))))
+
+(when (eq system-type 'gnu/linux)
+  (mapc (lambda (dir)
+          (when (and (file-directory-p dir)
+                     (file-accessible-directory-p dir))
+            (add-to-list 'exec-path dir)))
+        '("~/.local/bin")))
 
 ;; (setq user-init-file "~/.emacs.d/init.el")
 ;; (load user-init-file)
@@ -52,7 +64,11 @@
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (load custom-file)
 
-;; (setq url-proxy-services '(("http" . "10.25.71.1:8080"))) ;; 不支持authentication
+(setq url-max-password-attempts 2
+      ;; 不支持authentication
+      ;; url-proxy-services '(("http" . "10.25.71.1:8080"))
+      )
+
 (when (require 'package nil t)
   ;; 设置安装包的存储目录，该目录也需要被包含至'load-path中
   ;; (add-to-list 'package-directory-list "~/.emacs.d/elpa" t) ;; system-wide dir
