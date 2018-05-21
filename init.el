@@ -123,20 +123,20 @@
                                     company-jedi
                                     magit
                                     stickyfunc-enhance
-                                    ;; Python
-                                    elpy ;; ropemacs
-                                    flycheck-pyflakes
-                                    py-autopep8
-                                    auto-virtualenvwrapper ;; virtualenvwrapper
-                                    ;; Haskell
+                                    ;; [Python]
+                                    ;; elpy ;; ropemacs
+                                    ;; flycheck-pyflakes
+                                    ;; py-autopep8
+                                    ;; auto-virtualenvwrapper ;; virtualenvwrapper
+                                    ;; [Haskell]
                                     haskell-mode
                                     hindent
                                     flycheck-haskell
-                                    ;; Standard ML
+                                    ;; [Standard ML]
                                     ;; sml-mode
-                                    ;; HTML
+                                    ;; [HTML]
                                     ;; web-mode
-                                    ;; LaTeX
+                                    ;; [LaTeX]
                                     ;; auctex
                                     ;; pdf-tools
                                     ;; w3m

@@ -231,7 +231,8 @@
 ;; http://www.flycheck.org/manual/latest/Supported-languages.html
 ;; -----------------------------------------------------------------------------
 ;; 快捷键前缀：C-c !
-;; C-c ! l :: (flycheck-list-errors)
+;; l :: (flycheck-list-errors)
+;; C-c :: (flycheck-compile)
 ;; RET :: Go to the current error in the source buffer
 ;; n :: Jump to the next error
 ;; p :: Jump to the previous error
