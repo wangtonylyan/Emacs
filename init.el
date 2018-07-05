@@ -89,7 +89,8 @@
   (setq package-enable-at-startup nil) ;; 方式1) 随Emacs的启动而自动加载插件
   (package-initialize) ;; 方式2) 主动执行该函数以加载插件
   ;; 目前使用此全局变量来管理插件的启用/禁用，其中包括了ELPA更新源中所没有的插件
-  (setq package-selected-packages '(;; all-the-icons-dired
+  (setq package-selected-packages '(;; [UI]
+                                    ;; all-the-icons-dired
                                     spaceline-all-the-icons ;; powerline, spaceline
                                     ;; smart-mode-line, smart-mode-line-powerline-theme
                                     solarized-theme ;; atom-one-dark-theme, doom-themes, github-theme, zenburn-theme
@@ -100,6 +101,7 @@
                                     rainbow-delimiters
                                     rainbow-identifiers ;; 会覆盖配色主题所使用的字体颜色
                                     ;; fill-column-indicator, whitespace
+                                    ;; [Edit]
                                     avy ;; ace-jump-mode
                                     ;; ace-pinyin
                                     undo-tree
@@ -139,6 +141,7 @@
                                     ;; [LaTeX]
                                     ;; auctex
                                     ;; pdf-tools
+                                    ;; [Web]
                                     ;; w3m
                                     ;; erc ;; circe, rcirc
                                     use-package))
@@ -681,7 +684,7 @@
         highlight-thing-limit-to-defun nil
         highlight-thing-case-sensitive-p t)
   :config
-  (global-hl-line-mode -1)
+  ;; (global-hl-line-mode -1)
   (add-hook 'text-mode-hook 'hl-line-mode t)
   (add-hook 'prog-mode-hook 'highlight-thing-mode t))
 
