@@ -186,7 +186,7 @@
         ;; ispell-personal-dictionary ""
         flyspell-issue-message-flag nil)
   (add-hook 'text-mode-hook 'flyspell-mode t)
-  (add-hook 'prog-mode-hook 'flyspell-prog-mode t)
+  ;; (add-hook 'prog-mode-hook 'flyspell-prog-mode t)
   (add-to-list 'ispell-skip-region-alist '("^#+BEGIN" . "^#+END") t))
 
 (use-package paredit
