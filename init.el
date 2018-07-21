@@ -259,7 +259,7 @@
 (let* ((rsltn (* (display-pixel-width) (display-pixel-height)))
        ;; 针对中英文字体分别设置两种字号
        (efont (cond ((<= rsltn (* 1600 900)) 12)
-                    ((<= rsltn (* 1920 1080)) 13)
+                    ((< rsltn (* 1920 1080)) 13)
                     (t 14)))
        (cfont (- efont 2)))
   (if (eq system-type 'windows-nt)
