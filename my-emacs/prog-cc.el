@@ -4,8 +4,12 @@
 (require 'my-prog)
 
 ;; replace built-in CEDET with an external one, if exists
-;; $git clone http://git.code.sf.net/p/cedet/git cedet
-;; $make
+;; $ git clone http://git.code.sf.net/p/cedet/git cedet
+;; $ make
+;; CEDET及其现状的介绍
+;; https://www.emacswiki.org/emacs/CollectionOfEmacsDevelopmentEnvironmentTools
+;; https://stackoverflow.com/questions/12711765/status-of-cedet-and-ecb-in-emacs-24-2
+;; http://alexott.net/en/writings/emacs-devenv/EmacsCedet.html
 (when (bound-and-true-p my-private-project-root-directory)
   (let* ((path (file-name-as-directory
                 (concat my-private-project-root-directory "cedet")))
@@ -19,6 +23,7 @@
 
 ;; =============================================================================
 ;; CC-mode
+;; http://cc-mode.sourceforge.net/
 (defun my-plugin-cc-mode-init ()
   (use-package cc-mode
     :init
@@ -34,7 +39,7 @@
                    ;; (c-special-indent-hook . ())
                    ;; (c-label-minimum-indentation . )
                    (c-tab-always-indent . t)
-                   (c-echo-syntactic-information-p . t)
+                   (c-echo-syntactic-information-p . nil)
                    (c-report-syntactic-errors . t)
                    (c-comment-prefix-regexp . ((c-mode . "//+\\|\\**")
                                                (c++-mode . "//+\\|\\**")))
@@ -103,6 +108,9 @@
 ;; =============================================================================
 ;; CEDET
 (defun my-plugin-cedet-init()
+  ;; CEDET的相关配置可以通过在相应buffer或模式下利用以下命令查看
+  ;; (semantic-describe-buffer)
+  ;; (semantic-c-describe-environment)
   (use-package cedet
     :demand t
     :commands (semantic-mode semantic-toggle-minor-mode-globally)
@@ -117,27 +125,31 @@
     ;; (semantic-load-enable-guady-code-helpers)
     ;; (semantic-load-enable-excessive-code-helpers)
     ;; (semantic-load-enable-semantic-debugging-helpers)
-    (setq semantic-default-submodes '(;; Idle Scheduler
+    (setq semantic-default-submodes '(;; [Idle Scheduler]
                                       global-semantic-idle-scheduler-mode
-                                      ;; global-semantic-idle-summary-mode ;; 基于Smart Summary
-                                      global-semantic-idle-local-symbol-highlight-mode
+                                      ;; 目前发现该模式高亮的符号并不全，即使启用它，也没有必要禁用highlight-thing插件
+                                      ;; global-semantic-idle-local-symbol-highlight-mode
+                                      global-semantic-idle-summary-mode ;; 基于Smart Summary
                                       ;; global-semantic-idle-completions-mode ;; 基于Smart Completion，用company替代
-                                      ;; global-semantic-idle-breadcrumbs-mode
-                                      ;; SemanticDB
+                                      ;; [SemanticDB] tag database
                                       global-semanticdb-minor-mode
-                                      ;; Display and Decoration
-                                      global-semantic-stickyfunc-mode ;; (use-package stickyfunc-enhance)
+                                      ;; [Display and Decoration]
+                                      ;; 该模式可以使用stickyfunc-enhance插件进行增强
+                                      ;; 此外，其主要功能可被内置的(which-function-mode)替代
+                                      ;; 由于其还会与tabbar插件相冲突，因此两者只能选其一
+                                      ;; global-semantic-stickyfunc-mode
                                       ;; global-semantic-highlight-func-mode
                                       ;; global-semantic-decoration-mode
-                                      ;; global-semantic-tag-folding-mode ;; (require 'semantic-tag-folding)
-                                      ;; Senator
-                                      ;; global-semantic-mru-bookmark-mode ;; mostly recently used
-                                      ;; Debug
+                                      ;; [Tag]
+                                      global-semantic-mru-bookmark-mode ;; mostly recently used
+                                      ;; [Debug]
                                       ;; global-semantic-show-unmatched-syntax-mode
                                       ;; global-semantic-show-parser-state-mode
                                       ;; global-semantic-highlight-edits-mode
-                                      ;; Mouse Context Menu
+                                      ;; [Mouse Context Menu]
                                       ;; global-cedet-m3-minor-mode
+                                      ;; [CEDET 1.x] 以下功能并没有集成于Emacs内置的CEDET 2.x中
+                                      ;; global-semantic-tag-folding-mode ;; (require 'semantic-tag-folding)
                                       )
           ;; -------------------------------------------------------------------
           semantic-complete-inline-analyzer-idle-displayor-class ;; 以何种方式显示
@@ -150,8 +162,8 @@
           'standard ;; initial-max-tags
           semantic-displayor-tooltip-initial-max-tags 8
           ;; -------------------------------------------------------------------
-          semantic-idle-scheduler-idle-time 1
-          semantic-idle-scheduler-work-idle-time 30
+          semantic-idle-scheduler-idle-time 3
+          semantic-idle-scheduler-work-idle-time 15
           semantic-idle-scheduler-max-buffer-size 10240
           semantic-idle-scheduler-verbose-flag nil ;; 与semantic-idle-summary-mode冲突，故禁用
           ;; 比较耗时的任务
@@ -198,7 +210,8 @@
     :config
     (semantic-mode 1) ;; global minor mode
     (use-package stickyfunc-enhance
-      :if (my-func-package-enabled-p 'stickyfunc-enhance)
+      :if (and (my-func-package-enabled-p 'stickyfunc-enhance)
+               (member 'global-semantic-stickyfunc-mode semantic-default-submodes))
       :demand t)
     (use-package semantic/bovine/gcc
       :if (executable-find "gcc")
@@ -218,58 +231,97 @@
       :config
       (semanticdb-enable-gnu-global-databases 'c-mode)
       (semanticdb-enable-gnu-global-databases 'c++-mode))
-    ;; 以下是代码浏览功能的相关设置，待完善
-    (use-package semantic/ia
-      :disabled
-      :config
-      (bind-key :map semantic-mode-map
-                ("" . semantic-ia-fast-jump)
-                ("" . semantic-complete-jump)
-                ("" . semantic-complete-jump-local)
-                ("" . semantic-complete-jump-local-members)
-                ("" . semantic-decoration-include-visit) ;; jump to include file
-                ("" . semantic-mrub-switch-tag)))
-    (use-package semantic/symref
-      :disabled
-      :config
-      (bind-key :map semantic-mode-map
-                ("" . semantic-symref)
-                ("" . semantic-symref-symbol)))
-    (use-package semantic/senator
-      :disabled
-      :config
-      (bind-key :map semantic-mode-map
-                ("" . senator-next-tag)
-                ("" . senator-previous-tag)
-                ("" . senator-jump)
-                ("" . senator-go-to-up-reference)))
     ;; 若Semantic始终不能正常解析某些特定的符号，则可作如下设置
     ;; (add-to-list 'semantic-lex-c-preprocessor-symbol-map '("symbol" . "value"))
-    ;; (add-to-list 'semantic-lex-c-preprocessor-symbol-file  "path/file")
+    ;; (add-to-list 'semantic-lex-c-preprocessor-symbol-file "path/file")
+    ;; -------------------------------------------------------------------------
+    ;; 以下是代码浏览功能的相关设置，主要涉及到了Complete、Senator、IA这三个组件
+    ;; 此外，这三个组件在很多功能上是重叠的，都可以支持tag跳转和符号补全
+    ;; 由于符号补全功能已由Company插件替代，因此只需要配置它们的代码跳转功能
+    (use-package semantic/complete
+      :config
+      ;; Complete跳转需要手动输入符号
+      (unbind-key "C-c , J" semantic-mode-map) ;; (semantic-complete-jump)
+      (unbind-key "C-c , j" semantic-mode-map) ;; (semantic-complete-jump-local)
+      (unbind-key "C-c , m" semantic-mode-map) ;; (semantic-complete-jump-local-members)
+      (unbind-key "C-c , SPC" semantic-mode-map) ;; (semantic-complete-analyze-inline)
+      )
+    (use-package semantic/senator
+      :config
+      ;; Senator可在当前文件中已被解析出的符号所出现的位置之间按序地跳转的
+      ;; 相当于是在遍历符号表，似乎实际用处不大
+      (unbind-key "C-c , n" semantic-mode-map) ;; (senator-next-tag)
+      (unbind-key "C-c , p" semantic-mode-map) ;; (senator-previous-tag)
+      (unbind-key "C-c , u" semantic-mode-map) ;; (senator-go-to-up-referenc)
+      (unbind-key "C-c , r" semantic-mode-map) ;; (senator-copy-tag-to-register)
+      (unbind-key "C-c , C-w" semantic-mode-map) ;; (senator-kill-tag)
+      (unbind-key "C-c , C-y" semantic-mode-map) ;; (senator-yank-tag)
+      (unbind-key "C-c , <down>" semantic-mode-map) ;; (senator-transpose-tags-down)
+      (unbind-key "C-c , <up>" semantic-mode-map) ;; (senator-transpose-tags-up)
+      (unbind-key "C-c , M-w" semantic-mode-map) ;; (senator-copy-tag)
+      ;; Senator还提供了代码折叠的功能，但暂没有semantic-tag-folding强大
+      (unless (member 'global-semantic-tag-folding-mode semantic-default-submodes)
+        (bind-keys :map semantic-mode-map
+                   ("C-c , -" . senator-fold-tag)
+                   ("C-c , =" . senator-unfold-tag))))
+    (use-package semantic/ia
+      :config
+      ;; (semantic-ia-complete-tip)
+      ;; (semantic-ia-complete-symbol)
+      ;; (semantic-ia-complete-symbol-menu)
+      ;; IA才是最常用的跳转
+      (bind-keys :map semantic-mode-map
+                 ("C-c , ," . semantic-ia-fast-jump)
+                 ("C-c , ." . semantic-ia-show-summary)
+                 ("C-c , /" . semantic-ia-show-doc)))
+    (use-package semantic/mru-bookmark
+      :if (member 'global-semantic-mru-bookmark-mode semantic-default-submodes)
+      :config
+      (unbind-key "C-x B" semantic-mru-bookmark-mode-map) ;; (semantic-mrub-switch-tags)
+      (bind-keys :map semantic-mru-bookmark-mode-map
+                 ("C-c , b" . semantic-mrub-switch-tags)))
+    ;; 杂项
+    (unbind-key "C-c , l" semantic-mode-map) ;; (semantic-analyze-possible-completions)
+    (bind-keys :map semantic-mode-map
+               ("C-c , G" . semantic-symref) ;; 寻找光标所在函数被引用的地方
+               ("C-c , g" . semantic-symref-symbol) ;; 寻找光标所在符号被引用的地方
+               ("C-c , i" . semantic-decoration-include-visit) ;; jump to include file
+               ("C-c , t" . semantic-analyze-proto-impl-toggle))
     (use-package semantic/sb ;; 此为CEDET中内置的Speedbar，不启用
       :disabled)
     (use-package semantic-tag-folding
+      :if (member 'global-semantic-tag-folding-mode semantic-default-submodes)
       :config
-      (global-semantic-tag-folding-mode 1))
+      (bind-keys :map semantic-tag-folding-mode-map
+                 ("C-c , -" . semantic-tag-folding-fold-block)
+                 ("C-c , =" . semantic-tag-folding-show-block)
+                 ("C-c , _" . semantic-tag-folding-fold-all)
+                 ("C-c , +" . semantic-tag-folding-show-all)))
+    ;; -------------------------------------------------------------------------
     (use-package ede
       :config
-      ;; EDE默认使用Unix上的Locate命令来定位文件，此外还支持使用GNU Global
+      ;; 支持利用makefile和automake所管理的项目，暂不支持cmake等
+      ;; 默认使用Unix上的Locate命令来定位文件，此外还支持使用GNU Global
       ;; 但目前Emacs内置的CEDET中删除了ede-locate.el文件，因此也就暂不支持后者了
       ;; (setq ede-locate-setup-options '(ede-locate-global ede-locate-base))
-      ;; 1. 对于复杂的项目，应利用ede-new新建并利用Project.ede文件定制
-      ;; 2. 对于简单的项目，应利用以下脚本定制
+      ;; 1. 对于复杂的项目，可利用(ede-new)新建并利用自动生成的Project.ede文件定制
+      ;; 2. 对于简单的项目，可手写脚本定制具体信息，以下为示例
       (when (bound-and-true-p my-private-project-root-directory)
-        (let ((root (concat my-private-project-root-directory "Emacs/README.md")))
-          (when (file-exists-p root)
-            (ede-cpp-root-project "evo_btappl" ;; name
-                                  :file root ;; anchor
-                                  ;; :include-path '("/include")
+        ;; 通常应以项目根目录下已有的makefile或readme等固定文件作为锚
+        ;; (ede-emacs-project)
+        (let ((anchor (concat my-private-project-root-directory "Emacs/README.md")))
+          (when (file-exists-p anchor)
+            (ede-cpp-root-project "Emacs" ;; name
+                                  :file anchor ;; root folder
+                                  ;; :include-path '("./include")
                                   ;; :system-include-path '("")
                                   ;; :spp-table '(("MACRO1" . "VALUE1"))
+                                  ;; :compile-command "cd build && make"
                                   ))))
-      ;; 具体项目的EDE信息由每个系统中的ede-projects.el文件独立地维护
+      ;; 目前手写的EDE项目配置信息由每个系统中的ede-projects.el文件统一地维护
       (when (bound-and-true-p my-private-project-ede-config-file)
         (load my-private-project-ede-config-file t nil t t))
+      ;; (ede-enable-generic-projects)
       (global-ede-mode 1))))
 
 (defun my-plugin-cedet-start ()

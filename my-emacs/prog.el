@@ -34,6 +34,8 @@
     (add-hook 'my-prog-mode-start-hook 'my-plugin-prog-mode-start t)
     (setq prettify-symbols-unprettify-at-point 'right-edge)
     :config
+    ;; 在mode-line显示当前光标所在的函数名
+    (which-function-mode 1)
     ;; lambda=λ
     (add-to-list 'prettify-symbols-alist '("lambda" . 955))))
 

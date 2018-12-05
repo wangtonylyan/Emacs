@@ -51,11 +51,11 @@
 (defconst my-private-emacs-directory (concat user-emacs-directory ".private/"))
 
 (load (concat my-private-emacs-directory "init.el") t)
-;; ******************** sample ********************
+;; *************************** sample code in .private/init.el ***************************
 ;; (defconst my-private-project-root-directory "~/project/")
 ;; (defconst my-private-project-ede-config-file
 ;;   (concat my-private-project-root-directory "ede-projects.el"))
-;; ************************************************
+;; ***************************************************************************************
 
 ;; (normal-top-level-add-subdirs-to-load-path)
 ;; (normal-top-level-add-to-load-path)
@@ -101,6 +101,7 @@
                                     rainbow-delimiters
                                     rainbow-identifiers ;; 会覆盖配色主题所使用的字体颜色
                                     ;; fill-column-indicator, whitespace
+                                    tabbar
                                     ;; [Edit]
                                     avy ;; ace-jump-mode
                                     ;; ace-pinyin
@@ -360,6 +361,9 @@
 ;; C-c i :: highlight
 ;; C-c b :: bm, helm-bm
 ;; C-c w :: window layout: windmove, winner, buffer-move
+;; C-c , :: CEDET/Semantic
+;; C-c . :: CEDET/EDE
+;; C-c C- :: tabbar
 (unbind-key "C-x f") ;; (set-fill-column)
 (unbind-key "C-x C-l") ;; (downcase-region)
 (unbind-key "C-x C-u") ;; (upcase-region)
@@ -913,6 +917,16 @@
     ;; 避免在special buffers、dired、shell等特殊模式下启用
     (lambda () (when buffer-file-name (fci-mode 1))))
   (global-fci-mode 1))
+
+(use-package tabbar
+  :if (my-func-package-enabled-p 'tabbar)
+  :config
+  (tabbar-mode 1)
+  (bind-keys :map tabbar-mode-map
+             ("C-c C-b" . tabbar-backward-tab)
+             ("C-c C-f" . tabbar-forward-tab)
+             ("C-c C-p" . tabbar-backward-group)
+             ("C-c C-n" . tabbar-forward-group)))
 
 ;; =============================================================================
 (use-package pdf-tools
