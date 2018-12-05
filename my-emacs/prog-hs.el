@@ -4,10 +4,10 @@
 
 (defvar my-prog-hs-mode-start-hook '())
 
-;; 常用的三大插件：haskell-mode, ghc-mode, structured-haskell-mode
+;; 常用的几大插件：haskell-mode, intero, ghc-mode, structured-haskell-mode
 ;; =============================================================================
 ;; haskell-mode
-;; Haskell库：alex, happy, hlint, hindent, stylish-haskell, hasktags, hoogle
+;; 支持和依赖于以下Haskell库：alex, happy, hlint, hindent, stylish-haskell, hasktags, hoogle
 (defun my-plugin-haskell-mode-init ()
   (use-package haskell-mode
     :if (my-func-package-enabled-p 'haskell-mode)
