@@ -263,7 +263,8 @@
       (unless (member 'global-semantic-tag-folding-mode semantic-default-submodes)
         (bind-keys :map semantic-mode-map
                    ("C-c , -" . senator-fold-tag)
-                   ("C-c , =" . senator-unfold-tag))))
+                   ;; ("C-c , =" . senator-unfold-tag)
+                   ("C-c , =" . senator-fold-tag-toggle))))
     (use-package semantic/ia
       :config
       ;; (semantic-ia-complete-tip)
