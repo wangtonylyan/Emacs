@@ -189,8 +189,7 @@
                         (setq semantic-stickyfunc-sticky-classes
                               '(type function) ;; variable, include, package
                               semanticdb-find-default-throttle
-                              '(file local project system recursive
-                                     unloaded omniscience)
+                              '(file local project unloaded system recursive) ;; omniscience
                               semanticdb-project-system-databases
                               (mapcar (lambda (path)
                                         (semanticdb-create-database
