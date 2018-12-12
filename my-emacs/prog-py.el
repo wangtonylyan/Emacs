@@ -127,7 +127,7 @@
 
 (defun my-plugin-ropemacs-start ()
   ;; (ropemacs-mode 1) ;;无需手动启用
-  (when (bound-and-true-p ac-sources)
+  (when (boundp 'ac-sources)
     (set (make-local-variable 'ac-sources)
          (add-to-list 'ac-sources 'ac-source-ropemacs t))))
 
