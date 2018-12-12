@@ -114,18 +114,24 @@
                                     ;; neotree, sr-speedbar
                                     ;; sublimity, minimap
                                     helm ;; icomplete, anything, ido, smex, ivy
-                                    helm-gtags
                                     flyspell
                                     ;; flyspell-correct-helm
+                                    ;; [Programming]
+                                    yasnippet
                                     flycheck ;; flymake
                                     helm-flycheck
-                                    projectile
-                                    helm-projectile
-                                    yasnippet
                                     company ;; auto-complete
                                     company-jedi
+                                    helm-gtags ;; ggtags
+                                    ;; [Project]
+                                    projectile ;; eproject
+                                    helm-projectile
                                     magit
-                                    stickyfunc-enhance
+                                    cmake-mode ;; cmake-ide, cmake-project
+                                    cmake-font-lock
+                                    ;; [C, C++]
+                                    cpputils-cmake
+                                    ;; stickyfunc-enhance
                                     ;; [Python]
                                     ;; elpy ;; ropemacs
                                     ;; flycheck-pyflakes
@@ -353,22 +359,23 @@
 ;; Key Binding
 ;; 命令集前缀
 ;; 以C-c加单个字母为前缀，且全局性key map的前缀互不相同
+;; C-c w :: window layout: windmove, winner, buffer-move
+;; C-c C- :: tabbar
+;; C-c i :: highlight
+;; C-c b :: bm, helm-bm
+;; C-c o :: org
 ;; C-c h :: helm
 ;; C-c c :: helm-gtags
 ;; C-c p :: projectile, helm-projectile
 ;; C-c g :: magit
-;; C-c o :: org
-;; C-c i :: highlight
-;; C-c b :: bm, helm-bm
-;; C-c w :: window layout: windmove, winner, buffer-move
 ;; C-c , :: CEDET/Semantic
 ;; C-c . :: CEDET/EDE
-;; C-c C- :: tabbar
 (unbind-key "C-x f") ;; (set-fill-column)
 (unbind-key "C-x C-l") ;; (downcase-region)
 (unbind-key "C-x C-u") ;; (upcase-region)
 (unbind-key "C-M-v") ;; (scroll-other-window)
 (unbind-key "M-s h")
+;; 以下部分是重复绑定，目的是便于查阅
 (bind-keys ("C-S-a" . mark-whole-buffer)
            ("C-M-p" . scroll-other-window-down)
            ("C-M-n" . scroll-other-window)
@@ -383,7 +390,9 @@
            ("C-c i p" . highlight-phrase)
            ("C-c i r" . highlight-regexp)
            ("C-c i l" . highlight-lines-matching-regexp)
-           ("C-c i u" . unhighlight-regexp))
+           ("C-c i u" . unhighlight-regexp)
+           ("M-." . xref-find-definitions)
+           ("M-," . xref-pop-marker-stack))
 (put 'downcase-region 'disabled nil) ;; 去除每次执行此命令时的提示，强制执行
 (put 'upcase-region 'disabled nil)
 ;; 与输入法切换键冲突

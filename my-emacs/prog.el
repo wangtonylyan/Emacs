@@ -111,9 +111,9 @@
                               ;; company-clang ;; Clang
                               company-gtags
                               company-etags)
+                             company-cmake ;; CMake
                              ;; company-eclim ;; Eclipse
                              ;; company-xcode ;; Xcode
-                             company-cmake ;; CMake
                              ;; company-css ;; CSS
                              (company-dabbrev-code company-keywords)
                              company-files
@@ -250,7 +250,7 @@
     :commands (global-flycheck-mode flycheck-mode flycheck-mode-on-safe)
     :init
     (setq flycheck-check-syntax-automatically '(mode-enabled save idle-change)
-          flycheck-checker-error-threshold 200
+          flycheck-checker-error-threshold 500
           flycheck-idle-change-delay 2.5
           flycheck-indication-mode 'left-fringe)
     (add-hook 'my-prog-mode-start-hook 'my-plugin-flycheck-start t)
@@ -269,15 +269,15 @@
                (not (memq 'emacs-lisp flycheck-disabled-checkers)))
       (add-hook 'emacs-lisp-mode-hook
                 (lambda ()
-                  (setq flycheck-emacs-lisp-load-path `(,my-user-emacs-directory)))
-                t))
+                  (setq flycheck-emacs-lisp-load-path `(,my-user-emacs-directory))
+                  ) t))
     ;; C/C++
     (when (and (memq 'c/c++-gcc flycheck-checkers)
                (not (memq 'c/c++-gcc flycheck-disabled-checkers)))
       (add-hook 'c++-mode-hook
                 (lambda ()
-                  (setq flycheck-gcc-language-standard "c++11"))
-                t))
+                  ;; (setq flycheck-gcc-language-standard "c++11") ;; 可由cpputils-cmake插件设置
+                  ) t))
     ;; Python
     (use-package flycheck-pyflakes
       :if (my-func-package-enabled-p 'flycheck-pyflakes)
@@ -313,6 +313,113 @@
   (flycheck-mode-on-safe))
 
 ;; =============================================================================
+;; 常用的tagging system主要有两个，即GNU Global (gtags)和Ctags
+;; 而ctags又分为了两个版本，Exuberant Ctags和Universal Ctags
+;; ctags相比于gtags支持更多的语言，而gtags本身也支持以ctags作为解析后端
+;; 此外，gtags还支持由Python实现的pygments作为解析后端
+;; $ gtags --gtagslabel=ctags     # exuberant ctags
+;; $ gtags --gtagslabel=new-ctags # universal ctags
+;; $ gtags --gtagslabel=pygments  # pygments
+;; Emacs中有两个独立支持gtags的前端插件，即ggtags和helm-gtags
+(defun my-plugin/gtags/init ()
+  ;; gtags暂仅用于C、C++
+  (defun my-plugin/gtags/add-hook (func)
+    ;; 'c-mode-hook, 'c++-mode-hook
+    (add-hook 'my-prog-cc-mode-start-hook func t))
+  (use-package ggtags
+    :if (and (my-func-package-enabled-p 'ggtags)
+             (executable-find "gtags"))
+    :init
+    (my-plugin/gtags/add-hook 'my-plugin/gtags/start))
+  (with-eval-after-load 'helm
+    (use-package helm-gtags
+      :if (and (my-func-package-enabled-p 'helm-gtags)
+               (executable-find "gtags"))
+      :commands (helm-gtags-mode)
+      :init
+      (setq helm-gtags-path-style 'root ;; 'relative, 'absolute
+            helm-gtags-ignore-case t
+            helm-gtags-read-only t
+            helm-gtags-use-input-at-cursor t
+            helm-gtags-highlight-candidate t
+            helm-gtags-maximum-candidates 1000
+            helm-gtags-display-style nil ;; 'detail
+            helm-gtags-fuzzy-match nil
+            helm-gtags-direct-helm-completing nil
+            helm-gtags-auto-update t
+            helm-gtags-update-interval-second 60
+            helm-gtags-pulse-at-cursor t
+            helm-gtags-cache-select-result t
+            helm-gtags-cache-max-result-size 10485760 ;; 10Mb
+            helm-gtags-preselect nil
+            helm-gtags-prefix-key (kbd "C-c c")
+            ;; 启用以下配置项会使得某些常用快捷键不再绑定于上述前缀中
+            ;; 例如将(helm-gtags-dwim)绑定于"M-."
+            helm-gtags-suggested-key-mapping nil)
+      (my-plugin/gtags/add-hook 'my-plugin/gtags/start)
+      :config
+      ;; 在以下快捷键前输入"C-u"，还可以限定搜索的目录路径
+      (bind-keys :map helm-gtags-mode-map
+                 ("M-." . helm-gtags-dwim) ;; 替代(xref-find-definitions)
+                 ("M-/" . helm-gtags-show-stack) ;; 所有跳转位置都会被记录于一个栈中，打印整个栈，以供选择
+                 ("M-," . helm-gtags-pop-stack) ;; 替代(xref-pop-marker-stack)，删除栈顶记录
+                 ("" . helm-gtags-previous-history) ;; 遍历栈
+                 ("" . helm-gtags-next-history)
+                 ;; 以下(helm-gtags-find-*)中的多数可由(helm-gtags-dwim)替代
+                 ("C-c c t" . helm-gtags-find-tag)     ;; jump to definitions
+                 ("C-c c r" . helm-gtags-find-rtag)    ;; jump to references
+                 ("C-c c s" . helm-gtags-find-symbol)  ;; jump to symbols
+                 ("C-c c p" . helm-gtags-find-pattern) ;; jump to patterns
+                 ("" . helm-gtags-find-files)          ;; jump to files
+                 ("C-c c l" . helm-gtags-select) ;; 列出所有已被gtags识别出的符号，以供选择
+                 ("C-c c a" . helm-gtags-tags-in-this-function) ;; 列出当前函数中已被识别的符号
+                 ("" . helm-gtags-select-path) ;; 类似于打开文件的功能
+                 ("C-c c n" . helm-gtags-create-tags)
+                 ("C-c c u" . helm-gtags-update-tags)))))
+
+(defun my-plugin/gtags/start ()
+  (when (my-func-package-enabled-p 'ggtags))
+  (when (my-func-package-enabled-p 'helm-gtags)
+    (helm-gtags-mode 1)))
+
+;; =============================================================================
+;; cmake-mode, cmake-font-lock, cmake-ide, cmake-project
+(defun my-plugin/cmake/init ()
+  ;; 项目目录示例
+  ;; project root folder
+  ;; |-- CMakeLists.txt
+  ;; |-- src :: 头文件和源文件
+  ;; |-- project1 :: 一个子项目或模块
+  ;; |---- CMakeLists.txt
+  ;; |---- src
+  ;; |-- project2
+  ;; |---- CMakeLists.txt
+  ;; |---- src
+  (use-package cmake-mode
+    :if (my-func-package-enabled-p 'cmake-mode)
+    :init
+    (add-hook 'my-prog-mode-start-hook 'my-plugin/cmake/start t)
+    :config
+    (use-package cmake-font-lock
+      :if (my-func-package-enabled-p 'cmake-font-lock)
+      :init
+      ;; (cmake-font-lock-activate)在实现上会覆盖原本font-lock-mode的效果
+      ;; 因此其必须在后者生效之后执行，于是暂采用以下手段
+      ;; 但其要求(global-font-lock-mode)在实现上要与(turn-on-font-lock)类似
+      ;; 即保证在font-lock-mode启动后执行时，不会再次重启
+      (add-hook 'cmake-mode-hook 'turn-on-font-lock nil)
+      (add-hook 'cmake-mode-hook 'cmake-font-lock-activate t))
+    )
+  (use-package cmake-ide
+    )
+  (use-package cmake-project
+    )
+  )
+
+(defun my-plugin/cmake/start ()
+  )
+
+;; =============================================================================
 ;; =============================================================================
 (defun my-prog-mode-init ()
   (my-plugin-prog-mode-init)
@@ -321,6 +428,8 @@
   (my-plugin-auto-complete-init)
   (my-plugin-flymake-init)
   (my-plugin-flycheck-init)
+  (my-plugin/gtags/init)
+  (my-plugin/cmake/init)
   (add-hook 'prog-mode-hook 'my-prog-mode-start t))
 
 (defun my-prog-mode-start ()

@@ -16,6 +16,12 @@ bookmarks
 ede-projects.el
 smex-items
 srecode-map.el
+
+TAGS
+GTAGS
+GRTAGS
+GPATH
+
 /auto-save-list
 /elpa
 /eshell
