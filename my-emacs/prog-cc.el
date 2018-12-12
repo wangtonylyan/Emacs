@@ -183,9 +183,11 @@
                                        ("semantic-decoration-on-includes" . nil))
           ;; -------------------------------------------------------------------
           semantic-c-obey-conditional-section-parsing-flag t)
-    (mapc (lambda (hook) ;; 不知为何使用CEDET中定义的(setq-mode-local)无法生效
+    (mapc (lambda (hook) ;; 不知为何在:config中使用CEDET中定义的(setq-mode-local)无法生效
             (add-hook hook
                       (lambda ()
+                        ;; 以下设置完全可以在(my-plugin-cedet-start)中被执行
+                        ;; 使用mode-hook的方式触发，仅仅是为了与上面的配置项相邻排列
                         (setq semantic-stickyfunc-sticky-classes
                               '(type function) ;; variable, include, package
                               semanticdb-find-default-throttle
@@ -233,10 +235,19 @@
     ;; 若Semantic始终不能正常解析某些特定的符号，则可作如下设置
     ;; (add-to-list 'semantic-lex-c-preprocessor-symbol-map '("symbol" . "value"))
     ;; (add-to-list 'semantic-lex-c-preprocessor-symbol-file "path/file")
+    (defun my-plugin/cedet/c++-setup-boost (path)
+      (when (file-accessible-directory-p path)
+        (let ((cfiles (cedet-files-list-recursively path "\\(config\\|user\\)\\.hpp")))
+          (dolist (file cfiles)
+            (add-to-list 'semantic-lex-c-preprocessor-symbol-file file)))))
     ;; -------------------------------------------------------------------------
     ;; 以下是代码浏览功能的相关设置，主要涉及到了Complete、Senator、IA这三个组件
-    ;; 此外，这三个组件在很多功能上是重叠的，都可以支持tag跳转和符号补全
-    ;; 由于符号补全功能已由Company插件替代，因此只需要配置它们的代码跳转功能
+    ;; 这三个组件在以下功能上是有很多重叠的
+    ;; 1. 符号补全，可由auto-complete或company插件替代
+    ;; 2. 符号跳转/搜索，可由gtags或ctags工具替代
+    ;; 3. 书签标记/跳转，可由bm插件替代
+    ;; 4. 代码折叠，暂无替代
+    ;; 目前体验下来，相比于CEDET组件，上述替代插件/工具的准确性和效率都更好
     (use-package semantic/complete
       :config
       ;; Complete跳转需要手动输入符号
@@ -258,7 +269,7 @@
       (unbind-key "C-c , <down>" semantic-mode-map) ;; (senator-transpose-tags-down)
       (unbind-key "C-c , <up>" semantic-mode-map) ;; (senator-transpose-tags-up)
       (unbind-key "C-c , M-w" semantic-mode-map) ;; (senator-copy-tag)
-      ;; Senator还提供了代码折叠的功能，但暂没有semantic-tag-folding强大
+      ;; Senator还提供了代码折叠的功能，但没有semantic-tag-folding的功能全面
       (unless (member 'global-semantic-tag-folding-mode semantic-default-submodes)
         (bind-keys :map semantic-mode-map
                    ("C-c , -" . senator-fold-tag)
@@ -266,11 +277,10 @@
                    ("C-c , =" . senator-fold-tag-toggle))))
     (use-package semantic/ia
       :config
-      ;; (semantic-ia-complete-tip)
-      ;; (semantic-ia-complete-symbol)
-      ;; (semantic-ia-complete-symbol-menu)
-      ;; IA才是最常用的跳转
       (bind-keys :map semantic-mode-map
+                 ("" . semantic-ia-complete-tip)
+                 ("" . semantic-ia-complete-symbol)
+                 ("" . semantic-ia-complete-symbol-menu)
                  ("C-c , ," . semantic-ia-fast-jump)
                  ("C-c , ." . semantic-ia-show-summary)
                  ("C-c , /" . semantic-ia-show-doc)))
@@ -299,6 +309,7 @@
                  ("C-c , +" . semantic-tag-folding-show-all)))
     ;; -------------------------------------------------------------------------
     (use-package ede
+      :disabled
       :config
       ;; 支持利用makefile和automake所管理的项目，暂不支持cmake等
       ;; 默认使用Unix上的Locate命令来定位文件，此外还支持使用GNU Global
@@ -321,8 +332,8 @@
       ;; 目前手写的EDE项目配置信息由每个系统中的ede-projects.el文件统一地维护
       (when (bound-and-true-p my-private-project-ede-config-file)
         (load my-private-project-ede-config-file t nil t t))
-      ;; (ede-enable-generic-projects)
-      (global-ede-mode 1))))
+      (global-ede-mode 1)
+      (ede-enable-generic-projects))))
 
 (defun my-plugin-cedet-start ()
   (when (bound-and-true-p ac-sources)
@@ -402,44 +413,42 @@
   )
 
 ;; =============================================================================
-;; 插件ggtags和helm-gtags都是对于GNU Global的支持，且两者相互独立，实现上互不依赖
-(defun my-plugin-helm-gtags-init ()
-  (with-eval-after-load 'helm
-    (use-package helm-gtags
-      :if (and (my-func-package-enabled-p 'helm-gtags)
-               (executable-find "gtags"))
-      :commands (helm-gtags-mode)
-      :init
-      (setq helm-gtags-path-style 'root
-            helm-gtags-ignore-case t
-            helm-gtags-read-only t
-            helm-gtags-highlight-candidate t
-            helm-gtags-display-style 'detail
-            helm-gtags-fuzzy-match nil
-            helm-gtags-direct-helm-completing nil
-            helm-gtags-use-input-at-cursor t
-            helm-gtags-pulse-at-cursor t
-            helm-gtags-auto-update t
-            helm-gtags-update-interval-second 60
-            helm-gtags-prefix-key (kbd "C-c c")
-            ;; 启用以下配置项会使得某些常用快捷键不再绑定于上述前缀中
-            helm-gtags-suggested-key-mapping t)
-      (add-hook 'my-prog-cc-mode-start-hook 'my-plugin-helm-gtags-start t)
-      :config
-      (bind-keys :map helm-gtags-mode-map ;; 以下仅供参考
-                 ("M-." . helm-gtags-dwim)
-                 ("M-," . helm-gtags-pop-stack)
-                 ("C-j" . helm-gtags-select)
-                 ("C-c c s" . helm-gtags-find-symbol)
-                 ("C-c c r" . helm-gtags-find-rtag)
-                 ("C-c c a" . helm-gtags-tags-in-this-function)
-                 ;; ("" . helm-gtags-find-files)
-                 ;; ("" . helm-gtags-show-stack)
-                 ("C-c c <" . helm-gtags-previous-history)
-                 ("C-c c >" . helm-gtags-next-history)))))
+;; 此插件会读取CMake所使用的项目配置文件，包括CMakeLists.txt
+;; 用于设置但不依赖于以下插件的存在，其仅依赖于CMake
+;; [Flymake]
+;; [Flycheck]
+;; 'flycheck-clang-language-standard
+;; 'flycheck-gcc-language-standard
+;; 'flycheck-clang-include-path
+;; 'flycheck-clang-definitions
+;; [Company]
+;; 'company-clang-arguments
+;; [Company-C-Headers]
+;; 'company-c-headers-path-system
+;; [Auto-Complete]
+;; 'ac-clang-flags
+;; [Semantic]
+;; (semantic-add-system-include)
+;; (semantic-remove-system-include)
+(defun my-plugin/cpputils-cmake/init ()
+  (use-package cpputils-cmake
+    :if (and (my-func-package-enabled-p 'cmake-mode)
+             (my-func-package-enabled-p 'cpputils-cmake))
+    :commands (cppcm-reload-all)
+    :init
+    (setq cppcm-write-flymake-makefile nil ;; since flymake is not used for now
+          ;; optional, specify extra preprocess flags forwarded to compiler
+          ;; cppcm-extra-preprocss-flags-from-user '("-I/usr/src/linux/include" "-DNDEBUG")
+          )
+    (add-hook 'my-prog-cc-mode-start-hook 'my-plugin/cpputils-cmake/start t)))
 
-(defun my-plugin-helm-gtags-start ()
-  (helm-gtags-mode 1))
+(defun my-plugin/cpputils-cmake/start ()
+  (cppcm-reload-all))
+
+;; Grand Unified Debugger
+;; optional, avoid typing full path when starting gdb
+;; (bind-keys ("C-c C-g" . (lambda () (interactive)
+;; (gud-gdb (concat "gdb --fullname " (cppcm-get-exe-path-current-buffer))))))
 
 ;; =============================================================================
 ;; =============================================================================
@@ -451,7 +460,7 @@
   ;; 而不是也不应依赖于hook的执行顺序
   (my-plugin-cedet-init)
   (my-plugin-ecb-init)
-  (my-plugin-helm-gtags-init)
+  (my-plugin/cpputils-cmake/init)
   (add-hook 'c-mode-hook 'my-prog-cc-mode-start t)
   (add-hook 'c++-mode-hook 'my-prog-cc-mode-start t))
 
