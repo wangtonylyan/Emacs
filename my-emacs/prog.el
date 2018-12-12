@@ -321,6 +321,7 @@
 ;; $ gtags --gtagslabel=new-ctags # universal ctags
 ;; $ gtags --gtagslabel=pygments  # pygments
 ;; Emacs中有两个独立支持gtags的前端插件，即ggtags和helm-gtags
+;; 此外，Emacs中还自带了etags，提供了类似的功能
 (defun my-plugin/gtags/init ()
   ;; gtags暂仅用于C、C++
   (defun my-plugin/gtags/add-hook (func)

@@ -10,7 +10,7 @@
 ;; https://www.emacswiki.org/emacs/CollectionOfEmacsDevelopmentEnvironmentTools
 ;; https://stackoverflow.com/questions/12711765/status-of-cedet-and-ecb-in-emacs-24-2
 ;; http://alexott.net/en/writings/emacs-devenv/EmacsCedet.html
-(when (bound-and-true-p my-private-project-root-directory)
+(when (boundp 'my-private-project-root-directory)
   (let* ((path (file-name-as-directory
                 (concat my-private-project-root-directory "cedet")))
          (file (concat path "cedet-devel-load.el")))
@@ -317,7 +317,7 @@
       ;; (setq ede-locate-setup-options '(ede-locate-global ede-locate-base))
       ;; 1. 对于复杂的项目，可利用(ede-new)新建并利用自动生成的Project.ede文件定制
       ;; 2. 对于简单的项目，可手写脚本定制具体信息，以下为示例
-      (when (bound-and-true-p my-private-project-root-directory)
+      (when (boundp 'my-private-project-root-directory)
         ;; 通常应以项目根目录下已有的makefile或readme等固定文件作为锚
         ;; (ede-emacs-project)
         (let ((anchor (concat my-private-project-root-directory "Emacs/README.md")))
@@ -330,13 +330,13 @@
                                   ;; :compile-command "cd build && make"
                                   ))))
       ;; 目前手写的EDE项目配置信息由每个系统中的ede-projects.el文件统一地维护
-      (when (bound-and-true-p my-private-project-ede-config-file)
-        (load my-private-project-ede-config-file t nil t t))
+      (when (boundp 'my-private-project-ede-config-file)
+        (load my-private-project-ede-config-file nil nil t))
       (global-ede-mode 1)
       (ede-enable-generic-projects))))
 
 (defun my-plugin-cedet-start ()
-  (when (bound-and-true-p ac-sources)
+  (when (boundp 'ac-sources)
     (set (make-local-variable 'ac-sources)
          (add-to-list 'ac-sources (if (cedet-gnu-global-version-check t)
                                       'ac-source-gtags 'ac-source-semantic) t))))

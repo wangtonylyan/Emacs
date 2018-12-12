@@ -52,6 +52,7 @@
 
 (load (concat my-private-emacs-directory "init.el") t)
 ;; *************************** sample code in .private/init.el ***************************
+;; 目前策略是，一旦定义就需要保证其正确性，不然会导致报错
 ;; (defconst my-private-project-root-directory "~/project/")
 ;; (defconst my-private-project-ede-config-file
 ;;   (concat my-private-project-root-directory "ede-projects.el"))
@@ -515,10 +516,27 @@
   (setq projectile-indexing-method 'alien
         projectile-enable-caching t
         projectile-keymap-prefix (kbd "C-c p")
+        projectile-project-search-path
+        (when (boundp 'my-private-project-root-directory)
+          `(,my-private-project-root-directory))
         projectile-switch-project-action 'my-plugin-projectile-switch-action)
   :config
+  ;; 输入"C-c p C-h"可以查询所有'projectile-mode-map中的快捷键，常用的有
+  ;; p :: (helm-projectile-switch-project)
+  ;; d :: (helm-projectile-find-dir)
+  ;; D :: (projectile-dired)
+  ;; f :: (helm-projectile-find-file)
+  ;; l :: (projectile-find-file-in-directory)
+  ;; b :: (helm-projectile-switch-to-buffer)
+  ;; k :: (projectile-kill-buffers)
+  ;; o :: (projectile-multi-occur)
+  ;; r :: (projectile-replace)
+  ;; e :: (helm-projectile-recentf)
+  ;; ! :: (projectile-run-shell-command-in-root)
   (projectile-mode 1)
   ;; (add-to-list 'projectile-other-file-alist '("html" "js"))
+  ;; 使用helm-projectile包装原projectile插件
+  ;; 包括替换'projectile-mode-map中的快捷键
   (use-package helm-projectile
     :if (my-func-package-enabled-p 'helm-projectile)
     :demand t ;; 初始化后就立即启用，基于project的方式管理各类文件
@@ -536,16 +554,15 @@
   :config
   (when (eq system-type 'windows-nt)
     (let ((path (my-func-executable-find "git.exe" "Git")))
-      (when path
-        (setq magit-git-executable path))))
+      (when path (setq magit-git-executable path))))
   (setq magit-auto-revert-mode t
         magit-auto-revert-immediately t
         magit-auto-revert-tracked-only t
         ;; magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1
-        magit-repository-directories `((,(expand-file-name "project") . 3)
-                                       (,(expand-file-name "Project") . 3)
-                                       (,(expand-file-name "projects") . 3)
-                                       (,(expand-file-name "Projects") . 3))))
+        ;; 执行(magit-list-repositories)命令，可以打印出以下列表所指示的路径下搜索到的git项目
+        magit-repository-directories
+        (when (boundp 'my-private-project-root-directory)
+          `((,my-private-project-root-directory . 1)))))
 
 (use-package sr-speedbar
   :if (my-func-package-enabled-p 'sr-speedbar)
@@ -632,7 +649,7 @@
   (unbind-key "D" neotree-mode-map)
   (unbind-key "H" neotree-mode-map)
   (unbind-key "U" neotree-mode-map)
-  (when (bound-and-true-p my-plugin-projectile-switch-hook)
+  (when (boundp 'my-plugin-projectile-switch-hook)
     (add-hook 'my-plugin-projectile-switch-hook 'neotree-projectile-action t)))
 
 (use-package org
