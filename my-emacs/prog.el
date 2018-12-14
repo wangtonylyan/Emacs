@@ -15,23 +15,27 @@
                     (concat exe " -l C -c " cfg " --no-backup " buffer-file-name)))
         (message "uncrustify unsupported!"))))
    ((eq major-mode 'python-mode)
-    (if (and (my-func-package-enabled-p 'py-autopep8)
+    (if (and (my/package-enabled-p 'py-autopep8)
              (executable-find "autopep8")
              (fboundp 'py-autopep8-buffer))
         (py-autopep8-buffer)
       (message "autopep8 unsupported!")))
    ((derived-mode-p 'web-mode)
-    (if (my-func-package-enabled-p 'web-beautify)
+    (if (my/package-enabled-p 'web-beautify)
         (web-beautify-html)
       (message "html-beautify unsupported!")))
    (t (message "current major mode unsupported!"))))
 
-(defvar my-prog-mode-start-hook '())
+;; =============================================================================
+(defvar pkg/prog-mode/start-hook '())
 
-(defun my-plugin-prog-mode-init ()
+(defun pkg/prog-mode/add-start-hook (func)
+  (add-hook 'pkg/prog-mode/start-hook func t))
+
+(defun pkg/prog-mode/init ()
   (use-package prog-mode
     :init
-    (add-hook 'my-prog-mode-start-hook 'my-plugin-prog-mode-start t)
+    (pkg/prog-mode/add-start-hook 'pkg/prog-mode/start)
     (setq prettify-symbols-unprettify-at-point 'right-edge)
     :config
     ;; 在mode-line显示当前光标所在的函数名
@@ -39,7 +43,7 @@
     ;; lambda=λ
     (add-to-list 'prettify-symbols-alist '("lambda" . 955))))
 
-(defun my-plugin-prog-mode-start ()
+(defun pkg/prog-mode/start ()
   )
 
 ;; =============================================================================
@@ -49,18 +53,18 @@
 ;; 在yas模式下的文本中通过输入脚本文件名称以激活替换宏
 ;; 而脚本注释中的name属性只是作为替换成功后所呈现出的描述信息，或存在同名文件时的提示选择信息
 ;; -----------------------------------------------------------------------------
-(defun my-plugin-yasnippet-init ()
+(defun pkg/yasnippet/init ()
   (use-package yasnippet
-    :if (my-func-package-enabled-p 'yasnippet)
+    :if (my/package-enabled-p 'yasnippet)
     :commands (yas-global-mode yas-minor-mode yas-minor-mode-on)
     :diminish yas-minor-mode
     :init
-    (add-hook 'my-prog-mode-start-hook 'my-plugin-yasnippet-start t)
+    (pkg/prog-mode/add-start-hook 'pkg/yasnippet/start)
     :config
     ;; 为配合auto-complete或company等插件的使用，需禁用以下自带的补全快捷键
     (unbind-key "<tab>" yas-minor-mode-map)
     (add-to-list 'yas-snippet-dirs
-                 (concat my-user-emacs-directory "snippets"))
+                 (concat my/user-emacs-directory "snippets"))
     ;; 设置解决同名snippet的方式
     (setq yas-prompt-functions
           (if (eq system-type 'windows-nt)
@@ -69,7 +73,7 @@
     ;; (yas-global-mode 1)
     ))
 
-(defun my-plugin-yasnippet-start ()
+(defun pkg/yasnippet/start ()
   (yas-minor-mode-on) ;; 会自动执行(yas-reload-all)
   )
 
@@ -80,13 +84,13 @@
 ;; https://www.emacswiki.org/emacs/CompanyMode
 ;; 一个与auto-complete功能基本类似的补全插件，相比于后者，更新更为频繁
 ;; ----------------------------------------------------------------------------
-(defun my-plugin-company-init ()
+(defun pkg/company/init ()
   (use-package company
-    :if (my-func-package-enabled-p 'company)
+    :if (my/package-enabled-p 'company)
     :commands (global-company-mode company-mode company-mode-on)
     :diminish company-mode
     :init
-    (add-hook 'my-prog-mode-start-hook 'my-plugin-company-start t)
+    (pkg/prog-mode/add-start-hook 'pkg/company/start)
     :config
     ;; 常用的快捷键：
     ;; <tab>用于补全候选项中的公共字段，<return>用于补全所选项，C-g用于终止补全
@@ -104,7 +108,7 @@
                ("C-t" . company-search-toggle-filtering))
     ;; 没有必要为每个模式分别启用其独享的后端，因为筛选适用后端的过程非常效率
     (setq company-backends `(company-elisp
-                             ,(when (and (my-func-package-enabled-p 'company-jedi)
+                             ,(when (and (my/package-enabled-p 'company-jedi)
                                          (require 'company-jedi nil t))
                                 'company-jedi)
                              (company-semantic ;; Semantic
@@ -127,7 +131,7 @@
     ;; (global-company-mode 1)
     ))
 
-(defun my-plugin-company-start ()
+(defun pkg/company/start ()
   (company-mode-on))
 
 ;; =============================================================================
@@ -136,31 +140,31 @@
 ;; https://github.com/auto-complete
 ;; 一个能够支持多种后台实现的补全界面，并自带了一些支持多种语言的补全字典
 ;; -----------------------------------------------------------------------------
-(defun my-plugin-auto-complete-init ()
+(defun pkg/auto-complete/init ()
   (use-package auto-complete
-    :if (my-func-package-enabled-p 'auto-complete)
+    :if (my/package-enabled-p 'auto-complete)
     :commands (global-auto-complete-mode auto-complete-mode)
     :init
-    (add-hook 'my-prog-mode-start-hook 'my-plugin-auto-complete-start t)
+    (pkg/prog-mode/add-start-hook 'pkg/auto-complete/start)
     :config
     (ac-config-default)
     (add-to-list 'ac-dictionary-directories
-                 (concat my-user-emacs-directory "ac-dicts"))
+                 (concat my/user-emacs-directory "ac-dicts"))
     (ac-set-trigger-key "<tab>") ;; ac会在输入trigger key后立即强制生效
     (setq ac-trigger-commands '(self-insert-command
                                 backward-delete-char
                                 backward-delete-char-untabify)
           ac-ignore-case 'smart
-          ac-dwim t ;; Do What I Mean
+          ac-dwim t
           ac-fuzzy-enable t
           ac-candidate-menu-height 8
-          ;; performance
+          ;; [performance]
           ac-auto-start 2 ;; ac会在输入指定个数的字符后自动生效
           ac-delay 0.5
           ac-auto-show-menu nil ;; 不会自动显示候选词菜单
           ac-use-comphist t
           ac-candidate-limit 15 ;; 最大上限
-          ;; quick help
+          ;; [quick help]
           ac-use-quick-help t
           ac-quick-help-delay 1.0)
     (ac-linum-workaround) ;; 解决auto-complete与linum两个模式之间的冲突
@@ -205,7 +209,7 @@
     ;; (global-auto-complete-mode 1)
     ))
 
-(defun my-plugin-auto-complete-start ()
+(defun pkg/auto-complete/start ()
   (auto-complete-mode 1)
   ;; 各继承于prog-mode的编程模式在启动时都将设置其buffer-local的'ac-sources
   (set (make-local-variable 'ac-sources)
@@ -215,15 +219,15 @@
 ;; Flymake
 ;; Emacs内置，静态编译检查，效率低，准确度高，依赖于后台编译器的支持
 ;; -----------------------------------------------------------------------------
-(defun my-plugin-flymake-init ()
+(defun pkg/flymake/init ()
   (use-package flymake
-    :if (my-func-package-enabled-p 'flymake)
-    :commands (flymake-mode flymake-mode-on)
+    :if (my/package-enabled-p 'flymake)
+    :commands (flymake-mode)
     :init
-    (add-hook 'my-prog-mode-start-hook 'my-plugin-flymake-start t)))
+    (pkg/prog-mode/add-start-hook 'pkg/flymake/start)))
 
-(defun my-plugin-flymake-start ()
-  (flymake-mode-on))
+(defun pkg/flymake/start ()
+  (flymake-mode t))
 
 ;; =============================================================================
 ;; Flycheck
@@ -244,16 +248,20 @@
 ;; S :: Sort the error list by the column at point
 ;; g :: Check the source buffer and update the error list
 ;; q :: Quit the error list and hide its window
-(defun my-plugin-flycheck-init ()
+(defun pkg/flycheck/init ()
   (use-package flycheck
-    :if (my-func-package-enabled-p 'flycheck)
+    :preface
+    (defun pkg/flycheck/checker-enabled-p (chk)
+      (and (memq chk flycheck-checkers) ;; global variable
+           (not (memq chk flycheck-disabled-checkers)))) ;; buffer-local variable
+    :if (my/package-enabled-p 'flycheck)
     :commands (global-flycheck-mode flycheck-mode flycheck-mode-on-safe)
     :init
     (setq flycheck-check-syntax-automatically '(mode-enabled save idle-change)
           flycheck-checker-error-threshold 500
           flycheck-idle-change-delay 2.5
           flycheck-indication-mode 'left-fringe)
-    (add-hook 'my-prog-mode-start-hook 'my-plugin-flycheck-start t)
+    (pkg/prog-mode/add-start-hook 'pkg/flycheck/start)
     :config
     (flycheck-error-list-set-filter 'error)
     ;; (flycheck-list-errors)可以列出当前buffer中的所有error，优化显示窗口
@@ -264,52 +272,51 @@
                    (reusable-frames . visible)
                    (window-height   . 0.33)))
     ;; Lisp
-    (add-to-list 'flycheck-disabled-checkers 'emacs-lisp-checkdoc)
-    (when (and (memq 'emacs-lisp flycheck-checkers)
-               (not (memq 'emacs-lisp flycheck-disabled-checkers)))
-      (add-hook 'emacs-lisp-mode-hook
-                (lambda ()
-                  (setq flycheck-emacs-lisp-load-path `(,my-user-emacs-directory))
-                  ) t))
+    (defun pkg/flycheck/elisp-mode-hook ()
+      (when (pkg/flycheck/checker-enabled-p 'emacs-lisp)
+        (add-to-list 'flycheck-disabled-checkers 'emacs-lisp-checkdoc)
+        (setq flycheck-emacs-lisp-load-path `(,my/user-emacs-directory))))
+    (my/add-language-mode-hook "elisp" 'pkg/flycheck/elisp-mode-hook)
     ;; C/C++
-    (when (and (memq 'c/c++-gcc flycheck-checkers)
-               (not (memq 'c/c++-gcc flycheck-disabled-checkers)))
-      (add-hook 'c++-mode-hook
-                (lambda ()
-                  ;; (setq flycheck-gcc-language-standard "c++11") ;; 可由cpputils-cmake插件设置
-                  ) t))
+    (defun pkg/flycheck/c++-mode-hook ()
+      (when (pkg/flycheck/checker-enabled-p 'c/c++-gcc)
+        ;; (setq flycheck-gcc-language-standard "c++11") ;; 由cpputils-cmake插件设置
+        ))
+    (my/add-language-mode-hook "c++" 'pkg/flycheck/c++-mode-hook)
     ;; Python
     (use-package flycheck-pyflakes
-      :if (my-func-package-enabled-p 'flycheck-pyflakes)
-      :config
-      (add-to-list 'flycheck-disabled-checkers 'python-flake8)
-      (add-to-list 'flycheck-disabled-checkers 'python-pylint))
-    (when (and (memq 'python-flake8 flycheck-checkers)
-               (not (memq 'python-flake8 flycheck-disabled-checkers)))
-      (add-to-list 'flycheck-flake8-error-level-alist '("^E305$" . info) t))
+      :if (my/package-enabled-p 'flycheck-pyflakes)
+      :demand t)
+    (defun pkg/flycheck/python-mode-hook ()
+      (when (my/package-enabled-p 'flycheck-pyflakes)
+        (add-to-list 'flycheck-disabled-checkers 'python-flake8)
+        (add-to-list 'flycheck-disabled-checkers 'python-pylint))
+      (when (pkg/flycheck/checker-enabled-p 'python-flake8)
+        (add-to-list 'flycheck-flake8-error-level-alist '("^E305$" . info) t)))
+    (my/add-language-mode-hook "python" 'pkg/flycheck/python-mode-hook)
     ;; Haskell
     (use-package flycheck-haskell
-      :if (my-func-package-enabled-p 'flycheck-haskell)
+      :if (my/package-enabled-p 'flycheck-haskell)
       :init
       (add-hook 'flycheck-mode-hook 'flycheck-haskell-setup))
-    (when (and (memq 'haskell-hlint flycheck-checkers)
-               (not (memq 'haskell-hlint flycheck-disabled-checkers))
-               (my-func-executable-find "hlint"))
-      ;; 'flycheck-haskell-stack-ghc-executable
-      ;; 'flycheck-haskell-ghc-executable
-      ;; 'flycheck-haskell-hlint-executable
-      (add-to-list 'flycheck-disabled-checkers 'haskell-stack-ghc)
-      (add-to-list 'flycheck-disabled-checkers 'haskell-ghc))
-    (setq-default flycheck-disabled-checkers flycheck-disabled-checkers)
-    ;; (global-flycheck-mode 1)
-    ;; 此外，若是使用插件helm-flycheck，则可以基于helm模式来呈现信息
+    (defun pkg/flycheck/haskell-mode-hook ()
+      (when (and (pkg/flycheck/checker-enabled-p 'haskell-hlint)
+                 (my/find-executable "hlint"))
+        ;; 'flycheck-haskell-stack-ghc-executable
+        ;; 'flycheck-haskell-ghc-executable
+        ;; 'flycheck-haskell-hlint-executable
+        (add-to-list 'flycheck-disabled-checkers 'haskell-stack-ghc)
+        (add-to-list 'flycheck-disabled-checkers 'haskell-ghc)))
+    (my/add-language-mode-hook "haskell" 'pkg/flycheck/haskell-mode-hook)
     (use-package helm-flycheck
-      :if (my-func-package-enabled-p 'helm-flycheck)
+      :if (my/package-enabled-p 'helm-flycheck)
       :after helm
       :config
-      (bind-key "C-c ! l" 'helm-flycheck flycheck-mode-map))))
+      (bind-key "C-c ! l" 'helm-flycheck flycheck-mode-map))
+    ;; (global-flycheck-mode 1)
+    ))
 
-(defun my-plugin-flycheck-start ()
+(defun pkg/flycheck/start ()
   (flycheck-mode-on-safe))
 
 ;; =============================================================================
@@ -322,19 +329,19 @@
 ;; $ gtags --gtagslabel=pygments  # pygments
 ;; Emacs中有两个独立支持gtags的前端插件，即ggtags和helm-gtags
 ;; 此外，Emacs中还自带了etags，提供了类似的功能
-(defun my-plugin/gtags/init ()
-  ;; gtags暂仅用于C、C++
-  (defun my-plugin/gtags/add-hook (func)
-    ;; 'c-mode-hook, 'c++-mode-hook
-    (add-hook 'my-prog-cc-mode-start-hook func t))
+(defun pkg/gtags/init ()
+  (defun pkg/gtags/add-hook (func)
+    ;; gtags暂仅用于C、C++
+    (my/add-language-mode-hook "c" func)
+    (my/add-language-mode-hook "c++" func))
   (use-package ggtags
-    :if (and (my-func-package-enabled-p 'ggtags)
+    :if (and (my/package-enabled-p 'ggtags)
              (executable-find "gtags"))
     :init
-    (my-plugin/gtags/add-hook 'my-plugin/gtags/start))
+    (pkg/gtags/add-hook 'pkg/gtags/start))
   (with-eval-after-load 'helm
     (use-package helm-gtags
-      :if (and (my-func-package-enabled-p 'helm-gtags)
+      :if (and (my/package-enabled-p 'helm-gtags)
                (executable-find "gtags"))
       :commands (helm-gtags-mode)
       :init
@@ -357,7 +364,7 @@
             ;; 启用以下配置项会使得某些常用快捷键不再绑定于上述前缀中
             ;; 例如将(helm-gtags-dwim)绑定于"M-."
             helm-gtags-suggested-key-mapping nil)
-      (my-plugin/gtags/add-hook 'my-plugin/gtags/start)
+      (pkg/gtags/add-hook 'pkg/gtags/start)
       :config
       ;; 在以下快捷键前输入"C-u"，还可以限定搜索的目录路径
       (bind-keys :map helm-gtags-mode-map
@@ -378,14 +385,14 @@
                  ("C-c c n" . helm-gtags-create-tags)
                  ("C-c c u" . helm-gtags-update-tags)))))
 
-(defun my-plugin/gtags/start ()
-  (when (my-func-package-enabled-p 'ggtags))
-  (when (my-func-package-enabled-p 'helm-gtags)
+(defun pkg/gtags/start ()
+  (when (my/package-enabled-p 'ggtags))
+  (when (my/package-enabled-p 'helm-gtags)
     (helm-gtags-mode 1)))
 
 ;; =============================================================================
 ;; cmake-mode, cmake-font-lock, cmake-ide, cmake-project
-(defun my-plugin/cmake/init ()
+(defun pkg/cmake/init ()
   ;; 项目目录示例
   ;; project root folder
   ;; |-- CMakeLists.txt
@@ -397,12 +404,12 @@
   ;; |---- CMakeLists.txt
   ;; |---- src
   (use-package cmake-mode
-    :if (my-func-package-enabled-p 'cmake-mode)
+    :if (my/package-enabled-p 'cmake-mode)
     :init
-    (add-hook 'my-prog-mode-start-hook 'my-plugin/cmake/start t)
+    (pkg/prog-mode/add-start-hook 'pkg/cmake/start)
     :config
     (use-package cmake-font-lock
-      :if (my-func-package-enabled-p 'cmake-font-lock)
+      :if (my/package-enabled-p 'cmake-font-lock)
       :init
       ;; (cmake-font-lock-activate)在实现上会覆盖原本font-lock-mode的效果
       ;; 因此其必须在后者生效之后执行，于是暂采用以下手段
@@ -417,26 +424,26 @@
     )
   )
 
-(defun my-plugin/cmake/start ()
+(defun pkg/cmake/start ()
   )
 
 ;; =============================================================================
 ;; =============================================================================
-(defun my-prog-mode-init ()
-  (my-plugin-prog-mode-init)
-  (my-plugin-yasnippet-init)
-  (my-plugin-company-init)
-  (my-plugin-auto-complete-init)
-  (my-plugin-flymake-init)
-  (my-plugin-flycheck-init)
-  (my-plugin/gtags/init)
-  (my-plugin/cmake/init)
-  (add-hook 'prog-mode-hook 'my-prog-mode-start t))
+(defun my-prog/init ()
+  (pkg/prog-mode/init)
+  (pkg/yasnippet/init)
+  (pkg/company/init)
+  (pkg/auto-complete/init)
+  (pkg/flymake/init)
+  (pkg/flycheck/init)
+  (pkg/gtags/init)
+  (pkg/cmake/init)
+  (add-hook 'prog-mode-hook 'my-prog/start t))
 
-(defun my-prog-mode-start ()
+(defun my-prog/start ()
   (linum-mode 1)
-  (run-hooks 'my-prog-mode-start-hook))
+  (run-hooks 'pkg/prog-mode/start-hook))
 
-(add-hook 'after-init-hook 'my-prog-mode-init t)
+(add-hook 'after-init-hook 'my-prog/init t)
 
 (provide 'my-prog)

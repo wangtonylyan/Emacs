@@ -2,40 +2,108 @@
 
 ;; 判断Emacs版本可以基于两个变量：'emacs-major-version和'emacs-minor-version
 
-(defun my-func-executable-find (exe &optional dir add)
-  (let* ((dir (if (and (stringp dir) (> (length dir) 0)
-                       (file-directory-p dir))
-                  ;; 统一传参的形式
-                  (file-name-as-directory dir) ""))
-         (path (executable-find (concat dir exe))))
-    (when (and path (file-executable-p path))
+;; 变量前缀
+;; my :: global
+;; my-prog, my-prog-cc, ... :: file-local
+;; pvt :: private
+;; pkg :: package
+
+
+;; file, path ::
+;; directory :: 以斜杠结尾
+;; dwim :: Do What I Mean
+
+(defun my/mapcar (func seq)
+  (delq nil (mapcar func seq)))
+
+
+;; 仿照my/find-executable的逻辑
+(defun my/load-file (name &optional dir add)
+  (let* ((file (cond ((null dir) name)
+                     ((my/directory-exists-p dir)
+                      (my/concat-directory-file dir name))
+                     (t (concat (file-name-as-directory dir) name)))))
+    (when (and file (load file t))
       (when add
-        (add-to-list 'exec-path
-                     (directory-file-name (file-name-directory path))))
-      path)))
+        (let ((path (my/path-exists-p (my/get-file-path file))))
+          (when path (add-to-list 'load-path path)))))))
 
-(defalias 'my-func-package-enabled-p 'package--user-selected-p)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defalias 'my-func-minor-mode-on-p 'bound-and-true-p)
+(defalias 'my/get-file-directory 'file-name-directory)
 
-(when (eq system-type 'windows-nt)
+(defun my/get-file-path (file)
+  (when file
+    (let ((dir (my/get-file-directory file)))
+      (when dir (directory-file-name dir)))))
+
+(defun my/directory-exists-p (dir)
+  (when (and dir (file-directory-p dir)
+             (file-accessible-directory-p dir))
+    (expand-file-name (file-name-as-directory dir))))
+
+(defun my/path-exists-p (path)
+  (let ((dir (my/directory-exists-p path)))
+    (when dir (directory-file-name dir))))
+
+(defun my/file-exists-p (file)
+  (when (and file (file-regular-p file)
+             (file-readable-p file))
+    (expand-file-name file)))
+
+(defun my/concat-directory-file (dir file)
+  (let ((dir (my/directory-exists-p dir)))
+    (when dir (my/file-exists-p (concat dir file)))))
+
+(defun my/find-executable (name &optional dir add)
+  (let* ((file (cond ((null dir) name)
+                     ((my/directory-exists-p dir)
+                      (my/concat-directory-file dir name))
+                     (t (concat (file-name-as-directory dir) name))))
+         (exec (when file (executable-find file))))
+    (when (and exec (file-executable-p exec))
+      (when add (add-to-list 'exec-path (my/get-file-path exec)))
+      exec)))
+
+(defalias 'my/package-enabled-p 'package--user-selected-p)
+
+(defalias 'my/minor-mode-on-p 'bound-and-true-p)
+
+(defconst my/language-mode-hook-dict
+  (let ((dict (make-hash-table :test 'equal)))
+    (mapc (lambda (tup) (puthash (car tup) (cadr tup) dict))
+          '(("cc"      c-mode-common-hook)
+            ("c"       c-mode-hook)
+            ("c++"     c++-mode-hook)
+            ("python"  python-mode-hook)
+            ("lisp"    lisp-mode-hook)
+            ("elisp"   emacs-lisp-mode-hook)
+            ("scheme"  scheme-mode-hook)
+            ("haskell" haskell-mode-hook)
+            ("org"     org-mode-hook)))
+    dict))
+
+(defun my/add-language-mode-hook (lang func)
+  (let ((hook (gethash lang my/language-mode-hook-dict)))
+    (if hook (add-hook hook func t)
+      (user-error "*Error* [my/add-language-mode-hook] %s" lang))))
+
+(cond ;; os-related
+ ((eq system-type 'windows-nt)
   (mapc (lambda (dir)
-          (when (and (file-directory-p dir)
-                     (file-accessible-directory-p dir))
-            (add-to-list 'exec-path dir)))
+          (let ((path (my/path-exists-p dir)))
+            (when path (add-to-list 'exec-path path))))
         '("D:/softwares"))
-  (let ((path (my-func-executable-find "cmdproxy.exe"
-                                       "Emacs25/libexec/emacs/24.5/i686-pc-mingw32")))
+  (let ((path (my/find-executable "cmdproxy.exe"
+                                  "Emacs25/libexec/emacs/24.5/i686-pc-mingw32")))
     (when path
       (setq shell-file-name path
             shell-command-switch "-c"))))
-
-(when (eq system-type 'gnu/linux)
+ ((eq system-type 'gnu/linux)
   (mapc (lambda (dir)
-          (when (and (file-directory-p dir)
-                     (file-accessible-directory-p dir))
-            (add-to-list 'exec-path dir)))
-        '("~/.local/bin")))
+          (let ((path (my/path-exists-p dir)))
+            (when path (add-to-list 'exec-path path))))
+        '("~/.local/bin"))))
 
 ;; (setq user-init-file "~/.emacs.d/init.el")
 ;; (load user-init-file)
@@ -47,23 +115,39 @@
       command-line-default-directory default-directory)
 (setq-default default-directory default-directory
               user-emacs-directory user-emacs-directory)
-(defconst my-user-emacs-directory (concat user-emacs-directory "my-emacs/"))
-(defconst my-private-emacs-directory (concat user-emacs-directory ".private/"))
 
-(load (concat my-private-emacs-directory "init.el") t)
+(defconst my/user-emacs-directory (concat user-emacs-directory "my-emacs/"))
+(defconst my/private-emacs-directory (concat user-emacs-directory ".private/"))
+
+(load (concat my/private-emacs-directory "init.el") t)
 ;; *************************** sample code in .private/init.el ***************************
-;; 目前策略是，一旦定义就需要保证其正确性，不然会导致报错
-;; (defconst my-private-project-root-directory "~/project/")
-;; (defconst my-private-project-ede-config-file
-;;   (concat my-private-project-root-directory "ede-projects.el"))
+;; (defvar pvt/project/root-directories '("~/Projects/" "~/projects/"))
+;; (defvar pvt/project/ede-config-file-names '("ede-projects.el"))
 ;; ***************************************************************************************
+
+(defconst pvt/project/root-directories
+  (when (boundp 'pvt/project/root-directories)
+    (my/mapcar 'my/directory-exists-p pvt/project/root-directories)))
+
+(defconst pvt/project/ede-config-files
+  (when (boundp 'pvt/project/ede-config-file-names)
+    (mapcan (lambda (dir)
+              (my/mapcar (lambda (file)
+                           (my/concat-directory-file dir file))
+                         pvt/project/ede-config-file-names))
+            pvt/project/root-directories)))
+
+(defun pvt/project/find-subdirectory (subdir)
+  (car (my/mapcar (lambda (dir)
+                    (my/directory-exists-p (concat dir subdir)))
+                  pvt/project/root-directories)))
 
 ;; (normal-top-level-add-subdirs-to-load-path)
 ;; (normal-top-level-add-to-load-path)
 
 ;; 指定由(customize)写入配置信息的文件，随后每当Emacs自动写入时就不会再修改当前文件了
-(setq custom-file (concat user-emacs-directory "custom.el"))
-(load custom-file)
+(setq custom-file (my/concat-directory-file user-emacs-directory "custom.el"))
+(my/load-file custom-file)
 
 (setq url-max-password-attempts 2
       ;; 不支持authentication
@@ -81,10 +165,7 @@
   ;; (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
   ;; 以下列表用于设置被允许加载的插件，因此无论是在安装还是使用插件的过程中
   ;; 都必须提前详细地列举出所有的插件，且要根据插件之间的依赖关系进行先后地声明
-  (setq package-load-list '(all
-                            ;; e.g.
-                            ;; (dash) (epl) (let-alist) (pkg-info) (flycheck)
-                            ;; (atom-one-dark-theme t) (material-theme t)
+  (setq package-load-list '(all ;; e.g. (dash) (epl) (let-alist) (pkg-info) (flycheck)
                             ))
   ;; 设置加载上述列表中所指定插件的时机
   (setq package-enable-at-startup nil) ;; 方式1) 随Emacs的启动而自动加载插件
@@ -163,7 +244,7 @@
 (require 'diminish nil t)
 
 (use-package sublimity
-  :if (my-func-package-enabled-p 'sublimity)
+  :if (my/package-enabled-p 'sublimity)
   :commands (sublimity-global-mode sublimity-mode)
   :init
   (setq sublimity-map-set-delay 3)
@@ -173,7 +254,7 @@
   (require 'sublimity-map nil t))
 
 (use-package minimap
-  :if (my-func-package-enabled-p 'minimap)
+  :if (my/package-enabled-p 'minimap)
   :config
   (setq minimap-always-recenter nil ;; 设置为nil才有效?
         minimap-recenter-type 'middle
@@ -186,10 +267,10 @@
         minimap-enlarge-certain-faces nil))
 
 (use-package flyspell
-  :if (and (my-func-package-enabled-p 'flyspell)
-           (executable-find "aspell"))
+  :if (and (my/package-enabled-p 'flyspell)
+           (my/find-executable "aspell"))
   :config
-  (setq ispell-program-name (executable-find "aspell") ;; 设置后台支持程序
+  (setq ispell-program-name (my/find-executable "aspell") ;; 设置后台支持程序
         ;; ispell-dictionary "english" ;; default dictionary
         ;; ispell-personal-dictionary ""
         flyspell-issue-message-flag nil)
@@ -198,15 +279,12 @@
   (add-to-list 'ispell-skip-region-alist '("^#+BEGIN" . "^#+END") t))
 
 (use-package paredit
-  :if (my-func-package-enabled-p 'paredit)
+  :if (my/package-enabled-p 'paredit)
   :config
-  (mapc (lambda (hook)
-          (add-hook hook 'enable-paredit-mode t))
-        '(lisp-mode-hook
-          emacs-lisp-mode-hook
-          lisp-interaction-mode-hook
-          scheme-mode-hook
-          org-mode)))
+  (mapc (lambda (lang)
+          (my/add-language-mode-hook lang 'enable-paredit-mode))
+        '("lisp" "elisp" "scheme" "org"))
+  (add-hook 'lisp-interaction-mode-hook 'enable-paredit-mode t))
 
 ;; =============================================================================
 ;; 配置杂项
@@ -425,19 +503,19 @@
   :bind (("C-c w u" . winner-undo)
          ("C-c w r" . winner-redo)))
 (use-package buffer-move
-  :if (my-func-package-enabled-p 'buffer-move)
+  :if (my/package-enabled-p 'buffer-move)
   :bind (("C-c w h" . buf-move-left)
          ("C-c w l" . buf-move-right)
          ("C-c w k" . buf-move-up)
          ("C-c w j" . buf-move-down)))
 
 (use-package icomplete
-  :if (not (my-func-package-enabled-p 'icomplete))
+  :if (not (my/package-enabled-p 'icomplete))
   :config
   (icomplete-mode -1))
 
 (use-package ido
-  :if (my-func-package-enabled-p 'ido)
+  :if (my/package-enabled-p 'ido)
   :config
   (ido-mode 1)
   (ido-everywhere -1) ;; 仅使ido支持find-file和switch-to-buffer
@@ -447,7 +525,7 @@
         ido-enter-matching-directory nil))
 
 (use-package smex
-  :if (my-func-package-enabled-p 'smex)
+  :if (my/package-enabled-p 'smex)
   :bind (("M-x" . smex)
          ("M-X" . smex-major-mode-commands)
          ;; 该插件会自动替换原M-x快捷键所绑定的命令，若想保留则可重新绑定之
@@ -456,7 +534,7 @@
   (smex-initialize))
 
 (use-package helm
-  :if (my-func-package-enabled-p 'helm)
+  :if (my/package-enabled-p 'helm)
   ;; Helm提供了一套在功能上与部分Emacs原生命令相重合的命令集
   ;; 并将其默认绑定在了以'helm-command-prefix-key为前缀的快捷键集中
   ;; 可以通过输入该前缀来触发相关命令
@@ -472,7 +550,7 @@
   :diminish helm-mode
   :init
   (require 'helm-config)
-  (setq helm-split-window-in-side-p t
+  (setq helm-split-window-side-p t
         helm-display-header-line nil
         helm-echo-input-in-header-line nil
         helm-autoresize-max-height 30
@@ -508,18 +586,16 @@
 
 (use-package projectile
   :preface
-  (defvar my-plugin-projectile-switch-hook '())
-  (defun my-plugin-projectile-switch-action ()
-    (run-hooks 'my-plugin-projectile-switch-hook))
-  :if (my-func-package-enabled-p 'projectile)
+  (defvar pkg/projectile/switch-hook '())
+  (defun pkg/projectile/switch-action ()
+    (run-hooks 'pkg/projectile/switch-hook))
+  :if (my/package-enabled-p 'projectile)
   :init
   (setq projectile-indexing-method 'alien
         projectile-enable-caching t
-        projectile-keymap-prefix (kbd "C-c p")
-        projectile-project-search-path
-        (when (boundp 'my-private-project-root-directory)
-          `(,my-private-project-root-directory))
-        projectile-switch-project-action 'my-plugin-projectile-switch-action)
+        projectile-project-search-path (when (boundp 'pvt/project/root-directories)
+                                         pvt/project/root-directories)
+        projectile-switch-project-action 'pkg/projectile/switch-action)
   :config
   ;; 输入"C-c p C-h"可以查询所有'projectile-mode-map中的快捷键，常用的有
   ;; p :: (helm-projectile-switch-project)
@@ -533,27 +609,28 @@
   ;; r :: (projectile-replace)
   ;; e :: (helm-projectile-recentf)
   ;; ! :: (projectile-run-shell-command-in-root)
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
   (projectile-mode 1)
   ;; (add-to-list 'projectile-other-file-alist '("html" "js"))
   ;; 使用helm-projectile包装原projectile插件
   ;; 包括替换'projectile-mode-map中的快捷键
   (use-package helm-projectile
-    :if (my-func-package-enabled-p 'helm-projectile)
+    :if (my/package-enabled-p 'helm-projectile)
     :demand t ;; 初始化后就立即启用，基于project的方式管理各类文件
     :after helm
     :init
     (setq helm-projectile-fuzzy-match t
           projectile-completion-system 'helm)
     :config
-    (add-hook 'my-plugin-projectile-switch-hook 'helm-projectile t)
+    (add-hook 'pkg/projectile/switch-hook 'helm-projectile t)
     (helm-projectile-on)))
 
 (use-package magit
-  :if (my-func-package-enabled-p 'magit)
+  :if (my/package-enabled-p 'magit)
   :bind (("C-c g" . magit-status))
   :config
   (when (eq system-type 'windows-nt)
-    (let ((path (my-func-executable-find "git.exe" "Git")))
+    (let ((path (my/find-executable "git.exe" "Git")))
       (when path (setq magit-git-executable path))))
   (setq magit-auto-revert-mode t
         magit-auto-revert-immediately t
@@ -561,11 +638,14 @@
         ;; magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1
         ;; 执行(magit-list-repositories)命令，可以打印出以下列表所指示的路径下搜索到的git项目
         magit-repository-directories
-        (when (boundp 'my-private-project-root-directory)
-          `((,my-private-project-root-directory . 1)))))
+        (when (boundp 'pvt/project/root-directories)
+          (my/mapcar (lambda (dir)
+                       (let ((dir (my/directory-exists-p dir)))
+                         (when dir (cons dir 1)))) ;; directory depth = 1
+                     pvt/project/root-directories))))
 
 (use-package sr-speedbar
-  :if (my-func-package-enabled-p 'sr-speedbar)
+  :if (my/package-enabled-p 'sr-speedbar)
   :bind (("C-S-s" . sr-speedbar-toggle))
   :init
   (setq speedbar-use-images nil
@@ -580,7 +660,7 @@
              ("<tab>" . speedbar-edit-line)))
 
 (use-package bm
-  :if (my-func-package-enabled-p 'bm)
+  :if (my/package-enabled-p 'bm)
   :bind (("C-c b m" . bookmark-set)
          ("C-c b d" . bookmark-delete)
          ("C-c b r" . bookmark-rename)
@@ -606,14 +686,14 @@
   (add-hook 'after-save-hook 'bm-buffer-save)
   (add-hook 'after-revert-hook 'bm-buffer-restore)
   (use-package helm-bm
-    :if (my-func-package-enabled-p 'helm-bm)
+    :if (my/package-enabled-p 'helm-bm)
     :demand t
     :after helm
     :bind (("C-c b b" . helm-bm))))
 
 (use-package neotree
   :preface
-  (defun my-plugin-neotree-toggle ()
+  (defun pkg/neotree/toggle ()
     (interactive)
     (let ((root (when (and (fboundp 'projectile-project-p)
                            (fboundp 'projectile-project-root)
@@ -625,10 +705,10 @@
           (progn
             (neotree-dir root)
             (neotree-find file))
-        (message "neotree: could not find projectile project"))))
-  :if (my-func-package-enabled-p 'neotree)
+        (message "*neotree* could not find projectile project"))))
+  :if (my/package-enabled-p 'neotree)
   :ensure all-the-icons
-  :bind (("C-S-s" . my-plugin-neotree-toggle))
+  :bind (("C-S-s" . pkg/neotree/toggle))
   :init
   (setq neo-theme (if (display-graphic-p) 'icons ;; (require 'all-the-icons)
                     'nerd)
@@ -649,8 +729,8 @@
   (unbind-key "D" neotree-mode-map)
   (unbind-key "H" neotree-mode-map)
   (unbind-key "U" neotree-mode-map)
-  (when (boundp 'my-plugin-projectile-switch-hook)
-    (add-hook 'my-plugin-projectile-switch-hook 'neotree-projectile-action t)))
+  (when (boundp 'pkg/projectile/switch-hook)
+    (add-hook 'pkg/projectile/switch-hook 'neotree-projectile-action t)))
 
 (use-package org
   :bind (("C-c o c" . org-capture)
@@ -658,26 +738,26 @@
   :init
   (setq org-src-fontify-natively t)
   :config
-  (add-hook 'org-mode-hook 'org-indent-mode t))
+  (my/add-language-mode-hook "org" 'org-indent-mode))
 
 (use-package ace-jump-mode
-  :if (my-func-package-enabled-p 'ace-jump-mode)
+  :if (my/package-enabled-p 'ace-jump-mode)
   :bind (("C-:" . ace-jump-mode-pop-mark)
          ("C-'" . ace-jump-char-mode))
   :config
   (ace-jump-mode-enable-mark-sync))
 
 (use-package avy
-  :if (my-func-package-enabled-p 'avy)
+  :if (my/package-enabled-p 'avy)
   :bind (("C-:" . avy-goto-char-timer) ;; (avy-goto-char)
          ("C-'" . avy-pop-mark))
   :config
   ;; (avy-setup-default)
   (setq avy-timeout-seconds 0.5))
 
-(let ((plg (or (my-func-package-enabled-p 'ace-jump-mode)
-               (my-func-package-enabled-p 'avy))))
-  (when (and nil plg (my-func-package-enabled-p 'ace-pinyin))
+(let ((plg (or (my/package-enabled-p 'ace-jump-mode)
+               (my/package-enabled-p 'avy))))
+  (when (and nil plg (my/package-enabled-p 'ace-pinyin))
     (when (eq plg 'ace-jump-mode)
       (setq ace-pinyin-use-avy nil)
       (ace-pinyin-global-mode 1)))
@@ -685,7 +765,7 @@
     (ace-pinyin-global-mode 1)))
 
 (use-package undo-tree
-  :if (my-func-package-enabled-p 'undo-tree)
+  :if (my/package-enabled-p 'undo-tree)
   :init
   (setq undo-tree-visualizer-diff nil
         undo-tree-visualizer-relative-timestamps nil)
@@ -698,7 +778,7 @@
   (global-undo-tree-mode 1))
 
 (use-package smart-hungry-delete
-  :if (my-func-package-enabled-p 'smart-hungry-delete)
+  :if (my/package-enabled-p 'smart-hungry-delete)
   :demand t
   :bind (("<backspace>" . smart-hungry-delete-backward-char)
          ("C-d" . smart-hungry-delete-forward-char))
@@ -706,7 +786,7 @@
   (smart-hungry-delete-add-default-hooks))
 
 (use-package highlight-thing
-  :if (my-func-package-enabled-p 'highlight-thing)
+  :if (my/package-enabled-p 'highlight-thing)
   :init
   ;; '(highlight-thing ((t (:background "#4A4A4A"))))
   (setq highlight-thing-what-thing 'symbol
@@ -720,7 +800,7 @@
   (add-hook 'prog-mode-hook 'highlight-thing-mode t))
 
 (use-package evil
-  :if (my-func-package-enabled-p 'evil)
+  :if (my/package-enabled-p 'evil)
   :config
   (bind-keys :map evil-normal-state-map
              ("q" . read-only-mode)
@@ -746,7 +826,7 @@
                             (delete-window))
                         (progn
                           (let* ((dir (if (buffer-file-name)
-                                          (file-name-directory (buffer-file-name))
+                                          (my/get-file-directory (buffer-file-name))
                                         default-directory))
                                  (name (car (last (split-string dir "/" t)))))
                             (split-window-vertically (- (/ (window-total-height) 3)))
@@ -757,19 +837,18 @@
 (provide 'my-init)
 
 ;; 加载其他配置文件
-(let ((path my-user-emacs-directory))
-  (mapc (lambda (name)
-          (load (concat path name) t nil nil t))
-        '(;; prog-mode与text-mode是相互独立的
-          "prog" ;; prog-mode
-          "prog-cc" ;; cc-mode (c-mode, c++-mode, java-mode)
-          ;; "prog-lisp" ;; lisp-mode, emacs-lisp-mode, lisp-interaction-mode
-          "prog-py" ;; python-mode
-          "prog-hs" ;; haskell-mode
-          "prog-web" ;; web-mode
-          "text-tex" ;; tex-mode, latex-mode
-          ;; "web-browser" ;; web browser
-          )))
+(mapc (lambda (file)
+        (load (concat my/user-emacs-directory file)))
+      '(;; prog-mode与text-mode是相互独立的
+        "prog" ;; prog-mode
+        ;; "prog-cc" ;; cc-mode (c-mode, c++-mode, java-mode)
+        ;; "prog-lisp" ;; lisp-mode, emacs-lisp-mode, lisp-interaction-mode
+        ;; "prog-py" ;; python-mode
+        ;; "prog-hs" ;; haskell-mode
+        ;; "prog-web" ;; web-mode
+        ;; "text-tex" ;; tex-mode, latex-mode
+        ;; "web-browser" ;; web browser
+        ))
 
 ;; =============================================================================
 ;; 调整窗口大小
@@ -797,7 +876,7 @@
   ;; 字体下载目录默认为HOME/.local/share/fonts
   ;; (all-the-icons-install-fonts)
   :config
-  (when (and (my-func-package-enabled-p 'all-the-icons-dired)
+  (when (and (my/package-enabled-p 'all-the-icons-dired)
              (require 'all-the-icons-dired nil t))))
 
 (use-package powerline
@@ -805,7 +884,7 @@
   :config
   (setq powerline-default-separator 'arrow
         powerline-default-separator-dir '(left . right))
-  (when (my-func-package-enabled-p 'powerline)
+  (when (my/package-enabled-p 'powerline)
     (powerline-default-theme)))
 
 (use-package spaceline
@@ -813,23 +892,23 @@
   :config
   (require 'spaceline-config)
   (setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
-  (when (my-func-package-enabled-p 'spaceline)
+  (when (my/package-enabled-p 'spaceline)
     ;; (spaceline-emacs-theme)
     (spaceline-spacemacs-theme))
   (eval-after-load 'helm '(spaceline-helm-mode)))
 
 (use-package spaceline-all-the-icons
-  :if (my-func-package-enabled-p 'spaceline-all-the-icons)
+  :if (my/package-enabled-p 'spaceline-all-the-icons)
   :config
   (spaceline-all-the-icons-theme)
   ;; (spaceline-all-the-icons--setup-neotree)
   (spaceline-all-the-icons--setup-package-updates))
 
 (use-package smart-mode-line
-  :if (or (my-func-package-enabled-p 'smart-mode-line)
-          (my-func-package-enabled-p 'smart-mode-line-powerline-theme))
+  :if (or (my/package-enabled-p 'smart-mode-line)
+          (my/package-enabled-p 'smart-mode-line-powerline-theme))
   :config
-  (setq sml/theme (if (and (my-func-package-enabled-p 'smart-mode-line-powerline-theme)
+  (setq sml/theme (if (and (my/package-enabled-p 'smart-mode-line-powerline-theme)
                            (require 'smart-mode-line-powerline-theme nil t))
                       'powerline 'automatic)
         sml/no-confirm-load-theme t
@@ -837,15 +916,15 @@
         sml/shorten-modes t)
   (smart-mode-line-enable))
 
-(let ((path (concat my-user-emacs-directory "theme")))
+(let ((path (concat my/user-emacs-directory "theme")))
   (add-to-list 'load-path path t)
   (add-to-list 'custom-theme-load-path path t))
 (use-package atom-one-dark-theme
-  :if (my-func-package-enabled-p 'atom-one-dark-theme)
+  :if (my/package-enabled-p 'atom-one-dark-theme)
   :config
   (load-theme 'atom-one-dark t))
 (use-package doom-themes
-  :if (my-func-package-enabled-p 'doom-themes)
+  :if (my/package-enabled-p 'doom-themes)
   :config
   (setq doom-themes-enable-bold nil
         doom-themes-enable-italic nil)
@@ -856,7 +935,7 @@
   (when visible-bell
     (doom-themes-visual-bell-config)))
 (use-package github-theme
-  :if (my-func-package-enabled-p 'github-theme)
+  :if (my/package-enabled-p 'github-theme)
   :init
   (setq github-override-colors-alist '(("github-white" . "#FBF9E1")
                                        ("github-comment" . "#009E73")
@@ -864,7 +943,7 @@
   :config
   (load-theme 'github t))
 (use-package solarized-theme
-  :if (my-func-package-enabled-p 'solarized-theme)
+  :if (my/package-enabled-p 'solarized-theme)
   :init
   (setq solarized-high-contrast-mode-line t
         solarized-use-more-italic t)
@@ -872,26 +951,26 @@
   ;; (load-theme 'solarized-dark t)
   (load-theme 'solarized-light t))
 (use-package zenburn-theme
-  :if (my-func-package-enabled-p 'zenburn-theme)
+  :if (my/package-enabled-p 'zenburn-theme)
   :init
   (setq zenburn-override-colors-alist '(("zenburn-fg" . "#EDEDDD")))
   :config
   (load-theme 'zenburn t))
 
-(when (my-func-package-enabled-p 'neotree)
+(when (my/package-enabled-p 'neotree)
   (with-eval-after-load 'neotree
     (cond
-     ((my-func-package-enabled-p 'doom-themes-neotree)
+     ((my/package-enabled-p 'doom-themes-neotree)
       (use-package doom-themes
         :config
         (doom-themes-neotree-config)))
-     ((my-func-package-enabled-p 'spaceline-all-the-icons)
+     ((my/package-enabled-p 'spaceline-all-the-icons)
       (use-package spaceline-all-the-icons
         :config
         (spaceline-all-the-icons--setup-neotree))))))
 
 (use-package nlinum-hl
-  :if (my-func-package-enabled-p 'nlinum-hl)
+  :if (my/package-enabled-p 'nlinum-hl)
   :config
   (run-with-idle-timer 5 t 'nlinum-hl-flush-window)
   (run-with-idle-timer 30 t 'nlinum-hl-flush-all-windows)
@@ -901,7 +980,7 @@
   (advice-add 'select-window :after 'nlinum-hl-do-flush))
 
 (use-package yascroll
-  :if (my-func-package-enabled-p 'yascroll)
+  :if (my/package-enabled-p 'yascroll)
   :init
   (setq yascroll:delay-to-hide nil)
   :config
@@ -910,7 +989,7 @@
 
 ;; 嵌套的括号通过大小而不仅是颜色来进行区分
 (use-package rainbow-delimiters
-  :if (my-func-package-enabled-p 'rainbow-delimiters)
+  :if (my/package-enabled-p 'rainbow-delimiters)
   :init
   (setq rainbow-delimiters-max-face-count 9
         rainbow-delimiters-outermost-only-face-count 0)
@@ -919,7 +998,7 @@
 
 ;; 修改默认字体颜色，从而将文字与符号区分开来
 (use-package rainbow-identifiers
-  :if (my-func-package-enabled-p 'rainbow-identifiers)
+  :if (my/package-enabled-p 'rainbow-identifiers)
   :init
   ;; dark theme: '(rainbow-identifiers-identifier-1 ((t (:foreground "#CCCCCC"))))
   ;; light theme: '(rainbow-identifiers-identifier-1 ((t (:foreground "#333333"))))
@@ -928,13 +1007,13 @@
   (add-hook 'prog-mode-hook 'rainbow-identifiers-mode t))
 
 (use-package whitespace
-  :if (my-func-package-enabled-p 'whitespace)
+  :if (my/package-enabled-p 'whitespace)
   :init
   (setq whitespace-style '(face lines-tail)
         whitespace-line-column 80))
 
 (use-package fill-column-indicator
-  :if (my-func-package-enabled-p 'fill-column-indicator)
+  :if (my/package-enabled-p 'fill-column-indicator)
   :init
   (setq fci-rule-use-dashes nil
         fci-rule-column 100)
@@ -945,7 +1024,7 @@
   (global-fci-mode 1))
 
 (use-package tabbar
-  :if (my-func-package-enabled-p 'tabbar)
+  :if (my/package-enabled-p 'tabbar)
   :config
   (tabbar-mode 1)
   (bind-keys :map tabbar-mode-map
@@ -956,7 +1035,7 @@
 
 ;; =============================================================================
 (use-package pdf-tools
-  :if (my-func-package-enabled-p 'pdf-tools)
+  :if (my/package-enabled-p 'pdf-tools)
   :init
   (setq pdf-view-continuous t)
   :config
@@ -964,11 +1043,11 @@
 
 (use-package w3m
   :preface
-  (defvar-local my-plugin-w3m-exe
+  (defvar pkg/w3m/exists-p
     (if (eq system-type 'windows-nt)
-        (my-func-executable-find "w3m.exe" "w3m" t)
-      (executable-find "w3m")))
-  :if (and (my-func-package-enabled-p 'w3m) my-plugin-w3m-exe)
+        (my/find-executable "w3m.exe" "w3m" t)
+      (my/find-executable "w3m")))
+  :if (and (my/package-enabled-p 'w3m) pkg/w3m/exists-p)
   :config
   (setq w3m-home-page "http://www.baidu.com/"
         w3m-command-arguments '("-cookie" "-F")
@@ -983,7 +1062,7 @@
   (add-hook 'w3m-mode-hook 'visual-line-mode t))
 
 (use-package erc
-  :if (my-func-package-enabled-p 'erc)
+  :if (my/package-enabled-p 'erc)
   :config
   ;; (unbind-key "<return>" erc-mode-map)
   (bind-keys :map erc-mode-map
@@ -993,7 +1072,7 @@
         erc-kill-buffer-on-part t))
 
 (use-package circe
-  :if (my-func-package-enabled-p 'circe)
+  :if (my/package-enabled-p 'circe)
   :config
   (setq circe-network-options '(("Freenode" ;; http://freenode.net/
                                  :nick ""
@@ -1007,7 +1086,7 @@
 ;; =============================================================================
 ;; http://www.smlnj.org/doc/Emacs/sml-mode.html
 (use-package sml-mode
-  :if (my-func-package-enabled-p 'sml-mode)
+  :if (my/package-enabled-p 'sml-mode)
   :init
   (add-to-list 'load-path "/usr/local/sml/bin") ;; path to executable (sml.bat on Windows)
   (add-to-list 'auto-mode-alist '("\\.sml$" . sml-mode))
