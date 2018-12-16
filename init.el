@@ -965,11 +965,11 @@
         sml/shorten-modes t)
   (smart-mode-line-enable))
 
-(let ((path (my/path-exists-p
-             (my/set-user-emacs-file "theme" t))))
+(let* ((dir (my/set-user-emacs-file "theme" t))
+       (dir (my/locate 'exist dir nil t))
+       (path (my/get-file-path dir)))
   (when path
-    (add-to-list 'load-path path t)
-    (add-to-list 'custom-theme-load-path path t)))
+    (add-to-list 'custom-theme-load-path path)))
 (use-package atom-one-dark-theme
   :if (my/package-enabled-p 'atom-one-dark-theme)
   :config
@@ -1139,8 +1139,7 @@
 (use-package sml-mode
   :if (my/package-enabled-p 'sml-mode)
   :init
-  ;; path to executable (sml.bat on Windows)
-  (my/locate 'exist "/usr/local/sml/bin" nil t)
+  (my/locate 'exist "/usr/local/sml/bin" nil t) ;; e.g. sml.bat on Windows
   (add-to-list 'auto-mode-alist '("\\.sml$" . sml-mode))
   (add-to-list 'auto-mode-alist '("\\.sig$" . sml-mode))
   (add-hook 'sml-mode-hook
