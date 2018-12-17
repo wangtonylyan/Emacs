@@ -2,7 +2,7 @@
 
 ;; 'emacs-major-version, 'emacs-minor-version
 
-;; prefix
+;; prefix convention
 ;; my :: global
 ;; my-prog, my-prog-cc, ... :: file-local
 ;; pvt :: private
@@ -71,9 +71,8 @@
     (cond
      ;; 1. locate directory or file, in 'load-path by default
      ((equal type 'exist)
-      (let ((file
-             (or (my/exists-p file)
-                 (car (my/exists-p file load-path)))))
+      (let ((file (or (my/exists-p file)
+                      (car (my/exists-p file load-path)))))
         (when add
           (cond ((my/directory-exists-p file)
                  (add-to-list 'load-path (my/path-exists-p file)))
@@ -94,7 +93,7 @@
         (when (and file (file-executable-p file))
           (when add (add-to-list 'exec-path (my/get-file-path file)))
           file)))
-     (t (user-error "*my/locate* type=%s file=%s" type file)))))
+     (t (user-error "*my/locate* TYPE=%s FILE=%s" type file)))))
 
 (defun my/locate-file (file &optional dir add)
   (my/locate 'file dir file add))
@@ -112,24 +111,51 @@
 
 (defalias 'my/minor-mode-on-p 'bound-and-true-p)
 
-(defconst my/language-mode-hook-dict
+(defconst my/mode-hook-dict
   (let ((dict (make-hash-table :test 'equal)))
     (mapc (lambda (tup) (puthash (car tup) (cadr tup) dict))
-          '(("cc"      c-mode-common-hook)
-            ("c"       c-mode-hook)
-            ("c++"     c++-mode-hook)
-            ("python"  python-mode-hook)
-            ("lisp"    lisp-mode-hook)
-            ("elisp"   emacs-lisp-mode-hook)
-            ("scheme"  scheme-mode-hook)
-            ("haskell" haskell-mode-hook)
-            ("org"     org-mode-hook)))
+          '(;; [edit]
+            ("text"           text-mode-hook            )
+            ("org"            org-mode-hook             )
+            ;; [programming]
+            ("prog"           prog-mode-hook            )
+            ("yas"            yas-minor-mode-hook       )
+            ("YAS"            yas-global-mode-hook      )
+            ("flycheck"       flycheck-mode-hook        )
+            ;; [language]
+            ("lisp"           lisp-mode-hook            )
+            ("elisp"          emacs-lisp-mode-hook      )
+            ("ilisp"          lisp-interaction-mode-hook)
+            ("slime"          slime-mode-hook           )
+            ("scheme"         scheme-mode-hook          )
+            ("cc"             c-mode-common-hook        ) ;; c, c++, objc, java, idl, pike, awk
+            ("c"              c-mode-hook               )
+            ("c++"            c++-mode-hook             )
+            ("python"         python-mode-hook          )
+            ("sml"            sml-mode-hook             )
+            ("haskell"        haskell-mode-hook         )
+            ;; [others]
+            ("w3m"            w3m-mode-hook             )
+            ;; [my]
+            ("my/prog"        my/prog/start-hook        )
+            ("my/prog-cc"     my/prog-cc/start-hook     )))
     dict))
 
-(defun my/add-language-mode-hook (lang func)
-  (let ((hook (gethash lang my/language-mode-hook-dict)))
-    (if hook (add-hook hook func t)
-      (user-error "*my/add-language-mode-hook* lang=%s" lang))))
+(defun my/get-mode-hook (mode)
+  (let ((hook (gethash mode my/mode-hook-dict)))
+    (unless hook (user-error "*my/get-mode-hook* MODE=%s" mode))
+    hook))
+
+(defun my/add-mode-hook (mode func &optional local)
+  (add-hook (my/get-mode-hook mode) func t local))
+
+(defun my/add-modes-hook (pairs)
+  (mapc (lambda (pair)
+          (my/add-mode-hook (car pair) (cadr pair)))
+        pairs))
+
+(defun my/run-mode-hook (mode)
+  (run-hooks (my/get-mode-hook mode)))
 
 (cond ;; os-related
  ((eq system-type 'windows-nt)
@@ -162,7 +188,7 @@
 (defun my/set-user-emacs-file (file &optional self)
   (let ((dir (if self my/self-emacs-directory
                user-emacs-directory)))
-    (my/concat-directory-file dir file)))
+    (when dir (my/concat-directory-file dir file))))
 
 (defun my/get-user-emacs-file (&optional file self)
   (my/exists-p (my/set-user-emacs-file file self)))
@@ -171,7 +197,8 @@
   (my/get-user-emacs-file ".private/"))
 
 (defun my/get-private-emacs-file (file)
-  (my/exists-p file my/private-emacs-directory))
+  (let ((dir my/private-emacs-directory))
+    (when dir (my/exists-p file dir))))
 
 (my/load-file (my/get-private-emacs-file "init.el"))
 ;; *************************** sample code in .private/init.el ***************************
@@ -204,8 +231,8 @@
 
 (when (require 'package nil t)
   ;; 设置安装包的存储目录，该目录也需要被包含至'load-path中
-  ;; (add-to-list 'package-directory-list "~/.emacs.d/elpa" t) ;; system-wide dir
-  (setq package-user-dir (my/set-user-emacs-file "elpa")) ;; user-wide dir
+  ;; (add-to-list 'package-directory-list "~/.emacs.d/elpa/" t) ;; system-wide dir
+  (setq package-user-dir (my/set-user-emacs-file "elpa/")) ;; user-wide dir
   ;; Emacs使用的默认更新源为：("gnu" . "http://elpa.gnu.org/")
   ;; 添加更新源：MELPA每天更新，其包含了绝大多数插件
   ;; (add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/") t)
@@ -322,17 +349,16 @@
         ;; ispell-dictionary "english" ;; default dictionary
         ;; ispell-personal-dictionary ""
         flyspell-issue-message-flag nil)
-  (add-hook 'text-mode-hook 'flyspell-mode t)
-  ;; (add-hook 'prog-mode-hook 'flyspell-prog-mode t)
+  (my/add-mode-hook "text" flyspell-mode)
+  ;; (my/add-mode-hook "prog" flyspell-prog-mode)
   (add-to-list 'ispell-skip-region-alist '("^#+BEGIN" . "^#+END") t))
 
 (use-package paredit
   :if (my/package-enabled-p 'paredit)
   :config
-  (mapc (lambda (lang)
-          (my/add-language-mode-hook lang 'enable-paredit-mode))
-        '("lisp" "elisp" "scheme" "org"))
-  (add-hook 'lisp-interaction-mode-hook 'enable-paredit-mode t))
+  (mapc (lambda (mode)
+          (my/add-mode-hook mode 'enable-paredit-mode))
+        '("org" "lisp" "elisp" "ilisp" "scheme")))
 
 ;; =============================================================================
 ;; 配置杂项
@@ -428,7 +454,7 @@
 (column-number-mode 1) ;; 在mode-line显示列数
 (scroll-bar-mode -1) ;; 取消滚动条
 (global-visual-line-mode -1) ;; 对中文支持不好
-(add-hook 'text-mode-hook 'visual-line-mode t)
+(my/add-mode-hook "text" 'visual-line-mode)
 (show-paren-mode 1) ;; 显示匹配的左右括号
 (electric-pair-mode -1)
 (electric-quote-mode -1)
@@ -719,7 +745,7 @@
         temporary-bookmark-p t
         bm-buffer-persistence t
         bm-restore-repository-on-load t
-        bm-repository-file (my/set-user-emacs-file "bm-repository"))
+        bm-repository-file (my/set-user-emacs-file "bm-repository/"))
   (setq-default bm-buffer-persistence bm-buffer-persistence)
   (add-hook' after-init-hook 'bm-repository-load)
   (add-hook 'find-file-hooks 'bm-buffer-restore)
@@ -782,7 +808,7 @@
   :init
   (setq org-src-fontify-natively t)
   :config
-  (my/add-language-mode-hook "org" 'org-indent-mode))
+  (my/add-mode-hook "org" 'org-indent-mode))
 
 (use-package ace-jump-mode
   :if (my/package-enabled-p 'ace-jump-mode)
@@ -843,8 +869,8 @@
         highlight-thing-case-sensitive-p t)
   :config
   ;; (global-hl-line-mode -1)
-  (add-hook 'text-mode-hook 'hl-line-mode t)
-  (add-hook 'prog-mode-hook 'highlight-thing-mode t))
+  (my/add-mode-hook "text" 'hl-line-mode)
+  (my/add-mode-hook "prog" 'highlight-thing-mode))
 
 (use-package evil
   :if (my/package-enabled-p 'evil)
@@ -886,7 +912,7 @@
 
 ;; 加载其他配置文件
 (mapc (lambda (file)
-        (my/load-file (my/get-user-emacs-file file t)))
+        (my/load-file (my/set-user-emacs-file file t)))
       '(;; prog-mode与text-mode是相互独立的
         "prog" ;; prog-mode
         ;; "prog-cc" ;; cc-mode (c-mode, c++-mode, java-mode)
@@ -965,7 +991,7 @@
         sml/shorten-modes t)
   (smart-mode-line-enable))
 
-(let* ((dir (my/set-user-emacs-file "theme" t))
+(let* ((dir (my/set-user-emacs-file "theme/" t))
        (dir (my/locate 'exist dir nil t))
        (path (my/get-file-path dir)))
   (when path
@@ -1045,7 +1071,7 @@
   (setq rainbow-delimiters-max-face-count 9
         rainbow-delimiters-outermost-only-face-count 0)
   :config
-  (add-hook 'prog-mode-hook 'rainbow-delimiters-mode t))
+  (my/add-mode-hook "prog" 'rainbow-delimiters-mode))
 
 ;; 修改默认字体颜色，从而将文字与符号区分开来
 (use-package rainbow-identifiers
@@ -1055,7 +1081,7 @@
   ;; light theme: '(rainbow-identifiers-identifier-1 ((t (:foreground "#333333"))))
   (setq rainbow-identifiers-face-count 1)
   :config
-  (add-hook 'prog-mode-hook 'rainbow-identifiers-mode t))
+  (my/add-mode-hook "prog" 'rainbow-identifiers-mode))
 
 (use-package whitespace
   :if (my/package-enabled-p 'whitespace)
@@ -1110,7 +1136,7 @@
         w3m-show-graphic-icons-in-header-line nil
         w3m-show-graphic-icons-in-mode-line nil)
   (setq browse-url-browser-function 'w3m-browse-url)
-  (add-hook 'w3m-mode-hook 'visual-line-mode t))
+  (my/add-mode-hook "w3m" 'visual-line-mode))
 
 (use-package erc
   :if (my/package-enabled-p 'erc)
@@ -1142,10 +1168,10 @@
   (my/locate 'exist "/usr/local/sml/bin" nil t) ;; e.g. sml.bat on Windows
   (add-to-list 'auto-mode-alist '("\\.sml$" . sml-mode))
   (add-to-list 'auto-mode-alist '("\\.sig$" . sml-mode))
-  (add-hook 'sml-mode-hook
-            (lambda ()
-              (setq indent-tabs-mode nil
-                    sml-indent-args 2)))
+  (my/add-mode-hook "sml"
+                    (lambda ()
+                      (setq indent-tabs-mode nil
+                            sml-indent-args 2)))
   :config
   (bind-keys :map sml-mode-map
              ("M-SPC" . just-one-space)))

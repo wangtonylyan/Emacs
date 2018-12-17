@@ -2,68 +2,40 @@
 
 (require 'my-init)
 
-(defun my-func-prog-mode-beautify ()
-  (interactive)
-  (cond
-   ((or (eq major-mode 'c-mode)
-        (eq major-mode 'c++-mode))
-    (let ((exe "uncrustify")
-          (cfg "~/.uncrustify/alps.cfg"))
-      (if (and (executable-find exe)
-               (file-exists-p cfg))
-          (message (shell-command-to-string
-                    (concat exe " -l C -c " cfg " --no-backup " buffer-file-name)))
-        (message "uncrustify unsupported!"))))
-   ((eq major-mode 'python-mode)
-    (if (and (my/package-enabled-p 'py-autopep8)
-             (executable-find "autopep8")
-             (fboundp 'py-autopep8-buffer))
-        (py-autopep8-buffer)
-      (message "autopep8 unsupported!")))
-   ((derived-mode-p 'web-mode)
-    (if (my/package-enabled-p 'web-beautify)
-        (web-beautify-html)
-      (message "html-beautify unsupported!")))
-   (t (message "current major mode unsupported!"))))
+(defun my/prog/add-start-hook (func)
+  (my/add-mode-hook "my/prog" func))
 
-;; =============================================================================
-(defvar pkg/prog-mode/start-hook '())
+(defun my/prog/run-start-hook ()
+  (my/run-mode-hook "my/prog"))
 
-(defun pkg/prog-mode/add-start-hook (func)
-  (add-hook 'pkg/prog-mode/start-hook func t))
 
 (defun pkg/prog-mode/init ()
   (use-package prog-mode
+    :demand t
     :init
-    (pkg/prog-mode/add-start-hook 'pkg/prog-mode/start)
     (setq prettify-symbols-unprettify-at-point 'right-edge)
+    (my/prog/add-start-hook 'pkg/prog-mode/start)
     :config
-    ;; 在mode-line显示当前光标所在的函数名
-    (which-function-mode 1)
-    ;; lambda=λ
-    (add-to-list 'prettify-symbols-alist '("lambda" . 955))))
+    (which-function-mode 1) ;; 在mode-line显示当前光标所在的函数名
+    (add-to-list 'prettify-symbols-alist '("lambda" . 955)) ;; lambda = λ
+    ))
 
 (defun pkg/prog-mode/start ()
   )
 
-;; =============================================================================
-;; Yasnippet
-;; 一个宏管理和应用的插件，允许用户自定义宏，并自动将其扩展
-;; yas的脚本snippet以文件和目录的方式进行管理：每个文件中定义一个宏，每个目录对应于一个模式
-;; 在yas模式下的文本中通过输入脚本文件名称以激活替换宏
-;; 而脚本注释中的name属性只是作为替换成功后所呈现出的描述信息，或存在同名文件时的提示选择信息
-;; -----------------------------------------------------------------------------
+
 (defun pkg/yasnippet/init ()
   (use-package yasnippet
     :if (my/package-enabled-p 'yasnippet)
     :commands (yas-global-mode yas-minor-mode yas-minor-mode-on)
     :diminish yas-minor-mode
     :init
-    (pkg/prog-mode/add-start-hook 'pkg/yasnippet/start)
+    (my/prog/add-start-hook 'pkg/yasnippet/start)
     :config
     ;; 为配合auto-complete或company等插件的使用，需禁用以下自带的补全快捷键
     (unbind-key "<tab>" yas-minor-mode-map)
-    (add-to-list 'yas-snippet-dirs (my/get-user-emacs-file "snippets" t))
+    (let ((dir (my/get-user-emacs-file "snippets/" t)))
+      (when dir (add-to-list 'yas-snippet-dirs dir)))
     ;; 设置解决同名snippet的方式
     (setq yas-prompt-functions
           (if (eq system-type 'windows-nt)
@@ -76,20 +48,14 @@
   (yas-minor-mode-on) ;; 会自动执行(yas-reload-all)
   )
 
-;; =============================================================================
-;; Company (complete anything)
-;; http://company-mode.github.io/
-;; https://github.com/company-mode/company-mode
-;; https://www.emacswiki.org/emacs/CompanyMode
-;; 一个与auto-complete功能基本类似的补全插件，相比于后者，更新更为频繁
-;; ----------------------------------------------------------------------------
+
 (defun pkg/company/init ()
   (use-package company
     :if (my/package-enabled-p 'company)
     :commands (global-company-mode company-mode company-mode-on)
     :diminish company-mode
     :init
-    (pkg/prog-mode/add-start-hook 'pkg/company/start)
+    (my/prog/add-start-hook 'pkg/company/start)
     :config
     ;; 常用的快捷键：
     ;; <tab>用于补全候选项中的公共字段，<return>用于补全所选项，C-g用于终止补全
@@ -111,7 +77,7 @@
                                          (require 'company-jedi nil t))
                                 'company-jedi)
                              (company-semantic ;; Semantic
-                              ;; company-clang ;; Clang
+                              company-clang ;; Clang
                               company-gtags
                               company-etags)
                              company-cmake ;; CMake
@@ -133,22 +99,27 @@
 (defun pkg/company/start ()
   (company-mode-on))
 
-;; =============================================================================
-;; Auto-Complete
-;; http://auto-complete.org/
-;; https://github.com/auto-complete
-;; 一个能够支持多种后台实现的补全界面，并自带了一些支持多种语言的补全字典
-;; -----------------------------------------------------------------------------
+
 (defun pkg/auto-complete/init ()
   (use-package auto-complete
+    :preface
+    (defun pkg/auto-complete/add-source (srcs)
+      (cond
+       ((symbolp srcs)
+        (setq-local ac-sources (add-to-list 'ac-sources srcs)))
+       ((listp srcs)
+        (mapc (lambda (src)
+                (pkg/auto-complete/add-source src))
+              (nreverse srcs)))
+       (t (user-error "*pkg/auto-complete/add-local-source* SRCS=%s" srcs))))
     :if (my/package-enabled-p 'auto-complete)
     :commands (global-auto-complete-mode auto-complete-mode)
     :init
-    (pkg/prog-mode/add-start-hook 'pkg/auto-complete/start)
+    (my/prog/add-start-hook 'pkg/auto-complete/start)
     :config
     (ac-config-default)
     (add-to-list 'ac-dictionary-directories
-                 (concat my/user-emacs-directory "ac-dicts"))
+                 (my/get-user-emacs-file "ac-dicts/" t))
     (ac-set-trigger-key "<tab>") ;; ac会在输入trigger key后立即强制生效
     (setq ac-trigger-commands '(self-insert-command
                                 backward-delete-char
@@ -167,9 +138,29 @@
           ac-use-quick-help t
           ac-quick-help-delay 1.0)
     (ac-linum-workaround) ;; 解决auto-complete与linum两个模式之间的冲突
-    ;; source
+    ;; [source]
     ;; auto-complete-config.el文件中定义了大量的扩展source
     ;; 从而使得auto-complete能与更多的插件相集成
+    (defun pkg/auto-complete/yas-mode-hook ()
+      (pkg/auto-complete/add-source 'ac-source-yasnippet))
+    (defun pkg/auto-complete/lisp-mode-hook ()
+      (my/add-mode-hook "slime" ;; local minor mode
+                        (lambda ()
+                          (pkg/auto-complete/add-source 'ac-source-slime)) t))
+    (defun pkg/auto-complete/elisp-mode-hook ()
+      (pkg/auto-complete/add-source '(ac-source-functions
+                                      ac-source-variables
+                                      ac-source-symbols
+                                      ac-source-features)))
+    (defun pkg/auto-complete/c&c++-mode-hook ()
+      (when (my/minor-mode-on-p semantic-mode) ;; global minor mode
+        (pkg/auto-complete/add-source (if (cedet-gnu-global-version-check t)
+                                          'ac-source-gtags 'ac-source-semantic))))
+    (my/add-modes-hook '(("yas"   pkg/auto-complete/yas-mode-hook  )
+                         ("lisp"  pkg/auto-complete/lisp-mode-hook )
+                         ("elisp" pkg/auto-complete/elisp-mode-hook)
+                         ("c"     pkg/auto-complete/c&c++-mode-hook)
+                         ("c++"   pkg/auto-complete/c&c++-mode-hook)))
     (setq ac-sources
           '(;; 以下分类反映的只是目前实际的使用情况，而非各自的局限范围：
             ac-source-filename
@@ -181,24 +172,11 @@
             ;; ac-source-imenu ;; Emacs imenu
             ac-source-dictionary
             ;; 以下各源将在具体的编程模式启动时被添加
-            ;; 1) prog-mode
-            ;; ac-source-yasnippet
-            ;; 2) lisp-mode
-            ;; ac-source-slime
-            ;; 3) emacs-lisp-mode
-            ;; ac-source-functions
-            ;; ac-source-variables
-            ;; ac-source-symbols
-            ;; ac-source-features ;; (require)
-            ;; 4) c-mode, c++-mode
-            ;; ac-source-semantic
-            ;; ac-source-semantic-raw
-            ;; ac-source-gtags
-            ;; 5) java-mode
+            ;; [java-mode]
             ;; ac-source-eclim
-            ;; 6) python-mode
+            ;; [python-mode]
             ;; ac-source-ropemacs
-            ;; 7) other languages
+            ;; [other languages]
             ;; ac-source-ghc-mod ;; Haskell
             ;; ac-source-css-property ;; CSS
             ))
@@ -209,45 +187,33 @@
     ))
 
 (defun pkg/auto-complete/start ()
-  (auto-complete-mode 1)
-  ;; 各继承于prog-mode的编程模式在启动时都将设置其buffer-local的'ac-sources
-  (set (make-local-variable 'ac-sources)
-       (add-to-list 'ac-sources 'ac-source-yasnippet t)))
+  (auto-complete-mode 1))
 
-;; =============================================================================
-;; Flymake
-;; Emacs内置，静态编译检查，效率低，准确度高，依赖于后台编译器的支持
-;; -----------------------------------------------------------------------------
+
 (defun pkg/flymake/init ()
   (use-package flymake
     :if (my/package-enabled-p 'flymake)
     :commands (flymake-mode)
     :init
-    (pkg/prog-mode/add-start-hook 'pkg/flymake/start)))
+    (my/prog/add-start-hook 'pkg/flymake/start)))
 
 (defun pkg/flymake/start ()
-  (flymake-mode t))
+  (flymake-mode 1))
 
-;; =============================================================================
-;; Flycheck
-;; http://www.flycheck.org/
-;; 静态语义分析，效率高，准确度低，依赖于后台语法解析器(或编译器前端)的支持
-;; 针对不同语言需安装各自相应的后台支持，具体可参见
-;; http://www.flycheck.org/manual/latest/Supported-languages.html
-;; -----------------------------------------------------------------------------
-;; 快捷键前缀：C-c !
-;; l :: (flycheck-list-errors)
-;; C-c :: (flycheck-compile)
-;; RET :: Go to the current error in the source buffer
-;; n :: Jump to the next error
-;; p :: Jump to the previous error
-;; e :: Explain the error
-;; f :: Filter the error list by level
-;; F :: Remove the filter
-;; S :: Sort the error list by the column at point
-;; g :: Check the source buffer and update the error list
-;; q :: Quit the error list and hide its window
+
 (defun pkg/flycheck/init ()
+  ;; 快捷键前缀：C-c !
+  ;; l :: (flycheck-list-errors)
+  ;; C-c :: (flycheck-compile)
+  ;; RET :: Go to the current error in the source buffer
+  ;; n :: Jump to the next error
+  ;; p :: Jump to the previous error
+  ;; e :: Explain the error
+  ;; f :: Filter the error list by level
+  ;; F :: Remove the filter
+  ;; S :: Sort the error list by the column at point
+  ;; g :: Check the source buffer and update the error list
+  ;; q :: Quit the error list and hide its window
   (use-package flycheck
     :preface
     (defun pkg/flycheck/checker-enabled-p (chk)
@@ -260,7 +226,7 @@
           flycheck-checker-error-threshold 500
           flycheck-idle-change-delay 2.5
           flycheck-indication-mode 'left-fringe)
-    (pkg/prog-mode/add-start-hook 'pkg/flycheck/start)
+    (my/prog/add-start-hook 'pkg/flycheck/start)
     :config
     (flycheck-error-list-set-filter 'error)
     ;; (flycheck-list-errors)可以列出当前buffer中的所有error，优化显示窗口
@@ -270,19 +236,14 @@
                    (side            . bottom)
                    (reusable-frames . visible)
                    (window-height   . 0.33)))
-    ;; Lisp
     (defun pkg/flycheck/elisp-mode-hook ()
       (when (pkg/flycheck/checker-enabled-p 'emacs-lisp)
         (add-to-list 'flycheck-disabled-checkers 'emacs-lisp-checkdoc)
         (setq flycheck-emacs-lisp-load-path 'inherit)))
-    (my/add-language-mode-hook "elisp" 'pkg/flycheck/elisp-mode-hook)
-    ;; C/C++
-    (defun pkg/flycheck/c++-mode-hook ()
+    (defun pkg/flycheck/c&c++-mode-hook ()
       (when (pkg/flycheck/checker-enabled-p 'c/c++-gcc)
         ;; (setq flycheck-gcc-language-standard "c++11") ;; 由cpputils-cmake插件设置
         ))
-    (my/add-language-mode-hook "c++" 'pkg/flycheck/c++-mode-hook)
-    ;; Python
     (use-package flycheck-pyflakes
       :if (my/package-enabled-p 'flycheck-pyflakes)
       :demand t)
@@ -292,21 +253,23 @@
         (add-to-list 'flycheck-disabled-checkers 'python-pylint))
       (when (pkg/flycheck/checker-enabled-p 'python-flake8)
         (add-to-list 'flycheck-flake8-error-level-alist '("^E305$" . info) t)))
-    (my/add-language-mode-hook "python" 'pkg/flycheck/python-mode-hook)
-    ;; Haskell
     (use-package flycheck-haskell
       :if (my/package-enabled-p 'flycheck-haskell)
       :init
-      (add-hook 'flycheck-mode-hook 'flycheck-haskell-setup))
+      (my/add-mode-hook "flycheck" 'flycheck-haskell-setup))
     (defun pkg/flycheck/haskell-mode-hook ()
       (when (and (pkg/flycheck/checker-enabled-p 'haskell-hlint)
-                 (my/find-executable "hlint"))
+                 (my/locate-exec "hlint"))
         ;; 'flycheck-haskell-stack-ghc-executable
         ;; 'flycheck-haskell-ghc-executable
         ;; 'flycheck-haskell-hlint-executable
         (add-to-list 'flycheck-disabled-checkers 'haskell-stack-ghc)
         (add-to-list 'flycheck-disabled-checkers 'haskell-ghc)))
-    (my/add-language-mode-hook "haskell" 'pkg/flycheck/haskell-mode-hook)
+    (my/add-modes-hook '(("elisp"   pkg/flycheck/elisp-mode-hook  )
+                         ("c"       pkg/flycheck/c&c++-mode-hook  )
+                         ("c++"     pkg/flycheck/c&c++-mode-hook  )
+                         ("python"  pkg/flycheck/python-mode-hook )
+                         ("haskell" pkg/flycheck/haskell-mode-hook)))
     (use-package helm-flycheck
       :if (my/package-enabled-p 'helm-flycheck)
       :after helm
@@ -318,30 +281,21 @@
 (defun pkg/flycheck/start ()
   (flycheck-mode-on-safe))
 
-;; =============================================================================
-;; 常用的tagging system主要有两个，即GNU Global (gtags)和Ctags
-;; 而ctags又分为了两个版本，Exuberant Ctags和Universal Ctags
-;; ctags相比于gtags支持更多的语言，而gtags本身也支持以ctags作为解析后端
-;; 此外，gtags还支持由Python实现的pygments作为解析后端
-;; $ gtags --gtagslabel=ctags     # exuberant ctags
-;; $ gtags --gtagslabel=new-ctags # universal ctags
-;; $ gtags --gtagslabel=pygments  # pygments
-;; Emacs中有两个独立支持gtags的前端插件，即ggtags和helm-gtags
-;; 此外，Emacs中还自带了etags，提供了类似的功能
+
 (defun pkg/gtags/init ()
   (defun pkg/gtags/add-hook (func)
     ;; gtags暂仅用于C、C++
-    (my/add-language-mode-hook "c" func)
-    (my/add-language-mode-hook "c++" func))
+    (my/add-mode-hook "c" func)
+    (my/add-mode-hook "c++" func))
   (use-package ggtags
     :if (and (my/package-enabled-p 'ggtags)
-             (executable-find "gtags"))
+             (my/locate-exec "gtags"))
     :init
     (pkg/gtags/add-hook 'pkg/gtags/start))
   (with-eval-after-load 'helm
     (use-package helm-gtags
       :if (and (my/package-enabled-p 'helm-gtags)
-               (executable-find "gtags"))
+               (my/locate-exec "gtags"))
       :commands (helm-gtags-mode)
       :init
       (setq helm-gtags-path-style 'root ;; 'relative, 'absolute
@@ -385,12 +339,15 @@
                  ("C-c c u" . helm-gtags-update-tags)))))
 
 (defun pkg/gtags/start ()
-  (when (my/package-enabled-p 'ggtags))
+  (when (my/package-enabled-p 'ggtags)
+    )
   (when (my/package-enabled-p 'helm-gtags)
     (helm-gtags-mode 1)))
 
+
+
 ;; =============================================================================
-;; cmake-mode, cmake-font-lock, cmake-ide, cmake-project
+;; todo
 (defun pkg/cmake/init ()
   ;; 项目目录示例
   ;; project root folder
@@ -405,7 +362,7 @@
   (use-package cmake-mode
     :if (my/package-enabled-p 'cmake-mode)
     :init
-    (pkg/prog-mode/add-start-hook 'pkg/cmake/start)
+    (my/prog/add-start-hook 'pkg/cmake/start)
     :config
     (use-package cmake-font-lock
       :if (my/package-enabled-p 'cmake-font-lock)
@@ -426,8 +383,7 @@
 (defun pkg/cmake/start ()
   )
 
-;; =============================================================================
-;; =============================================================================
+
 (defun my-prog/init ()
   (pkg/prog-mode/init)
   (pkg/yasnippet/init)
@@ -437,11 +393,11 @@
   (pkg/flycheck/init)
   (pkg/gtags/init)
   (pkg/cmake/init)
-  (add-hook 'prog-mode-hook 'my-prog/start t))
+  (my/add-mode-hook "prog" 'my-prog/start))
 
 (defun my-prog/start ()
   (linum-mode 1)
-  (run-hooks 'pkg/prog-mode/start-hook))
+  (my/prog/run-start-hook))
 
 (add-hook 'after-init-hook 'my-prog/init t)
 
