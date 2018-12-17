@@ -63,8 +63,7 @@
     :config
     ;; 为配合auto-complete或company等插件的使用，需禁用以下自带的补全快捷键
     (unbind-key "<tab>" yas-minor-mode-map)
-    (add-to-list 'yas-snippet-dirs
-                 (concat my/user-emacs-directory "snippets"))
+    (add-to-list 'yas-snippet-dirs (my/get-user-emacs-file "snippets" t))
     ;; 设置解决同名snippet的方式
     (setq yas-prompt-functions
           (if (eq system-type 'windows-nt)
@@ -275,7 +274,7 @@
     (defun pkg/flycheck/elisp-mode-hook ()
       (when (pkg/flycheck/checker-enabled-p 'emacs-lisp)
         (add-to-list 'flycheck-disabled-checkers 'emacs-lisp-checkdoc)
-        (setq flycheck-emacs-lisp-load-path `(,my/user-emacs-directory))))
+        (setq flycheck-emacs-lisp-load-path 'inherit)))
     (my/add-language-mode-hook "elisp" 'pkg/flycheck/elisp-mode-hook)
     ;; C/C++
     (defun pkg/flycheck/c++-mode-hook ()
