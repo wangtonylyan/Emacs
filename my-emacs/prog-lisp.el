@@ -32,9 +32,7 @@
 (defun my-plugin-lispbox-start ()
   (slime-mode 1) ;; 启用smile-mode
   (save-excursion (slime)) ;; 启动SBCL，并连接Swank
-  (when (boundp 'ac-sources)
-    (setq ac-sources
-          (append my-prog-ac-sources '(ac-source-slime)))))
+  )
 
 ;; =============================================================================
 ;; =============================================================================
@@ -52,20 +50,9 @@
 
 ;; =============================================================================
 ;; =============================================================================
-(defun my-emacs-lisp-mode-init ()
-  )
-
-(defun my-emacs-lisp-mode-start ()
-  (when (boundp 'ac-sources)
-    (setq ac-sources
-          (append my-prog-ac-sources '(ac-source-functions
-                                       ac-source-variables
-                                       ac-source-symbols
-                                       ac-source-features)))))
 
 (eval-after-load 'lisp-mode ;; /lisp/emacs-lisp/lisp-mode.el
   '(progn
-     (my-emacs-lisp-mode-init)
-     (add-hook 'emacs-lisp-mode-hook 'my-emacs-lisp-mode-start)))
+     (my-emacs-lisp-mode-init)))
 
 (provide 'my-prog-lisp)

@@ -183,22 +183,21 @@
                                        ("semantic-decoration-on-includes" . nil))
           ;; -------------------------------------------------------------------
           semantic-c-obey-conditional-section-parsing-flag t)
-    (mapc (lambda (hook) ;; 不知为何在:config中使用CEDET中定义的(setq-mode-local)无法生效
-            (add-hook hook
-                      (lambda ()
-                        ;; 以下设置完全可以在(my-plugin-cedet-start)中被执行
-                        ;; 使用mode-hook的方式触发，仅仅是为了与上面的配置项相邻排列
-                        (setq semantic-stickyfunc-sticky-classes
-                              '(type function) ;; variable, include, package
-                              semanticdb-find-default-throttle
-                              '(file local project unloaded system recursive) ;; omniscience
-                              semanticdb-project-system-databases
-                              (mapcar (lambda (path)
-                                        (semanticdb-create-database
-                                         semanticdb-new-database-class path))
-                                      ;; e.g. "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
-                                      '("/usr/include" "/usr/local/include")))) t))
-          '(c-mode-hook c++-mode-hook))
+    (defun pkg/cedet/cc-mode-hook ()
+      ;; 不知为何在:config中使用CEDET中定义的(setq-mode-local)无法生效
+      ;; 以下设置完全可以在(my-plugin-cedet-start)中被执行
+      ;; 使用mode-hook的方式触发，仅仅是为了与上面的配置项相邻排列
+      (setq semantic-stickyfunc-sticky-classes
+            '(type function) ;; variable, include, package
+            semanticdb-find-default-throttle
+            '(file local project unloaded system recursive) ;; omniscience
+            semanticdb-project-system-databases
+            (mapcar (lambda (path)
+                      (semanticdb-create-database
+                       semanticdb-new-database-class path))
+                    ;; e.g. "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
+                    '("/usr/include" "/usr/local/include"))))
+    (my/add-language-mode-hook "cc" 'pkg/cedet/cc-mode-hook)
     ;; 设置'semanticdb-find-default-throttle中的'project，主要交由EDE或JDE等组件控制
     ;; (add-hook semanticdb-project-predicate-functions ) ;; 此项交由EDE设置
     ;; (add-hook semanticdb-project-root-functions ) ;; 此项交由EDE设置
@@ -336,10 +335,7 @@
       (ede-enable-generic-projects))))
 
 (defun my-plugin-cedet-start ()
-  (when (boundp 'ac-sources)
-    (set (make-local-variable 'ac-sources)
-         (add-to-list 'ac-sources (if (cedet-gnu-global-version-check t)
-                                      'ac-source-gtags 'ac-source-semantic) t))))
+  )
 
 ;; =============================================================================
 ;; ECB (Emacs Code Browser)
@@ -461,8 +457,7 @@
   (my-plugin-cedet-init)
   (my-plugin-ecb-init)
   (my-plugin/cpputils-cmake/init)
-  (add-hook 'c-mode-hook 'my-prog-cc-mode-start t)
-  (add-hook 'c++-mode-hook 'my-prog-cc-mode-start t))
+  (add-hook 'c-mode-common-hook 'my-prog-cc-mode-start t))
 
 (defun my-prog-cc-mode-start ()
   (run-hooks 'my-prog-cc-mode-start-hook))
