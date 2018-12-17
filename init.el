@@ -1,71 +1,114 @@
 ;; -*- coding: utf-8 -*-
 
-;; 判断Emacs版本可以基于两个变量：'emacs-major-version和'emacs-minor-version
+;; 'emacs-major-version, 'emacs-minor-version
 
-;; 变量前缀
+;; prefix
 ;; my :: global
 ;; my-prog, my-prog-cc, ... :: file-local
 ;; pvt :: private
 ;; pkg :: package
 
-
 ;; file, path ::
 ;; directory :: 以斜杠结尾
 ;; dwim :: Do What I Mean
 
-(defun my/mapcar (func seq)
+(defun my/map (func seq)
   (delq nil (mapcar func seq)))
 
-
-;; 仿照my/find-executable的逻辑
-(defun my/load-file (name &optional dir add)
-  (let* ((file (cond ((null dir) name)
-                     ((my/directory-exists-p dir)
-                      (my/concat-directory-file dir name))
-                     (t (concat (file-name-as-directory dir) name)))))
-    (when (and file (load file t))
-      (when add
-        (let ((path (my/path-exists-p (my/get-file-path file))))
-          (when path (add-to-list 'load-path path)))))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun my/mapcar (func seq)
+  (car (my/map func seq)))
 
 (defalias 'my/get-file-directory 'file-name-directory)
 
 (defun my/get-file-path (file)
-  (when file
+  (when (stringp file)
     (let ((dir (my/get-file-directory file)))
       (when dir (directory-file-name dir)))))
 
-(defun my/directory-exists-p (dir)
-  (when (and dir (file-directory-p dir)
-             (file-accessible-directory-p dir))
-    (expand-file-name (file-name-as-directory dir))))
-
-(defun my/path-exists-p (path)
-  (let ((dir (my/directory-exists-p path)))
-    (when dir (directory-file-name dir))))
-
-(defun my/file-exists-p (file)
-  (when (and file (file-regular-p file)
-             (file-readable-p file))
-    (expand-file-name file)))
-
 (defun my/concat-directory-file (dir file)
-  (let ((dir (my/directory-exists-p dir)))
-    (when dir (my/file-exists-p (concat dir file)))))
+  (let ((dir (when (stringp dir)
+               (file-name-as-directory dir))))
+    (concat dir file)))
 
-(defun my/find-executable (name &optional dir add)
-  (let* ((file (cond ((null dir) name)
-                     ((my/directory-exists-p dir)
-                      (my/concat-directory-file dir name))
-                     (t (concat (file-name-as-directory dir) name))))
-         (exec (when file (executable-find file))))
-    (when (and exec (file-executable-p exec))
-      (when add (add-to-list 'exec-path (my/get-file-path exec)))
-      exec)))
+;; 'nil = '(), satisfy both (string-or-null-p) and (listp)
+(defun my/directory-exists-p (file &optional dirs)
+  (cond
+   ((string-or-null-p dirs) ;; include the case of '()
+    (let ((file (my/concat-directory-file dirs file)))
+      (when (and (file-directory-p file)
+                 (file-accessible-directory-p file))
+        (expand-file-name (file-name-as-directory file)))))
+   ((listp dirs)
+    (my/map (lambda (dir)
+              (my/directory-exists-p file dir))
+            dirs))))
 
-(defalias 'my/package-enabled-p 'package--user-selected-p)
+(defun my/path-exists-p (file &optional dirs)
+  (let ((dirs (my/directory-exists-p file dirs)))
+    (if (listp dirs) ;; include the case of 'nil
+        (my/map (lambda (dir)
+                  (when dir (directory-file-name dir)))
+                dirs)
+      (directory-file-name dirs))))
+
+(defun my/file-exists-p (file &optional dirs)
+  (cond
+   ((string-or-null-p dirs) ;; in 'default-directory by default
+    (let ((file (my/concat-directory-file dirs file)))
+      (when (file-regular-p file)
+        (expand-file-name file))))
+   ((listp dirs)
+    (my/map (lambda (dir)
+              (my/file-exists-p file dir))
+            dirs))))
+
+(defun my/exists-p (file &optional dirs)
+  (or (my/directory-exists-p file dirs)
+      (my/file-exists-p file dirs)))
+
+(defun my/locate (type dir file add)
+  (let ((file (my/concat-directory-file dir file)))
+    (cond
+     ;; 1. locate directory or file, in 'load-path by default
+     ((equal type 'exist)
+      (let ((file
+             (or (my/exists-p file)
+                 (car (my/exists-p file load-path)))))
+        (when add
+          (cond ((my/directory-exists-p file)
+                 (add-to-list 'load-path (my/path-exists-p file)))
+                ((my/file-exists-p file)
+                 (add-to-list 'load-path (my/get-file-path file)))))
+        file))
+     ;; 2. locate readable file, in 'load-path by default
+     ((equal type 'file)
+      (let ((file (or (my/file-exists-p file)
+                      (locate-file file load-path)))) ;; as-is the 'file
+        (when (and file (file-readable-p file))
+          (when add (add-to-list 'load-path (my/get-file-path file)))
+          file)))
+     ;; 3. locate executable file, in 'exec-path by default
+     ((equal type 'exec)
+      (let ((file (or (my/file-exists-p file)
+                      (executable-find file))))
+        (when (and file (file-executable-p file))
+          (when add (add-to-list 'exec-path (my/get-file-path file)))
+          file)))
+     (t (user-error "*my/locate* type=%s file=%s" type file)))))
+
+(defun my/locate-file (file &optional dir add)
+  (my/locate 'file dir file add))
+
+(defun my/locate-exec (file &optional dir add)
+  (my/locate 'exec dir file add))
+
+;; 目前暂没有对于该函数实现上的额外需求
+;; (load)本身的实现逻辑就类似于(my/locate-file)
+(defun my/load-file (file &optional dir) ;; todo
+  (load (my/concat-directory-file dir file) t))
+
+(defun my/package-enabled-p (pkg)
+  (car (package--user-selected-p pkg)))
 
 (defalias 'my/minor-mode-on-p 'bound-and-true-p)
 
@@ -86,7 +129,7 @@
 (defun my/add-language-mode-hook (lang func)
   (let ((hook (gethash lang my/language-mode-hook-dict)))
     (if hook (add-hook hook func t)
-      (user-error "*Error* [my/add-language-mode-hook] %s" lang))))
+      (user-error "*my/add-language-mode-hook* lang=%s" lang))))
 
 (cond ;; os-related
  ((eq system-type 'windows-nt)
@@ -94,8 +137,8 @@
           (let ((path (my/path-exists-p dir)))
             (when path (add-to-list 'exec-path path))))
         '("D:/softwares"))
-  (let ((path (my/find-executable "cmdproxy.exe"
-                                  "Emacs25/libexec/emacs/24.5/i686-pc-mingw32")))
+  (let ((path (my/locate-exec "cmdproxy.exe"
+                              "Emacs25/libexec/emacs/24.5/i686-pc-mingw32")))
     (when path
       (setq shell-file-name path
             shell-command-switch "-c"))))
@@ -107,19 +150,30 @@
 
 ;; (setq user-init-file "~/.emacs.d/init.el")
 ;; (load user-init-file)
-
-;; 由于以下两个变量在当前文件被执行时就有buffer-local的初始值了
-;; 因此为使其自此生效，就必须同时修改局部和全局值
 (setq default-directory "~/"
       user-emacs-directory "~/.emacs.d/"
       command-line-default-directory default-directory)
 (setq-default default-directory default-directory
               user-emacs-directory user-emacs-directory)
 
-(defconst my/user-emacs-directory (concat user-emacs-directory "my-emacs/"))
-(defconst my/private-emacs-directory (concat user-emacs-directory ".private/"))
+(defconst my/self-emacs-directory
+  (my/locate 'exist user-emacs-directory "my-emacs/" t))
 
-(load (concat my/private-emacs-directory "init.el") t)
+(defun my/set-user-emacs-file (file &optional self)
+  (let ((dir (if self my/self-emacs-directory
+               user-emacs-directory)))
+    (my/concat-directory-file dir file)))
+
+(defun my/get-user-emacs-file (&optional file self)
+  (my/exists-p (my/set-user-emacs-file file self)))
+
+(defconst my/private-emacs-directory
+  (my/get-user-emacs-file ".private/"))
+
+(defun my/get-private-emacs-file (file)
+  (my/exists-p file my/private-emacs-directory))
+
+(my/load-file (my/get-private-emacs-file "init.el"))
 ;; *************************** sample code in .private/init.el ***************************
 ;; (defvar pvt/project/root-directories '("~/Projects/" "~/projects/"))
 ;; (defvar pvt/project/ede-config-file-names '("ede-projects.el"))
@@ -127,26 +181,20 @@
 
 (defconst pvt/project/root-directories
   (when (boundp 'pvt/project/root-directories)
-    (my/mapcar 'my/directory-exists-p pvt/project/root-directories)))
+    (my/map 'my/directory-exists-p pvt/project/root-directories)))
 
 (defconst pvt/project/ede-config-files
-  (when (boundp 'pvt/project/ede-config-file-names)
-    (mapcan (lambda (dir)
-              (my/mapcar (lambda (file)
-                           (my/concat-directory-file dir file))
-                         pvt/project/ede-config-file-names))
-            pvt/project/root-directories)))
-
-(defun pvt/project/find-subdirectory (subdir)
-  (car (my/mapcar (lambda (dir)
-                    (my/directory-exists-p (concat dir subdir)))
-                  pvt/project/root-directories)))
+  (when (and pvt/project/root-directories
+             (boundp 'pvt/project/ede-config-file-names))
+    (mapcan (lambda (file)
+              (my/file-exists-p file pvt/project/root-directories))
+            pvt/project/ede-config-file-names)))
 
 ;; (normal-top-level-add-subdirs-to-load-path)
 ;; (normal-top-level-add-to-load-path)
 
 ;; 指定由(customize)写入配置信息的文件，随后每当Emacs自动写入时就不会再修改当前文件了
-(setq custom-file (my/concat-directory-file user-emacs-directory "custom.el"))
+(setq custom-file (my/get-user-emacs-file "custom.el"))
 (my/load-file custom-file)
 
 (setq url-max-password-attempts 2
@@ -157,7 +205,7 @@
 (when (require 'package nil t)
   ;; 设置安装包的存储目录，该目录也需要被包含至'load-path中
   ;; (add-to-list 'package-directory-list "~/.emacs.d/elpa" t) ;; system-wide dir
-  (setq package-user-dir (concat user-emacs-directory "elpa")) ;; user-wide dir
+  (setq package-user-dir (my/set-user-emacs-file "elpa")) ;; user-wide dir
   ;; Emacs使用的默认更新源为：("gnu" . "http://elpa.gnu.org/")
   ;; 添加更新源：MELPA每天更新，其包含了绝大多数插件
   ;; (add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/") t)
@@ -268,9 +316,9 @@
 
 (use-package flyspell
   :if (and (my/package-enabled-p 'flyspell)
-           (my/find-executable "aspell"))
+           (my/locate-exec "aspell"))
   :config
-  (setq ispell-program-name (my/find-executable "aspell") ;; 设置后台支持程序
+  (setq ispell-program-name (my/locate-exec "aspell") ;; 设置后台支持程序
         ;; ispell-dictionary "english" ;; default dictionary
         ;; ispell-personal-dictionary ""
         flyspell-issue-message-flag nil)
@@ -593,8 +641,7 @@
   :init
   (setq projectile-indexing-method 'alien
         projectile-enable-caching t
-        projectile-project-search-path (when (boundp 'pvt/project/root-directories)
-                                         pvt/project/root-directories)
+        projectile-project-search-path pvt/project/root-directories
         projectile-switch-project-action 'pkg/projectile/switch-action)
   :config
   ;; 输入"C-c p C-h"可以查询所有'projectile-mode-map中的快捷键，常用的有
@@ -630,19 +677,16 @@
   :bind (("C-c g" . magit-status))
   :config
   (when (eq system-type 'windows-nt)
-    (let ((path (my/find-executable "git.exe" "Git")))
+    (let ((path (my/locate-exec "git.exe" "Git")))
       (when path (setq magit-git-executable path))))
   (setq magit-auto-revert-mode t
         magit-auto-revert-immediately t
         magit-auto-revert-tracked-only t
         ;; magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1
-        ;; 执行(magit-list-repositories)命令，可以打印出以下列表所指示的路径下搜索到的git项目
+        ;; 执行(magit-list-repositories)，可以打印出以下列表所指示的路径下搜索到的git项目
         magit-repository-directories
-        (when (boundp 'pvt/project/root-directories)
-          (my/mapcar (lambda (dir)
-                       (let ((dir (my/directory-exists-p dir)))
-                         (when dir (cons dir 1)))) ;; directory depth = 1
-                     pvt/project/root-directories))))
+        (my/map (lambda (dir) (cons dir 1)) ;; directory depth = 1
+                pvt/project/root-directories)))
 
 (use-package sr-speedbar
   :if (my/package-enabled-p 'sr-speedbar)
@@ -675,7 +719,7 @@
         temporary-bookmark-p t
         bm-buffer-persistence t
         bm-restore-repository-on-load t
-        bm-repository-file (concat user-emacs-directory "bm-repository"))
+        bm-repository-file (my/set-user-emacs-file "bm-repository"))
   (setq-default bm-buffer-persistence bm-buffer-persistence)
   (add-hook' after-init-hook 'bm-repository-load)
   (add-hook 'find-file-hooks 'bm-buffer-restore)
@@ -705,7 +749,7 @@
           (progn
             (neotree-dir root)
             (neotree-find file))
-        (message "*neotree* could not find projectile project"))))
+        (user-error "*neotree* could not find projectile project"))))
   :if (my/package-enabled-p 'neotree)
   :ensure all-the-icons
   :bind (("C-S-s" . pkg/neotree/toggle))
@@ -755,14 +799,17 @@
   ;; (avy-setup-default)
   (setq avy-timeout-seconds 0.5))
 
-(let ((plg (or (my/package-enabled-p 'ace-jump-mode)
-               (my/package-enabled-p 'avy))))
-  (when (and nil plg (my/package-enabled-p 'ace-pinyin))
-    (when (eq plg 'ace-jump-mode)
-      (setq ace-pinyin-use-avy nil)
-      (ace-pinyin-global-mode 1)))
-  (when (eq plg 'avy)
-    (ace-pinyin-global-mode 1)))
+(use-package ace-pinyin
+  :preface
+  (defvar pkg/ace-pinyin/enabled-p
+    (or (my/package-enabled-p 'ace-jump-mode)
+        (my/package-enabled-p 'avy)))
+  :if (and pkg/ace-pinyin/enabled-p
+           (my/package-enabled-p 'ace-pinyin))
+  :config
+  (when (eq pkg/ace-pinyin/enabled-p 'ace-jump-mode)
+    (setq ace-pinyin-use-avy nil))
+  (ace-pinyin-global-mode 1))
 
 (use-package undo-tree
   :if (my/package-enabled-p 'undo-tree)
@@ -817,28 +864,29 @@
 (use-package eshell
   :config
   ;; (add-to-list 'eshell-visual-commands)
-  (bind-key "C-c e" (lambda ()
-                      (interactive)
-                      (if (eq major-mode 'eshell-mode)
-                          (progn
-                            (insert "exit")
-                            (eshell-send-input)
-                            (delete-window))
-                        (progn
-                          (let* ((dir (if (buffer-file-name)
-                                          (my/get-file-directory (buffer-file-name))
-                                        default-directory))
-                                 (name (car (last (split-string dir "/" t)))))
-                            (split-window-vertically (- (/ (window-total-height) 3)))
-                            (other-window 1)
-                            (eshell "new")
-                            (rename-buffer (concat "*eshell: " name "*"))))))))
+  (bind-key "C-c e"
+            (lambda ()
+              (interactive)
+              (if (eq major-mode 'eshell-mode)
+                  (progn
+                    (insert "exit")
+                    (eshell-send-input)
+                    (delete-window))
+                (progn
+                  (let* ((dir (if (buffer-file-name)
+                                  (my/get-file-directory (buffer-file-name))
+                                default-directory))
+                         (name (car (last (split-string dir "/" t)))))
+                    (split-window-vertically (- (/ (window-total-height) 3)))
+                    (other-window 1)
+                    (eshell "new")
+                    (rename-buffer (concat "*eshell: " name "*"))))))))
 
 (provide 'my-init)
 
 ;; 加载其他配置文件
 (mapc (lambda (file)
-        (load (concat my/user-emacs-directory file)))
+        (my/load-file (my/get-user-emacs-file file t)))
       '(;; prog-mode与text-mode是相互独立的
         "prog" ;; prog-mode
         ;; "prog-cc" ;; cc-mode (c-mode, c++-mode, java-mode)
@@ -908,17 +956,20 @@
   :if (or (my/package-enabled-p 'smart-mode-line)
           (my/package-enabled-p 'smart-mode-line-powerline-theme))
   :config
-  (setq sml/theme (if (and (my/package-enabled-p 'smart-mode-line-powerline-theme)
-                           (require 'smart-mode-line-powerline-theme nil t))
-                      'powerline 'automatic)
+  (setq sml/theme
+        (if (and (my/package-enabled-p 'smart-mode-line-powerline-theme)
+                 (require 'smart-mode-line-powerline-theme nil t))
+            'powerline 'automatic)
         sml/no-confirm-load-theme t
         sml/shorten-directory t
         sml/shorten-modes t)
   (smart-mode-line-enable))
 
-(let ((path (concat my/user-emacs-directory "theme")))
-  (add-to-list 'load-path path t)
-  (add-to-list 'custom-theme-load-path path t))
+(let* ((dir (my/set-user-emacs-file "theme" t))
+       (dir (my/locate 'exist dir nil t))
+       (path (my/get-file-path dir)))
+  (when path
+    (add-to-list 'custom-theme-load-path path)))
 (use-package atom-one-dark-theme
   :if (my/package-enabled-p 'atom-one-dark-theme)
   :config
@@ -1045,8 +1096,8 @@
   :preface
   (defvar pkg/w3m/exists-p
     (if (eq system-type 'windows-nt)
-        (my/find-executable "w3m.exe" "w3m" t)
-      (my/find-executable "w3m")))
+        (my/locate-exec "w3m.exe" "w3m" t)
+      (my/locate-exec "w3m")))
   :if (and (my/package-enabled-p 'w3m) pkg/w3m/exists-p)
   :config
   (setq w3m-home-page "http://www.baidu.com/"
@@ -1088,7 +1139,7 @@
 (use-package sml-mode
   :if (my/package-enabled-p 'sml-mode)
   :init
-  (add-to-list 'load-path "/usr/local/sml/bin") ;; path to executable (sml.bat on Windows)
+  (my/locate 'exist "/usr/local/sml/bin" nil t) ;; e.g. sml.bat on Windows
   (add-to-list 'auto-mode-alist '("\\.sml$" . sml-mode))
   (add-to-list 'auto-mode-alist '("\\.sig$" . sml-mode))
   (add-hook 'sml-mode-hook

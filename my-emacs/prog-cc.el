@@ -10,12 +10,14 @@
 ;; https://www.emacswiki.org/emacs/CollectionOfEmacsDevelopmentEnvironmentTools
 ;; https://stackoverflow.com/questions/12711765/status-of-cedet-and-ecb-in-emacs-24-2
 ;; http://alexott.net/en/writings/emacs-devenv/EmacsCedet.html
-
-(let* ((dir (pvt/project/find-subdirectory "cedet"))
-       (file (my/concat-directory-file dir "cedet-devel-load.el")))
-  (when (and file (load file))
-    (add-to-list 'load-path (concat dir "contrib"))
-    (add-to-list 'Info-directory-list (concat dir "doc/info/"))))
+(when (boundp 'my-private-project-root-directory)
+  (let* ((path (file-name-as-directory
+                (concat my-private-project-root-directory "cedet")))
+         (file (concat path "cedet-devel-load.el")))
+    (when (file-exists-p file)
+      (load-file file)
+      (add-to-list 'load-path (concat path "contrib"))
+      (add-to-list 'Info-directory-list (concat path "doc/info/")))))
 
 (defvar my-prog-cc-mode-start-hook '())
 
@@ -329,7 +331,7 @@
                                   ))))
       ;; 目前手写的EDE项目配置信息由每个系统中的ede-projects.el文件统一地维护
       (when (boundp 'my-private-project-ede-config-file)
-        (my/load-file my-private-project-ede-config-file))
+        (load my-private-project-ede-config-file nil nil t))
       (global-ede-mode 1)
       (ede-enable-generic-projects))))
 
