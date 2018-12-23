@@ -4,7 +4,7 @@
 
 ;; prefix convention
 ;; my :: global
-;; my-prog, my-prog-cc, ... :: file-local
+;; my/prog, my/prog-cc, ... :: file-local
 ;; pvt :: private
 ;; pkg :: package
 
@@ -119,9 +119,11 @@
             ("org"            org-mode-hook             )
             ;; [programming]
             ("prog"           prog-mode-hook            )
-            ("yas"            yas-minor-mode-hook       )
-            ("YAS"            yas-global-mode-hook      )
+            ("yas"            yas-minor-mode-hook       ) ;; when enabled as local mode
+            ("YAS"            yas-global-mode-hook      ) ;; when enabled as global mode
             ("flycheck"       flycheck-mode-hook        )
+            ("SEMANTIC"       semantic-init-hook        ) ;; when enabled as global mode
+            ("semantic"       semantic-init-mode-hook   ) ;; mode-local hook
             ;; [language]
             ("lisp"           lisp-mode-hook            )
             ("elisp"          emacs-lisp-mode-hook      )
@@ -149,10 +151,10 @@
 (defun my/add-mode-hook (mode func &optional local)
   (add-hook (my/get-mode-hook mode) func t local))
 
-(defun my/add-modes-hook (pairs)
-  (mapc (lambda (pair)
-          (my/add-mode-hook (car pair) (cadr pair)))
-        pairs))
+(defun my/add-modes-hook (list)
+  (mapc (lambda (elem)
+          (my/add-mode-hook (car elem) (cadr elem) (caddr elem)))
+        list))
 
 (defun my/run-mode-hook (mode)
   (run-hooks (my/get-mode-hook mode)))
@@ -250,7 +252,7 @@
                                     ;; all-the-icons-dired
                                     spaceline-all-the-icons ;; powerline, spaceline
                                     ;; smart-mode-line, smart-mode-line-powerline-theme
-                                    solarized-theme ;; atom-one-dark-theme, doom-themes, github-theme, zenburn-theme
+                                    solarized-theme ;; zenburn-theme, atom-one-dark-theme, doom-themes, github-theme
                                     ;; doom-themes-neotree
                                     ;; nlinum-hl
                                     ;; yascroll
@@ -268,7 +270,7 @@
                                     ;; evil
                                     bm
                                     helm-bm
-                                    ;; neotree, sr-speedbar
+                                    ;; neotree, sr-speedbar, ecb
                                     ;; sublimity, minimap
                                     helm ;; icomplete, anything, ido, smex, ivy
                                     flyspell
@@ -314,6 +316,9 @@
   (package-install-selected-packages))
 
 (eval-when-compile
+  ;; disabled
+  ;; ensure, after, demand, defer
+  ;; preface, if, init, config
   (require 'use-package))
 (require 'bind-key)
 (require 'diminish nil t)
@@ -564,7 +569,7 @@
            ("C-=" . enlarge-window-horizontally)
            ("C--" . shrink-window-horizontally))
 (use-package windmove
-  :demand t
+  :ensure t
   :bind (("C-S-h" . windmove-left)
          ("C-S-l" . windmove-right)
          ("C-S-k" . windmove-up)
@@ -573,7 +578,7 @@
   ;; <shift-up/down/left/right>
   (windmove-default-keybindings))
 (use-package winner
-  :demand t
+  :ensure t
   :bind (("C-c w u" . winner-undo)
          ("C-c w r" . winner-redo)))
 (use-package buffer-move
@@ -688,9 +693,9 @@
   ;; 使用helm-projectile包装原projectile插件
   ;; 包括替换'projectile-mode-map中的快捷键
   (use-package helm-projectile
-    :if (my/package-enabled-p 'helm-projectile)
-    :demand t ;; 初始化后就立即启用，基于project的方式管理各类文件
     :after helm
+    :demand t ;; 初始化后就立即启用，基于project的方式管理各类文件
+    :if (my/package-enabled-p 'helm-projectile)
     :init
     (setq helm-projectile-fuzzy-match t
           projectile-completion-system 'helm)
@@ -756,12 +761,13 @@
   (add-hook 'after-save-hook 'bm-buffer-save)
   (add-hook 'after-revert-hook 'bm-buffer-restore)
   (use-package helm-bm
-    :if (my/package-enabled-p 'helm-bm)
-    :demand t
     :after helm
+    :demand t
+    :if (my/package-enabled-p 'helm-bm)
     :bind (("C-c b b" . helm-bm))))
 
 (use-package neotree
+  :ensure all-the-icons
   :preface
   (defun pkg/neotree/toggle ()
     (interactive)
@@ -777,7 +783,6 @@
             (neotree-find file))
         (user-error "*neotree* could not find projectile project"))))
   :if (my/package-enabled-p 'neotree)
-  :ensure all-the-icons
   :bind (("C-S-s" . pkg/neotree/toggle))
   :init
   (setq neo-theme (if (display-graphic-p) 'icons ;; (require 'all-the-icons)
@@ -851,8 +856,8 @@
   (global-undo-tree-mode 1))
 
 (use-package smart-hungry-delete
+  :ensure t
   :if (my/package-enabled-p 'smart-hungry-delete)
-  :demand t
   :bind (("<backspace>" . smart-hungry-delete-backward-char)
          ("C-d" . smart-hungry-delete-forward-char))
   :config
@@ -861,7 +866,6 @@
 (use-package highlight-thing
   :if (my/package-enabled-p 'highlight-thing)
   :init
-  ;; '(highlight-thing ((t (:background "#4A4A4A"))))
   (setq highlight-thing-what-thing 'symbol
         highlight-thing-exclude-thing-under-point nil
         highlight-thing-delay-seconds 0.5
@@ -908,18 +912,19 @@
                     (eshell "new")
                     (rename-buffer (concat "*eshell: " name "*"))))))))
 
-(provide 'my-init)
+(provide 'my/init)
 
 ;; 加载其他配置文件
 (mapc (lambda (file)
         (my/load-file (my/set-user-emacs-file file t)))
-      '(;; prog-mode与text-mode是相互独立的
+      '(;; [programming]
         "prog" ;; prog-mode
-        ;; "prog-cc" ;; cc-mode (c-mode, c++-mode, java-mode)
+        "prog-cc" ;; cc-mode
         ;; "prog-lisp" ;; lisp-mode, emacs-lisp-mode, lisp-interaction-mode
         ;; "prog-py" ;; python-mode
         ;; "prog-hs" ;; haskell-mode
         ;; "prog-web" ;; web-mode
+        ;; [others]
         ;; "text-tex" ;; tex-mode, latex-mode
         ;; "web-browser" ;; web browser
         ))
@@ -1022,15 +1027,18 @@
 (use-package solarized-theme
   :if (my/package-enabled-p 'solarized-theme)
   :init
-  (setq solarized-high-contrast-mode-line t
-        solarized-use-more-italic t)
+  (setq solarized-distinct-fringe-background nil
+        solarized-distinct-doc-face t
+        solarized-high-contrast-mode-line t
+        solarized-use-more-italic t
+        solarized-emphasize-indicators t)
   :config
   ;; (load-theme 'solarized-dark t)
   (load-theme 'solarized-light t))
 (use-package zenburn-theme
   :if (my/package-enabled-p 'zenburn-theme)
   :init
-  (setq zenburn-override-colors-alist '(("zenburn-fg" . "#EDEDDD")))
+  ;; (setq zenburn-override-colors-alist '(("zenburn-fg" . "#EDEDDD")))
   :config
   (load-theme 'zenburn t))
 
@@ -1068,7 +1076,7 @@
 (use-package rainbow-delimiters
   :if (my/package-enabled-p 'rainbow-delimiters)
   :init
-  (setq rainbow-delimiters-max-face-count 9
+  (setq rainbow-delimiters-max-face-count 15
         rainbow-delimiters-outermost-only-face-count 0)
   :config
   (my/add-mode-hook "prog" 'rainbow-delimiters-mode))
@@ -1077,8 +1085,6 @@
 (use-package rainbow-identifiers
   :if (my/package-enabled-p 'rainbow-identifiers)
   :init
-  ;; dark theme: '(rainbow-identifiers-identifier-1 ((t (:foreground "#CCCCCC"))))
-  ;; light theme: '(rainbow-identifiers-identifier-1 ((t (:foreground "#333333"))))
   (setq rainbow-identifiers-face-count 1)
   :config
   (my/add-mode-hook "prog" 'rainbow-identifiers-mode))
@@ -1168,10 +1174,9 @@
   (my/locate 'exist "/usr/local/sml/bin" nil t) ;; e.g. sml.bat on Windows
   (add-to-list 'auto-mode-alist '("\\.sml$" . sml-mode))
   (add-to-list 'auto-mode-alist '("\\.sig$" . sml-mode))
-  (my/add-mode-hook "sml"
-                    (lambda ()
-                      (setq indent-tabs-mode nil
-                            sml-indent-args 2)))
+  (my/add-mode-hook "sml" (lambda ()
+                            (setq indent-tabs-mode nil
+                                  sml-indent-args 2)))
   :config
   (bind-keys :map sml-mode-map
              ("M-SPC" . just-one-space)))

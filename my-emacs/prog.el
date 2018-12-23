@@ -1,6 +1,6 @@
 ;; -*- coding: utf-8 -*-
 
-(require 'my-init)
+(require 'my/init)
 
 (defun my/prog/add-start-hook (func)
   (my/add-mode-hook "my/prog" func))
@@ -11,7 +11,6 @@
 
 (defun pkg/prog-mode/init ()
   (use-package prog-mode
-    :demand t
     :init
     (setq prettify-symbols-unprettify-at-point 'right-edge)
     (my/prog/add-start-hook 'pkg/prog-mode/start)
@@ -77,7 +76,7 @@
                                          (require 'company-jedi nil t))
                                 'company-jedi)
                              (company-semantic ;; Semantic
-                              company-clang ;; Clang
+                              ;; company-clang ;; Clang
                               company-gtags
                               company-etags)
                              company-cmake ;; CMake
@@ -245,8 +244,8 @@
         ;; (setq flycheck-gcc-language-standard "c++11") ;; 由cpputils-cmake插件设置
         ))
     (use-package flycheck-pyflakes
-      :if (my/package-enabled-p 'flycheck-pyflakes)
-      :demand t)
+      :demand t
+      :if (my/package-enabled-p 'flycheck-pyflakes))
     (defun pkg/flycheck/python-mode-hook ()
       (when (my/package-enabled-p 'flycheck-pyflakes)
         (add-to-list 'flycheck-disabled-checkers 'python-flake8)
@@ -271,8 +270,8 @@
                          ("python"  pkg/flycheck/python-mode-hook )
                          ("haskell" pkg/flycheck/haskell-mode-hook)))
     (use-package helm-flycheck
-      :if (my/package-enabled-p 'helm-flycheck)
       :after helm
+      :if (my/package-enabled-p 'helm-flycheck)
       :config
       (bind-key "C-c ! l" 'helm-flycheck flycheck-mode-map))
     ;; (global-flycheck-mode 1)
@@ -375,8 +374,10 @@
       (add-hook 'cmake-mode-hook 'cmake-font-lock-activate t))
     )
   (use-package cmake-ide
+    :disabled
     )
   (use-package cmake-project
+    :disabled
     )
   )
 
@@ -384,7 +385,7 @@
   )
 
 
-(defun my-prog/init ()
+(defun my/prog/init ()
   (pkg/prog-mode/init)
   (pkg/yasnippet/init)
   (pkg/company/init)
@@ -393,12 +394,12 @@
   (pkg/flycheck/init)
   (pkg/gtags/init)
   (pkg/cmake/init)
-  (my/add-mode-hook "prog" 'my-prog/start))
+  (my/add-mode-hook "prog" 'my/prog/start))
 
-(defun my-prog/start ()
+(defun my/prog/start ()
   (linum-mode 1)
   (my/prog/run-start-hook))
 
-(add-hook 'after-init-hook 'my-prog/init t)
+(add-hook 'after-init-hook 'my/prog/init t)
 
-(provide 'my-prog)
+(provide 'my/prog)
