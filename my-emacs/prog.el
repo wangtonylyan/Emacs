@@ -374,10 +374,10 @@
       (add-hook 'cmake-mode-hook 'cmake-font-lock-activate t))
     )
   (use-package cmake-ide
-    :disabled
+    :if (my/package-enabled-p 'cmake-ide)
     )
   (use-package cmake-project
-    :disabled
+    :if (my/package-enabled-p 'cmake-project)
     )
   )
 
