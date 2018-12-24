@@ -250,28 +250,28 @@
   ;; 目前使用此全局变量来管理插件的启用/禁用，其中包括了ELPA更新源中所没有的插件
   (setq package-selected-packages '(;; [UI]
                                     ;; all-the-icons-dired
-                                    spaceline-all-the-icons ;; powerline, spaceline
+                                    spaceline ;; powerline, spaceline-all-the-icons
                                     ;; smart-mode-line, smart-mode-line-powerline-theme
-                                    solarized-theme ;; zenburn-theme, atom-one-dark-theme, doom-themes, github-theme
+                                    doom-themes ;; atom-one-dark-theme, github-theme, solarized-theme, zenburn-theme
                                     ;; doom-themes-neotree
+                                    rainbow-delimiters
+                                    ;; rainbow-identifiers ;; 会覆盖配色主题所使用的字体颜色
+                                    highlight-thing
                                     ;; nlinum-hl
                                     ;; yascroll
-                                    buffer-move
-                                    rainbow-delimiters
-                                    rainbow-identifiers ;; 会覆盖配色主题所使用的字体颜色
-                                    ;; fill-column-indicator, whitespace
                                     tabbar
+                                    ;; neotree, sr-speedbar, ecb
+                                    ;; sublimity, minimap
+                                    ;; fill-column-indicator, whitespace
+                                    buffer-move
                                     ;; [Edit]
                                     avy ;; ace-jump-mode
                                     ;; ace-pinyin
                                     undo-tree
                                     smart-hungry-delete
-                                    highlight-thing
                                     ;; evil
                                     bm
                                     helm-bm
-                                    ;; neotree, sr-speedbar, ecb
-                                    ;; sublimity, minimap
                                     helm ;; icomplete, anything, ido, smex, ivy
                                     flyspell
                                     ;; flyspell-correct-helm
@@ -301,7 +301,7 @@
                                     hindent
                                     flycheck-haskell
                                     ;; [Standard ML]
-                                    ;; sml-mode
+                                    sml-mode
                                     ;; [HTML]
                                     ;; web-mode
                                     ;; [LaTeX]
@@ -374,7 +374,7 @@
       frame-title-format '(buffer-file-name "%f" ("%b")) ;; 设置标题栏显示为buffer名字
       uniquify-buffer-name-style 'post-forward-angle-brackets ;; 重名buffer的命名
       help-window-select t
-      visible-bell nil ;; 以窗口闪烁的方式代替错误提示音
+      visible-bell t ;; 以窗口闪烁的方式代替错误提示音
       echo-keystrokes 0.1
       debug-on-error nil ;; 显示错误信息
       debug-on-signal nil
@@ -756,8 +756,9 @@
   (add-hook 'find-file-hooks 'bm-buffer-restore)
   (add-hook 'kill-buffer-hook 'bm-buffer-save)
   (add-hook 'kill-emacs-hook '(lambda nil
-                                (bm-buffer-save-all)
-                                (bm-repository-save)))
+                                (progn
+                                  (bm-buffer-save-all)
+                                  (bm-repository-save))))
   (add-hook 'after-save-hook 'bm-buffer-save)
   (add-hook 'after-revert-hook 'bm-buffer-restore)
   (use-package helm-bm
@@ -920,9 +921,10 @@
       '(;; [programming]
         "prog" ;; prog-mode
         "prog-cc" ;; cc-mode
-        ;; "prog-lisp" ;; lisp-mode, emacs-lisp-mode, lisp-interaction-mode
+        ;; lisp-mode, emacs-lisp-mode, lisp-interaction-mode,
+        ;; sml-mode, haskell-mode
+        "prog-fun"
         ;; "prog-py" ;; python-mode
-        ;; "prog-hs" ;; haskell-mode
         ;; "prog-web" ;; web-mode
         ;; [others]
         ;; "text-tex" ;; tex-mode, latex-mode
@@ -959,29 +961,26 @@
              (require 'all-the-icons-dired nil t))))
 
 (use-package powerline
-  :ensure t
+  :if (my/package-enabled-p 'powerline)
   :config
   (setq powerline-default-separator 'arrow
         powerline-default-separator-dir '(left . right))
-  (when (my/package-enabled-p 'powerline)
-    (powerline-default-theme)))
+  (powerline-default-theme))
 
 (use-package spaceline
-  :ensure t
+  :if (or (my/package-enabled-p 'spaceline)
+          (my/package-enabled-p 'spaceline-all-the-icons))
   :config
   (require 'spaceline-config)
   (setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
-  (when (my/package-enabled-p 'spaceline)
-    ;; (spaceline-emacs-theme)
-    (spaceline-spacemacs-theme))
-  (eval-after-load 'helm '(spaceline-helm-mode)))
-
-(use-package spaceline-all-the-icons
-  :if (my/package-enabled-p 'spaceline-all-the-icons)
-  :config
-  (spaceline-all-the-icons-theme)
-  ;; (spaceline-all-the-icons--setup-neotree)
-  (spaceline-all-the-icons--setup-package-updates))
+  (spaceline-emacs-theme) ;; (spaceline-spacemacs-theme)
+  (eval-after-load 'helm '(spaceline-helm-mode))
+  (use-package spaceline-all-the-icons
+    :if (my/package-enabled-p 'spaceline-all-the-icons)
+    :config
+    (spaceline-all-the-icons-theme)
+    ;; (spaceline-all-the-icons--setup-neotree)
+    (spaceline-all-the-icons--setup-package-updates)))
 
 (use-package smart-mode-line
   :if (or (my/package-enabled-p 'smart-mode-line)
@@ -1009,11 +1008,15 @@
   :if (my/package-enabled-p 'doom-themes)
   :config
   (setq doom-themes-enable-bold nil
-        doom-themes-enable-italic nil)
-  (load-theme 'doom-one t)
-  ;; (load-theme 'doom-vibrant t)
-  ;; (load-theme 'doom-spacegrey t)
-  ;; (doom-themes-neotree-config)
+        doom-themes-enable-italic nil
+        ;; 'doom-one
+        ;; 'doom-spacegrey
+        ;; 'doom-nova
+        ;; 'doom-spacegrey
+        doom-spacegrey-brighter-modeline t
+        doom-spacegrey-brighter-comments t
+        doom-spacegrey-comment-bg nil)
+  (load-theme 'doom-spacegrey t)
   (when visible-bell
     (doom-themes-visual-bell-config)))
 (use-package github-theme
@@ -1075,9 +1078,6 @@
 ;; 嵌套的括号通过大小而不仅是颜色来进行区分
 (use-package rainbow-delimiters
   :if (my/package-enabled-p 'rainbow-delimiters)
-  :init
-  (setq rainbow-delimiters-max-face-count 15
-        rainbow-delimiters-outermost-only-face-count 0)
   :config
   (my/add-mode-hook "prog" 'rainbow-delimiters-mode))
 
@@ -1165,18 +1165,3 @@
 
 ;; =============================================================================
 (message "emacs init time = %s" (emacs-init-time))
-
-;; =============================================================================
-;; http://www.smlnj.org/doc/Emacs/sml-mode.html
-(use-package sml-mode
-  :if (my/package-enabled-p 'sml-mode)
-  :init
-  (my/locate 'exist "/usr/local/sml/bin" nil t) ;; e.g. sml.bat on Windows
-  (add-to-list 'auto-mode-alist '("\\.sml$" . sml-mode))
-  (add-to-list 'auto-mode-alist '("\\.sig$" . sml-mode))
-  (my/add-mode-hook "sml" (lambda ()
-                            (setq indent-tabs-mode nil
-                                  sml-indent-args 2)))
-  :config
-  (bind-keys :map sml-mode-map
-             ("M-SPC" . just-one-space)))
