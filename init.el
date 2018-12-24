@@ -275,6 +275,7 @@
                                     helm ;; icomplete, anything, ido, smex, ivy
                                     flyspell
                                     ;; flyspell-correct-helm
+                                    paredit
                                     ;; [Programming]
                                     yasnippet
                                     flycheck ;; flymake
@@ -363,7 +364,7 @@
   :config
   (mapc (lambda (mode)
           (my/add-mode-hook mode 'enable-paredit-mode))
-        '("org" "lisp" "elisp" "ilisp" "scheme")))
+        '("org" "lisp" "elisp" "ilisp" "slime" "scheme")))
 
 ;; =============================================================================
 ;; 配置杂项
@@ -868,7 +869,7 @@
   :if (my/package-enabled-p 'highlight-thing)
   :init
   (setq highlight-thing-what-thing 'symbol
-        highlight-thing-exclude-thing-under-point nil
+        highlight-thing-exclude-thing-under-point t
         highlight-thing-delay-seconds 0.5
         highlight-thing-limit-to-defun nil
         highlight-thing-case-sensitive-p t)
