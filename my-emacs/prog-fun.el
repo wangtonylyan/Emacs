@@ -18,17 +18,18 @@
                              slime-autodoc)
             slime-description-autofocus nil)
       (slime-setup) ;; 使上述定制生效
+      (defun pkg/lispbox/start ()
+        ;; (when (fboundp 'slime-mode))
+        (slime-mode 1) ;; 启用smile-mode
+        (save-excursion (slime))) ;; 启动SBCL，并连接Swank
       (my/add-mode-hook "lisp" 'pkg/lispbox/start))))
 
-(defun pkg/lispbox/start ()
-  ;; (when (fboundp 'slime-mode))
-  (slime-mode 1) ;; 启用smile-mode
-  (save-excursion (slime)) ;; 启动SBCL，并连接Swank
-  )
 
 (eval-after-load 'lisp-mode ;; /lisp/emacs-lisp/lisp-mode.el
   '(progn
      (pkg/lispbox/init)))
+
+
 
 
 (use-package sml-mode
@@ -45,6 +46,8 @@
   :config
   (bind-keys :map sml-mode-map
              ("M-SPC" . just-one-space)))
+
+
 
 
 (defun pkg/haskell-mode/init ()
@@ -101,6 +104,8 @@
 
 (defun pkg/haskell-mode/start ()
   (setq haskell-indentation-electric-flag t))
+
+
 
 (eval-after-load 'prog-mode
   '(progn
