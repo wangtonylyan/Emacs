@@ -110,7 +110,7 @@
         (mapc (lambda (src)
                 (pkg/auto-complete/add-source src))
               (nreverse srcs)))
-       (t (user-error "*pkg/auto-complete/add-local-source* SRCS=%s" srcs))))
+       (t (user-error "*pkg/auto-complete/add-source* SRCS=%s" srcs))))
     :if (my/package-enabled-p 'auto-complete)
     :commands (global-auto-complete-mode auto-complete-mode)
     :init
@@ -214,6 +214,7 @@
   ;; g :: Check the source buffer and update the error list
   ;; q :: Quit the error list and hide its window
   (use-package flycheck
+    :diminish flycheck-mode
     :preface
     (defun pkg/flycheck/checker-enabled-p (chk)
       (and (memq chk flycheck-checkers) ;; global variable
