@@ -269,13 +269,13 @@
                                     ;; ace-pinyin
                                     undo-tree
                                     smart-hungry-delete
+                                    paredit
                                     ;; evil
                                     bm
                                     helm-bm
                                     helm ;; icomplete, anything, ido, smex, ivy
                                     flyspell
                                     ;; flyspell-correct-helm
-                                    paredit
                                     ;; [Programming]
                                     yasnippet
                                     flycheck ;; flymake
@@ -311,18 +311,23 @@
                                     ;; [Web]
                                     ;; w3m
                                     ;; erc ;; circe, rcirc
+                                    diminish
                                     use-package))
   (when (not package-archive-contents)
     (package-refresh-contents))
   (package-install-selected-packages))
 
 (eval-when-compile
-  ;; disabled
+  ;; disabled, diminish
   ;; ensure, after, demand, defer
   ;; preface, if, init, config
   (require 'use-package))
 (require 'bind-key)
-(require 'diminish nil t)
+
+(use-package diminish
+  :ensure t
+  :config
+  (diminish 'eldoc-mode))
 
 (use-package sublimity
   :if (my/package-enabled-p 'sublimity)
@@ -358,13 +363,6 @@
   (my/add-mode-hook "text" flyspell-mode)
   ;; (my/add-mode-hook "prog" flyspell-prog-mode)
   (add-to-list 'ispell-skip-region-alist '("^#+BEGIN" . "^#+END") t))
-
-(use-package paredit
-  :if (my/package-enabled-p 'paredit)
-  :config
-  (mapc (lambda (mode)
-          (my/add-mode-hook mode 'enable-paredit-mode))
-        '("org" "lisp" "elisp" "ilisp" "slime" "scheme")))
 
 ;; =============================================================================
 ;; 配置杂项
@@ -551,7 +549,8 @@
            ("C-c i l" . highlight-lines-matching-regexp)
            ("C-c i u" . unhighlight-regexp)
            ("M-." . xref-find-definitions)
-           ("M-," . xref-pop-marker-stack))
+           ("M-," . xref-pop-marker-stack)
+           ("M-!" . shell-command))
 (put 'downcase-region 'disabled nil) ;; 去除每次执行此命令时的提示，强制执行
 (put 'upcase-region 'disabled nil)
 ;; 与输入法切换键冲突
@@ -665,6 +664,7 @@
   (helm-mode 1))
 
 (use-package projectile
+  :diminish projectile-mode
   :preface
   (defvar pkg/projectile/switch-hook '())
   (defun pkg/projectile/switch-action ()
@@ -845,6 +845,7 @@
   (ace-pinyin-global-mode 1))
 
 (use-package undo-tree
+  :diminish undo-tree-mode
   :if (my/package-enabled-p 'undo-tree)
   :init
   (setq undo-tree-visualizer-diff nil
@@ -865,7 +866,16 @@
   :config
   (smart-hungry-delete-add-default-hooks))
 
+(use-package paredit
+  :diminish paredit-mode
+  :if (my/package-enabled-p 'paredit)
+  :config
+  (mapc (lambda (mode)
+          (my/add-mode-hook mode 'enable-paredit-mode))
+        '("org" "lisp" "elisp" "ilisp" "slime" "scheme")))
+
 (use-package highlight-thing
+  :diminish highlight-thing-mode
   :if (my/package-enabled-p 'highlight-thing)
   :init
   (setq highlight-thing-what-thing 'symbol
@@ -966,6 +976,10 @@
   :config
   (setq powerline-default-separator 'arrow
         powerline-default-separator-dir '(left . right))
+  ;; (powerline-center-theme)
+  ;; (powerline-center-evil-theme)
+  ;; (powerline-vim-theme)
+  ;; (powerline-nano-theme)
   (powerline-default-theme))
 
 (use-package spaceline
