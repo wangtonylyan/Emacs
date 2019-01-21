@@ -386,6 +386,18 @@
   )
 
 
+
+;;========================================================================================
+(defun pkg/asn1-mode/init ()
+  (use-package asn1-mode
+    :if (my/package-enabled-p 'asn1-mode)
+    )
+  )
+
+(defun pkg/asn1-mode/start ()
+  )
+
+
 (defun my/prog/init ()
   (pkg/prog-mode/init)
   (pkg/yasnippet/init)
@@ -395,6 +407,7 @@
   (pkg/flycheck/init)
   (pkg/gtags/init)
   (pkg/cmake/init)
+  (pkg/asn1-mode/init)
   (my/add-mode-hook "prog" 'my/prog/start))
 
 (defun my/prog/start ()

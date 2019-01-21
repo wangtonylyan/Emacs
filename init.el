@@ -134,13 +134,16 @@
             ("c"              c-mode-hook               )
             ("c++"            c++-mode-hook             )
             ("python"         python-mode-hook          )
+            ("elpy"           elpy-mode-hook            )
             ("sml"            sml-mode-hook             )
             ("haskell"        haskell-mode-hook         )
             ;; [others]
             ("w3m"            w3m-mode-hook             )
             ;; [my]
             ("my/prog"        my/prog/start-hook        )
-            ("my/prog-cc"     my/prog-cc/start-hook     )))
+            ("my/prog-cc"     my/prog-cc/start-hook     )
+            ("my/prog-py"     my/prog-py/start-hook     )
+            ))
     dict))
 
 (defun my/get-mode-hook (mode)
@@ -150,6 +153,9 @@
 
 (defun my/add-mode-hook (mode func &optional local)
   (add-hook (my/get-mode-hook mode) func t local))
+
+(defun my/del-mode-hook (mode func &optional local)
+  (remove-hook (my/get-mode-hook mode) func local))
 
 (defun my/add-modes-hook (list)
   (mapc (lambda (elem)
@@ -238,8 +244,11 @@
   ;; Emacs使用的默认更新源为：("gnu" . "http://elpa.gnu.org/")
   ;; 添加更新源：MELPA每天更新，其包含了绝大多数插件
   ;; (add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/") t)
-  (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
+  ;; (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
   ;; (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+  ;; 以下使用国内的清华镜像源
+  (setq package-archives '(("gnu"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
+                           ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")))
   ;; 以下列表用于设置被允许加载的插件，因此无论是在安装还是使用插件的过程中
   ;; 都必须提前详细地列举出所有的插件，且要根据插件之间的依赖关系进行先后地声明
   (setq package-load-list '(all ;; e.g. (dash) (epl) (let-alist) (pkg-info) (flycheck)
@@ -276,6 +285,7 @@
                                     helm ;; icomplete, anything, ido, smex, ivy
                                     flyspell
                                     ;; flyspell-correct-helm
+                                    ediff ;; vdiff
                                     ;; [Programming]
                                     yasnippet
                                     flycheck ;; flymake
@@ -283,10 +293,12 @@
                                     company ;; auto-complete
                                     company-jedi
                                     helm-gtags ;; ggtags
+                                    asn1-mode
                                     ;; [Project]
                                     projectile ;; eproject
                                     helm-projectile
                                     magit
+                                    ;; vdiff-magit
                                     cmake-mode ;; cmake-ide, cmake-project
                                     cmake-font-lock
                                     ;; [C, C++]
@@ -520,6 +532,7 @@
 ;; C-c C- :: tabbar
 ;; C-c i :: highlight
 ;; C-c b :: bm, helm-bm
+;; C-c d :: ediff, vdiff
 ;; C-c o :: org
 ;; C-c h :: helm
 ;; C-c c :: helm-gtags
@@ -704,21 +717,78 @@
     (add-hook 'pkg/projectile/switch-hook 'helm-projectile t)
     (helm-projectile-on)))
 
+(use-package ediff
+  :after winner
+  :demand t
+  :if (my/package-enabled-p 'ediff)
+  :init
+  (setq ediff-window-setup-function 'ediff-setup-windows-plain
+        ediff-split-window-function 'split-window-horizontally
+        ediff-diff-options "-w" ;; (ediff-toggle-skip-similar) ;; "##"
+        ;; "-i" ;; (ediff-toggle-ignore-case) ;; "#c"
+        ;; ediff-forward-word-function 'forward-char ;; "@", "*"
+        )
+  (defun pkg/ediff/setup-keymap ()
+    ;; 可参考(ediff-setup-keymap)，或激活ediff后输入"?"
+    ;; (bind-keys :map ediff-mode-map)
+    ;; (unbind-key "C-x f" ediff-mode-map) ;; ()
+    )
+  (add-hook 'ediff-keymap-setup-hook 'pkg/ediff/setup-keymap t)
+  (add-hook 'ediff-after-quit-hook-internal 'winner-undo t))
+
+(use-package vdiff
+  :if (my/package-enabled-p 'vdiff)
+  :config
+  (define-key vdiff-mode-map (kbd "C-c d") vdiff-mode-prefix-map)
+  ;; (bind-keys :map vdiff-mode-map
+  ;;             ("e" . vdiff-magit-dwim)
+  ;;             ("E" . vdiff-magit-popup))
+  )
+
 (use-package magit
   :if (my/package-enabled-p 'magit)
   :bind (("C-c g" . magit-status))
-  :config
+  :init
   (when (eq system-type 'windows-nt)
     (let ((path (my/locate-exec "git.exe" "Git")))
       (when path (setq magit-git-executable path))))
   (setq magit-auto-revert-mode t
         magit-auto-revert-immediately t
         magit-auto-revert-tracked-only t
+        magit-ediff-dwim-show-on-hunks t
         ;; magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1
         ;; 执行(magit-list-repositories)，可以打印出以下列表所指示的路径下搜索到的git项目
         magit-repository-directories
         (my/map (lambda (dir) (cons dir 1)) ;; directory depth = 1
-                pvt/project/root-directories)))
+                pvt/project/root-directories))
+  :config
+  (use-package vdiff-magit
+    :if (my/package-enabled-p 'vdiff-magit)
+    :config
+    (bind-keys :map magit-mode-map
+               ("e" . vdiff-magit-dwim)
+               ("E" . vdiff-magit-popup))
+    (setcdr (assoc ?e (plist-get magit-dispatch-popup :actions))
+            '("vdiff dwim" 'vdiff-magit-dwim))
+    (setcdr (assoc ?E (plist-get magit-dispatch-popup :actions))
+            '("vdiff popup" 'vdiff-magit-popup))
+    ;; This flag will default to using ediff for merges. vdiff-magit does not yet
+    ;; support 3-way merges. Please see the docstring of this variable for more
+    ;; information
+    ;; (setq vdiff-magit-use-ediff-for-merges nil)
+
+    ;; Whether vdiff-magit-dwim runs show variants on hunks.  If non-nil,
+    ;; vdiff-magit-show-staged or vdiff-magit-show-unstaged are called based on what
+    ;; section the hunk is in.  Otherwise, vdiff-magit-dwim runs vdiff-magit-stage
+    ;; when point is on an uncommitted hunk.  (setq vdiff-magit-dwim-show-on-hunks
+    ;; nil)
+
+    ;; Whether vdiff-magit-show-stash shows the state of the index.
+    ;; (setq vdiff-magit-show-stash-with-index t)
+
+    ;; Only use two buffers (working file and index) for vdiff-magit-stage
+    ;; (setq vdiff-magit-stage-is-2way nil)
+    ))
 
 (use-package sr-speedbar
   :if (my/package-enabled-p 'sr-speedbar)
