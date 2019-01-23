@@ -175,7 +175,8 @@
                               "Emacs25/libexec/emacs/24.5/i686-pc-mingw32")))
     (when path
       (setq shell-file-name path
-            shell-command-switch "-c"))))
+            shell-command-switch "-c")))
+  (my/locate-exec "git.exe" "Git" t))
  ((eq system-type 'gnu/linux)
   (mapc (lambda (dir)
           (let ((path (my/path-exists-p dir)))
@@ -258,6 +259,7 @@
   (package-initialize) ;; 方式2) 主动执行该函数以加载插件
   ;; 目前使用此全局变量来管理插件的启用/禁用，其中包括了ELPA更新源中所没有的插件
   (setq package-selected-packages '(;; [UI]
+                                    dashboard
                                     ;; all-the-icons-dired
                                     spaceline ;; powerline, spaceline-all-the-icons
                                     ;; smart-mode-line, smart-mode-line-powerline-theme
@@ -269,11 +271,13 @@
                                     ;; nlinum-hl
                                     ;; yascroll
                                     tabbar
-                                    ;; neotree, sr-speedbar, ecb
+                                    treemacs ;; neotree, sr-speedbar, ecb
                                     ;; sublimity, minimap
                                     ;; fill-column-indicator, whitespace
                                     buffer-move
+                                    zoom
                                     ;; [Edit]
+                                    hydra
                                     avy ;; ace-jump-mode
                                     ;; ace-pinyin
                                     undo-tree
@@ -331,7 +335,7 @@
 
 (eval-when-compile
   ;; disabled, diminish
-  ;; ensure, after, demand, defer
+  ;; ensure, after, demand, defer, commands
   ;; preface, if, init, config
   (require 'use-package))
 (require 'bind-key)
@@ -341,15 +345,30 @@
   :config
   (diminish 'eldoc-mode))
 
+(use-package hydra
+  :ensure t
+  :demand t
+  :preface
+  (defun pkg/hydra/quit ()
+    (interactive)
+    (message "Hydra Quit"))
+  :init
+  ;; 目前发现启用此项会导致，Hydra子窗口过小，无法完整地呈现提示文字
+  ;; 此外，启用全局的zoom mode似乎也可以避免该问题
+  (setq hydra-lv nil))
+
 (use-package sublimity
   :if (my/package-enabled-p 'sublimity)
-  :commands (sublimity-global-mode sublimity-mode)
   :init
-  (setq sublimity-map-set-delay 3)
+  (setq sublimity-map-size 17
+        sublimity-map-max-fraction 0.2
+        sublimity-map-text-scale -7)
   :config
   ;; (require 'sublimity-scroll)
   ;; (require 'sublimity-attractive)
-  (require 'sublimity-map nil t))
+  (require 'sublimity-map nil t)
+  (sublimity-map-set-delay 5)
+  (sublimity-mode 1))
 
 (use-package minimap
   :if (my/package-enabled-p 'minimap)
@@ -515,6 +534,9 @@
               word-wrap word-wrap
               tab-width 4)
 
+(put 'downcase-region 'disabled nil) ;; 去除每次执行此命令时的提示，强制执行
+(put 'upcase-region 'disabled nil)
+
 (add-hook 'before-save-hook
           (lambda ()
             (delete-trailing-whitespace) ;; 删除每行末尾的空格
@@ -525,81 +547,43 @@
             (highlight-changes-remove-highlight (point-min) (point-max)))
           t)
 
-;; Key Binding
-;; 命令集前缀
-;; 以C-c加单个字母为前缀，且全局性key map的前缀互不相同
-;; C-c w :: window layout: windmove, winner, buffer-move
-;; C-c C- :: tabbar
-;; C-c i :: highlight
-;; C-c b :: bm, helm-bm
-;; C-c d :: ediff, vdiff
-;; C-c o :: org
-;; C-c h :: helm
-;; C-c c :: helm-gtags
-;; C-c p :: projectile, helm-projectile
-;; C-c g :: magit
-;; C-c , :: CEDET/Semantic
-;; C-c . :: CEDET/EDE
-(unbind-key "C-x f") ;; (set-fill-column)
-(unbind-key "C-x C-l") ;; (downcase-region)
-(unbind-key "C-x C-u") ;; (upcase-region)
-(unbind-key "C-M-v") ;; (scroll-other-window)
-(unbind-key "M-s h")
-;; 以下部分是重复绑定，目的是便于查阅
-(bind-keys ("C-S-a" . mark-whole-buffer)
-           ("C-M-p" . scroll-other-window-down)
-           ("C-M-n" . scroll-other-window)
-           ("<C-wheel-up>" . text-scale-increase)
-           ("<C-wheel-down>" . text-scale-decrease)
-           ("<C-up>" . text-scale-increase)
-           ("<C-down>" . text-scale-decrease)
-           ("C-x C--" . downcase-region)
-           ("C-x C-=" . upcase-region)
-           ("C-q" . read-only-mode)
-           ("C-c i i" . highlight-symbol-at-point)
-           ("C-c i p" . highlight-phrase)
-           ("C-c i r" . highlight-regexp)
-           ("C-c i l" . highlight-lines-matching-regexp)
-           ("C-c i u" . unhighlight-regexp)
-           ("M-." . xref-find-definitions)
-           ("M-," . xref-pop-marker-stack)
-           ("M-!" . shell-command))
-(put 'downcase-region 'disabled nil) ;; 去除每次执行此命令时的提示，强制执行
-(put 'upcase-region 'disabled nil)
-;; 与输入法切换键冲突
-;; (global-set-key (kbd "C-S-SPC") 'set-mark-command)
-;; (global-unset-key (kbd "C-SPC"))
+(defconst my/key-binding-file (my/get-user-emacs-file "key-bindings.el"))
+(my/load-file my/key-binding-file)
 
 ;; File Extension
 ;; (setq auto-mode-alist (cons '("\\.emacs\\'" . emacs-lisp-mode) auto-mode-alist))
 
-(winner-mode 1)
-(unbind-key "C-x o") ;; (other-window)
-(unbind-key "C-x <left>") ;; (previous-buffer)
-(unbind-key "C-x <right>") ;; (next-buffer)
-(bind-keys ("C-+" . enlarge-window)
-           ("C-_" . shrink-window)
-           ("C-=" . enlarge-window-horizontally)
-           ("C--" . shrink-window-horizontally))
 (use-package windmove
   :ensure t
-  :bind (("C-S-h" . windmove-left)
-         ("C-S-l" . windmove-right)
-         ("C-S-k" . windmove-up)
-         ("C-S-j" . windmove-down))
+  :commands (windmove-left
+             windmove-right
+             windmove-up
+             windmove-down)
   :config
   ;; <shift-up/down/left/right>
   (windmove-default-keybindings))
+
 (use-package winner
   :ensure t
-  :bind (("C-c w u" . winner-undo)
-         ("C-c w r" . winner-redo)))
+  :config
+  (winner-mode 1))
+
 (use-package buffer-move
-  :if (my/package-enabled-p 'buffer-move)
-  :bind (("C-c w h" . buf-move-left)
-         ("C-c w l" . buf-move-right)
-         ("C-c w k" . buf-move-up)
-         ("C-c w j" . buf-move-down)))
+  :commands (buf-move-left
+             buf-move-right
+             buf-move-up
+             buf-move-down)
+  :if (my/package-enabled-p 'buffer-move))
+
+(use-package zoom
+  :diminish zoom-mode
+  :commands (zoom)
+  :if (my/package-enabled-p 'zoom)
+  :init
+  (setq zoom-minibuffer-preserve-layout nil)
+  :config
+  ;; (zoom-mode 1)
+  )
 
 (use-package icomplete
   :if (not (my/package-enabled-p 'icomplete))
@@ -676,6 +660,54 @@
   (helm-autoresize-mode 1)
   (helm-mode 1))
 
+(use-package ediff
+  :after winner
+  :commands (ediff-current-file
+             ediff-files
+             ediff-files3
+             ediff-buffers
+             ediff-buffers3)
+  :if (my/package-enabled-p 'ediff)
+  :init
+  (setq ediff-window-setup-function 'ediff-setup-windows-plain
+        ediff-split-window-function 'split-window-horizontally
+        ediff-make-buffers-readonly-at-startup nil
+        ;; ediff-diff-options "" ;; "-w" = "##", "-i" = "#c"
+        ;; ediff-forward-word-function 'forward-char ;; "@", "*"
+        ediff-highlight-all-diffs nil)
+  (defun pkg/ediff/setup-keymap ()
+    ;; 可参考(ediff-setup-keymap)，或激活ediff后输入"?"
+    ;; (bind-keys :map ediff-mode-map)
+    ;; (unbind-key "" ediff-mode-map) ;; ()
+    )
+  (add-hook 'ediff-keymap-setup-hook 'pkg/ediff/setup-keymap t)
+  (add-hook 'ediff-after-quit-hook-internal 'winner-undo t))
+
+(use-package vdiff
+  :commands (vdiff-current-file
+             vdiff-files
+             vdiff-files3
+             vdiff-buffers
+             vdiff-buffers3)
+  :if (my/package-enabled-p 'vdiff)
+  :init
+  (setq vdiff-diff-algorithm (if (my/locate-exec "git") 'git-diff 'diff-u)
+        vdiff-diff3-command '("diff3")
+        vdiff-lock-scrolling t
+        vdiff-default-refinement-syntax-code "w"
+        vdiff-auto-refine nil
+        vdiff-subtraction-style 'full
+        vdiff-subtraction-fill-char ?\s
+        vdiff-disable-folding nil
+        vdiff-may-close-fold-on-point nil
+        vdiff-min-fold-size 4
+        vdiff-fold-padding 6
+        vdiff-fold-string-function 'vdiff-fold-string-default)
+  :config
+  (define-key vdiff-mode-map (kbd "C-c d") vdiff-mode-prefix-map)
+  (bind-keys :map vdiff-mode-map
+             ("C-c d h" . vdiff-hydra/body)))
+
 (use-package projectile
   :diminish projectile-mode
   :preface
@@ -717,41 +749,10 @@
     (add-hook 'pkg/projectile/switch-hook 'helm-projectile t)
     (helm-projectile-on)))
 
-(use-package ediff
-  :after winner
-  :demand t
-  :if (my/package-enabled-p 'ediff)
-  :init
-  (setq ediff-window-setup-function 'ediff-setup-windows-plain
-        ediff-split-window-function 'split-window-horizontally
-        ediff-diff-options "-w" ;; (ediff-toggle-skip-similar) ;; "##"
-        ;; "-i" ;; (ediff-toggle-ignore-case) ;; "#c"
-        ;; ediff-forward-word-function 'forward-char ;; "@", "*"
-        )
-  (defun pkg/ediff/setup-keymap ()
-    ;; 可参考(ediff-setup-keymap)，或激活ediff后输入"?"
-    ;; (bind-keys :map ediff-mode-map)
-    ;; (unbind-key "C-x f" ediff-mode-map) ;; ()
-    )
-  (add-hook 'ediff-keymap-setup-hook 'pkg/ediff/setup-keymap t)
-  (add-hook 'ediff-after-quit-hook-internal 'winner-undo t))
-
-(use-package vdiff
-  :if (my/package-enabled-p 'vdiff)
-  :config
-  (define-key vdiff-mode-map (kbd "C-c d") vdiff-mode-prefix-map)
-  ;; (bind-keys :map vdiff-mode-map
-  ;;             ("e" . vdiff-magit-dwim)
-  ;;             ("E" . vdiff-magit-popup))
-  )
-
 (use-package magit
   :if (my/package-enabled-p 'magit)
   :bind (("C-c g" . magit-status))
   :init
-  (when (eq system-type 'windows-nt)
-    (let ((path (my/locate-exec "git.exe" "Git")))
-      (when path (setq magit-git-executable path))))
   (setq magit-auto-revert-mode t
         magit-auto-revert-immediately t
         magit-auto-revert-tracked-only t
@@ -763,7 +764,8 @@
                 pvt/project/root-directories))
   :config
   (use-package vdiff-magit
-    :if (my/package-enabled-p 'vdiff-magit)
+    :if (and (my/package-enabled-p 'vdiff)
+             (my/package-enabled-p 'vdiff-magit))
     :config
     (bind-keys :map magit-mode-map
                ("e" . vdiff-magit-dwim)
@@ -771,24 +773,7 @@
     (setcdr (assoc ?e (plist-get magit-dispatch-popup :actions))
             '("vdiff dwim" 'vdiff-magit-dwim))
     (setcdr (assoc ?E (plist-get magit-dispatch-popup :actions))
-            '("vdiff popup" 'vdiff-magit-popup))
-    ;; This flag will default to using ediff for merges. vdiff-magit does not yet
-    ;; support 3-way merges. Please see the docstring of this variable for more
-    ;; information
-    ;; (setq vdiff-magit-use-ediff-for-merges nil)
-
-    ;; Whether vdiff-magit-dwim runs show variants on hunks.  If non-nil,
-    ;; vdiff-magit-show-staged or vdiff-magit-show-unstaged are called based on what
-    ;; section the hunk is in.  Otherwise, vdiff-magit-dwim runs vdiff-magit-stage
-    ;; when point is on an uncommitted hunk.  (setq vdiff-magit-dwim-show-on-hunks
-    ;; nil)
-
-    ;; Whether vdiff-magit-show-stash shows the state of the index.
-    ;; (setq vdiff-magit-show-stash-with-index t)
-
-    ;; Only use two buffers (working file and index) for vdiff-magit-stage
-    ;; (setq vdiff-magit-stage-is-2way nil)
-    ))
+            '("vdiff popup" 'vdiff-magit-popup))))
 
 (use-package sr-speedbar
   :if (my/package-enabled-p 'sr-speedbar)
@@ -806,14 +791,10 @@
              ("<tab>" . speedbar-edit-line)))
 
 (use-package bm
+  :commands (bm-next
+             bm-previous
+             bm-toggle)
   :if (my/package-enabled-p 'bm)
-  :bind (("C-c b m" . bookmark-set)
-         ("C-c b d" . bookmark-delete)
-         ("C-c b r" . bookmark-rename)
-         ("C-c b l" . bookmark-bmenu-list)
-         ("C-c b n" . bm-next)
-         ("C-c b p" . bm-previous)
-         ("C-c b t" . bm-toggle))
   :config
   (unbind-key "C-x r")
   (setq bm-marker 'bm-marker-left
@@ -837,6 +818,65 @@
     :demand t
     :if (my/package-enabled-p 'helm-bm)
     :bind (("C-c b b" . helm-bm))))
+
+(use-package treemacs
+  :commands (treemacs-select-window)
+  :if (my/package-enabled-p 'treemacs)
+  :init
+  (setq treemacs-python-executable          (my/locate-exec "python")
+        treemacs-persist-file               (my/set-user-emacs-file ".cache/treemacs")
+        treemacs-display-in-side-window     t
+        treemacs-is-never-other-window      t
+        treemacs-no-delete-other-windows    t
+        treemacs-position                   'left
+        treemacs-width                      35
+        treemacs-show-cursor                nil
+        treemacs-indentation                1
+        treemacs-indentation-string         " "
+        treemacs-sorting                    'alphabetic-desc
+        treemacs-show-hidden-files          nil
+        treemacs-no-png-images              nil
+        treemacs-space-between-root-nodes   nil
+        treemacs-collapse-dirs              (if treemacs-python-executable 3 0)
+        treemacs-follow-after-init          t
+        treemacs-project-follow-cleanup     nil
+        treemacs-recenter-after-file-follow nil
+        treemacs-recenter-after-tag-follow  nil
+        treemacs-follow-recenter-distance   0.2
+        treemacs-file-follow-delay          1
+        treemacs-file-event-delay           5000
+        treemacs-goto-tag-strategy          'refetch-index
+        treemacs-tag-follow-delay           1.5
+        treemacs-tag-follow-cleanup         t
+        treemacs-silent-refresh             t
+        treemacs-silent-filewatch           t
+        treemacs-deferred-git-apply-delay   0.5
+        treemacs-git-command-pipe           ""
+        treemacs-max-git-entries            5000)
+  :config
+  (treemacs-resize-icons 10)
+  ;; (treemacs-follow-mode 1)
+  ;; (treemacs-tag-follow-mode 1)
+  (treemacs-filewatch-mode 1)
+  (treemacs-fringe-indicator-mode 1)
+  (bind-keys :map treemacs-mode-map
+             ([mouse-1] . treemacs-single-click-expand-action))
+  (use-package treemacs-icons-dired
+    :ensure t
+    :config
+    (treemacs-icons-dired-mode))
+  (use-package treemacs-projectile
+    :after projectile
+    :if (my/package-enabled-p 'projectile))
+
+  ;; todo: key bindings
+  (pcase (cons (not (null (executable-find "git")))
+               (not (null (executable-find "python3"))))
+    (`(t . t)
+     (treemacs-git-mode 'deferred))
+    (`(t . _)
+     (treemacs-git-mode 'simple)))
+  )
 
 (use-package neotree
   :ensure all-the-icons
@@ -880,8 +920,8 @@
     (add-hook 'pkg/projectile/switch-hook 'neotree-projectile-action t)))
 
 (use-package org
-  :bind (("C-c o c" . org-capture)
-         ("C-c o a" . org-agenda))
+  :commands (org-capture
+             org-agenda)
   :init
   (setq org-src-fontify-natively t)
   :config
@@ -1028,6 +1068,17 @@
      (interactive)
      (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
                             '(1 "_NET_WM_STATE_MAXIMIZED_VERT" 0)))))
+
+(use-package dashboard
+  :if (my/package-enabled-p 'dashboard)
+  :init
+  (setq dashboard-banner-logo-title "Welcome to Emacs"
+        dashboard-startup-banner 'official
+        dashboard-items '((recents  . 10)
+                          (bookmarks . 10)
+                          (projects . 10)))
+  :config
+  (dashboard-setup-startup-hook))
 
 (use-package all-the-icons
   :ensure t

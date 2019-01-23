@@ -11,6 +11,7 @@
 *recentf*
 .history
 *ido.last*
+.*desktop*
 ac-comphist.dat
 bookmarks
 ede-projects.el
@@ -28,6 +29,7 @@ GPATH
 /semanticdb
 /site-lisp
 /bm-repository
+/.cache
 /.idea
 /.private
 /.python-environments
