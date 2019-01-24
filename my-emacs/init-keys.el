@@ -38,8 +38,6 @@
 ;; C-c C- :: tabbar
 ;; C-c h :: helm
 ;; C-c c :: helm-gtags
-;; C-c p :: projectile, helm-projectile
-;; C-c g :: magit
 ;; C-c , :: CEDET/Semantic
 ;; C-c . :: CEDET/EDE
 (bind-keys ("C-c w" . pkg/hydra/group/window/body) ;; window, windmove, winner, buffer-move, zoom
@@ -48,6 +46,7 @@
            ("C-c b" . pkg/hydra/group/bookmark/body) ;; bookmark, bm, helm-bm
            ("C-c d" . pkg/hydra/group/diff/body) ;; ediff, vdiff
            ("C-c o" . pkg/hydra/group/org/body) ;; org
+           ("C-c p" . pkg/hydra/group/project/body) ;; projectile, helm-projectile
            )
 
 (defhydra pkg/hydra/group/window (:timeout 10)
@@ -126,3 +125,81 @@
   ("c" org-capture "capture" :column "org mode")
   ("a" org-agenda  "agenda"                    )
   ("q" pkg/hydra/quit nil :exit t))
+
+(defhydra pkg/hydra/group/project (:timeout 10 :exit t)
+  "
+PROJECT: %(projectile-project-root)
+
+"
+  ("h"   helm-projectile                            "helm"        :column "project"  )
+  ("p"   helm-projectile-switch-project             "open"                           )
+  ("C-p" projectile-switch-project                  nil                              )
+  ("P"   projectile-switch-open-project             "switch"                         )
+  ("v"   projectile-vc                              "versions"                       )
+  ("x"   projectile-remove-known-project            "remove"                         )
+  ("X"   projectile-cleanup-known-projects          "cleanup"                        )
+  ("b"   helm-projectile-switch-to-buffer           "switch"      :column "buffer"   )
+  ("C-b" projectile-switch-to-buffer                nil                              )
+  ("k"   projectile-kill-buffers                    "kill"                           )
+  ("f"   helm-projectile-find-file                  "find"        :column "file"     )
+  ("C-f" projectile-find-file                       nil                              )
+  ("F"   helm-projectile-recentf                    "recent"                         )
+  ("l"   projectile-find-file-in-directory          "find in dir"                    )
+  ("C-r" projectile-recentf                         nil                              )
+  ("d"   helm-projectile-find-dir                   "find"        :column "directory")
+  ("C-d" projectile-find-dir                        nil                              )
+  ("D"   projectile-dired                           "dired"                          )
+  ("o"   projectile-multi-occur                     "occur"       :column "symbol"   )
+  ("r"   projectile-replace                         "replace"                        )
+  ("!"   projectile-run-shell-command-in-root       "run shell"   :column "command"  )
+  ("&"   projectile-run-async-shell-command-in-root "run shell &"                    )
+  ("q" pkg/hydra/quit nil :exit t))
+
+;; helm-projectile-ack
+;; helm-projectile-ag, projectile-ag, "a"
+;; helm-projectile-grep
+;; helm-projectile-browse-dirty-projects
+                                        ; C-c p ESC       projectile-project-buffers-other-buffer
+                                        ; C-c p C         projectile-configure-project
+                                        ; C-c p E         projectile-edit-dir-locals
+                                        ; C-c p F         projectile-find-file-in-known-projects
+                                        ; C-c p I         projectile-ibuffer
+                                        ; C-c p P         projectile-test-project
+                                        ; C-c p R         projectile-regenerate-tags
+                                        ; C-c p S         projectile-save-project-buffers
+                                        ; C-c p T         projectile-find-test-file
+                                        ; C-c p V         projectile-browse-dirty-projects
+                                        ; C-c p a         projectile-find-other-file
+                                        ; C-c p c         projectile-compile-project
+
+                                        ; C-c p i         projectile-invalidate-cache
+                                        ; C-c p j         projectile-find-tag
+                                        ; C-c p m         projectile-commander
+
+                                        ; C-c p t         projectile-toggle-between-implementation-and-test
+                                        ; C-c p u         projectile-run-project
+
+                                        ; C-c p z         projectile-cache-current-file
+                                        ; C-c p <left>    projectile-previous-project-buffer
+                                        ; C-c p <right>   projectile-next-project-buffer
+
+                                        ; C-c p s g       projectile-grep
+                                        ; C-c p s r       projectile-ripgrep
+                                        ; C-c p s s       projectile-ag
+
+                                        ; C-c p 5 D       projectile-dired-other-frame
+                                        ; C-c p 5 a       projectile-find-other-file-other-frame
+                                        ; C-c p 5 b       projectile-switch-to-buffer-other-frame
+                                        ; C-c p 5 d       projectile-find-dir-other-frame
+                                        ; C-c p 5 f       projectile-find-file-other-frame
+                                        ; C-c p 5 g       projectile-find-file-dwim-other-frame
+                                        ; C-c p 5 t       projectile-find-implementation-or-test-other-frame
+
+                                        ; C-c p 4 C-o     projectile-display-buffer
+                                        ; C-c p 4 D       projectile-dired-other-window
+                                        ; C-c p 4 a       projectile-find-other-file-other-window
+                                        ; C-c p 4 b       projectile-switch-to-buffer-other-window
+                                        ; C-c p 4 d       projectile-find-dir-other-window
+                                        ; C-c p 4 f       projectile-find-file-other-window
+                                        ; C-c p 4 g       projectile-find-file-dwim-other-window
+                                        ; C-c p 4 t       projectile-find-implementation-or-test-other-window

@@ -201,7 +201,7 @@
         treemacs-no-delete-other-windows    t
         treemacs-position                   'left
         treemacs-width                      35
-        treemacs-show-cursor                nil
+        treemacs-show-cursor                t
         treemacs-indentation                1
         treemacs-indentation-string         " "
         treemacs-sorting                    'alphabetic-desc
@@ -229,7 +229,8 @@
   ;; (treemacs-follow-mode 1)
   ;; (treemacs-tag-follow-mode 1)
   (treemacs-filewatch-mode 1)
-  (treemacs-fringe-indicator-mode 1)
+  (when (not treemacs-show-cursor)
+    (treemacs-fringe-indicator-mode 1))
   (bind-keys :map treemacs-mode-map
              ([mouse-1] . treemacs-single-click-expand-action))
   (use-package treemacs-icons-dired
