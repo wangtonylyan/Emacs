@@ -1,5 +1,7 @@
 ;; -*- coding: utf-8 -*-
 
+;; <shift-up/down/left/right>
+
 ;; 与输入法切换键冲突
 ;; (global-set-key (kbd "C-S-SPC") 'set-mark-command)
 ;; (global-unset-key (kbd "C-SPC"))
@@ -78,6 +80,7 @@
   ("q" pkg/hydra/quit nil :exit t))
 
 (defhydra pkg/hydra/group/neotree (:timeout 10 :exit t)
+  ("t" pkg/neotree/toggle "select")
   ("q" pkg/hydra/quit nil :exit t))
 
 (defhydra pkg/hydra/group/highlight (:timeout 10)
