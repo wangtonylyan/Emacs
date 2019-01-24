@@ -259,39 +259,52 @@
   (package-initialize) ;; 方式2) 主动执行该函数以加载插件
   ;; 目前使用此全局变量来管理插件的启用/禁用，其中包括了ELPA更新源中所没有的插件
   (setq package-selected-packages '(;; [UI]
+                                    all-the-icons
+                                    diminish
                                     dashboard
                                     nyan-mode
-                                    ;; all-the-icons-dired
                                     spaceline ;; spaceline-all-the-icons, smart-mode-line
                                     doom-themes ;; atom-one-dark-theme, github-theme, solarized-theme, zenburn-theme
-                                    ;; doom-themes-neotree
-                                    rainbow-delimiters
-                                    ;; rainbow-identifiers ;; 会覆盖配色主题所使用的字体颜色
-                                    highlight-thing
                                     beacon
                                     ;; nlinum-hl
                                     ;; yascroll
-                                    tabbar
-                                    treemacs ;; neotree, sr-speedbar, ecb
                                     ;; sublimity, minimap
-                                    ;; fill-column-indicator, whitespace
+                                    ;; [Layout]
+                                    tabbar ;; awesome-tab
+                                    treemacs ;; neotree, sr-speedbar, ecb
                                     buffer-move
-                                    zoom
                                     ;; dimmer
+                                    zoom
                                     ;; [Edit]
-                                    hydra
+                                    ;; fill-column-indicator, whitespace
+                                    rainbow-delimiters
+                                    ;; rainbow-identifiers ;; 会覆盖配色主题所使用的字体颜色
+                                    highlight-thing
                                     avy ;; ace-jump-mode
                                     ;; ace-pinyin
                                     undo-tree
                                     smart-hungry-delete
                                     paredit
                                     ;; evil
+                                    flyspell
+                                    ;; flyspell-correct-helm
+
+
+                                    ;; [Tools]
+                                    ;; all-the-icons-dired
+                                    hydra
                                     bm
                                     helm-bm
                                     helm ;; icomplete, anything, ido, smex, ivy
-                                    flyspell
-                                    ;; flyspell-correct-helm
                                     ediff ;; vdiff
+
+                                    ;; [Project]
+                                    projectile ;; eproject
+                                    helm-projectile
+                                    magit
+                                    ;; vdiff-magit
+
+
                                     ;; [Programming]
                                     yasnippet
                                     flycheck ;; flymake
@@ -300,16 +313,11 @@
                                     company-jedi
                                     helm-gtags ;; ggtags
                                     asn1-mode
-                                    ;; [Project]
-                                    projectile ;; eproject
-                                    helm-projectile
-                                    magit
-                                    ;; vdiff-magit
+                                    ;; [C, C++]
+                                    ;; stickyfunc-enhance
                                     cmake-mode ;; cmake-ide, cmake-project
                                     cmake-font-lock
-                                    ;; [C, C++]
                                     cpputils-cmake
-                                    ;; stickyfunc-enhance
                                     ;; [Python]
                                     ;; elpy ;; ropemacs
                                     ;; flycheck-pyflakes
@@ -367,24 +375,6 @@
   ;; 目前发现启用此项会导致，Hydra子窗口过小，无法完整地呈现提示文字
   ;; 此外，启用全局的zoom mode似乎也可以避免该问题
   (setq hydra-lv nil))
-
-
-
-
-
-
-
-(use-package flyspell
-  :if (and (my/package-enabled-p 'flyspell)
-           (my/locate-exec "aspell"))
-  :config
-  (setq ispell-program-name (my/locate-exec "aspell") ;; 设置后台支持程序
-        ;; ispell-dictionary "english" ;; default dictionary
-        ;; ispell-personal-dictionary ""
-        flyspell-issue-message-flag nil)
-  (my/add-mode-hook "text" flyspell-mode)
-  ;; (my/add-mode-hook "prog" flyspell-prog-mode)
-  (add-to-list 'ispell-skip-region-alist '("^#+BEGIN" . "^#+END") t))
 
 ;; =============================================================================
 ;; 配置杂项
@@ -541,10 +531,6 @@
 ;; File Extension
 ;; (setq auto-mode-alist (cons '("\\.emacs\\'" . emacs-lisp-mode) auto-mode-alist))
 
-
-
-
-
 (use-package icomplete
   :if (not (my/package-enabled-p 'icomplete))
   :config
@@ -670,38 +656,26 @@
 
 (use-package projectile
   :diminish projectile-mode
+  :ensure t
   :preface
   (defvar pkg/projectile/switch-hook)
   (defun pkg/projectile/switch-action ()
     (run-hooks 'pkg/projectile/switch-hook))
-  :if (my/package-enabled-p 'projectile)
   :init
   (setq projectile-indexing-method 'alien
         projectile-enable-caching t
         projectile-project-search-path pvt/project/root-directories
         projectile-switch-project-action 'pkg/projectile/switch-action)
   :config
-  ;; 输入"C-c p C-h"可以查询所有'projectile-mode-map中的快捷键，常用的有
-  ;; p :: (helm-projectile-switch-project)
-  ;; d :: (helm-projectile-find-dir)
-  ;; D :: (projectile-dired)
-  ;; f :: (helm-projectile-find-file)
-  ;; l :: (projectile-find-file-in-directory)
-  ;; b :: (helm-projectile-switch-to-buffer)
-  ;; k :: (projectile-kill-buffers)
-  ;; o :: (projectile-multi-occur)
-  ;; r :: (projectile-replace)
-  ;; e :: (helm-projectile-recentf)
-  ;; ! :: (projectile-run-shell-command-in-root)
-  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+  ;; (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
   (projectile-mode 1)
   ;; (add-to-list 'projectile-other-file-alist '("html" "js"))
   ;; 使用helm-projectile包装原projectile插件
   ;; 包括替换'projectile-mode-map中的快捷键
   (use-package helm-projectile
+    :ensure t
     :after helm
     :demand t ;; 初始化后就立即启用，基于project的方式管理各类文件
-    :if (my/package-enabled-p 'helm-projectile)
     :init
     (setq helm-projectile-fuzzy-match t
           projectile-completion-system 'helm)
@@ -710,8 +684,8 @@
     (helm-projectile-on)))
 
 (use-package magit
+  :commands (magit-status)
   :if (my/package-enabled-p 'magit)
-  :bind (("C-c g" . magit-status))
   :init
   (setq magit-auto-revert-mode t
         magit-auto-revert-immediately t
@@ -734,8 +708,6 @@
             '("vdiff dwim" 'vdiff-magit-dwim))
     (setcdr (assoc ?E (plist-get magit-dispatch-popup :actions))
             '("vdiff popup" 'vdiff-magit-popup))))
-
-
 
 (use-package bm
   :commands (bm-next
@@ -766,7 +738,6 @@
     :if (my/package-enabled-p 'helm-bm)
     :bind (("C-c b b" . helm-bm))))
 
-
 (use-package org
   :commands (org-capture
              org-agenda)
@@ -774,92 +745,6 @@
   (setq org-src-fontify-natively t)
   :config
   (my/add-mode-hook "org" 'org-indent-mode))
-
-(use-package ace-jump-mode
-  :if (my/package-enabled-p 'ace-jump-mode)
-  :bind (("C-:" . ace-jump-mode-pop-mark)
-         ("C-'" . ace-jump-char-mode))
-  :config
-  (ace-jump-mode-enable-mark-sync))
-
-(use-package avy
-  :if (my/package-enabled-p 'avy)
-  :bind (("C-:" . avy-goto-char-timer) ;; (avy-goto-char)
-         ("C-'" . avy-pop-mark))
-  :config
-  ;; (avy-setup-default)
-  (setq avy-timeout-seconds 0.5))
-
-(use-package ace-pinyin
-  :preface
-  (defvar pkg/ace-pinyin/enabled-p
-    (or (my/package-enabled-p 'ace-jump-mode)
-        (my/package-enabled-p 'avy)))
-  :if (and pkg/ace-pinyin/enabled-p
-           (my/package-enabled-p 'ace-pinyin))
-  :config
-  (when (eq pkg/ace-pinyin/enabled-p 'ace-jump-mode)
-    (setq ace-pinyin-use-avy nil))
-  (ace-pinyin-global-mode 1))
-
-(use-package undo-tree
-  :diminish undo-tree-mode
-  :if (my/package-enabled-p 'undo-tree)
-  :init
-  (setq undo-tree-visualizer-diff nil
-        undo-tree-visualizer-relative-timestamps nil)
-  :config
-  (bind-keys :map undo-tree-visualizer-mode-map
-             ("<return>" . undo-tree-visualizer-quit)
-             ("C-p" . undo-tree-visualize-undo-to-x)
-             ("C-n" . undo-tree-visualize-redo-to-x))
-  (unbind-key "C-_" undo-tree-map)
-  (global-undo-tree-mode 1))
-
-(use-package smart-hungry-delete
-  :ensure t
-  :if (my/package-enabled-p 'smart-hungry-delete)
-  :bind (("<backspace>" . smart-hungry-delete-backward-char)
-         ("C-d" . smart-hungry-delete-forward-char))
-  :config
-  (smart-hungry-delete-add-default-hooks))
-
-(use-package paredit
-  :diminish paredit-mode
-  :if (my/package-enabled-p 'paredit)
-  :config
-  (mapc (lambda (mode)
-          (my/add-mode-hook mode 'enable-paredit-mode))
-        '("org" "lisp" "elisp" "ilisp" "slime" "scheme")))
-
-(use-package highlight-thing
-  :diminish highlight-thing-mode
-  :if (my/package-enabled-p 'highlight-thing)
-  :init
-  (setq highlight-thing-what-thing 'symbol
-        highlight-thing-exclude-thing-under-point t
-        highlight-thing-delay-seconds 0.5
-        highlight-thing-limit-to-defun nil
-        highlight-thing-case-sensitive-p t)
-  :config
-  ;; (global-hl-line-mode -1)
-  (my/add-mode-hook "text" 'hl-line-mode)
-  (my/add-mode-hook "prog" 'highlight-thing-mode))
-
-(use-package evil
-  :if (my/package-enabled-p 'evil)
-  :config
-  (bind-keys :map evil-normal-state-map
-             ("q" . read-only-mode)
-             ("C-a" . move-beginning-of-line)
-             ("C-e" . move-end-of-line)
-             ("C-S-h" . evil-window-left)
-             ("C-S-l" . evil-window-right)
-             ("C-S-j" . evil-window-down)
-             ("C-S-k" . evil-window-up)
-             ("C-v" . evil-scroll-page-down)
-             ("M-v" . evil-scroll-page-up))
-  (evil-mode 1))
 
 (use-package eshell
   :config
@@ -887,7 +772,7 @@
 ;; 加载其他配置文件
 (mapc (lambda (file)
         (my/load-file (my/set-user-emacs-file file t)))
-      '(;; [programming]
+      '("init-edit"
         "prog" ;; prog-mode
         "prog-cc" ;; cc-mode
         ;; lisp-mode, emacs-lisp-mode, lisp-interaction-mode,
@@ -895,54 +780,10 @@
         "prog-fun"
         ;; "prog-py" ;; python-mode
         ;; "prog-web" ;; web-mode
-        ;; [others]
         ;; "text-tex" ;; tex-mode, latex-mode
         ;; "web-browser" ;; web browser
-        ;; [initialization]
-        "init-keys"
         "init-ui"
-        ))
-
-
-
-
-
-
-
-
-
-
-
-;; 嵌套的括号通过大小而不仅是颜色来进行区分
-(use-package rainbow-delimiters
-  :if (my/package-enabled-p 'rainbow-delimiters)
-  :config
-  (my/add-mode-hook "prog" 'rainbow-delimiters-mode))
-
-;; 修改默认字体颜色，从而将文字与符号区分开来
-(use-package rainbow-identifiers
-  :if (my/package-enabled-p 'rainbow-identifiers)
-  :init
-  (setq rainbow-identifiers-face-count 1)
-  :config
-  (my/add-mode-hook "prog" 'rainbow-identifiers-mode))
-
-(use-package whitespace
-  :if (my/package-enabled-p 'whitespace)
-  :init
-  (setq whitespace-style '(face lines-tail)
-        whitespace-line-column 80))
-
-(use-package fill-column-indicator
-  :if (my/package-enabled-p 'fill-column-indicator)
-  :init
-  (setq fci-rule-use-dashes nil
-        fci-rule-column 100)
-  :config
-  (define-globalized-minor-mode global-fci-mode fci-mode
-    ;; 避免在special buffers、dired、shell等特殊模式下启用
-    (lambda () (when buffer-file-name (fci-mode 1))))
-  (global-fci-mode 1))
+        "init-keys"))
 
 ;; =============================================================================
 (use-package pdf-tools
