@@ -293,9 +293,9 @@
                                     ;; [Tools]
                                     ;; all-the-icons-dired
                                     hydra
+                                    helm ;; icomplete, anything, ido, smex, ivy
                                     bm
                                     helm-bm
-                                    helm ;; icomplete, anything, ido, smex, ivy
                                     ediff ;; vdiff
 
                                     ;; [Project]
@@ -556,30 +556,29 @@
   (smex-initialize))
 
 (use-package helm
-  :if (my/package-enabled-p 'helm)
-  ;; Helm提供了一套在功能上与部分Emacs原生命令相重合的命令集
-  ;; 并将其默认绑定在了以'helm-command-prefix-key为前缀的快捷键集中
-  ;; 可以通过输入该前缀来触发相关命令
-  :bind (("C-c h" . helm-command-prefix) ;; 替换前缀
-         ;; 也可以将部分常用命令直接替换Emacs原快捷键
-         ("M-x" . helm-M-x)
-         ("M-y" . helm-show-kill-ring)
-         ("C-x C-f" . helm-find-files)
-         ("C-x C-r" . helm-recentf)
-         ("C-x b" . helm-mini)
-         ("C-x C-b" . helm-buffers-list)
-         ("C-o" . helm-occur))
   :diminish helm-mode
+  :ensure t
+  :commands (helm-command-prefix
+             helm-M-x
+             helm-show-kill-ring
+             helm-find-files
+             helm-recentf
+             helm-mini
+             helm-buffers-list
+             helm-occur)
+  :if (my/package-enabled-p 'helm)
   :init
   (require 'helm-config)
-  (setq helm-split-window-side-p t
+  (setq helm-split-window-inside-p t
+        helm-full-frame nil
+        helm-use-frame-when-more-than-two-windows nil
         helm-display-header-line nil
         helm-echo-input-in-header-line nil
         helm-autoresize-max-height 30
         helm-autoresize-min-height 0
         helm-ff-search-library-in-sexp t
         helm-ff-file-name-history-use-recentf t
-        helm-mode-fuzzy-match nil ;; global
+        helm-mode-fuzzy-match nil ;; globally disabled
         helm-M-x-fuzzy-match t
         helm-buffers-fuzzy-matching t
         helm-recentf-fuzzy-match t
@@ -599,7 +598,7 @@
   (bind-keys :map helm-map
              ("<tab>" . helm-execute-persistent-action)
              ("M-x" . helm-select-action)
-             ("<C-tab>" . helm-follow-mode)
+             ;; ("C-c C-f" . helm-follow-mode)
              :map minibuffer-local-map
              ("M-p" . helm-minibuffer-history)
              ("M-n" . helm-minibuffer-history))
@@ -657,6 +656,7 @@
 (use-package projectile
   :diminish projectile-mode
   :ensure t
+  :defer t
   :preface
   (defvar pkg/projectile/switch-hook)
   (defun pkg/projectile/switch-action ()
@@ -675,10 +675,10 @@
   (use-package helm-projectile
     :ensure t
     :after helm
-    :demand t ;; 初始化后就立即启用，基于project的方式管理各类文件
+    :commands (helm-projectile)
     :init
-    (setq helm-projectile-fuzzy-match t
-          projectile-completion-system 'helm)
+    (setq projectile-completion-system 'helm
+          helm-projectile-fuzzy-match t)
     :config
     (add-hook 'pkg/projectile/switch-hook 'helm-projectile t)
     (helm-projectile-on)))
