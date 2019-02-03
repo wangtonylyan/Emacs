@@ -194,42 +194,44 @@
   :commands (treemacs-select-window)
   :if (my/package-enabled-p 'treemacs)
   :init
-  (setq treemacs-python-executable          (my/locate-exec "python")
-        treemacs-persist-file               (my/set-user-emacs-file ".cache/treemacs-persist")
-        treemacs-display-in-side-window     t
-        treemacs-is-never-other-window      t
-        treemacs-no-delete-other-windows    t
-        treemacs-position                   'left
-        treemacs-width                      35
-        treemacs-show-cursor                t
-        treemacs-indentation                1
-        treemacs-indentation-string         " "
-        treemacs-sorting                    'alphabetic-desc
-        treemacs-show-hidden-files          nil
-        treemacs-no-png-images              nil
-        treemacs-space-between-root-nodes   nil
-        treemacs-collapse-dirs              (if treemacs-python-executable 3 0)
-        treemacs-follow-after-init          t
-        treemacs-project-follow-cleanup     nil
+  (setq treemacs-python-executable (or (my/locate-exec "python3")
+                                       (my/locate-exec "python"))
+        treemacs-persist-file (my/set-user-emacs-file ".cache/treemacs-persist")
+        treemacs-display-in-side-window t
+        treemacs-is-never-other-window nil
+        treemacs-no-delete-other-windows t
+        treemacs-position 'left
+        treemacs-width 35
+        treemacs-show-cursor t
+        treemacs-indentation 1
+        treemacs-indentation-string " "
+        treemacs-sorting 'alphabetic-desc
+        treemacs-show-hidden-files nil
+        treemacs-no-png-images nil
+        treemacs-space-between-root-nodes nil
+        treemacs-collapse-dirs (if treemacs-python-executable 3 0)
+        treemacs-follow-after-init t
+        treemacs-project-follow-cleanup nil
         treemacs-recenter-after-file-follow nil
-        treemacs-recenter-after-tag-follow  nil
-        treemacs-follow-recenter-distance   0.2
-        treemacs-file-follow-delay          1
-        treemacs-file-event-delay           5000
-        treemacs-goto-tag-strategy          'refetch-index
-        treemacs-tag-follow-delay           1.5
-        treemacs-tag-follow-cleanup         t
-        treemacs-silent-refresh             t
-        treemacs-silent-filewatch           t
-        treemacs-deferred-git-apply-delay   0.5
-        treemacs-git-command-pipe           ""
-        treemacs-max-git-entries            5000)
+        treemacs-recenter-after-tag-follow nil
+        treemacs-follow-recenter-distance 0.2
+        treemacs-file-follow-delay 1
+        treemacs-file-event-delay 5000
+        treemacs-goto-tag-strategy 'refetch-index
+        treemacs-tag-follow-delay 1.5
+        treemacs-tag-follow-cleanup t
+        treemacs-silent-refresh t
+        treemacs-silent-filewatch t
+        treemacs-deferred-git-apply-delay 0.5
+        treemacs-git-command-pipe ""
+        treemacs-max-git-entries 5000)
   :config
   (treemacs-resize-icons 10)
   ;; (treemacs-follow-mode 1)
   ;; (treemacs-tag-follow-mode 1)
   (treemacs-filewatch-mode 1)
   (when (not treemacs-show-cursor)
+    ;; 该子模式似乎并不完善，不建议启用
     (treemacs-fringe-indicator-mode 1))
   (bind-keys :map treemacs-mode-map
              ([mouse-1] . treemacs-single-click-expand-action))
@@ -240,15 +242,9 @@
   (use-package treemacs-projectile
     :after projectile
     :if (my/package-enabled-p 'projectile))
-
-  ;; todo: key bindings
-  (pcase (cons (not (null (executable-find "git")))
-               (not (null (executable-find "python3"))))
-    (`(t . t)
-     (treemacs-git-mode 'deferred))
-    (`(t . _)
-     (treemacs-git-mode 'simple)))
-  )
+  (when (and (my/locate-exec "git")
+             (my/locate-exec "python3"))
+    (treemacs-git-mode 'deferred)))
 
 (use-package neotree
   :ensure all-the-icons

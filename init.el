@@ -301,6 +301,7 @@
                                     ;; [Project]
                                     projectile ;; eproject
                                     helm-projectile
+                                    treemacs-projectile
                                     magit
                                     ;; vdiff-magit
 
@@ -685,7 +686,8 @@
 
 (use-package magit
   :commands (magit-status)
-  :if (my/package-enabled-p 'magit)
+  :if (and (my/package-enabled-p 'magit)
+           (my/locate-exec "git"))
   :init
   (setq magit-auto-revert-mode t
         magit-auto-revert-immediately t
