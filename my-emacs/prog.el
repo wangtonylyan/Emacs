@@ -256,7 +256,7 @@
     (use-package flycheck-haskell
       :if (my/package-enabled-p 'flycheck-haskell)
       :init
-      (my/add-mode-hook "flycheck" 'flycheck-haskell-setup))
+      (my/add-mode-hook "flycheck" #'flycheck-haskell-setup))
     (defun pkg/flycheck/haskell-mode-hook ()
       (when (and (pkg/flycheck/checker-enabled-p 'haskell-hlint)
                  (my/locate-exec "hlint"))

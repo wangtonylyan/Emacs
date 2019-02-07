@@ -22,7 +22,7 @@
         ;; (when (fboundp 'slime-mode))
         (slime-mode 1) ;; 启用smile-mode
         (save-excursion (slime))) ;; 启动SBCL，并连接Swank
-      (my/add-mode-hook "lisp" 'pkg/lispbox/start))))
+      (my/add-mode-hook "lisp" #'pkg/lispbox/start))))
 
 
 (eval-after-load 'lisp-mode ;; /lisp/emacs-lisp/lisp-mode.el
@@ -42,7 +42,7 @@
   (setq sml-indent-level 2)
   (defun pkg/sml-mode/sml-mode-hook ()
     (setq indent-tabs-mode nil))
-  (my/add-mode-hook "sml" 'pkg/sml-mode/sml-mode-hook)
+  (my/add-mode-hook "sml" #'pkg/sml-mode/sml-mode-hook)
   :config
   (bind-keys :map sml-mode-map
              ("M-SPC" . just-one-space)))
@@ -73,7 +73,7 @@
           ;; haskell-compile-cabal-build-command
           ;; haskell-compile-cabal-build-alt-command
           haskell-compile-command "stack ghc %s")
-    (my/add-mode-hook "haskell" 'pkg/haskell-mode/start)
+    (my/add-mode-hook "haskell" #'pkg/haskell-mode/start)
     :config
     (bind-keys :map haskell-mode-map
                ("M-." . haskell-mode-jump-to-def-or-tag) ;; (haskell-mode-tag-find)
@@ -94,12 +94,12 @@
         (progn
           (use-package hindent
             :commands (hindent-mode))
-          (my/add-mode-hook "haskell" 'hindent-mode))
-      (my/add-mode-hook "haskell" 'haskell-indentation-mode) ;; (turn-on-haskell-indent(ation))
+          (my/add-mode-hook "haskell" #'hindent-mode))
+      (my/add-mode-hook "haskell" #'haskell-indentation-mode) ;; (turn-on-haskell-indent(ation))
       )
-    (my/add-mode-hook "haskell" 'haskell-doc-mode) ;; (turn-on-haskell-doc-(mode))
-    ;; (my/add-mode-hook "haskell" 'turn-on-haskell-unicode-input-method)
-    ;; (my/add-mode-hook "haskell" 'haskell-auto-insert-module-template)
+    (my/add-mode-hook "haskell" #'haskell-doc-mode) ;; (turn-on-haskell-doc-(mode))
+    ;; (my/add-mode-hook "haskell" #'turn-on-haskell-unicode-input-method)
+    ;; (my/add-mode-hook "haskell" #'haskell-auto-insert-module-template)
     ))
 
 (defun pkg/haskell-mode/start ()

@@ -130,56 +130,6 @@
   (load-theme 'zenburn t))
 
 
-(use-package beacon
-  :if (my/package-enabled-p 'beacon)
-  :config
-  (beacon-mode 1))
-
-(use-package nlinum-hl
-  :if (my/package-enabled-p 'nlinum-hl)
-  :config
-  (run-with-idle-timer 5 t 'nlinum-hl-flush-window)
-  (run-with-idle-timer 30 t 'nlinum-hl-flush-all-windows)
-  (add-hook 'focus-in-hook 'nlinum-hl-flush-all-windows)
-  (add-hook 'focus-out-hook 'nlinum-hl-flush-all-windows)
-  (advice-add 'select-window :before 'nlinum-hl-do-flush)
-  (advice-add 'select-window :after 'nlinum-hl-do-flush))
-
-(use-package yascroll
-  :if (my/package-enabled-p 'yascroll)
-  :init
-  (setq yascroll:delay-to-hide nil)
-  :config
-  (add-to-list 'yascroll:disabled-modes 'neotree-mode)
-  (global-yascroll-bar-mode 1))
-
-(use-package sublimity
-  :if (my/package-enabled-p 'sublimity)
-  :init
-  (setq sublimity-map-size 17
-        sublimity-map-max-fraction 0.2
-        sublimity-map-text-scale -7)
-  :config
-  ;; (require 'sublimity-scroll)
-  ;; (require 'sublimity-attractive)
-  (require 'sublimity-map nil t)
-  (sublimity-map-set-delay 5)
-  (sublimity-mode 1))
-
-(use-package minimap
-  :if (my/package-enabled-p 'minimap)
-  :config
-  (setq minimap-always-recenter nil ;; 设置为nil才有效?
-        minimap-recenter-type 'middle
-        minimap-buffer-name-prefix "MINI" ;; 不能为空，否则无法启动minimap窗口
-        minimap-hide-fringes t
-        minimap-hide-scroll-bar t
-        minimap-update-delay 1.0
-        minimap-window-location 'left
-        minimap-display-semantic-overlays nil
-        minimap-enlarge-certain-faces nil))
-
-
 (use-package tabbar
   :if (my/package-enabled-p 'tabbar)
   :config
@@ -284,7 +234,7 @@
              ("u" . neotree-select-up-node)
              ("a" . neotree-hidden-file-toggle))
   (when (my/package-enabled-p 'projectile)
-    (add-hook 'pkg/projectile/switch-hook 'neotree-projectile-action t)))
+    (add-hook 'pkg/projectile/switch-hook #'neotree-projectile-action t)))
 
 (use-package windmove
   :ensure t
