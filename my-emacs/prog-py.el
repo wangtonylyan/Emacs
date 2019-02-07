@@ -39,11 +39,11 @@
             ;; python-shell-completion-module-string-code "';'.join(module_completion('''%s'''))\n"
             ;; python-shell-completion-string-code "';'.join(get_ipython().Completer.all_completions('''%s'''))\n"
             )
-      (my/prog-py/add-start-hook 'pkg/python/start)
+      (my/prog-py/add-start-hook #'pkg/python/start)
       :config
       (bind-keys :map python-mode-map
                  ("<backspace>" . python-indent-dedent-line-backspace))
-      (my/del-mode-hook "python" 'wisent-python-default-setup))))
+      (my/del-mode-hook "python" #'wisent-python-default-setup))))
 
 (defun pkg/python/start ()
   )
@@ -73,7 +73,7 @@
     :commands (elpy-enable elpy-mode)
     :init
     (eval-after-load 'python '(elpy-enable))
-    (my/prog-py/add-start-hook 'pkg/elpy/start)
+    (my/prog-py/add-start-hook #'pkg/elpy/start)
     :config ;; (elpy-config)
     (bind-keys :map elpy-mode-map
                ("C-c C-c" . elpy-shell-send-region-or-buffer))
@@ -87,13 +87,13 @@
     ;; elpy默认支持并使用Emacs内置的flymake，但可随意地切换成flycheck
     (with-eval-after-load 'flycheck
       (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-      (my/add-mode-hook "elpy" 'flycheck-mode-on-safe))
+      (my/add-mode-hook "elpy" #'flycheck-mode-on-safe))
     (use-package py-autopep8
       :if (and (my-func-package-enabled-p 'py-autopep8)
                (executable-find "autopep8"))
       :commands (py-autopep8-enable-on-save)
       :init
-      (my/add-mode-hook "elpy" 'py-autopep8-enable-on-save))
+      (my/add-mode-hook "elpy" #'py-autopep8-enable-on-save))
     ;; ELPY所默认依赖的插件，基于Python库virtualenvwrapper
     (use-package pyvenv
       ;; 目前使用virtualenvwrapper插件替代
@@ -174,7 +174,7 @@
   (pkg/elpy/init)
   ;; (my-plugin-ropemacs-init)
   ;; (my-plugin-auto-virtualenvwrapper-init)
-  (my/add-mode-hook "python" 'my/prog-py/start))
+  (my/add-mode-hook "python" #'my/prog-py/start))
 
 (defun my/prog-py/start ()
   (prettify-symbols-mode 1)

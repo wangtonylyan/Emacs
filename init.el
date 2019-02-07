@@ -258,36 +258,37 @@
   (setq package-enable-at-startup nil) ;; 方式1) 随Emacs的启动而自动加载插件
   (package-initialize) ;; 方式2) 主动执行该函数以加载插件
   ;; 目前使用此全局变量来管理插件的启用/禁用，其中包括了ELPA更新源中所没有的插件
-  (setq package-selected-packages '(;; [UI]
+  (setq package-selected-packages '(;;;; [UI]
                                     all-the-icons
                                     diminish
                                     dashboard
                                     nyan-mode
                                     spaceline ;; spaceline-all-the-icons, smart-mode-line
-                                    doom-themes ;; atom-one-dark-theme, github-theme, solarized-theme, zenburn-theme
-                                    beacon
-                                    ;; nlinum-hl
-                                    ;; yascroll
-                                    ;; sublimity, minimap
-                                    ;; [Layout]
+                                    doom-themes ;; solarized-theme, zenburn-theme
+                                    ;;;; [window]
                                     tabbar ;; awesome-tab
                                     treemacs ;; neotree, sr-speedbar, ecb
                                     buffer-move
                                     ;; dimmer
                                     zoom
-                                    ;; [Edit]
+                                    ;;;; [frame]
+                                    beacon
+                                    ;; nlinum-hl
+                                    ;; yascroll
+                                    ;; sublimity, minimap
                                     ;; fill-column-indicator, whitespace
                                     rainbow-delimiters
                                     ;; rainbow-identifiers ;; 会覆盖配色主题所使用的字体颜色
                                     highlight-thing
+                                    ;;;; [Edit]
+                                    flyspell-correct ;; flyspell
+                                    flyspell-correct-helm
                                     avy ;; ace-jump-mode
                                     ;; ace-pinyin
                                     undo-tree
                                     smart-hungry-delete
-                                    paredit
+                                    paredit ;; parinfer
                                     ;; evil
-                                    flyspell
-                                    ;; flyspell-correct-helm
 
 
                                     ;; [Tools]
@@ -304,7 +305,6 @@
                                     treemacs-projectile
                                     magit
                                     ;; vdiff-magit
-
 
                                     ;; [Programming]
                                     yasnippet
@@ -345,7 +345,8 @@
 
 (eval-when-compile
   ;; disabled, diminish
-  ;; ensure, after, demand, defer, commands
+  ;; ensure, after, demand
+  ;; defer, commands, binds
   ;; preface, if, init, config
   (require 'use-package))
 (require 'bind-key)
@@ -458,9 +459,9 @@
 
 ;; -----------------------------------------------------------------------------
 (global-font-lock-mode 1) ;; 语法高亮
-;; (add-hook 'xxx-mode-hook 'turn-on-font-lock) ;; (font-lock-mode 1)
+;; (add-hook 'xxx-mode-hook #'turn-on-font-lock) ;; (font-lock-mode 1)
 ;; (global-linum-mode 1) ;; 左侧行号，推荐仅将其显示于主要的编辑文档中
-;; (add-hook 'xxx-mode-hook 'linum-mode)
+;; (add-hook 'xxx-mode-hook #'linum-mode)
 (global-hi-lock-mode 1)
 (global-hl-line-mode 1)
 ;; (global-highlight-changes-mode 1)
@@ -471,7 +472,7 @@
 (column-number-mode 1) ;; 在mode-line显示列数
 (scroll-bar-mode -1) ;; 取消滚动条
 (global-visual-line-mode -1) ;; 对中文支持不好
-(my/add-mode-hook "text" 'visual-line-mode)
+(my/add-mode-hook "text" #'visual-line-mode)
 (show-paren-mode 1) ;; 显示匹配的左右括号
 (electric-pair-mode -1)
 (electric-quote-mode -1)
@@ -623,11 +624,11 @@
         ediff-highlight-all-diffs nil)
   (defun pkg/ediff/setup-keymap ()
     ;; 可参考(ediff-setup-keymap)，或激活ediff后输入"?"
-    ;; (bind-keys :map ediff-mode-map)
     ;; (unbind-key "" ediff-mode-map) ;; ()
+    ;; (bind-keys :map ediff-mode-map)
     )
-  (add-hook 'ediff-keymap-setup-hook 'pkg/ediff/setup-keymap t)
-  (add-hook 'ediff-after-quit-hook-internal 'winner-undo t))
+  (add-hook 'ediff-keymap-setup-hook #'pkg/ediff/setup-keymap t)
+  (add-hook 'ediff-after-quit-hook-internal #'winner-undo t))
 
 (use-package vdiff
   :commands (vdiff-current-file
@@ -681,7 +682,7 @@
     (setq projectile-completion-system 'helm
           helm-projectile-fuzzy-match t)
     :config
-    (add-hook 'pkg/projectile/switch-hook 'helm-projectile t)
+    (add-hook 'pkg/projectile/switch-hook #'helm-projectile t)
     (helm-projectile-on)))
 
 (use-package magit
@@ -725,15 +726,15 @@
         bm-restore-repository-on-load t
         bm-repository-file (my/set-user-emacs-file "bm-repository/"))
   (setq-default bm-buffer-persistence bm-buffer-persistence)
-  (add-hook' after-init-hook 'bm-repository-load)
-  (add-hook 'find-file-hooks 'bm-buffer-restore)
-  (add-hook 'kill-buffer-hook 'bm-buffer-save)
+  (add-hook' after-init-hook #'bm-repository-load t)
+  (add-hook 'find-file-hooks #'bm-buffer-restore t)
+  (add-hook 'kill-buffer-hook #'bm-buffer-save t)
   (add-hook 'kill-emacs-hook '(lambda nil
                                 (progn
                                   (bm-buffer-save-all)
-                                  (bm-repository-save))))
-  (add-hook 'after-save-hook 'bm-buffer-save)
-  (add-hook 'after-revert-hook 'bm-buffer-restore)
+                                  (bm-repository-save))) t)
+  (add-hook 'after-save-hook #'bm-buffer-save t)
+  (add-hook 'after-revert-hook #'bm-buffer-restore t)
   (use-package helm-bm
     :after helm
     :demand t
@@ -746,7 +747,7 @@
   :init
   (setq org-src-fontify-natively t)
   :config
-  (my/add-mode-hook "org" 'org-indent-mode))
+  (my/add-mode-hook "org" #'org-indent-mode))
 
 (use-package eshell
   :config
@@ -813,7 +814,7 @@
         w3m-show-graphic-icons-in-header-line nil
         w3m-show-graphic-icons-in-mode-line nil)
   (setq browse-url-browser-function 'w3m-browse-url)
-  (my/add-mode-hook "w3m" 'visual-line-mode))
+  (my/add-mode-hook "w3m" #'visual-line-mode))
 
 (use-package erc
   :if (my/package-enabled-p 'erc)
