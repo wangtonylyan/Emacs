@@ -14,6 +14,16 @@
 (unbind-key "C-x o") ;; (other-window)
 (unbind-key "C-x <left>") ;; (previous-buffer)
 (unbind-key "C-x <right>") ;; (next-buffer)
+(unbind-key "M-e") ;; (forward-sentence)
+(unbind-key "M-a") ;; (backward-sentence)
+(unbind-key "M-{") ;; (forward-paragraph)
+(unbind-key "M-}") ;; (backward-paragraph)
+(unbind-key "C-M-f") ;; (forward-sexp)
+(unbind-key "C-M-b") ;; (backward-sexp)
+(unbind-key "C-M-n") ;; (forward-list)
+(unbind-key "C-M-p") ;; (backward-list)
+(unbind-key "C-M-d") ;; (down-list)
+(unbind-key "C-M-u") ;; (backward-up-list)
 
 ;; 以下部分是重复绑定，目的是便于查阅
 (bind-keys ("M-x" . helm-M-x)
@@ -43,6 +53,9 @@
            ;; ("C-;" . avy or ace-jump-mode)
            ;; ("C-\"" . flyspell or flyspell-correct)
            ;; ("C-'" . flyspell or flyspell-correct)
+           :map package-menu-mode-map
+           ("r" . package-menu-refresh)
+           ("R" . package-refresh-contents)
            )
 
 ;; 命令集前缀，以C-c加单个字母为前缀，且全局性key map的前缀互不相同
@@ -52,6 +65,13 @@
 ;; C-c . :: CEDET/EDE
 (bind-keys ("C-c h" . helm-command-prefix) ;; helm
            ("C-c w" . pkg/hydra/group/window/body) ;; window, windmove, winner, buffer-move, zoom
+           ("C-c c" . (lambda () ;; cursor
+                        (interactive)
+                        (cond
+                         ((my/package-enabled-p 'paredit)
+                          (pkg/hydra/group/paredit/body))
+                         (t
+                          (pkg/hydra/group/cursor/body)))))
            ("C-c t" . pkg/hydra/group/directory/body) ;; treemacs, neotree
            ("C-c i" . pkg/hydra/group/highlight/body) ;; highlight, highlight-thing
            ("C-c b" . pkg/hydra/group/bookmark/body) ;; bookmark, bm, helm-bm
@@ -75,13 +95,58 @@
   ("j" buf-move-down               "down"                                        )
   ("q" pkg/hydra/quit nil :exit t))
 
+(defhydra pkg/hydra/group/cursor (:timeout 10)
+  ("C-f" forward-char           nil                        )
+  ("C-b" backward-char          nil                        )
+  ("C-n" next-line              nil                        )
+  ("C-p" previous-line          nil                        )
+  ("C-e" move-end-of-line       nil                        )
+  ("C-a" move-beginning-of-line nil                        )
+  ("M-f" forward-word           nil                        )
+  ("M-b" backward-word          nil                        )
+  ("C-l" recenter-top-bottom    nil                        )
+  ("C-q" read-only-mode         nil                        )
+  ("f"   forward-sexp           "->"   :column "expression")
+  ("b"   backward-sexp          "<-"                       )
+  ("e"   forward-sentence       "->"   :column "sentence"  )
+  ("a"   backward-sentence      "<-"                       )
+  ("n"   forward-paragraph      "->"   :column "paragraph" )
+  ("p"   backward-paragraph     "<-"                       )
+  ("j"   down-list              "-> v" :column "tree down" )
+  ("l"   up-list                "-> ^" :column "tree up"   )
+  ("h"   backward-up-list       "<- ^"                     )
+  ("q" pkg/hydra/quit nil :exit t))
+
+(defhydra pkg/hydra/group/paredit (:timeout 10)
+  ("C-f" forward-char           nil                        )
+  ("C-b" backward-char          nil                        )
+  ("C-n" next-line              nil                        )
+  ("C-p" previous-line          nil                        )
+  ("C-e" move-end-of-line       nil                        )
+  ("C-a" move-beginning-of-line nil                        )
+  ("M-f" forward-word           nil                        )
+  ("M-b" backward-word          nil                        )
+  ("C-l" recenter-top-bottom    nil                        )
+  ("C-q" read-only-mode         nil                        )
+  ("f"   paredit-forward        "->"   :column "expression")
+  ("b"   paredit-backward       "<-"                       )
+  ("e"   forward-sentence       "->"   :column "sentence"  )
+  ("a"   backward-sentence      "<-"                       )
+  ("n"   forward-paragraph      "->"   :column "paragraph" )
+  ("p"   backward-paragraph     "<-"                       )
+  ("j"   paredit-forward-down   "-> v" :column "tree down" )
+  ("k"   paredit-backward-down  "<- v"                     )
+  ("l"   paredit-forward-up     "-> ^" :column "tree up"   )
+  ("h"   paredit-backward-up    "<- ^"                     )
+  ("q" pkg/hydra/quit nil :exit t))
+
 (defhydra pkg/hydra/group/directory (:timeout 10 :exit t)
   ("t" pkg/hydra/group/treemacs/body "choose" :column "treemacs")
-  ("n" pkg/hydra/group/neotree/body  "choose"  :column "neotree")
+  ("n" pkg/hydra/group/neotree/body  "choose" :column "neotree" )
   ("q" pkg/hydra/quit nil :exit t))
 
 (defhydra pkg/hydra/group/treemacs (:timeout 10 :exit t)
-  ("t" treemacs-select-window        "select"        :column "window")
+  ("t" pkg/treemacs/select-window    "select"        :column "window")
   ("1" treemacs-delete-other-windows "delete others"                 )
   ("u" treemacs                      nil                             )
   ("F" treemacs-find-file            "find file"     :column "browse")
