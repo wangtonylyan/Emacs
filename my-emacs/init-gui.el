@@ -87,6 +87,7 @@
   (when visible-bell
     (doom-themes-visual-bell-config))
   (use-package doom-themes-treemacs
+    :after treemacs
     :if (my/package-enabled-p 'treemacs)
     :init
     (setq doom-treemacs-enable-variable-pitch t
@@ -95,7 +96,8 @@
     :config
     (with-eval-after-load 'treemacs
       (doom-themes-treemacs-config)))
-  (use-package doom-theme
+  (use-package doom-themes
+    :after neotree
     :if (my/package-enabled-p 'neotree)
     :config
     (with-eval-after-load 'neotree
@@ -142,6 +144,12 @@
 
 (use-package treemacs
   :commands (treemacs-select-window)
+  :preface
+  (defun pkg/treemacs/select-window ()
+    (interactive)
+    (treemacs-select-window)
+    (text-scale-increase 0)
+    (text-scale-decrease 1))
   :if (my/package-enabled-p 'treemacs)
   :init
   (setq treemacs-python-executable (or (my/locate-exec "python3")
