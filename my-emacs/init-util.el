@@ -22,7 +22,22 @@
                     (rename-buffer (concat "*eshell: " name "*"))))))))
 
 (use-package dired
-  )
+  :commands (dired
+             dired-get-marked-files)
+  :preface
+  (defun pkg/dired/count-marked ()
+    (let* ((list (dired-get-marked-files nil nil nil t))
+           (len (length list)))
+      (cond
+       ((> len 2) len)
+       ((= len 2) (if (eq (car list) t) 1 2))
+       (t 0))))
+  :init
+  (setq dired-recursive-deletes 'top
+        dired-copy-preserve-time t)
+  :config
+  (bind-keys :map dired-mode-map
+             ("?" . pkg/hydra/group/dired/body)))
 
 (use-package dired-hacks-utils
   :if (my/package-enabled-p 'dired-hacks-utils)
