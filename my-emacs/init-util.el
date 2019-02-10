@@ -141,13 +141,13 @@
   (add-hook 'after-save-hook #'bm-buffer-save t)
   (add-hook 'after-revert-hook #'bm-buffer-restore t)
   (use-package helm-bm
-    :after helm
+    :after (helm)
     :demand t
     :if (my/package-enabled-p 'helm-bm)
     :bind (("C-c b b" . helm-bm))))
 
 (use-package ediff
-  :after winner
+  :after (winner)
   :commands (ediff-current-file
              ediff-files
              ediff-files3
@@ -198,7 +198,7 @@
 (use-package projectile
   :diminish projectile-mode
   :ensure t
-  :defer t
+  :commands (projectile-project-root)
   :preface
   (defvar pkg/projectile/switch-hook)
   (defun pkg/projectile/switch-action ()
@@ -216,8 +216,16 @@
   ;; 包括替换'projectile-mode-map中的快捷键
   (use-package helm-projectile
     :ensure t
-    :after helm
-    :commands (helm-projectile)
+    :after (helm)
+    :commands (helm-projectile
+               helm-projectile-switch-project
+               helm-projectile-switch-to-buffer
+               helm-projectile-find-file
+               helm-projectile-recentf
+               helm-projectile-find-dir
+               helm-projectile-grep
+               helm-projectile-ag
+               helm-projectile-ack)
     :init
     (setq projectile-completion-system 'helm
           helm-projectile-fuzzy-match t)

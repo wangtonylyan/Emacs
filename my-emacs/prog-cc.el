@@ -12,7 +12,7 @@
 (defun pkg/cc-mode/init ()
   (use-package cc-mode
     :init
-    (my/prog-cc/add-start-hook 'pkg/cc-mode/start)
+    (my/prog-cc/add-start-hook #'pkg/cc-mode/start)
     :config
     (c-add-style "my/cc-style"
                  '("stroustrup"
@@ -123,7 +123,7 @@
                                 ;; :compile-command "cd build && make"
                                 )))
       ;; 目前手写的EDE项目配置信息由每个系统中的ede-projects.el文件统一地维护
-      (mapc 'my/load-flile pvt/project/ede-config-files)
+      (mapc #'my/load-file pvt/project/ede-config-files)
       (global-ede-mode 1)
       (ede-enable-generic-projects))
     (use-package semantic
@@ -136,7 +136,7 @@
                 t)
       ;; 此外，也可局部性地启用，即将其子模式加入至各mode-hook中
       ;; 但目前发现idle相关的几个子模式必须全局性地启用，可能是由于被其他子模式所依赖的缘故
-      ;; (my/prog-cc/add-start-hook 'semantic-idle-scheduler-mode)
+      ;; (my/prog-cc/add-start-hook #'semantic-idle-scheduler-mode)
       ;; 除了设置'semantic-default-submodes，还可调用以下函数来启用支持指定功能的子模块
       ;; (semantic-load-enable-minimum-features)
       ;; (semantic-load-enable-code-helpers)
@@ -147,7 +147,7 @@
                                         global-semantic-idle-scheduler-mode
                                         ;; 目前发现该模式高亮的符号并不全，即使启用它，也没有必要禁用highlight-thing插件
                                         ;; global-semantic-idle-local-symbol-highlight-mode
-                                        global-semantic-idle-summary-mode ;; 基于Smart Summary
+                                        ;; global-semantic-idle-summary-mode ;; 基于Smart Summary
                                         ;; global-semantic-idle-completions-mode ;; 基于Smart Completion，用company替代
                                         ;; [SemanticDB] tag database
                                         global-semanticdb-minor-mode
@@ -181,13 +181,19 @@
             ;; semanticdb-default-file-name ""
             semanticdb-persistent-path '(always)
             ;; 可以预先主动地对某些目录生成数据库，以便今后复用
-            semanticdb-search-system-databases t)
+            semanticdb-search-system-databases t
+            semanticdb-project-root-functions (when (my/package-enabled-p 'projectile)
+                                                '(projectile-project-root)))
       (setq semantic-decoration-styles '(("semantic-tag-boundary" . t)
                                          ("semantic-decoration-on-private-members" . nil)
                                          ("semantic-decoration-on-protected-members" . nil)
                                          ("semantic-decoration-on-includes" . nil)))
       (setq semantic-c-obey-conditional-section-parsing-flag t)
       (defun pkg/cedet/setup-semantic () ;; 会在每次semantic被重新启用后执行
+        (use-package semantic/symref
+          :if (my/package-enabled-p 'projectile)
+          :config
+          (defalias 'semantic-symref-calculate-rootdir #'projectile-project-root))
         (use-package semantic/bovine/gcc
           :if (my/locate-exec "gcc")
           :config
@@ -214,7 +220,7 @@
             (let ((cfiles (cedet-files-list-recursively path "\\(config\\|user\\)\\.hpp")))
               (dolist (file cfiles)
                 (add-to-list 'semantic-lex-c-preprocessor-symbol-file file))))))
-      (my/add-mode-hook "SEMANTIC" 'pkg/cedet/setup-semantic)
+      (my/add-mode-hook "SEMANTIC" #'pkg/cedet/setup-semantic)
       (defun pkg/cedet/c&c++-mode-hook ()
         ;; 不知为何在:config中使用CEDET中定义的(setq-mode-local)无法生效
         ;; 以下设置完全可以在(pkg/cedet/start)中被执行
@@ -227,27 +233,36 @@
                          semanticdb-new-database-class path))
                       ;; e.g. "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
                       '("/usr/include" "/usr/local/include")))
-        ;; 设置'semanticdb-find-default-throttle中的'project，主要交由EDE或JDE等组件控制
-        ;; (add-hook 'semanticdb-project-predicate-functions) ;; 此项交由EDE设置
-        ;; (add-hook 'semanticdb-project-root-functions)      ;; 此项交由EDE设置
-        ;; 设置'semanticdb-find-default-throttle中的'system，可以利用编译器的输出信息
-        ;; 甚至可以具体指定一些项目的根目录，该变量也会被'semantic-project-root-functions中注册的函数修改
+        ;; 1. 对于'semanticdb-find-default-throttle中的'project，主要可交由EDE或JDE等组件控制
+        ;; (add-hook 'semanticdb-project-predicate-functions)
+        ;; (add-hook 'semanticdb-project-root-functions)
+        ;; 甚至还可以通过设置以下变量，来具体指定某些项目的根目录
+        ;; 注意，'semantic-project-root-functions中注册的函数也会修改该变量
         ;; (setq semanticdb-project-roots '())
+        ;; 2. 对于'semanticdb-find-default-throttle中的'system，主要是利用编译器的输出信息
         )
       :config
-      (my/add-mode-hook "c" 'pkg/cedet/c&c++-mode-hook)
-      (my/add-mode-hook "c++" 'pkg/cedet/c&c++-mode-hook))
-    (my/prog-cc/add-start-hook 'pkg/cedet/start)
+      (my/add-mode-hook "c" #'pkg/cedet/c&c++-mode-hook)
+      (my/add-mode-hook "c++" #'pkg/cedet/c&c++-mode-hook))
+    (my/prog-cc/add-start-hook #'pkg/cedet/start)
     :config
     (semantic-mode 1) ;; global minor mode
+
+    ;; todo: move into (pkg/cedet/setup-semantic)
     ;; 以下模块未必随semantic的启用而被加载，因此可于'semantic-init-hook中被执行
     ;; 但又由于其大多是对key-map的设置，在semantic/:config中也能被执行，目前只是暂置于此
-    (unbind-key "C-c , l" semantic-mode-map) ;; (semantic-analyze-possible-completions)
+    (defun pkg/cedet/fold-block ()
+      (interactive)
+      (if (pkg/cedet/submode-enabled-p 'global-semantic-tag-folding-mode)
+          (semantic-tag-folding-fold-block) (senator-fold-tag)))
+    (defun pkg/cedet/unfold-block ()
+      (interactive)
+      (if (pkg/cedet/submode-enabled-p 'global-semantic-tag-folding-mode)
+          ;; (senator-unfold-tag)
+          (semantic-tag-folding-show-block) (senator-fold-tag-toggle)))
     (bind-keys :map semantic-mode-map
-               ("C-c , G" . semantic-symref) ;; 寻找光标所在函数被引用的地方
-               ("C-c , g" . semantic-symref-symbol) ;; 寻找光标所在符号被引用的地方
-               ("C-c , i" . semantic-decoration-include-visit) ;; jump to include file
-               ("C-c , t" . semantic-analyze-proto-impl-toggle))
+               ("C-c ," . pkg/hydra/group/cedet/body))
+
     ;; -------------------------------------------------------------------------
     ;; 以下是代码浏览功能的相关设置，主要涉及到了Complete、Senator、IA这三个组件
     ;; 这三个组件在以下功能上是有很多重叠的
@@ -257,6 +272,11 @@
     ;; 4. 代码折叠，暂无替代
     ;; 目前体验下来，相比于CEDET组件，上述替代插件/工具的准确性和效率都更好
     (use-package semantic/complete
+      ;; Complete跳转需要手动输入符号
+      :commands (semantic-complete-jump
+                 semantic-complete-jump-local
+                 semantic-complete-jump-local-members
+                 semantic-complete-analyze-inline)
       :init
       (setq semantic-complete-inline-analyzer-idle-displayor-class ;; 以何种方式显示
             ;; 'semantic-displayor-ghost ;; inline
@@ -266,59 +286,43 @@
             ;; 'quiet ;; 只有当数量小于initial-max-tags时才显示
             ;; 'verbose ;; 显示所有，貌似有bug，慎用
             'standard ;; initial-max-tags
-            semantic-displayor-tooltip-initial-max-tags 8)
-      :config
-      ;; Complete跳转需要手动输入符号
-      (unbind-key "C-c , J" semantic-mode-map) ;; (semantic-complete-jump)
-      (unbind-key "C-c , j" semantic-mode-map) ;; (semantic-complete-jump-local)
-      (unbind-key "C-c , m" semantic-mode-map) ;; (semantic-complete-jump-local-members)
-      (unbind-key "C-c , SPC" semantic-mode-map) ;; (semantic-complete-analyze-inline)
-      )
+            semantic-displayor-tooltip-initial-max-tags 8))
     (use-package semantic/senator
-      :config
       ;; Senator可在当前文件中已被解析出的符号所出现的位置之间按序地跳转的
       ;; 相当于是在遍历符号表，似乎实际用处不大
-      (unbind-key "C-c , n" semantic-mode-map) ;; (senator-next-tag)
-      (unbind-key "C-c , p" semantic-mode-map) ;; (senator-previous-tag)
-      (unbind-key "C-c , u" semantic-mode-map) ;; (senator-go-to-up-referenc)
-      (unbind-key "C-c , r" semantic-mode-map) ;; (senator-copy-tag-to-register)
-      (unbind-key "C-c , C-w" semantic-mode-map) ;; (senator-kill-tag)
-      (unbind-key "C-c , C-y" semantic-mode-map) ;; (senator-yank-tag)
-      (unbind-key "C-c , <down>" semantic-mode-map) ;; (senator-transpose-tags-down)
-      (unbind-key "C-c , <up>" semantic-mode-map) ;; (senator-transpose-tags-up)
-      (unbind-key "C-c , M-w" semantic-mode-map) ;; (senator-copy-tag)
       ;; Senator还提供了代码折叠的功能，但没有semantic-tag-folding的功能全面
-      (unless (pkg/cedet/submode-enabled-p 'global-semantic-tag-folding-mode)
-        (bind-keys :map semantic-mode-map
-                   ("C-c , -" . senator-fold-tag)
-                   ;; ("C-c , =" . senator-unfold-tag)
-                   ("C-c , =" . senator-fold-tag-toggle))))
+      :commands (senator-next-tag
+                 senator-previous-tag
+                 senator-go-to-up-reference
+                 senator-copy-tag-to-register
+                 senator-kill-tag
+                 senator-yank-tag
+                 senator-transpose-tags-down
+                 senator-transpose-tags-up
+                 senator-copy-tag
+                 senator-fold-tag
+                 senator-unfold-tag
+                 senator-fold-tag-toggle))
     (use-package semantic/ia
-      :config
-      (bind-keys :map semantic-mode-map
-                 ("" . semantic-ia-complete-tip)
-                 ("" . semantic-ia-complete-symbol)
-                 ("" . semantic-ia-complete-symbol-menu)
-                 ("C-c , ," . semantic-ia-fast-jump)
-                 ("C-c , ." . semantic-ia-show-summary)
-                 ("C-c , /" . semantic-ia-show-doc)))
+      :commands (semantic-ia-complete-tip
+                 semantic-ia-complete-symbol
+                 semantic-ia-complete-symbol-menu
+                 semantic-ia-fast-jump
+                 semantic-ia-show-summary
+                 semantic-ia-show-doc))
     (use-package semantic/mru-bookmark
-      :if (pkg/cedet/submode-enabled-p 'global-semantic-mru-bookmark-mode)
-      :config
-      (unbind-key "C-x B" semantic-mru-bookmark-mode-map) ;; (semantic-mrub-switch-tags)
-      (bind-keys :map semantic-mru-bookmark-mode-map
-                 ("C-c , b" . semantic-mrub-switch-tags)))
-    ;; -------------------------------------------------------------------------
+      ;; 'semantic-mru-bookmark-mode-map
+      :commands (semantic-mrub-switch-tags)
+      :if (pkg/cedet/submode-enabled-p 'global-semantic-mru-bookmark-mode))
+    (use-package semantic-tag-folding
+      ;; 'semantic-tag-folding-mode-map
+      :commands (semantic-tag-folding-fold-block
+                 semantic-tag-folding-show-block
+                 semantic-tag-folding-fold-all
+                 semantic-tag-folding-show-all)
+      :if (pkg/cedet/submode-enabled-p 'global-semantic-tag-folding-mode))
     (use-package semantic/sb ;; 此为CEDET中内置的Speedbar，暂不启用
       :disabled)
-    (use-package semantic-tag-folding
-      :if (pkg/cedet/submode-enabled-p 'global-semantic-tag-folding-mode)
-      :config
-      (bind-keys :map semantic-tag-folding-mode-map
-                 ("C-c , -" . semantic-tag-folding-fold-block)
-                 ("C-c , =" . semantic-tag-folding-show-block)
-                 ("C-c , _" . semantic-tag-folding-fold-all)
-                 ("C-c , +" . semantic-tag-folding-show-all)))
     (use-package stickyfunc-enhance
       :demand t
       :if (and (my/package-enabled-p 'stickyfunc-enhance)
@@ -334,7 +338,7 @@
     :if (my/package-enabled-p 'ecb)
     :commands (ecb-minor-mode)
     :init
-    (my/prog-cc/add-start-hook 'pkg/ecb/start)
+    (my/prog-cc/add-start-hook #'pkg/ecb/start)
     :config
     (save-excursion
       (unless (boundp 'stack-trace-on-error)
@@ -426,7 +430,7 @@
           ;; optional, specify extra preprocess flags forwarded to compiler
           ;; cppcm-extra-preprocss-flags-from-user '("-I/usr/src/linux/include" "-DNDEBUG")
           )
-    (my/prog-cc/add-start-hook 'pkg/cpputils-cmake/start)))
+    (my/prog-cc/add-start-hook #'pkg/cpputils-cmake/start)))
 
 (defun pkg/cpputils-cmake/start ()
   (cppcm-reload-all))
@@ -439,7 +443,7 @@
 (defun pkg/gud/init ()
   (use-package gud
     :init
-    (my/prog-cc/add-start-hook 'pkg/gud/start)
+    (my/prog-cc/add-start-hook #'pkg/gud/start)
     )
   )
 
@@ -457,12 +461,12 @@
   (pkg/ecb/init)
   (pkg/cpputils-cmake/init)
   (pkg/gud/init)
-  (my/add-mode-hook "c" 'my/prog-cc/start)
-  (my/add-mode-hook "c++" 'my/prog-cc/start))
+  (my/add-mode-hook "c" #'my/prog-cc/start)
+  (my/add-mode-hook "c++" #'my/prog-cc/start))
 
 (defun my/prog-cc/start ()
   (my/prog-cc/run-start-hook))
 
-(eval-after-load 'cc-mode '(add-hook 'c-initialization-hook 'my/prog-cc/init t))
+(eval-after-load 'cc-mode '(add-hook 'c-initialization-hook #'my/prog-cc/init t))
 
 (provide 'my/prog-cc)

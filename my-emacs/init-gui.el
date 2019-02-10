@@ -87,7 +87,7 @@
   (when visible-bell
     (doom-themes-visual-bell-config))
   (use-package doom-themes-treemacs
-    :after treemacs
+    :after (treemacs)
     :if (my/package-enabled-p 'treemacs)
     :init
     (setq doom-treemacs-enable-variable-pitch t
@@ -97,7 +97,7 @@
     (with-eval-after-load 'treemacs
       (doom-themes-treemacs-config)))
   (use-package doom-themes
-    :after neotree
+    :after (neotree)
     :if (my/package-enabled-p 'neotree)
     :config
     (with-eval-after-load 'neotree
@@ -198,7 +198,7 @@
     :config
     (treemacs-icons-dired-mode))
   (use-package treemacs-projectile
-    :after projectile
+    :after (projectile)
     :if (my/package-enabled-p 'projectile))
   (when (and (my/locate-exec "git")
              (my/locate-exec "python3"))
