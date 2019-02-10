@@ -1,6 +1,21 @@
 ;; -*- coding: utf-8 -*-
 
-;; <shift-up/down/left/right>
+;; 在foo-mode-map中绑定("x y" . foo)
+;; (defhydra foo (foo-mode-map "x") ("y" . foo))
+;; 在global-map中新增快捷键前缀"x"
+;; (bind-key "x" #'foo/body global-map)
+(use-package hydra
+  :ensure t
+  :demand t
+  :preface
+  (defconst pkg/hydra/timeout-sec 30)
+  (defun pkg/hydra/quit ()
+    (interactive)
+    (message "Hydra Quit"))
+  :init
+  ;; 目前发现启用此项会导致，Hydra子窗口过小，无法完整地呈现提示文字
+  ;; 此外，启用全局的zoom mode似乎也可以避免该问题
+  (setq hydra-lv nil))
 
 ;; 与输入法切换键冲突
 ;; (global-set-key (kbd "C-S-SPC") 'set-mark-command)
@@ -25,63 +40,86 @@
 (unbind-key "C-M-d"      ) ;; (down-list)
 (unbind-key "C-M-u"      ) ;; (backward-up-list)
 (unbind-key "C-x d"      ) ;; (dired)
+(unbind-key "C-s"        ) ;; (isearch-forward)
+(unbind-key "C-r"        ) ;; (isearch-backward)
+(unbind-key "M-/"        ) ;; (dabbrev-expand)
 
 ;; 以下部分是重复绑定，目的是便于查阅
-(bind-keys ("M-x"            . helm-M-x                )
-           ("M-y"            . helm-show-kill-ring     )
-           ("C-x C-f"        . helm-find-files         )
-           ("C-x C-r"        . helm-recentf            )
-           ("C-x b"          . helm-mini               )
-           ("C-x C-b"        . helm-buffers-list       )
-           ("C-o"            . helm-occur              )
-           ("C-S-h"          . windmove-left           )
-           ("C-S-l"          . windmove-right          )
-           ("C-S-k"          . windmove-up             )
-           ("C-S-j"          . windmove-down           )
-           ("C-+"            . zoom                    )
-           ("<C-wheel-up>"   . text-scale-increase     )
-           ("<C-wheel-down>" . text-scale-decrease     )
-           ("<C-up>"         . text-scale-increase     )
-           ("<C-down>"       . text-scale-decrease     )
-           ("C-x C--"        . downcase-region         )
-           ("C-x C-="        . upcase-region           )
-           ("C-S-a"          . mark-whole-buffer       )
-           ("C-q"            . read-only-mode          )
-           ("M-!"            . shell-command           )
-           ("M-."            . xref-find-definitions   )
-           ("M-,"            . xref-pop-marker-stack   )
-           ;; ("C-:"         . avy or ace-jump-mode)
-           ;; ("C-;"         . avy or ace-jump-mode)
-           ;; ("C-\""        . flyspell or flyspell-correct)
-           ;; ("C-'"         . flyspell or flyspell-correct)
-           :map package-menu-mode-map
-           ("r"              . package-menu-refresh    )
-           ("R"              . package-refresh-contents)
-           )
+(bind-keys
+ ("M-x"            . helm-M-x                )
+ ("M-y"            . helm-show-kill-ring     )
+ ("C-x C-f"        . helm-find-files         )
+ ("C-x C-r"        . helm-recentf            )
+ ("C-x b"          . helm-mini               )
+ ("C-x C-b"        . helm-buffers-list       )
+ ("C-o"            . helm-occur              )
+ ("C-S-h"          . windmove-left           )
+ ("C-S-l"          . windmove-right          )
+ ("C-S-k"          . windmove-up             )
+ ("C-S-j"          . windmove-down           )
+ ("<S-left>"       . windmove-left           )
+ ("<S-right>"      . windmove-right          )
+ ("<S-up>"         . windmove-up             )
+ ("<S-down>"       . windmove-down           )
+ ("C-+"            . zoom                    )
+ ("<C-wheel-up>"   . text-scale-increase     )
+ ("<C-wheel-down>" . text-scale-decrease     )
+ ("<C-up>"         . text-scale-increase     )
+ ("<C-down>"       . text-scale-decrease     )
+ ("C-x C--"        . downcase-region         )
+ ("C-x C-="        . upcase-region           )
+ ("C-S-a"          . mark-whole-buffer       )
+ ("C-q"            . read-only-mode          )
+ ("M-!"            . shell-command           )
+ ("M-."            . xref-find-definitions   )
+ ("M-,"            . xref-pop-marker-stack   )
+ ;; ("C-:")        ;; avy, ace-jump-mode
+ ;; ("C-;")        ;; avy, ace-jump-mode
+ ;; ("C-\"")       ;; flyspell, flyspell-correct
+ ;; ("C-'")        ;; flyspell, flyspell-correct
+ ("M-c"            . pkg/hydra/group/body    )
+ ;; C- :: tabbar
+ ;; , :: CEDET/Semantic
+ ;; . :: CEDET/EDE
+ )
 
-;; 命令集前缀，以C-c加单个字母为前缀，且全局性key map的前缀互不相同
-;; C-c C- :: tabbar
-;; C-c c :: helm-gtags
-;; C-c , :: CEDET/Semantic
-;; C-c . :: CEDET/EDE
-(bind-keys ("C-c h" . helm-command-prefix) ;; helm
-           ("C-c w" . pkg/hydra/group/window/body) ;; window, windmove, winner, buffer-move, zoom
-           ("C-c c" . (lambda () ;; cursor
-                        (interactive)
-                        (cond
-                         ((my/package-enabled-p 'paredit)
-                          (pkg/hydra/group/paredit/body))
-                         (t
-                          (pkg/hydra/group/cursor/body)))))
-           ("C-c t" . pkg/hydra/group/directory/body) ;; dired, treemacs, neotree
-           ("C-c i" . pkg/hydra/group/highlight/body) ;; highlight, highlight-thing
-           ("C-c b" . pkg/hydra/group/bookmark/body) ;; bookmark, bm, helm-bm
-           ("C-c d" . pkg/hydra/group/diff/body) ;; ediff, vdiff
-           ("C-c o" . pkg/hydra/group/org/body) ;; org
-           ("C-c p" . pkg/hydra/group/project/body) ;; projectile, helm-projectile
-           )
+(defhydra pkg/hydra/group (:timeout pkg/hydra/timeout-sec :exit t)
+  ("h" helm-command-prefix
+   "helm" :column "")
+  ("w" pkg/hydra/group/window/body
+   "window, windmove, winner, buffer-move, zoom")
+  ("c" (lambda () (interactive)
+         (cond
+          ((my/package-enabled-p 'paredit) (pkg/hydra/group/paredit/body))
+          (t (pkg/hydra/group/cursor/body))))
+   "cursor")
+  ("t" pkg/hydra/group/directory/body
+   "dired, treemacs, neotree")
+  ("i" pkg/hydra/group/highlight/body
+   "highlight, highlight-thing")
+  ("b" pkg/hydra/group/bookmark/body
+   "bookmark, bm, helm-bm")
+  ("d" pkg/hydra/group/diff/body
+   "ediff, vdiff")
+  ("o" pkg/hydra/group/org/body
+   "org")
+  ("p" pkg/hydra/group/project/body
+   "projectile, helm-projectile")
+  ("!" (lambda () (interactive)
+         (cond
+          ((my/package-enabled-p 'flymake) (pkg/hydra/group/flymake/body))
+          ((my/package-enabled-p 'flycheck) (pkg/hydra/group/flycheck/body))
+          (t (user-error "*bind-keys* no package enabled for \"C-c !\""))))
+   "flymake, flycheck")
+  ("g" (lambda () (interactive)
+         (cond
+          ((my/package-enabled-p 'ggtags) (pkg/hydra/group/ggtags/body))
+          ((my/package-enabled-p 'helm-gtags) (pkg/hydra/group/helm-gtags/body))
+          (t (user-error "*bind-keys* no package enabled for \"C-c g\""))))
+   "ggtags, helm-gtags")
+  ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/window (:timeout 10)
+(defhydra pkg/hydra/group/window (:timeout pkg/hydra/timeout-sec)
   ("+" enlarge-window              "++ <>      " :column "buffer size ")
   ("=" enlarge-window-horizontally "++ ^v      "                       )
   ("_" shrink-window               "-- <>      "                       )
@@ -96,7 +134,7 @@
   ("j" buf-move-down               "down       "                       )
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/cursor (:timeout 10)
+(defhydra pkg/hydra/group/cursor (:timeout pkg/hydra/timeout-sec)
   ("C-f" forward-char           nil)
   ("C-b" backward-char          nil)
   ("C-n" next-line              nil)
@@ -118,7 +156,7 @@
   ("h"   backward-up-list       "<- ^"                     )
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/paredit (:timeout 10)
+(defhydra pkg/hydra/group/paredit (:timeout pkg/hydra/timeout-sec)
   ("C-f" forward-char           nil)
   ("C-b" backward-char          nil)
   ("C-n" next-line              nil)
@@ -141,13 +179,13 @@
   ("h"   paredit-backward-up    "<- ^"                     )
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/directory (:timeout 10 :exit t)
+(defhydra pkg/hydra/group/directory (:timeout pkg/hydra/timeout-sec :exit t)
   ("d" dired                         "dired   " :column "dired")
   ("t" pkg/hydra/group/treemacs/body "treemacs" :column "tree ")
   ("n" pkg/hydra/group/neotree/body  "neotree "                )
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/dired (dired-mode-map "" :timeout 10)
+(defhydra pkg/hydra/group/dired (dired-mode-map "" :timeout pkg/hydra/timeout-sec :exit t)
   "
 Number of marked: %(pkg/dired/count-marked)
 
@@ -210,7 +248,7 @@ Number of marked: %(pkg/dired/count-marked)
   ("&"       dired-do-async-shell-command "shell &          "                   )
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/treemacs (:timeout 10 :exit t)
+(defhydra pkg/hydra/group/treemacs (:timeout pkg/hydra/timeout-sec :exit t)
   ("t" pkg/treemacs/select-window    "select       " :column "window")
   ("1" treemacs-delete-other-windows "delete others"                 )
   ("u" treemacs                      nil                             )
@@ -219,11 +257,11 @@ Number of marked: %(pkg/dired/count-marked)
   ("B" treemacs-bookmark             "bookmark     "                 )
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/neotree (:timeout 10 :exit t)
+(defhydra pkg/hydra/group/neotree (:timeout pkg/hydra/timeout-sec :exit t)
   ("t" pkg/neotree/toggle "select")
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/highlight (:timeout 10)
+(defhydra pkg/hydra/group/highlight (:timeout pkg/hydra/timeout-sec)
   ("i" highlight-symbol-at-point       "at point   " :column "highlight  ")
   ("p" highlight-phrase                "phrase     "                      )
   ("r" highlight-regexp                "regexp     "                      )
@@ -231,7 +269,7 @@ Number of marked: %(pkg/dired/count-marked)
   ("u" unhighlight-regexp              "regexp     " :column "unhighlight")
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/bookmark (:timeout 10)
+(defhydra pkg/hydra/group/bookmark (:timeout pkg/hydra/timeout-sec)
   ("m" bookmark-set        "set     " :column "bookmark")
   ("d" bookmark-delete     "unset   "                   )
   ("r" bookmark-rename     "rename  "                   )
@@ -241,12 +279,12 @@ Number of marked: %(pkg/dired/count-marked)
   ("t" bm-toggle           "toggle  "                   )
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/diff (:timeout 10 :exit t)
+(defhydra pkg/hydra/group/diff (:timeout pkg/hydra/timeout-sec :exit t)
   ("e" pkg/hydra/group/ediff/body "choose" :column "ediff")
   ("v" pkg/hydra/group/vdiff/body "choose" :column "vdiff")
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/ediff (:timeout 10 :exit t)
+(defhydra pkg/hydra/group/ediff (:timeout pkg/hydra/timeout-sec :exit t)
   ("f" ediff-files        "2 files  " :column "file  ")
   ("F" ediff-files3       "3 files  "                 )
   ("b" ediff-buffers      "2 buffers" :column "buffer")
@@ -254,7 +292,7 @@ Number of marked: %(pkg/dired/count-marked)
   ("d" ediff-current-file "current  "                 )
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/vdiff (:timeout 10 :exit t)
+(defhydra pkg/hydra/group/vdiff (:timeout pkg/hydra/timeout-sec :exit t)
   ("f" vdiff-files        "2 files  " :column "file  ")
   ("F" vdiff-files3       "3 files  "                 )
   ("b" vdiff-buffers      "2 buffers" :column "buffer")
@@ -262,12 +300,12 @@ Number of marked: %(pkg/dired/count-marked)
   ("d" vdiff-current-file "current  "                 )
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/org (:timeout 10 :exit t)
+(defhydra pkg/hydra/group/org (:timeout pkg/hydra/timeout-sec :exit t)
   ("c" org-capture "capture" :column "org mode")
   ("a" org-agenda  "agenda "                   )
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/project (:timeout 10 :exit t)
+(defhydra pkg/hydra/group/project (:timeout pkg/hydra/timeout-sec :exit t)
   "
 PROJECT: %(projectile-project-root)
 
@@ -302,6 +340,7 @@ PROJECT: %(projectile-project-root)
   ("C-a" projectile-ag                              nil                                 )
   ("c"   helm-projectile-ack                        "ack           "                    )
   ("C-c" projectile-ack                             nil                                 )
+  ;; todo
   ;; helm-projectile-browse-dirty-projects
   ;; C-c p V         projectile-browse-dirty-projects
   ;; C-c p c         projectile-compile-project
@@ -312,3 +351,100 @@ PROJECT: %(projectile-project-root)
   ;; C-c p i         projectile-invalidate-cache
   ;; C-c p z         projectile-cache-current-file
   ("q" pkg/hydra/quit nil :exit t))
+
+(defhydra pkg/hydra/group/flymake (:timeout pkg/hydra/timeout-sec :exit t)
+  ("q" pkg/hydra/quit nil :exit t))
+
+(defhydra pkg/hydra/group/flycheck (:timeout pkg/hydra/timeout-sec :exit t)
+  ("n" flycheck-next-error             "next     " :column "error  " :exit nil)
+  ("p" flycheck-previous-error         "prev     "                   :exit nil)
+  ("l" helm-flycheck                   "helm list"                            )
+  ("L" flycheck-list-errors            "list     "                            )
+  ;; 'flycheck-error-list-mode-map in (flycheck-list-errors)
+  ;; "<return>" :: go to the current error in the source buffer
+  ;; "e" :: explain the error
+  ;; "f" :: filter the error list by level
+  ;; "F" :: remove the filter
+  ;; "S" :: sort the error list by the column at point
+  ;; "g" :: check the source buffer and update the error list
+  ;; "q" :: quit the error list and hide its window
+  ("h" flycheck-display-error-at-point "display  " :column "detail "          )
+  ("H" flycheck-explain-error-at-point "explain  "                            )
+  ("w" flycheck-copy-errors-as-kill    "copy     "                            )
+  ("?" flycheck-describe-checker       "describe " :column "checker"          )
+  ("e" pkg/flycheck/enable-checker     "enable   "                            )
+  ("d" flycheck-disable-checker        "disable  "                            )
+  ("s" flycheck-select-checker         "select   "                            )
+  ("v" flycheck-verify-setup           "info     " :column "buffer "          )
+  ("g" flycheck-buffer                 "refresh  "                            )
+  ("G" flycheck-compile                "compile  "                            )
+  ("k" flycheck-clear                  "clear    "                            )
+  ("q" pkg/hydra/quit nil :exit t))
+
+(defhydra pkg/hydra/group/ggtags (:timeout pkg/hydra/timeout-sec :exit t)
+  ("."   ggtags-find-tag-dwim            "M-.        " :column "jump    ")
+  (","   xref-pop-marker-stack           "M-,        "                   )
+  ("n"   ggtags-next-mark                "M-n        "                   )
+  ("p"   ggtags-prev-mark                "M-p        "                   )
+  ("/"   ggtags-view-tag-history         "M-/        "                   )
+  ("o d" ggtags-find-definition          "definition " :column "search  ")
+  ("o r" ggtags-find-reference           "reference  "                   )
+  ("o o" ggtags-grep                     "grep       "                   )
+  ("o O" ggtags-find-tag-regexp          "pattern    "                   )
+  ("o s" ggtags-find-other-symbol        "symbol     "                   )
+  ("o f" ggtags-find-file                "file       "                   )
+  ("s s" ggtags-save-to-register         "register   " :column "history ")
+  ("s r" jump-to-register                "restore    "                   )
+  ("s l" ggtags-view-search-history      "show       "                   )
+  ("g"   ggtags-update-tags              "refresh    " :column "database")
+  ("G"   ggtags-create-tags              "setup      "                   )
+  ("K"   ggtags-delete-tags              "clean      "                   )
+  ("d"   ggtags-visit-project-root       "dired @root" :column "advance ")
+  ("1"   ggtags-kill-file-buffers        "kill others"                   )
+  ("v h" ggtags-browse-file-as-hypertext "view html  "                   )
+  ("w"   ggtags-query-replace            "replace    "                   )
+  ("C-q" ggtags-toggle-project-read-only "readonly   "                   )
+  ("q" pkg/hydra/quit nil :exit t))
+
+;; todo :: 在以下交互函数执行时，输入"C-u"，还可限定搜索的目录路径
+(defhydra pkg/hydra/group/helm-gtags (:timeout pkg/hydra/timeout-sec :exit t)
+  ("."   helm-gtags-dwim                  "M-.        " :column "jump    ")
+  (","   helm-gtags-pop-stack             "M-,        "                   )
+  ("n"   helm-gtags-next-history          "M-n        "                   )
+  ("p"   helm-gtags-previous-history      "M-p        "                   )
+  ("/"   helm-gtags-show-stack            "M-/        "                   )
+  ("o d" helm-gtags-find-tag              "definition " :column "search  ")
+  ("o r" helm-gtags-find-rtag             "reference  "                   )
+  ("o o" helm-gtags-find-pattern          "pattern    "                   )
+  ("o s" helm-gtags-find-symbol           "symbol     "                   )
+  ("o f" helm-gtags-find-files            "file       "                   )
+  ("s s" helm-gtags-tags-in-this-function "in function" :column "select  ")
+  ("s f" helm-gtags-parse-file            "in file    "                   )
+  ("s a" helm-gtags-select                "in project "                   )
+  ("s p" helm-gtags-select-path           "path       "                   )
+  ("g"   helm-gtags-update-tags           "refresh    " :column "database")
+  ("G"   helm-gtags-create-tags           "setup      "                   )
+  ("k"   helm-gtags-clear-all-stacks      "clear stack"                   )
+  ("K"   helm-gtags-clear-all-cache       "clear cache"                   )
+  ("q" pkg/hydra/quit nil :exit t))
+
+
+;; todo
+(defhydra pkg/hydra/group/cedet (:timeout pkg/hydra/timeout-sec)
+  ("g" semantic-symref-symbol                "find symbol    " :column "reference")
+  ("G" semantic-symref                       "find function  "                    )
+  ("i" semantic-decoration-include-visit     "include file   "                    )
+  ("t" semantic-analyze-proto-impl-toggle    "prototype      "                    )
+  ("l" semantic-analyze-possible-completions                                      )
+  ("-" pkg/cedet/fold-block)
+  ("=" pkg/cedet/unfold-block)
+  ("_" semantic-tag-folding-fold-all)
+  ("+" semantic-tag-folding-show-all)
+  (""  semantic-ia-complete-tip)
+  (""  semantic-ia-complete-symbol)
+  (""  semantic-ia-complete-symbol-menu)
+  ("," semantic-ia-fast-jump)
+  ("." semantic-ia-show-summary)
+  ("/" semantic-ia-show-doc)
+  ("b" semantic-mrub-switch-tags)
+  )

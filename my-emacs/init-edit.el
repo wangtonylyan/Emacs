@@ -119,7 +119,7 @@
     (bind-keys :map flyspell-mode-map
                ("C-'" . flyspell-correct-wrapper))
     (use-package flyspell-correct-helm
-      :after helm
+      :after (helm)
       :if (my/package-enabled-p 'flyspell-correct-helm)
       :config
       (setq flyspell-correct-interface #'flyspell-correct-helm)))

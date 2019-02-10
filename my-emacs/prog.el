@@ -13,7 +13,7 @@
   (use-package prog-mode
     :init
     (setq prettify-symbols-unprettify-at-point 'right-edge)
-    (my/prog/add-start-hook 'pkg/prog-mode/start)
+    (my/prog/add-start-hook #'pkg/prog-mode/start)
     :config
     (which-function-mode 1) ;; 在mode-line显示当前光标所在的函数名
     (add-to-list 'prettify-symbols-alist '("lambda" . 955)) ;; lambda = λ
@@ -25,21 +25,24 @@
 
 (defun pkg/yasnippet/init ()
   (use-package yasnippet
-    :if (my/package-enabled-p 'yasnippet)
-    :commands (yas-global-mode yas-minor-mode yas-minor-mode-on)
     :diminish yas-minor-mode
+    :commands (yas-global-mode
+               yas-minor-mode
+               yas-minor-mode-on)
+    :if (my/package-enabled-p 'yasnippet)
     :init
-    (my/prog/add-start-hook 'pkg/yasnippet/start)
-    :config
-    ;; 为配合auto-complete或company等插件的使用，需禁用以下自带的补全快捷键
-    (unbind-key "<tab>" yas-minor-mode-map)
-    (let ((dir (my/get-user-emacs-file "snippets/" t)))
-      (when dir (add-to-list 'yas-snippet-dirs dir)))
     ;; 设置解决同名snippet的方式
     (setq yas-prompt-functions
           (if (eq system-type 'windows-nt)
-              '(yas-ido-prompt yas-dropdown-prompt) ;; Windows环境下推荐，其余支持不好
+              ;; Windows环境下推荐，其余支持不好
+              '(yas-ido-prompt yas-dropdown-prompt)
             '(yas-x-prompt yas-dropdown-prompt)))
+    (my/prog/add-start-hook #'pkg/yasnippet/start)
+    :config
+    (let ((dir (my/get-user-emacs-file "snippets/" t)))
+      (when dir (add-to-list 'yas-snippet-dirs dir)))
+    ;; 为配合auto-complete或company等插件的使用，需禁用以下自带的补全快捷键
+    (unbind-key "<tab>" yas-minor-mode-map)
     ;; (yas-global-mode 1)
     ))
 
@@ -50,26 +53,14 @@
 
 (defun pkg/company/init ()
   (use-package company
-    :if (my/package-enabled-p 'company)
-    :commands (global-company-mode company-mode company-mode-on)
     :diminish company-mode
+    :commands (global-company-mode
+               company-mode
+               company-mode-on)
+    :if (my/package-enabled-p 'company)
     :init
-    (my/prog/add-start-hook 'pkg/company/start)
+    (my/prog/add-start-hook #'pkg/company/start)
     :config
-    ;; 常用的快捷键：
-    ;; <tab>用于补全候选项中的公共字段，<return>用于补全所选项，C-g用于终止补全
-    ;; (define-key company-active-map (kbd "<tab>") 'company-complete-common-or-cycle)
-    (unbind-key "M-n" company-active-map)
-    (unbind-key "M-p" company-active-map)
-    (unbind-key "M-n" company-search-map)
-    (unbind-key "M-p" company-search-map)
-    (bind-keys :map company-active-map
-               ("C-n" . company-select-next)
-               ("C-p" . company-select-previous)
-               :map company-search-map
-               ("C-n" . company-select-next)
-               ("C-p" . company-select-previous)
-               ("C-t" . company-search-toggle-filtering))
     ;; 没有必要为每个模式分别启用其独享的后端，因为筛选适用后端的过程非常效率
     (setq company-backends `(company-elisp
                              ,(when (and (my/package-enabled-p 'company-jedi)
@@ -92,6 +83,20 @@
                              company-dabbrev)
           company-minimum-prefix-length 1
           company-idle-delay 0)
+    ;; 常用的快捷键：
+    ;; <tab>用于补全候选项中的公共字段，<return>用于补全所选项，C-g用于终止补全
+    ;; (define-key company-active-map (kbd "<tab>") 'company-complete-common-or-cycle)
+    (unbind-key "M-n" company-active-map)
+    (unbind-key "M-p" company-active-map)
+    (unbind-key "M-n" company-search-map)
+    (unbind-key "M-p" company-search-map)
+    (bind-keys :map company-active-map
+               ("C-n" . company-select-next)
+               ("C-p" . company-select-previous)
+               :map company-search-map
+               ("C-n" . company-select-next)
+               ("C-p" . company-select-previous)
+               ("C-t" . company-search-toggle-filtering))
     ;; (global-company-mode 1)
     ))
 
@@ -101,6 +106,8 @@
 
 (defun pkg/auto-complete/init ()
   (use-package auto-complete
+    :commands (global-auto-complete-mode
+               auto-complete-mode)
     :preface
     (defun pkg/auto-complete/add-source (srcs)
       (cond
@@ -112,9 +119,8 @@
               (nreverse srcs)))
        (t (user-error "*pkg/auto-complete/add-source* SRCS=%s" srcs))))
     :if (my/package-enabled-p 'auto-complete)
-    :commands (global-auto-complete-mode auto-complete-mode)
     :init
-    (my/prog/add-start-hook 'pkg/auto-complete/start)
+    (my/prog/add-start-hook #'pkg/auto-complete/start)
     :config
     (ac-config-default)
     (add-to-list 'ac-dictionary-directories
@@ -191,42 +197,36 @@
 
 (defun pkg/flymake/init ()
   (use-package flymake
-    :if (my/package-enabled-p 'flymake)
     :commands (flymake-mode)
+    :if (my/package-enabled-p 'flymake)
     :init
-    (my/prog/add-start-hook 'pkg/flymake/start)))
+    (my/prog/add-start-hook #'pkg/flymake/start)))
 
 (defun pkg/flymake/start ()
   (flymake-mode 1))
 
 
 (defun pkg/flycheck/init ()
-  ;; 快捷键前缀：C-c !
-  ;; l :: (flycheck-list-errors)
-  ;; C-c :: (flycheck-compile)
-  ;; RET :: Go to the current error in the source buffer
-  ;; n :: Jump to the next error
-  ;; p :: Jump to the previous error
-  ;; e :: Explain the error
-  ;; f :: Filter the error list by level
-  ;; F :: Remove the filter
-  ;; S :: Sort the error list by the column at point
-  ;; g :: Check the source buffer and update the error list
-  ;; q :: Quit the error list and hide its window
   (use-package flycheck
     :diminish flycheck-mode
+    :commands (global-flycheck-mode
+               flycheck-mode
+               flycheck-mode-on-safe)
     :preface
+    (defun pkg/flycheck/enable-checker ()
+      (interactive)
+      (let ((current-prefix-arg t))
+        (call-interactively #'flycheck-disable-checker)))
     (defun pkg/flycheck/checker-enabled-p (chk)
       (and (memq chk flycheck-checkers) ;; global variable
            (not (memq chk flycheck-disabled-checkers)))) ;; buffer-local variable
     :if (my/package-enabled-p 'flycheck)
-    :commands (global-flycheck-mode flycheck-mode flycheck-mode-on-safe)
     :init
     (setq flycheck-check-syntax-automatically '(mode-enabled save idle-change)
           flycheck-checker-error-threshold 500
           flycheck-idle-change-delay 2.5
           flycheck-indication-mode 'left-fringe)
-    (my/prog/add-start-hook 'pkg/flycheck/start)
+    (my/prog/add-start-hook #'pkg/flycheck/start)
     :config
     (flycheck-error-list-set-filter 'error)
     ;; (flycheck-list-errors)可以列出当前buffer中的所有error，优化显示窗口
@@ -271,10 +271,10 @@
                          ("python"  pkg/flycheck/python-mode-hook )
                          ("haskell" pkg/flycheck/haskell-mode-hook)))
     (use-package helm-flycheck
-      :after helm
-      :if (my/package-enabled-p 'helm-flycheck)
-      :config
-      (bind-key "C-c ! l" 'helm-flycheck flycheck-mode-map))
+      :after (helm)
+      :commands (helm-flycheck)
+      :if (my/package-enabled-p 'helm-flycheck))
+    (unbind-key flycheck-keymap-prefix flycheck-mode-map)
     ;; (global-flycheck-mode 1)
     ))
 
@@ -288,59 +288,78 @@
     (my/add-mode-hook "c" func)
     (my/add-mode-hook "c++" func))
   (use-package ggtags
+    :diminish ggtags-mode
+    :commands (ggtags-global-mode
+               ggtags-mode)
     :if (and (my/package-enabled-p 'ggtags)
              (my/locate-exec "gtags"))
     :init
-    (pkg/gtags/add-hook 'pkg/gtags/start))
-  (with-eval-after-load 'helm
-    (use-package helm-gtags
-      :if (and (my/package-enabled-p 'helm-gtags)
-               (my/locate-exec "gtags"))
-      :commands (helm-gtags-mode)
-      :init
-      (setq helm-gtags-path-style 'root ;; 'relative, 'absolute
-            helm-gtags-ignore-case t
-            helm-gtags-read-only t
-            helm-gtags-use-input-at-cursor t
-            helm-gtags-highlight-candidate t
-            helm-gtags-maximum-candidates 1000
-            helm-gtags-display-style nil ;; 'detail
-            helm-gtags-fuzzy-match nil
-            helm-gtags-direct-helm-completing nil
-            helm-gtags-auto-update t
-            helm-gtags-update-interval-second 60
-            helm-gtags-pulse-at-cursor t
-            helm-gtags-cache-select-result t
-            helm-gtags-cache-max-result-size 10485760 ;; 10Mb
-            helm-gtags-preselect nil
-            helm-gtags-prefix-key (kbd "C-c c")
-            ;; 启用以下配置项会使得某些常用快捷键不再绑定于上述前缀中
-            ;; 例如将(helm-gtags-dwim)绑定于"M-."
-            helm-gtags-suggested-key-mapping nil)
-      (pkg/gtags/add-hook 'pkg/gtags/start)
-      :config
-      ;; 在以下快捷键前输入"C-u"，还可以限定搜索的目录路径
-      (bind-keys :map helm-gtags-mode-map
-                 ("M-." . helm-gtags-dwim) ;; 替代(xref-find-definitions)
-                 ("M-/" . helm-gtags-show-stack) ;; 所有跳转位置都会被记录于一个栈中，打印整个栈，以供选择
-                 ("M-," . helm-gtags-pop-stack) ;; 替代(xref-pop-marker-stack)，删除栈顶记录
-                 ("" . helm-gtags-previous-history) ;; 遍历栈
-                 ("" . helm-gtags-next-history)
-                 ;; 以下(helm-gtags-find-*)中的多数可由(helm-gtags-dwim)替代
-                 ("C-c c t" . helm-gtags-find-tag)     ;; jump to definitions
-                 ("C-c c r" . helm-gtags-find-rtag)    ;; jump to references
-                 ("C-c c s" . helm-gtags-find-symbol)  ;; jump to symbols
-                 ("C-c c p" . helm-gtags-find-pattern) ;; jump to patterns
-                 ("" . helm-gtags-find-files)          ;; jump to files
-                 ("C-c c l" . helm-gtags-select) ;; 列出所有已被gtags识别出的符号，以供选择
-                 ("C-c c a" . helm-gtags-tags-in-this-function) ;; 列出当前函数中已被识别的符号
-                 ("" . helm-gtags-select-path) ;; 类似于打开文件的功能
-                 ("C-c c n" . helm-gtags-create-tags)
-                 ("C-c c u" . helm-gtags-update-tags)))))
+    (setq ggtags-use-idutils t
+          ggtags-oversize-limit (* 100 1024 1024)
+          ggtags-mode-line-project-name nil
+          ggtags-sort-by-nearness t
+          ggtags-mode-prefix-key (kbd "C-c g"))
+    (pkg/gtags/add-hook #'pkg/gtags/start)
+    :config
+    (unbind-key ggtags-mode-prefix-key ggtags-mode-map)
+    (bind-keys :map ggtags-mode-map
+               ("M-." . ggtags-find-tag-dwim)
+               ("M-n" . ggtags-next-mark)
+               ("M-p" . ggtags-prev-mark)
+               ("M-/" . ggtags-view-tag-history)
+               :map ggtags-navigation-mode-map
+               ("M-n" . next-error)
+               ("M-p" . previous-error)
+               ("C-M-n" . ggtags-navigation-next-file)
+               ("C-M-p" . ggtags-navigation-previous-file)
+               ("M-<" . first-error)
+               ("M->" . ggtags-navigation-last-error)
+               ("M-s" . ggtags-navigation-isearch-forward)
+               ;; 搜索结果中的文件路径名可能会变成缩写，可利用此命令缩放
+               ("M-o" . ggtags-navigation-visible-mode)
+               ("<return>" . ggtags-navigation-mode-done)
+               ("M-," . ggtags-navigation-mode-abort))
+    ;; (ggtags-global-mode 1)
+    )
+  (use-package helm-gtags
+    :after (helm)
+    :commands (helm-gtags-mode)
+    :if (and (my/package-enabled-p 'helm-gtags)
+             (my/locate-exec "gtags"))
+    :init
+    (setq helm-gtags-path-style 'root ;; 'relative, 'absolute
+          helm-gtags-ignore-case t
+          helm-gtags-read-only t
+          helm-gtags-use-input-at-cursor t
+          helm-gtags-highlight-candidate t
+          helm-gtags-maximum-candidates 1000
+          helm-gtags-display-style nil ;; 'detail
+          helm-gtags-fuzzy-match nil
+          helm-gtags-direct-helm-completing nil
+          helm-gtags-auto-update t
+          helm-gtags-update-interval-second 60
+          helm-gtags-pulse-at-cursor t
+          helm-gtags-cache-select-result t
+          helm-gtags-cache-max-result-size (* 100 1024 1024)
+          helm-gtags-preselect nil
+          helm-gtags-prefix-key (kbd "C-c g")
+          ;; 启用以下配置项会使得某些常用快捷键不再绑定于上述前缀中
+          ;; 例如将(helm-gtags-dwim)绑定于"M-."
+          helm-gtags-suggested-key-mapping nil)
+    (pkg/gtags/add-hook #'pkg/gtags/start)
+    :config
+    (unbind-key helm-gtags-prefix-key helm-gtags-mode-map)
+    (bind-keys :map helm-gtags-mode-map
+               ("M-." . helm-gtags-dwim)
+               ("M-," . helm-gtags-pop-stack)
+               ("M-n" . helm-gtags-next-history)
+               ("M-p" . helm-gtags-previous-history)
+               ("M-/" . helm-gtags-show-stack)))
+  )
 
 (defun pkg/gtags/start ()
   (when (my/package-enabled-p 'ggtags)
-    )
+    (ggtags-mode 1))
   (when (my/package-enabled-p 'helm-gtags)
     (helm-gtags-mode 1)))
 
@@ -362,7 +381,7 @@
   (use-package cmake-mode
     :if (my/package-enabled-p 'cmake-mode)
     :init
-    (my/prog/add-start-hook 'pkg/cmake/start)
+    (my/prog/add-start-hook #'pkg/cmake/start)
     :config
     (use-package cmake-font-lock
       :if (my/package-enabled-p 'cmake-font-lock)

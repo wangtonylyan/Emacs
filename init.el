@@ -326,13 +326,13 @@
                                     helm-flycheck
                                     company ;; auto-complete
                                     company-jedi
-                                    helm-gtags ;; ggtags
+                                    ggtags ;; helm-gtags
                                     asn1-mode
                                     ;; [c, c++]
                                     ;; stickyfunc-enhance
-                                    cmake-mode ;; cmake-ide, cmake-project
-                                    cmake-font-lock
-                                    cpputils-cmake
+                                    ;; cmake-mode ;; cmake-ide, cmake-project
+                                    ;; cmake-font-lock
+                                    ;; cpputils-cmake
                                     ;; [python]
                                     ;; elpy ;; ropemacs
                                     ;; flycheck-pyflakes
@@ -351,7 +351,10 @@
                                     use-package))
   (when (not package-archive-contents)
     (package-refresh-contents))
-  (package-install-selected-packages))
+  (package-install-selected-packages)
+  (bind-keys :map package-menu-mode-map
+             ("r" . package-menu-refresh)
+             ("R" . package-refresh-contents)))
 
 (eval-when-compile
   ;; disabled, diminish
@@ -375,19 +378,9 @@
 (use-package diminish
   :ensure t
   :config
-  (diminish 'eldoc-mode))
-
-(use-package hydra
-  :ensure t
-  :demand t
-  :preface
-  (defun pkg/hydra/quit ()
-    (interactive)
-    (message "Hydra Quit"))
-  :init
-  ;; 目前发现启用此项会导致，Hydra子窗口过小，无法完整地呈现提示文字
-  ;; 此外，启用全局的zoom mode似乎也可以避免该问题
-  (setq hydra-lv nil))
+  (diminish 'eldoc-mode)
+  (diminish 'abbrev-mode)
+  (diminish 'hi-lock-mode))
 
 ;; =============================================================================
 ;; 配置杂项
