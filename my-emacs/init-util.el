@@ -259,3 +259,5 @@
             '("vdiff dwim" 'vdiff-magit-dwim))
     (setcdr (assoc ?E (plist-get magit-dispatch-popup :actions))
             '("vdiff popup" 'vdiff-magit-popup))))
+
+(provide 'my/init-util)

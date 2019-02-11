@@ -1,7 +1,5 @@
 ;; -*- coding: utf-8 -*-
 
-(require 'my/prog)
-
 (defun my/prog-cc/add-start-hook (func)
   (my/add-mode-hook "my/prog-cc" func))
 

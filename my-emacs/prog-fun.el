@@ -1,8 +1,5 @@
 ;; -*- coding: utf-8 -*-
 
-(require 'my/prog)
-
-
 (defun pkg/lispbox/init ()
   (let ((exec (my/locate-exec "sbcl")))
     (when (and exec

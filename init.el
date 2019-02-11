@@ -382,6 +382,11 @@
   (diminish 'abbrev-mode)
   (diminish 'hi-lock-mode))
 
+(use-package xref
+  :init
+  (add-hook 'xref-after-jump-hook
+            (lambda () (read-only-mode 1)) t))
+
 ;; =============================================================================
 ;; 配置杂项
 ;; -----------------------------------------------------------------------------
@@ -426,40 +431,44 @@
 (prefer-coding-system 'utf-8)
 ;; (set-face-background 'default "#C7EDCC") ;; 设置背景颜色为绿色护眼色
 ;; 字体的名字源自于.ttf或.otf文件内自带的元信息，包括family和style等
-;; 英文字体：Consolas
+;; 英文字体：Consolas，Fira Mono
 ;; 中文字体：SimSun，MicrosoftYaHei，SourceHanSerifSC (思源宋体简体中文)，SourceHanSansSC (思源黑体简体中文)
 ;; 混合字体：YaHeiConsolasHybrid，MicrosoftYaHeiMono
 ;; Emacs中设置中文字体有以下几种方案
-;; 1) 默认编码：英文字体，中文编码：中文字体
+;; 1. 默认编码：英文字体，中文编码：中文字体
 ;; 此方案存在的缺陷在于，中英文字体高度不同，导致含有中文字体的行与纯英文字体的行之间行距不均
 ;; 而以下设置又不知为何无法生效
 ;; (add-to-list 'face-font-rescale-alist '("SimSun" . 0.8) t)
-;; 2) 默认编码：中英文混合字体
+;; 2. 默认编码：中英文混合字体
 ;; 网上提供的混合字体，拥有统一的行高，但通常都不能完善地支持斜体、粗体等形式
 
 ;; http://emacser.com/torture-emacs.htm
 (let* ((rsltn (* (display-pixel-width) (display-pixel-height)))
        ;; 针对中英文字体分别设置两种字号
-       (efont (cond ((<= rsltn (* 1600 900)) 12)
-                    ((< rsltn (* 1920 1080)) 13)
-                    ((< rsltn (* 2560 1440)) 14)
-                    (t 16)))
-       (cfont (- efont 2)))
+       (efont (cond ((<= rsltn (* 1600 900)) 11)
+                    ((< rsltn (* 1920 1080)) 12)
+                    ((< rsltn (* 2560 1440)) 13)
+                    (t 15)))
+       (cfont (- efont 1))
+       (chsets '(kana han symbol cjk-misc bopomofo)))
   (if (eq system-type 'windows-nt)
       ;; Windows系统上的Emacs25版本对中文字体的显示存在问题，打开中文文档时会存在卡顿的现象
       ;; 必须手动指定中文字体为宋体才可避免。
       (progn
         (set-face-font 'default (font-spec :family "Consolas" :size efont))
-        (set-fontset-font "fontset-default" 'han
-                          (font-spec :family "SimSun" :size cfont) nil 'prepend))
+        (dolist (chset chsets)
+          (set-fontset-font t chset
+                            (font-spec :family "SimSun" :size cfont) nil 'prepend)))
     (progn
       ;; e.g. 设置字体的方式有以下三种
       ;; (set-frame-font (font-spec))
       ;; (set-face-attribute 'default nil :font (font-spec))
-      (set-face-font 'default (font-spec :family "YaHeiConsolasHybrid" :size efont))
+      (set-face-font 'default (font-spec :family "Fira Mono" :size efont))
       ;; 'charset-script-alist
-      (set-fontset-font "fontset-default" 'han
-                        (font-spec :family "YaHeiConsolasHybrid" :size cfont) nil 'prepend))))
+      (dolist (chset chsets)
+        (set-fontset-font t chset
+                          (font-spec :family "SourceHanSansSC" :size cfont) nil 'prepend))))
+  (setq-default line-spacing (/ efont 3)))
 
 ;; -----------------------------------------------------------------------------
 (global-font-lock-mode 1) ;; 语法高亮
@@ -513,7 +522,6 @@
 (setq-default cursor-type '(bar . 3)
               scroll-up-aggressively 0.01
               scroll-down-aggressively 0.01
-              line-spacing 1 ;; 行距
               fill-column 100 ;; 在auto-fill-mode模式下，超过指定字符就会被强制换行
               indicate-empty-lines nil
               indent-tabs-mode nil ;; make indentation commands use space only
@@ -536,8 +544,6 @@
 
 ;; File Extension
 ;; (setq auto-mode-alist (cons '("\\.emacs\\'" . emacs-lisp-mode) auto-mode-alist))
-
-(provide 'my/init)
 
 ;; 加载其他配置文件
 (mapc (lambda (file)
@@ -600,3 +606,5 @@
 
 ;; =============================================================================
 (message "emacs init time = %s" (emacs-init-time))
+
+(provide 'my/init)
