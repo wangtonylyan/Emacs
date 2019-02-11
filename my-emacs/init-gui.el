@@ -144,13 +144,14 @@
              ("C-S-y" . tabbar-backward-group)))
 
 (use-package treemacs
-  :commands (treemacs-select-window)
+  :commands (treemacs-select-window
+             treemacs-projectile)
   :preface
   (defun pkg/treemacs/select-window ()
     (interactive)
     (treemacs-select-window)
     (text-scale-increase 0)
-    (text-scale-decrease 1))
+    (text-scale-decrease 0.5))
   :if (my/package-enabled-p 'treemacs)
   :init
   (setq treemacs-python-executable (or (my/locate-exec "python3")
@@ -160,9 +161,9 @@
         treemacs-is-never-other-window nil
         treemacs-no-delete-other-windows t
         treemacs-position 'left
-        treemacs-width 35
+        treemacs-width 40
         treemacs-show-cursor t
-        treemacs-indentation 1
+        treemacs-indentation 2
         treemacs-indentation-string " "
         treemacs-sorting 'alphabetic-desc
         treemacs-show-hidden-files nil
@@ -170,11 +171,11 @@
         treemacs-space-between-root-nodes nil
         treemacs-collapse-dirs (if treemacs-python-executable 3 0)
         treemacs-follow-after-init t
-        treemacs-project-follow-cleanup nil
+        treemacs-project-follow-cleanup t
         treemacs-recenter-after-file-follow nil
         treemacs-recenter-after-tag-follow nil
         treemacs-follow-recenter-distance 0.2
-        treemacs-file-follow-delay 1
+        treemacs-file-follow-delay 5
         treemacs-file-event-delay 5000
         treemacs-goto-tag-strategy 'refetch-index
         treemacs-tag-follow-delay 1.5
@@ -186,8 +187,8 @@
         treemacs-max-git-entries 5000)
   :config
   (treemacs-resize-icons 10)
-  ;; (treemacs-follow-mode 1)
-  ;; (treemacs-tag-follow-mode 1)
+  (treemacs-follow-mode -1)
+  (treemacs-tag-follow-mode -1)
   (treemacs-filewatch-mode 1)
   (when (not treemacs-show-cursor)
     ;; 该子模式似乎并不完善，不建议启用
@@ -200,6 +201,7 @@
     (treemacs-icons-dired-mode))
   (use-package treemacs-projectile
     :after (projectile)
+    :commands (treemacs-projectile)
     :if (my/package-enabled-p 'projectile))
   (when (and (my/locate-exec "git")
              (my/locate-exec "python3"))
@@ -238,8 +240,8 @@
   (bind-keys :map neotree-mode-map
              ("n" . neotree-next-line)
              ("p" . neotree-previous-line)
-             ("C-n" . neotree-select-next-sibling-node)
-             ("C-p" . neotree-select-previous-sibling-node)
+             ("M-n" . neotree-select-next-sibling-node)
+             ("M-p" . neotree-select-previous-sibling-node)
              ("u" . neotree-select-up-node)
              ("a" . neotree-hidden-file-toggle))
   (when (my/package-enabled-p 'projectile)
