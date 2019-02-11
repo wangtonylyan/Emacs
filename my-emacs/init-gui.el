@@ -136,11 +136,12 @@
   :if (my/package-enabled-p 'tabbar)
   :config
   (tabbar-mode 1)
+  (define-key tabbar-mode-map tabbar-prefix-key nil)
   (bind-keys :map tabbar-mode-map
-             ("C-c C-b" . tabbar-backward-tab)
-             ("C-c C-f" . tabbar-forward-tab)
-             ("C-c C-p" . tabbar-backward-group)
-             ("C-c C-n" . tabbar-forward-group)))
+             ("C-S-i" . tabbar-forward-tab)
+             ("C-S-u" . tabbar-backward-tab)
+             ("C-S-o" . tabbar-forward-group)
+             ("C-S-y" . tabbar-backward-group)))
 
 (use-package treemacs
   :commands (treemacs-select-window)
@@ -279,3 +280,5 @@
   :config
   ;; (zoom-mode 1)
   )
+
+(provide 'my/init-gui)

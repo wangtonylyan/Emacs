@@ -1,7 +1,5 @@
 ;; -*- coding: utf-8 -*-
 
-(require 'my/prog)
-
 (defun my/prog-py/add-start-hook (func)
   (my/add-mode-hook "my/prog-py" func))
 

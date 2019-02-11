@@ -1,7 +1,5 @@
 ;; -*- coding: utf-8 -*-
 
-(require 'my-prog)
-
 (defvar my-prog-web-mode-start-hook '())
 
 (defun my-plugin-web-mode-init ()
@@ -54,4 +52,4 @@
 
 (add-hook 'after-init-hook 'my-prog-web-mode-init t)
 
-(provide 'my-prog-web)
+(provide 'my/prog-web)

@@ -37,3 +37,5 @@
 (use-package auctex
   :if (my/package-enabled-p 'auctex)
   )
+
+(provide 'my/text)

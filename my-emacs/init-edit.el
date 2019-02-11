@@ -182,13 +182,17 @@
           (my/add-mode-hook mode #'enable-paredit-mode))
         '("org" "lisp" "elisp" "ilisp" "slime" "scheme"))
   :config
-  (unbind-key "C-M-f" paredit-mode-map) ;; (paredit-forward)
-  (unbind-key "C-M-b" paredit-mode-map) ;; (paredit-backward)
   (unbind-key "C-M-n" paredit-mode-map) ;; (paredit-forward-up)
   (unbind-key "C-M-p" paredit-mode-map) ;; (paredit-backward-down)
   (unbind-key "C-M-d" paredit-mode-map) ;; (paredit-forward-down)
   (unbind-key "C-M-u" paredit-mode-map) ;; (paredit-backward-up)
-  )
+  (bind-keys :map paredit-mode-map
+             ("C-M-f" . paredit-forward)
+             ("C-M-b" . paredit-backward)
+             ("C-M-l" . paredit-forward-up)
+             ("C-M-k" . paredit-backward-down)
+             ("C-M-j" . paredit-forward-down)
+             ("C-M-h" . paredit-backward-up)))
 
 (use-package parinfer
   :if (my/package-enabled-p 'parinfer)
@@ -204,3 +208,5 @@
   (mapc (lambda (mode)
           (my/add-mode-hook mode #'parinfer-mode))
         '("lisp" "elisp" "ilisp" "scheme")))
+
+(provide 'my/init-edit)
