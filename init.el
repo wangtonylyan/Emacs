@@ -238,7 +238,7 @@
       ;; url-proxy-services '(("http" . "10.25.71.1:8080"))
       )
 
-(when (require 'package nil t)
+(when (require 'package)
   ;; 设置安装包的存储目录，该目录也需要被包含至'load-path中
   ;; (add-to-list 'package-directory-list "~/.emacs.d/elpa/" t) ;; system-wide dir
   (setq package-user-dir (my/set-user-emacs-file "elpa/")) ;; user-wide dir
@@ -351,18 +351,17 @@
                                     use-package))
   (when (not package-archive-contents)
     (package-refresh-contents))
-  (package-install-selected-packages)
-  (bind-keys :map package-menu-mode-map
-             ("r" . package-menu-refresh)
-             ("R" . package-refresh-contents)))
+  (package-install-selected-packages))
 
 (eval-when-compile
   ;; disabled, diminish
   ;; ensure, after, demand
-  ;; defer, commands, binds
+  ;; defer ;; used in init-keys.el only
+  ;; commands, binds
   ;; mode, magic, interpreter
   ;; preface, if, init, config
   (require 'use-package))
+
 (require 'bind-key)
 
 (use-package all-the-icons

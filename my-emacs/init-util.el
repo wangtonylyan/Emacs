@@ -55,11 +55,11 @@
         ido-enter-matching-directory nil))
 
 (use-package smex
-  :if (my/package-enabled-p 'smex)
   :bind (("M-x" . smex)
          ("M-X" . smex-major-mode-commands)
          ;; 该插件会自动替换原M-x快捷键所绑定的命令，若想保留则可重新绑定之
          ("C-x M-x" . execute-extended-command))
+  :if (my/package-enabled-p 'smex)
   :config
   (smex-initialize))
 
@@ -102,14 +102,6 @@
         ;; helm-completing-read-handlers-alist
         )
   :config
-  (bind-keys ("C-x c" . nil)
-             :map helm-map
-             ("<tab>" . helm-execute-persistent-action)
-             ("M-x" . helm-select-action)
-             ;; ("C-c C-f" . helm-follow-mode)
-             :map minibuffer-local-map
-             ("M-p" . helm-minibuffer-history)
-             ("M-n" . helm-minibuffer-history))
   (helm-autoresize-mode 1)
   (helm-mode 1))
 
@@ -129,10 +121,10 @@
   (add-hook' after-init-hook #'bm-repository-load t)
   (add-hook 'find-file-hooks #'bm-buffer-restore t)
   (add-hook 'kill-buffer-hook #'bm-buffer-save t)
-  (add-hook 'kill-emacs-hook '(lambda nil
-                                (progn
-                                  (bm-buffer-save-all)
-                                  (bm-repository-save))) t)
+  (add-hook 'kill-emacs-hook (lambda ()
+                               (progn
+                                 (bm-buffer-save-all)
+                                 (bm-repository-save))) t)
   (add-hook 'after-save-hook #'bm-buffer-save t)
   (add-hook 'after-revert-hook #'bm-buffer-restore t)
   (use-package helm-bm
@@ -183,11 +175,7 @@
         vdiff-may-close-fold-on-point nil
         vdiff-min-fold-size 4
         vdiff-fold-padding 6
-        vdiff-fold-string-function 'vdiff-fold-string-default)
-  :config
-  (define-key vdiff-mode-map (kbd "C-c d") vdiff-mode-prefix-map)
-  (bind-keys :map vdiff-mode-map
-             ("C-c d h" . vdiff-hydra/body)))
+        vdiff-fold-string-function 'vdiff-fold-string-default))
 
 
 (use-package projectile

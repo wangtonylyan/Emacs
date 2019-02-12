@@ -153,11 +153,6 @@
   (setq undo-tree-visualizer-diff nil
         undo-tree-visualizer-relative-timestamps nil)
   :config
-  (bind-keys :map undo-tree-visualizer-mode-map
-             ("C-_" . nil)
-             ("<return>" . undo-tree-visualizer-quit)
-             ("C-p" . undo-tree-visualize-undo-to-x)
-             ("C-n" . undo-tree-visualize-redo-to-x))
   (global-undo-tree-mode 1))
 
 (use-package smart-hungry-delete
