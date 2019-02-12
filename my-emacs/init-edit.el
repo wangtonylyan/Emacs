@@ -109,15 +109,9 @@
   (my/add-mode-hook "prog" #'flyspell-prog-mode)
   :config
   (add-to-list 'ispell-skip-region-alist '("^#+BEGIN" . "^#+END") t)
-  (unbind-key "C-," flyspell-mode-map) ;; (flyspell-goto-next-error)
-  (unbind-key "C-;" flyspell-mode-map) ;; (flyspell-auto-correct-previous-word)
-  (bind-keys :map flyspell-mode-map
-             ("C-\"" . flyspell-goto-next-error))
   (use-package flyspell-correct
     :if (my/package-enabled-p 'flyspell-correct)
     :config
-    (bind-keys :map flyspell-mode-map
-               ("C-'" . flyspell-correct-wrapper))
     (use-package flyspell-correct-helm
       :after (helm)
       :if (my/package-enabled-p 'flyspell-correct-helm)
@@ -159,8 +153,8 @@
   (setq undo-tree-visualizer-diff nil
         undo-tree-visualizer-relative-timestamps nil)
   :config
-  (unbind-key "C-_" undo-tree-map)
   (bind-keys :map undo-tree-visualizer-mode-map
+             ("C-_" . nil)
              ("<return>" . undo-tree-visualizer-quit)
              ("C-p" . undo-tree-visualize-undo-to-x)
              ("C-n" . undo-tree-visualize-redo-to-x))
@@ -180,19 +174,7 @@
   :init
   (mapc (lambda (mode)
           (my/add-mode-hook mode #'enable-paredit-mode))
-        '("org" "lisp" "elisp" "ilisp" "slime" "scheme"))
-  :config
-  (unbind-key "C-M-n" paredit-mode-map) ;; (paredit-forward-up)
-  (unbind-key "C-M-p" paredit-mode-map) ;; (paredit-backward-down)
-  (unbind-key "C-M-d" paredit-mode-map) ;; (paredit-forward-down)
-  (unbind-key "C-M-u" paredit-mode-map) ;; (paredit-backward-up)
-  (bind-keys :map paredit-mode-map
-             ("C-M-f" . paredit-forward)
-             ("C-M-b" . paredit-backward)
-             ("C-M-l" . paredit-forward-up)
-             ("C-M-k" . paredit-backward-down)
-             ("C-M-j" . paredit-forward-down)
-             ("C-M-h" . paredit-backward-up)))
+        '("org" "lisp" "elisp" "ilisp" "slime" "scheme")))
 
 (use-package parinfer
   :if (my/package-enabled-p 'parinfer)

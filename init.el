@@ -588,8 +588,8 @@
 (use-package erc
   :if (my/package-enabled-p 'erc)
   :config
-  ;; (unbind-key "<return>" erc-mode-map)
   (bind-keys :map erc-mode-map
+             ;; ("<return>" . nil)
              ("C-<return>" . erc-send-current-line))
   (setq erc-autojoin-channels-alist nil ;; '(("freenode.net" "#emacs"))
         erc-interpret-mirc-color t

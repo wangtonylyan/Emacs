@@ -135,13 +135,7 @@
 (use-package tabbar
   :if (my/package-enabled-p 'tabbar)
   :config
-  (tabbar-mode 1)
-  (define-key tabbar-mode-map tabbar-prefix-key nil)
-  (bind-keys :map tabbar-mode-map
-             ("C-S-i" . tabbar-forward-tab)
-             ("C-S-u" . tabbar-backward-tab)
-             ("C-S-o" . tabbar-forward-group)
-             ("C-S-y" . tabbar-backward-group)))
+  (tabbar-mode 1))
 
 (use-package treemacs
   :commands (treemacs-select-window
@@ -151,14 +145,14 @@
     (interactive)
     (treemacs-select-window)
     (text-scale-increase 0)
-    (text-scale-decrease 0.5))
+    (text-scale-decrease 0.3))
   :if (my/package-enabled-p 'treemacs)
   :init
   (setq treemacs-python-executable (or (my/locate-exec "python3")
                                        (my/locate-exec "python"))
         treemacs-persist-file (my/set-user-emacs-file ".cache/treemacs-persist")
         treemacs-display-in-side-window t
-        treemacs-is-never-other-window nil
+        treemacs-is-never-other-window t
         treemacs-no-delete-other-windows t
         treemacs-position 'left
         treemacs-width 40
@@ -193,8 +187,6 @@
   (when (not treemacs-show-cursor)
     ;; 该子模式似乎并不完善，不建议启用
     (treemacs-fringe-indicator-mode 1))
-  (bind-keys :map treemacs-mode-map
-             ([mouse-1] . treemacs-single-click-expand-action))
   (use-package treemacs-icons-dired
     :ensure t
     :config
@@ -232,18 +224,6 @@
         neo-show-updir-line t
         neo-window-width 35)
   :config
-  (unbind-key "s" neotree-mode-map)
-  (unbind-key "S" neotree-mode-map)
-  (unbind-key "D" neotree-mode-map)
-  (unbind-key "H" neotree-mode-map)
-  (unbind-key "U" neotree-mode-map)
-  (bind-keys :map neotree-mode-map
-             ("n" . neotree-next-line)
-             ("p" . neotree-previous-line)
-             ("M-n" . neotree-select-next-sibling-node)
-             ("M-p" . neotree-select-previous-sibling-node)
-             ("u" . neotree-select-up-node)
-             ("a" . neotree-hidden-file-toggle))
   (when (my/package-enabled-p 'projectile)
     (add-hook 'pkg/projectile/switch-hook #'neotree-projectile-action t)))
 

@@ -15,35 +15,35 @@
   :init
   ;; 目前发现启用此项会导致，Hydra子窗口过小，无法完整地呈现提示文字
   ;; 此外，启用全局的zoom mode似乎也可以避免该问题
-  (setq hydra-lv nil))
+  (setq hydra-lv nil)
+  )
 
 ;; 与输入法切换键冲突
 ;; (global-set-key (kbd "C-S-SPC") 'set-mark-command)
 ;; (global-unset-key (kbd "C-SPC"))
 
-(unbind-key "C-x f"      ) ;; (set-fill-column)
-(unbind-key "C-x C-l"    ) ;; (downcase-region)
-(unbind-key "C-x C-u"    ) ;; (upcase-region)
-(unbind-key "C-M-v"      ) ;; (scroll-other-window)
-(unbind-key "M-s h"      )
-(unbind-key "C-x o"      ) ;; (other-window)
-(unbind-key "C-x <left>" ) ;; (previous-buffer)
-(unbind-key "C-x <right>") ;; (next-buffer)
-(unbind-key "M-{"        ) ;; (forward-paragraph)
-(unbind-key "M-}"        ) ;; (backward-paragraph)
-(unbind-key "C-M-n"      ) ;; (forward-list)
-(unbind-key "C-M-p"      ) ;; (backward-list)
-(unbind-key "C-M-d"      ) ;; (down-list)
-(unbind-key "C-M-u"      ) ;; (backward-up-list)
-(unbind-key "C-M-a"      ) ;; (beginning-of-defun)
-(unbind-key "C-M-e"      ) ;; (end-of-defun)
-(unbind-key "C-x d"      ) ;; (dired)
-(unbind-key "C-s"        ) ;; (isearch-forward)
-(unbind-key "C-r"        ) ;; (isearch-backward)
-(unbind-key "M-/"        ) ;; (dabbrev-expand)
-
 ;; 以下部分是重复绑定，目的是便于查阅
 (bind-keys
+ ("C-x f"          . nil) ;; (set-fill-column)
+ ("C-x C-l"        . nil) ;; (downcase-region)
+ ("C-x C-u"        . nil) ;; (upcase-region)
+ ("C-M-v"          . nil) ;; (scroll-other-window)
+ ("M-s h"          . nil)
+ ("C-x o"          . nil) ;; (other-window)
+ ("C-x <left>"     . nil) ;; (previous-buffer)
+ ("C-x <right>"    . nil) ;; (next-buffer)
+ ("M-{"            . nil) ;; (forward-paragraph)
+ ("M-}"            . nil) ;; (backward-paragraph)
+ ("C-M-n"          . nil) ;; (forward-list)
+ ("C-M-p"          . nil) ;; (backward-list)
+ ("C-M-d"          . nil) ;; (down-list)
+ ("C-M-u"          . nil) ;; (backward-up-list)
+ ("C-M-a"          . nil) ;; (beginning-of-defun)
+ ("C-M-e"          . nil) ;; (end-of-defun)
+ ("C-x d"          . nil) ;; (dired)
+ ("C-s"            . nil) ;; (isearch-forward)
+ ("C-r"            . nil) ;; (isearch-backward)
+ ("M-/"            . nil) ;; (dabbrev-expand)
  ("M-x"            . helm-M-x                )
  ("M-y"            . helm-show-kill-ring     )
  ("C-x C-f"        . helm-find-files         )
@@ -82,27 +82,51 @@
  ("M-!"            . shell-command           )
  ("M-."            . xref-find-definitions   )
  ("M-,"            . xref-pop-marker-stack   )
- ;; ("C-S-y")      ;; tabbar
- ;; ("C-S-u")      ;; tabbar
- ;; ("C-S-i")      ;; tabbar
- ;; ("C-S-o")      ;; tabbar
  ;; ("C-:")        ;; avy, ace-jump-mode
  ;; ("C-;")        ;; avy, ace-jump-mode
- ;; ("C-\"")       ;; flyspell, flyspell-correct
- ;; ("C-'")        ;; flyspell, flyspell-correct
  ("M-c"            . pkg/hydra/group/body    )
  ;; , :: CEDET/Semantic
  ;; . :: CEDET/EDE
  )
 
-(defhydra pkg/hydra/group (:timeout pkg/hydra/timeout-sec :exit t)
+(use-package tabbar
+  :defer t
+  :config
+  (define-key tabbar-mode-map tabbar-prefix-key nil)
+  (bind-keys :map tabbar-mode-map
+             ("C-S-i" . tabbar-forward-tab)
+             ("C-S-u" . tabbar-backward-tab)
+             ("C-S-o" . tabbar-forward-group)
+             ("C-S-y" . tabbar-backward-group))
+  )
+
+(use-package flyspell
+  :defer t
+  :config
+  (bind-keys :map flyspell-mode-map
+             ("C-,"   . nil) ;; (flyspell-goto-next-error)
+             ("C-;"   . nil) ;; (flyspell-auto-correct-previous-word)
+             ("C-."   . nil) ;; (flyspell-auto-correct-word)
+             ("C-M-i" . nil) ;; (flyspell-auto-correct-word)
+             ("C-c $" . nil) ;; (flyspell-correct-word-before-point)
+             ("C-\""  . flyspell-goto-next-error)
+             ("C-'"   . flyspell-auto-correct-word))
+  (use-package flyspell-correct
+    :defer t
+    :config
+    (bind-keys :map flyspell-mode-map
+               ("C-'" . flyspell-correct-wrapper)))
+  )
+
+(defhydra pkg/hydra/group
+  (:timeout pkg/hydra/timeout-sec :exit t)
   ("h" helm-command-prefix
    "helm" :column "")
   ("w" pkg/hydra/group/window/body
    "window, windmove, winner, buffer-move, zoom")
   ("c" pkg/hydra/group/cursor/body
    "cursor, paredit")
-  ("t" (lambda () (interactive)
+  ("d" (lambda () (interactive)
          (cond
           ((my/package-enabled-p 'treemacs) (pkg/hydra/group/treemacs/body))
           ((my/package-enabled-p 'neotree) (pkg/hydra/group/neotree/body))
@@ -112,7 +136,7 @@
    "highlight, highlight-thing")
   ("b" pkg/hydra/group/bookmark/body
    "bookmark, bm, helm-bm")
-  ("d" pkg/hydra/group/diff/body
+  ("=" pkg/hydra/group/diff/body
    "ediff, vdiff")
   ("o" pkg/hydra/group/org/body
    "org")
@@ -132,7 +156,8 @@
    "ggtags, helm-gtags")
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/window (:timeout pkg/hydra/timeout-sec)
+(defhydra pkg/hydra/group/window
+  (:timeout pkg/hydra/timeout-sec)
   ("+" enlarge-window              "++ <>      " :column "buffer size ")
   ("=" enlarge-window-horizontally "++ ^v      "                       )
   ("_" shrink-window               "-- <>      "                       )
@@ -147,7 +172,8 @@
   ("j" buf-move-down               "down       "                       )
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/cursor (:timeout pkg/hydra/timeout-sec :exit t)
+(defhydra pkg/hydra/group/cursor
+  (:timeout pkg/hydra/timeout-sec :exit t)
   ("C-    f,b" nil "char     " :column "forward/backward")
   ("   M- f,b" nil "word     "                           )
   ("C-    e,a" nil "line     " :column "beginning/end   ")
@@ -155,75 +181,151 @@
   ("C- M- e,a" nil "paragraph"                           )
   ("C- M- f,b" nil "sexp     " :column "s-expression    ")
   ("C- M- j,k" nil "tree down"                           )
-  ("C- M- l,h" nil "tree up  "                           )
-  ("q" pkg/hydra/quit nil :exit t))
+  ("C- M- l,h" nil "tree up  "                           ))
 
-(defhydra pkg/hydra/group/dired (dired-mode-map "" :timeout pkg/hydra/timeout-sec :exit t)
-  "
+(use-package paredit
+  :defer t
+  :config
+  (bind-keys :map paredit-mode-map
+             ("C-M-n" . nil) ;; (paredit-forward-up)
+             ("C-M-p" . nil) ;; (paredit-backward-down)
+             ("C-M-d" . nil) ;; (paredit-forward-down)
+             ("C-M-u" . nil) ;; (paredit-backward-up)
+             ("C-M-f" . paredit-forward)
+             ("C-M-b" . paredit-backward)
+             ("C-M-l" . paredit-forward-up)
+             ("C-M-k" . paredit-backward-down)
+             ("C-M-j" . paredit-forward-down)
+             ("C-M-h" . paredit-backward-up))
+  )
+
+(use-package dired
+  :defer t
+  :config
+  (bind-keys :map dired-mode-map
+             ("?" . pkg/hydra/group/dired-help/body))
+  (defhydra pkg/hydra/group/dired-help
+    (dired-mode-map "" :timeout pkg/hydra/timeout-sec :exit t)
+    "
 Number of marked: %(pkg/dired/count-marked)
 
 "
-  ("C-f" forward-char           nil)
-  ("C-b" backward-char          nil)
-  ("C-e" move-end-of-line       nil)
-  ("C-a" move-beginning-of-line nil)
-  ("C-l" recenter-top-bottom    nil)
-  ("s"       dired-sort-toggle-or-edit    "sort             " :column "show    ")
-  ("g"       dired-do-redisplay           "refresh          "                   )
-  ("G"       revert-buffer                "revert           "                   )
-  ("k"       dired-do-kill-lines          "hide line        "                   )
-  ("K"       dired-hide-details-mode      "hide details     "                   )
-  ("n"       dired-next-line              "next line        " :column "move    ")
-  ("p"       dired-previous-line          "prev line"                           )
-  ("C-n"     dired-next-dirline           "next dir         "                   )
-  ("C-p"     dired-prev-dirline           "prev dir         "                   )
-  ("o"       dired-goto-file              "goto             "                   )
-  ("l"       dired-up-directory           "parent           "                   )
-  ("m"       dired-mark                   "mark             " :column "mark    ")
-  ("M"       dired-mark-files-regexp      "mark regexp      "                   )
-  ("u"       dired-unmark                 "unmark           "                   )
-  ("U"       dired-unmark-all-marks       "unmark all       "                   )
-  ("t"       dired-toggle-marks           "toggle (un)marked"                   )
-  ("M-n"     dired-next-marked-file       "next marked      "                   )
-  ("M-p"     dired-prev-marked-file       "prev marked      "                   )
-  ("v"       dired-view-file              "view             " :column "file    ")
-  ("V"       dired-display-file           "display          "                   )
-  ("f"       dired-find-file              "open             "                   )
-  ("F"       dired-find-file-other-window "open other       "                   )
-  ("c"       dired-do-copy                "copy             "                   )
-  ("C"       dired-do-rename              "move             "                   )
-  ("d"       dired-flag-file-deletion     "flag delete      " :column "delete  ")
-  ("#"       dired-flag-auto-save-files   "flag auto-saved  "                   )
-  ("~"       dired-flag-backup-files      "flag backup      "                   )
-  ("."       dired-clean-directory        "flag clean       "                   )
-  ("x"       dired-do-flagged-delete      "delete flagged   "                   )
-  ("D"       dired-do-delete              "delete marked    "                   )
-  (": m  "   dired-do-chmod               "chmod            " :column "property")
-  (": o  "   dired-do-chown               "chown            "                   )
-  (": g  "   dired-do-chgrp               "chgrp            "                   )
-  (": t  "   dired-do-touch               "touch            "                   )
-  (": d  "   dired-create-directory       "create dir       "                   )
-  ("!"       dired-do-shell-command       "shell            " :column "external")
-  ("&"       dired-do-async-shell-command "shell &          "                   ))
+    ("s"   dired-sort-toggle-or-edit    "sort             " :column "show    ")
+    ("g"   revert-buffer                "revert           "                   )
+    ("G"   dired-do-redisplay           "refresh          "                   )
+    ("k"   dired-do-kill-lines          "hide line        "                   )
+    ("K"   dired-hide-details-mode      "hide details     "                   )
+    ("n"   dired-next-line              "next line        " :column "move    ")
+    ("p"   dired-previous-line          "prev line"                           )
+    ("C-n" dired-next-dirline           "next dir         "                   )
+    ("C-p" dired-prev-dirline           "prev dir         "                   )
+    ("o"   dired-goto-file              "goto             "                   )
+    ("l"   dired-up-directory           "parent           "                   )
+    ("m"   dired-mark                   "mark             " :column "mark    ")
+    ("M"   dired-mark-files-regexp      "mark regexp      "                   )
+    ("u"   dired-unmark                 "unmark           "                   )
+    ("U"   dired-unmark-all-marks       "unmark all       "                   )
+    ("t"   dired-toggle-marks           "toggle (un)marked"                   )
+    ("M-n" dired-next-marked-file       "next marked      "                   )
+    ("M-p" dired-prev-marked-file       "prev marked      "                   )
+    ("v"   dired-view-file              "peek             " :column "view    ")
+    ("V"   dired-display-file           "display          "                   )
+    ("f"   dired-find-file              "open             "                   )
+    ("F"   dired-find-file-other-window "open in other    "                   )
+    ("y"   dired-do-copy                "copy             " :column "action  ")
+    ("Y"   dired-do-rename              "move             "                   )
+    ("="   dired-create-directory       "create dir       "                   )
+    ("d"   dired-flag-file-deletion     "flag delete      " :column "delete  ")
+    ("#"   dired-flag-auto-save-files   "flag auto-saved  "                   )
+    ("~"   dired-flag-backup-files      "flag backup      "                   )
+    ("."   dired-clean-directory        "flag clean       "                   )
+    ("x"   dired-do-flagged-delete      "delete flagged   "                   )
+    ("D"   dired-do-delete              "delete marked    "                   )
+    (": m" dired-do-chmod               "chmod            " :column "property")
+    (": o" dired-do-chown               "chown            "                   )
+    (": g" dired-do-chgrp               "chgrp            "                   )
+    (": t" dired-do-touch               "touch            "                   )
+    ("!"   dired-do-shell-command       "shell            " :column "external")
+    ("&"   dired-do-async-shell-command "shell &          "                   ))
+  )
 
-(defhydra pkg/hydra/group/treemacs (:timeout pkg/hydra/timeout-sec :exit t)
+(defhydra pkg/hydra/group/treemacs
+  (:timeout pkg/hydra/timeout-sec :exit t)
   ("d"   dired                         "enable       " :column "dired  ")
-  ("t"   pkg/treemacs/select-window    "select       " :column "window ")
+  ("j"   pkg/treemacs/select-window    "select       " :column "window ")
   ("1"   treemacs-delete-other-windows "delete others"                  )
-  ("u"   treemacs                      nil                              )
-  ("C-f" treemacs-follow-mode          "toggle       " :column "follow ")
+  ("C-f" treemacs-follow-mode          "mode         " :column "follow ")
   ("f"   treemacs-find-file            "file         "                  )
-  ("s"   treemacs-find-tag             "tag          "                  )
-  ("b"   treemacs-bookmark             "bookmark     "                  )
+  ("t"   treemacs-find-tag             "tag          "                  )
+  ("m"   treemacs-bookmark             "bookmark     "                  )
   ("p"   treemacs-projectile           "setup        " :column "project")
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/neotree (:timeout pkg/hydra/timeout-sec :exit t)
+(use-package treemacs
+  :defer t
+  :config
+  (bind-keys :map treemacs-mode-map
+             ([mouse-1] . treemacs-single-click-expand-action)
+             ("?"       . pkg/hydra/group/treemacs-help/body))
+  (defhydra pkg/hydra/group/treemacs-help
+    (treemacs-mode-map "" :timeout pkg/hydra/timeout-sec :exit t)
+    ("s"         treemacs-resort                     "sort           " :column "show    ")
+    ("g"         treemacs-refresh                    "refresh        "                   )
+    ("K"         treemacs-toggle-show-dotfiles       "dot files      "                   )
+    ("<C-tab>"   treemacs-collapse-other-projects    "collapse others"                   )
+    ("<backtab>" treemacs-collapse-all-projects      "collapse all   "                   )
+    ("n"         treemacs-next-line                  "next line      " :column "move    ")
+    ("p"         treemacs-previous-line              "prev line      "                   )
+    ("C-n"       treemacs-next-neighbour             "next dir       "                   )
+    ("C-p"       treemacs-previous-neighbour         "prev dir       "                   )
+    ("l"         treemacs-goto-parent-node           "parent         "                   )
+    ("L"         treemacs-collapse-parent-node       "collapse parent"                   )
+    ("v"         treemacs-TAB-action                 "peek           " :column "view    ")
+    ("<tab>"     treemacs-TAB-action                 nil                                 )
+    ("V"         treemacs-peek                       "display        "                   )
+    ("f"         treemacs-RET-action                 "open           "                   )
+    ("C-M-n"     treemacs-next-line-other-window     "peek next line "                   )
+    ("C-M-p"     treemacs-previous-line-other-window "peek prev line "                   )
+    ("Y"         treemacs-rename                     "move           " :column "action  ")
+    ("D"         treemacs-delete                     "delete         "                   )
+    ("+"         treemacs-create-file                "create file    "                   )
+    ("="         treemacs-create-dir                 "create dir     "                   )
+    ("m"         treemacs-add-bookmark               "bookmark       "                   )
+    ("M-n"       treemacs-next-project               "move next      " :column "project ")
+    ("M-p"       treemacs-previous-project           "move prev      "                   )
+    ("<C-return>"treemacs-root-up                    "root up        "                   )
+    ("<return>"  treemacs-root-down                  "root down      "                   )
+    (": f"       treemacs-follow-mode                "follow mode    " :column "treemacs")
+    (": g"       treemacs-git-mode                   "git mode       "                   )
+    (": w"       treemacs-set-width                  "set width      "                   )
+    (": m"       treemacs-toggle-fixed-width         "fixed width    "                   )
+    ("q"         treemacs-quit                       "quit           "                   )
+    ("Q"         treemacs-kill-buffer                "terminate      "                   ))
+  )
+
+(defhydra pkg/hydra/group/neotree
+  (:timeout pkg/hydra/timeout-sec :exit t)
   ("d" dired              "enable" :column "dired ")
-  ("t" pkg/neotree/toggle "select" :column "window")
+  ("j" pkg/neotree/toggle "select" :column "window")
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/highlight (:timeout pkg/hydra/timeout-sec)
+(use-package neotree
+  :defer t
+  :config
+  (bind-keys :map neotree-mode-map
+             ("?" . pkg/hydra/group/neotree-help/body))
+  (defhydra pkg/hydra/group/neotree-help
+    (neotree-mode-map "" :timeout pkg/hydra/timeout-sec :exit t)
+    ("n"   neotree-next-line                    "next line")
+    ("p"   neotree-previous-line                "prev line")
+    ("C-n" neotree-select-next-sibling-node     "next dir ")
+    ("C-p" neotree-select-previous-sibling-node "prev dir ")
+    ("l"   neotree-select-up-node               "parent   ")
+    ("K"   neotree-hidden-file-toggle           "hidden   "))
+  )
+
+(defhydra pkg/hydra/group/highlight
+  (:timeout pkg/hydra/timeout-sec)
   ("i" highlight-symbol-at-point       "at point   " :column "highlight  ")
   ("p" highlight-phrase                "phrase     "                      )
   ("r" highlight-regexp                "regexp     "                      )
@@ -231,7 +333,8 @@ Number of marked: %(pkg/dired/count-marked)
   ("u" unhighlight-regexp              "regexp     " :column "unhighlight")
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/bookmark (:timeout pkg/hydra/timeout-sec)
+(defhydra pkg/hydra/group/bookmark
+  (:timeout pkg/hydra/timeout-sec)
   ("m" bookmark-set        "set     " :column "bookmark")
   ("d" bookmark-delete     "unset   "                   )
   ("r" bookmark-rename     "rename  "                   )
@@ -241,12 +344,14 @@ Number of marked: %(pkg/dired/count-marked)
   ("t" bm-toggle           "toggle  "                   )
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/diff (:timeout pkg/hydra/timeout-sec :exit t)
+(defhydra pkg/hydra/group/diff
+  (:timeout pkg/hydra/timeout-sec :exit t)
   ("e" pkg/hydra/group/ediff/body "choose" :column "ediff")
   ("v" pkg/hydra/group/vdiff/body "choose" :column "vdiff")
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/ediff (:timeout pkg/hydra/timeout-sec :exit t)
+(defhydra pkg/hydra/group/ediff
+  (:timeout pkg/hydra/timeout-sec :exit t)
   ("f" ediff-files        "2 files  " :column "file  ")
   ("F" ediff-files3       "3 files  "                 )
   ("b" ediff-buffers      "2 buffers" :column "buffer")
@@ -254,7 +359,8 @@ Number of marked: %(pkg/dired/count-marked)
   ("d" ediff-current-file "current  "                 )
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/vdiff (:timeout pkg/hydra/timeout-sec :exit t)
+(defhydra pkg/hydra/group/vdiff
+  (:timeout pkg/hydra/timeout-sec :exit t)
   ("f" vdiff-files        "2 files  " :column "file  ")
   ("F" vdiff-files3       "3 files  "                 )
   ("b" vdiff-buffers      "2 buffers" :column "buffer")
@@ -262,12 +368,14 @@ Number of marked: %(pkg/dired/count-marked)
   ("d" vdiff-current-file "current  "                 )
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/org (:timeout pkg/hydra/timeout-sec :exit t)
+(defhydra pkg/hydra/group/org
+  (:timeout pkg/hydra/timeout-sec :exit t)
   ("c" org-capture "capture" :column "org mode")
   ("a" org-agenda  "agenda "                   )
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/project (:timeout pkg/hydra/timeout-sec :exit t)
+(defhydra pkg/hydra/group/project
+  (:timeout pkg/hydra/timeout-sec :exit t)
   "
 PROJECT: %(projectile-project-root)
 
@@ -314,10 +422,12 @@ PROJECT: %(projectile-project-root)
   ;; C-c p z         projectile-cache-current-file
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/flymake (:timeout pkg/hydra/timeout-sec :exit t)
+(defhydra pkg/hydra/group/flymake
+  (:timeout pkg/hydra/timeout-sec :exit t)
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/flycheck (:timeout pkg/hydra/timeout-sec :exit t)
+(defhydra pkg/hydra/group/flycheck
+  (:timeout pkg/hydra/timeout-sec :exit t)
   ("n" flycheck-next-error             "next     " :column "error  " :exit nil)
   ("p" flycheck-previous-error         "prev     "                   :exit nil)
   ("l" helm-flycheck                   "helm list"                            )
@@ -332,7 +442,7 @@ PROJECT: %(projectile-project-root)
   ;; "q" :: quit the error list and hide its window
   ("h" flycheck-display-error-at-point "display  " :column "detail "          )
   ("H" flycheck-explain-error-at-point "explain  "                            )
-  ("w" flycheck-copy-errors-as-kill    "copy     "                            )
+  ("y" flycheck-copy-errors-as-kill    "copy     "                            )
   ("?" flycheck-describe-checker       "describe " :column "checker"          )
   ("e" pkg/flycheck/enable-checker     "enable   "                            )
   ("d" flycheck-disable-checker        "disable  "                            )
@@ -343,7 +453,8 @@ PROJECT: %(projectile-project-root)
   ("k" flycheck-clear                  "clear    "                            )
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/ggtags (:timeout pkg/hydra/timeout-sec :exit t)
+(defhydra pkg/hydra/group/ggtags
+  (:timeout pkg/hydra/timeout-sec :exit t)
   ("."   ggtags-find-tag-dwim            "M-.        " :column "jump    ")
   (","   xref-pop-marker-stack           "M-,        "                   )
   ("n"   ggtags-next-mark                "M-n        "                   )
@@ -369,7 +480,8 @@ PROJECT: %(projectile-project-root)
   ("q" pkg/hydra/quit nil :exit t))
 
 ;; todo :: 在以下交互函数执行时，输入"C-u"，还可限定搜索的目录路径
-(defhydra pkg/hydra/group/helm-gtags (:timeout pkg/hydra/timeout-sec :exit t)
+(defhydra pkg/hydra/group/helm-gtags
+  (:timeout pkg/hydra/timeout-sec :exit t)
   ("."   helm-gtags-dwim                  "M-.        " :column "jump    ")
   (","   helm-gtags-pop-stack             "M-,        "                   )
   ("n"   helm-gtags-next-history          "M-n        "                   )
@@ -392,7 +504,8 @@ PROJECT: %(projectile-project-root)
 
 
 ;; todo
-(defhydra pkg/hydra/group/cedet (:timeout pkg/hydra/timeout-sec)
+(defhydra pkg/hydra/group/cedet
+  (:timeout pkg/hydra/timeout-sec)
   ("g" semantic-symref-symbol                "find symbol    " :column "reference")
   ("G" semantic-symref                       "find function  "                    )
   ("i" semantic-decoration-include-visit     "include file   "                    )
