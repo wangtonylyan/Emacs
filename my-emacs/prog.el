@@ -84,14 +84,14 @@
     ;; 常用的快捷键：
     ;; <tab>用于补全候选项中的公共字段，<return>用于补全所选项，C-g用于终止补全
     ;; (define-key company-active-map (kbd "<tab>") 'company-complete-common-or-cycle)
-    (unbind-key "M-n" company-active-map)
-    (unbind-key "M-p" company-active-map)
-    (unbind-key "M-n" company-search-map)
-    (unbind-key "M-p" company-search-map)
     (bind-keys :map company-active-map
+               ("M-n" . nil) ;; (company-select-next)
+               ("M-p" . nil) ;; (company-select-previous)
                ("C-n" . company-select-next)
                ("C-p" . company-select-previous)
                :map company-search-map
+               ("M-n" . nil) ;; (company-select-next)
+               ("M-p" . nil) ;; (company-select-previous)
                ("C-n" . company-select-next)
                ("C-p" . company-select-previous)
                ("C-t" . company-search-toggle-filtering))

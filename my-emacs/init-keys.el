@@ -44,6 +44,8 @@
  ("C-s"            . nil) ;; (isearch-forward)
  ("C-r"            . nil) ;; (isearch-backward)
  ("M-/"            . nil) ;; (dabbrev-expand)
+ ("C-_"            . nil) ;; (undo), (undo-only)
+ ("C-/"            . nil) ;; (undo), (undo-only)
  ("M-x"            . helm-M-x                )
  ("M-y"            . helm-show-kill-ring     )
  ("C-x C-f"        . helm-find-files         )
@@ -86,8 +88,16 @@
  ;; ("C-;")        ;; avy, ace-jump-mode
  ("M-c"            . pkg/hydra/group/body    )
  ;; , :: CEDET/Semantic
- ;; . :: CEDET/EDE
  )
+
+(use-package package
+  :defer t
+  :config
+  (bind-keys :map package-menu-mode-map
+             ("r" . nil)
+             ("g" . package-menu-refresh)
+             ("G" . package-refresh-contents))
+  )
 
 (use-package tabbar
   :defer t
@@ -98,6 +108,27 @@
              ("C-S-u" . tabbar-backward-tab)
              ("C-S-o" . tabbar-forward-group)
              ("C-S-y" . tabbar-backward-group))
+  )
+
+(use-package helm
+  :defer t
+  :config
+  (bind-keys ("C-x c" . nil)
+             :map helm-map
+             ("<tab>"   . helm-execute-persistent-action)
+             ("M-x"     . helm-select-action)
+             ("C-c C-f" . helm-follow-mode)
+             :map minibuffer-local-map
+             ("M-p" . helm-minibuffer-history)
+             ("M-n" . helm-minibuffer-history))
+  )
+
+(use-package vdiff
+  :defer t
+  :config
+  (bind-keys :map vdiff-mode-map
+             ("C-c d"   . vdiff-mode-prefix-map)
+             ("C-c d h" . vdiff-hydra/body))
   )
 
 (use-package flyspell
@@ -118,11 +149,25 @@
                ("C-'" . flyspell-correct-wrapper)))
   )
 
+(use-package undo-tree
+  :defer t
+  :config
+  (bind-keys :map undo-tree-map
+             ("C-/" . nil) ;; (undo-tree-undo)
+             ("C-_" . nil) ;; (undo-tree-undo)
+             ("C-?" . nil) ;; (undo-tree-redo)
+             ("M-_" . nil) ;; (undo-tree-redo)
+             :map undo-tree-visualizer-mode-map
+             ("<return>" . undo-tree-visualizer-quit)
+             ("C-p"      . undo-tree-visualize-undo-to-x)
+             ("C-n"      . undo-tree-visualize-redo-to-x))
+  )
+
 (defhydra pkg/hydra/group
   (:timeout pkg/hydra/timeout-sec :exit t)
   ("h" helm-command-prefix
    "helm" :column "")
-  ("w" pkg/hydra/group/window/body
+  ("b" pkg/hydra/group/window/body
    "window, windmove, winner, buffer-move, zoom")
   ("c" pkg/hydra/group/cursor/body
    "cursor, paredit")
@@ -134,7 +179,7 @@
    "dired, treemacs, neotree")
   ("i" pkg/hydra/group/highlight/body
    "highlight, highlight-thing")
-  ("b" pkg/hydra/group/bookmark/body
+  ("m" pkg/hydra/group/bookmark/body
    "bookmark, bm, helm-bm")
   ("=" pkg/hydra/group/diff/body
    "ediff, vdiff")
@@ -148,7 +193,7 @@
           ((my/package-enabled-p 'flycheck) (pkg/hydra/group/flycheck/body))
           (t (user-error "*pkg/hydra/group* no package enabled for \"!\""))))
    "flymake, flycheck")
-  ("g" (lambda () (interactive)
+  ("." (lambda () (interactive)
          (cond
           ((my/package-enabled-p 'ggtags) (pkg/hydra/group/ggtags/body))
           ((my/package-enabled-p 'helm-gtags) (pkg/hydra/group/helm-gtags/body))
@@ -214,12 +259,12 @@ Number of marked: %(pkg/dired/count-marked)
     ("g"   revert-buffer                "revert           "                   )
     ("G"   dired-do-redisplay           "refresh          "                   )
     ("k"   dired-do-kill-lines          "hide line        "                   )
-    ("K"   dired-hide-details-mode      "hide details     "                   )
+    ("a"   dired-hide-details-mode      "hide details     "                   )
     ("n"   dired-next-line              "next line        " :column "move    ")
     ("p"   dired-previous-line          "prev line"                           )
     ("C-n" dired-next-dirline           "next dir         "                   )
     ("C-p" dired-prev-dirline           "prev dir         "                   )
-    ("o"   dired-goto-file              "goto             "                   )
+    ("j"   dired-goto-file              "jump             "                   )
     ("l"   dired-up-directory           "parent           "                   )
     ("m"   dired-mark                   "mark             " :column "mark    ")
     ("M"   dired-mark-files-regexp      "mark regexp      "                   )
@@ -238,8 +283,8 @@ Number of marked: %(pkg/dired/count-marked)
     ("d"   dired-flag-file-deletion     "flag delete      " :column "delete  ")
     ("#"   dired-flag-auto-save-files   "flag auto-saved  "                   )
     ("~"   dired-flag-backup-files      "flag backup      "                   )
-    ("."   dired-clean-directory        "flag clean       "                   )
     ("x"   dired-do-flagged-delete      "delete flagged   "                   )
+    ("X"   dired-clean-directory        "cleanup          "                   )
     ("D"   dired-do-delete              "delete marked    "                   )
     (": m" dired-do-chmod               "chmod            " :column "property")
     (": o" dired-do-chown               "chown            "                   )
@@ -258,7 +303,7 @@ Number of marked: %(pkg/dired/count-marked)
   ("f"   treemacs-find-file            "file         "                  )
   ("t"   treemacs-find-tag             "tag          "                  )
   ("m"   treemacs-bookmark             "bookmark     "                  )
-  ("p"   treemacs-projectile           "setup        " :column "project")
+  ("p"   treemacs-projectile           "import       " :column "project")
   ("q" pkg/hydra/quit nil :exit t))
 
 (use-package treemacs
@@ -271,7 +316,7 @@ Number of marked: %(pkg/dired/count-marked)
     (treemacs-mode-map "" :timeout pkg/hydra/timeout-sec :exit t)
     ("s"         treemacs-resort                     "sort           " :column "show    ")
     ("g"         treemacs-refresh                    "refresh        "                   )
-    ("K"         treemacs-toggle-show-dotfiles       "dot files      "                   )
+    ("a"         treemacs-toggle-show-dotfiles       "dot files      "                   )
     ("<C-tab>"   treemacs-collapse-other-projects    "collapse others"                   )
     ("<backtab>" treemacs-collapse-all-projects      "collapse all   "                   )
     ("n"         treemacs-next-line                  "next line      " :column "move    ")
@@ -321,13 +366,13 @@ Number of marked: %(pkg/dired/count-marked)
     ("C-n" neotree-select-next-sibling-node     "next dir ")
     ("C-p" neotree-select-previous-sibling-node "prev dir ")
     ("l"   neotree-select-up-node               "parent   ")
-    ("K"   neotree-hidden-file-toggle           "hidden   "))
+    ("a"   neotree-hidden-file-toggle           "hidden   "))
   )
 
 (defhydra pkg/hydra/group/highlight
   (:timeout pkg/hydra/timeout-sec)
   ("i" highlight-symbol-at-point       "at point   " :column "highlight  ")
-  ("p" highlight-phrase                "phrase     "                      )
+  ("s" highlight-phrase                "word       "                      )
   ("r" highlight-regexp                "regexp     "                      )
   ("l" highlight-lines-matching-regexp "regexp line"                      )
   ("u" unhighlight-regexp              "regexp     " :column "unhighlight")
@@ -380,36 +425,28 @@ Number of marked: %(pkg/dired/count-marked)
 PROJECT: %(projectile-project-root)
 
 "
-  ("h"   helm-projectile                            "helm          " :column "project  ")
-  ("p"   helm-projectile-switch-project             "open          "                    )
-  ("C-p" projectile-switch-project                  nil                                 )
-  ("P"   projectile-switch-open-project             "switch        "                    )
-  ("v"   projectile-vc                              "version       "                    )
-  ("x"   projectile-remove-known-project            "remove        "                    )
-  ("X"   projectile-cleanup-known-projects          "cleanup       "                    )
-  ("b"   helm-projectile-switch-to-buffer           "switch        " :column "buffer   ")
-  ("C-b" projectile-switch-to-buffer                nil                                 )
-  ("k"   projectile-kill-buffers                    "kill          "                    )
-  ("f"   helm-projectile-find-file                  "find          " :column "file     ")
-  ("C-f" projectile-find-file                       nil                                 )
-  ("F"   projectile-find-file-in-known-projects     "find all      "                    )
-  ("r"   helm-projectile-recentf                    "recent        "                    )
-  ("l"   projectile-find-file-in-directory          "find in dir   "                    )
-  ("C-r" projectile-recentf                         nil                                 )
-  ("t"   projectile-find-other-file                 "with same name"                    )
-  ("d"   helm-projectile-find-dir                   "find          " :column "directory")
-  ("C-d" projectile-find-dir                        nil                                 )
-  ("D"   projectile-dired                           "dired         "                    )
-  ("o"   helm-projectile-grep                       "grep          " :column "symbol   ")
-  ("C-o" projectile-grep                            nil                                 )
-  ("O"   projectile-multi-occur                     "occur         "                    )
-  ("w"   projectile-replace                         "replace       "                    )
-  ("!"   projectile-run-shell-command-in-root       "shell         " :column "external ")
-  ("&"   projectile-run-async-shell-command-in-root "shell &       "                    )
-  ("a"   helm-projectile-ag                         "ag            "                    )
-  ("C-a" projectile-ag                              nil                                 )
-  ("c"   helm-projectile-ack                        "ack           "                    )
-  ("C-c" projectile-ack                             nil                                 )
+  ("h"   helm-projectile                            "helm     " :column "project  ")
+  ("p"   helm-projectile-switch-project             "open     "                    ) ;; (projectile-switch-project)
+  ("P"   projectile-switch-open-project             "switch   "                    )
+  ("v"   projectile-vc                              "version  "                    )
+  ("x"   projectile-remove-known-project            "remove   "                    )
+  ("X"   projectile-cleanup-known-projects          "cleanup  "                    )
+  ("b"   helm-projectile-switch-to-buffer           "switch   " :column "buffer   ") ;; (projectile-switch-to-buffer)
+  ("k"   projectile-kill-buffers                    "kill     "                    )
+  ("f"   helm-projectile-find-file                  "this proj" :column "find file") ;; (projectile-find-file)
+  ("F"   projectile-find-file-in-known-projects     "all proj "                    )
+  ("j"   projectile-find-file-in-directory          "the dir  "                    )
+  ("r"   helm-projectile-recentf                    "recent   "                    ) ;; (projectile-recentf)
+  ("t"   projectile-find-other-file                 "same name"                    )
+  ("d"   helm-projectile-find-dir                   "find     " :column "directory") ;; (projectile-find-dir)
+  ("D"   projectile-dired                           "dired    "                    )
+  ("o"   helm-projectile-grep                       "grep     " :column "symbol   ") ;; (projectile-grep)
+  ("O"   projectile-multi-occur                     "occur    "                    )
+  ("w"   projectile-replace                         "replace  "                    )
+  ("!"   projectile-run-shell-command-in-root       "shell    " :column "external ")
+  ("&"   projectile-run-async-shell-command-in-root "shell &  "                    )
+  ("a"   helm-projectile-ag                         "ag       "                    ) ;; (projectile-ag)
+  ("c"   helm-projectile-ack                        "ack      "                    ) ;; (projectile-ack)
   ;; todo
   ;; helm-projectile-browse-dirty-projects
   ;; C-c p V         projectile-browse-dirty-projects
@@ -446,7 +483,7 @@ PROJECT: %(projectile-project-root)
   ("?" flycheck-describe-checker       "describe " :column "checker"          )
   ("e" pkg/flycheck/enable-checker     "enable   "                            )
   ("d" flycheck-disable-checker        "disable  "                            )
-  ("s" flycheck-select-checker         "select   "                            )
+  ("j" flycheck-select-checker         "select   "                            )
   ("v" flycheck-verify-setup           "info     " :column "buffer "          )
   ("g" flycheck-buffer                 "refresh  "                            )
   ("G" flycheck-compile                "compile  "                            )
@@ -471,7 +508,7 @@ PROJECT: %(projectile-project-root)
   ("l"   ggtags-view-search-history      "show       "                   )
   ("g"   ggtags-update-tags              "refresh    " :column "database")
   ("G"   ggtags-create-tags              "setup      "                   )
-  ("K"   ggtags-delete-tags              "clean      "                   )
+  ("X"   ggtags-delete-tags              "cleanup    "                   )
   ("d"   ggtags-visit-project-root       "dired @root" :column "advance ")
   ("1"   ggtags-kill-file-buffers        "kill others"                   )
   ("v h" ggtags-browse-file-as-hypertext "view html  "                   )
@@ -492,14 +529,14 @@ PROJECT: %(projectile-project-root)
   ("o o" helm-gtags-find-pattern          "pattern    "                   )
   ("o s" helm-gtags-find-symbol           "symbol     "                   )
   ("o f" helm-gtags-find-files            "file       "                   )
-  ("s"   helm-gtags-tags-in-this-function "in function" :column "select  ")
-  ("f"   helm-gtags-parse-file            "in file    "                   )
-  ("p"   helm-gtags-select                "in project "                   )
+  ("i"   helm-gtags-tags-in-this-function "this func  " :column "select  ")
+  ("f"   helm-gtags-parse-file            "this file  "                   )
+  ("l"   helm-gtags-select                "this proj  "                   )
   ("d"   helm-gtags-select-path           "path       "                   )
   ("g"   helm-gtags-update-tags           "refresh    " :column "database")
   ("G"   helm-gtags-create-tags           "setup      "                   )
-  ("k"   helm-gtags-clear-all-stacks      "clear stack"                   )
-  ("K"   helm-gtags-clear-all-cache       "clear cache"                   )
+  ("x"   helm-gtags-clear-all-stacks      "clear stack"                   )
+  ("X"   helm-gtags-clear-all-cache       "clear cache"                   )
   ("q" pkg/hydra/quit nil :exit t))
 
 
