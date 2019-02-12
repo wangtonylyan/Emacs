@@ -22,8 +22,7 @@
                     (rename-buffer (concat "*eshell: " name "*"))))))))
 
 (use-package dired
-  :commands (dired
-             dired-get-marked-files)
+  :commands (dired)
   :preface
   (defun pkg/dired/count-marked ()
     (let* ((list (dired-get-marked-files nil nil nil t))
@@ -34,10 +33,7 @@
        (t 0))))
   :init
   (setq dired-recursive-deletes 'top
-        dired-copy-preserve-time t)
-  :config
-  (bind-keys :map dired-mode-map
-             ("?" . pkg/hydra/group/dired/body)))
+        dired-copy-preserve-time t))
 
 (use-package dired-hacks-utils
   :if (my/package-enabled-p 'dired-hacks-utils)
@@ -106,8 +102,8 @@
         ;; helm-completing-read-handlers-alist
         )
   :config
-  (unbind-key "C-x c")
-  (bind-keys :map helm-map
+  (bind-keys ("C-x c" . nil)
+             :map helm-map
              ("<tab>" . helm-execute-persistent-action)
              ("M-x" . helm-select-action)
              ;; ("C-c C-f" . helm-follow-mode)
@@ -123,7 +119,6 @@
              bm-toggle)
   :if (my/package-enabled-p 'bm)
   :config
-  (unbind-key "C-x r")
   (setq bm-marker 'bm-marker-left
         bm-cycle-all-buffers t
         temporary-bookmark-p t
@@ -144,7 +139,8 @@
     :after (helm)
     :demand t
     :if (my/package-enabled-p 'helm-bm)
-    :bind (("C-c b b" . helm-bm))))
+    :bind (("C-c b b" . helm-bm)))
+  (unbind-key "C-x r"))
 
 (use-package ediff
   :after (winner)
@@ -163,7 +159,6 @@
         ediff-highlight-all-diffs nil)
   (defun pkg/ediff/setup-keymap ()
     ;; 可参考(ediff-setup-keymap)，或激活ediff后输入"?"
-    ;; (unbind-key "" ediff-mode-map) ;; ()
     ;; (bind-keys :map ediff-mode-map)
     )
   (add-hook 'ediff-keymap-setup-hook #'pkg/ediff/setup-keymap t)

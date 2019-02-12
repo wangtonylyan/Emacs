@@ -48,7 +48,6 @@
                   TeX-master TeX-master
                   TeX-PDF-from-DVI TeX-PDF-from-DVI)
     (use-package latex
-      :defer t
       :config
       (bind-keys :map LaTeX-mode-map
                  ;; output
