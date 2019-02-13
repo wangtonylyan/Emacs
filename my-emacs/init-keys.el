@@ -40,12 +40,18 @@
  ("C-M-u"          . nil) ;; (backward-up-list)
  ("C-M-a"          . nil) ;; (beginning-of-defun)
  ("C-M-e"          . nil) ;; (end-of-defun)
+ ("C-M-k"          . nil) ;; (kill-sexp)
  ("C-x d"          . nil) ;; (dired)
  ("C-s"            . nil) ;; (isearch-forward)
  ("C-r"            . nil) ;; (isearch-backward)
  ("M-/"            . nil) ;; (dabbrev-expand)
  ("C-_"            . nil) ;; (undo), (undo-only)
  ("C-/"            . nil) ;; (undo), (undo-only)
+ ("M-c"            . nil) ;; (capitalize-word)
+ ("M-m"            . nil) ;; (back-to-indentation)
+ ("M-j"            . nil) ;; (indent-new-comment-line)
+ ("C-M-x"          . nil) ;; (eval-defun)
+ ("C-x e"          . nil) ;; ((kmacro-end-and-call-macro)
  ("M-x"            . helm-M-x                )
  ("M-y"            . helm-show-kill-ring     )
  ("C-x C-f"        . helm-find-files         )
@@ -86,7 +92,7 @@
  ("M-,"            . xref-pop-marker-stack   )
  ;; ("C-:")        ;; avy, ace-jump-mode
  ;; ("C-;")        ;; avy, ace-jump-mode
- ("M-c"            . pkg/hydra/group/body    )
+ ("M-j"            . pkg/hydra/group/body    )
  ;; , :: CEDET/Semantic
  )
 
@@ -244,6 +250,69 @@
              ("C-M-h" . paredit-backward-up))
   )
 
+(use-package lispy
+  :defer t
+  :config
+  (setq lispy-mode-map-base
+        (let ((map (make-sparse-keymap)))
+          (bind-keys :map map
+                     ("C-a" . lispy-move-beginning-of-line)
+                     ("C-e" . lispy-move-end-of-line)
+                     ("C-k" . lispy-kill)
+                     ("M-d" . lispy-kill-word)
+                     ("<C-backspace>" . lispy-backward-kill-word)
+                     ("(" . lispy-parens))
+          map))
+  (setq lispy-mode-map-special
+        (let ((map (make-sparse-keymap)))
+          ;; navigation
+          (lispy-define-key map "f" 'lispy-forward)
+          (lispy-define-key map "b" 'lispy-backward)
+          (lispy-define-key map "h" 'lispy-left)
+          (lispy-define-key map "l" 'lispy-right)
+          (lispy-define-key map "j" 'lispy-flow)
+          (lispy-define-key map "k" 'lispy-flow)
+          (lispy-define-key map ":" 'lispy-ace-symbol
+            :override '(cond ((looking-at lispy-outline)
+                              (lispy-meta-return))))
+          (lispy-define-key map "C-:" 'lispy-teleport
+            :override '(cond ((looking-at lispy-outline)
+                              (end-of-line))))
+          (lispy-define-key map "t" 'lispy-goto-local)
+          (lispy-define-key map "T" 'lispy-goto-symbol)
+          ;; edit
+          (lispy-define-key map "n" 'lispy-move-down)
+          (lispy-define-key map "p" 'lispy-move-up)
+          (lispy-define-key map "w" 'lispy-new-copy)
+          (lispy-define-key map "W" 'lispy-kill-at-point)
+          (lispy-define-key map "y" 'lispy-clone)
+          (lispy-define-key map "u" 'lispy-undo)
+          (lispy-define-key map "i" 'lispy-tab)
+          ;; misc
+          (lispy-define-key map "m" 'lispy-mark-list)
+          (lispy-define-key map "o" 'lispy-occur)
+          (lispy-define-key map "a" 'lispy-narrow)
+          (lispy-define-key map "A" 'lispy-widen)
+          (define-key map (kbd "SPC") 'lispy-space)
+          map))
+  (setq lispy-mode-map-lispy
+        (let ((map (copy-keymap lispy-mode-map-base)))
+          (define-key map (kbd "]") 'lispy-forward)
+          (define-key map (kbd "[") 'lispy-backward)
+          (define-key map (kbd "{") 'lispy-braces)
+          (define-key map (kbd "}") 'lispy-brackets)
+          (define-key map (kbd ")") 'lispy-right-nostring)
+          (define-key map (kbd "\"") 'lispy-doublequote) ;; (lispy-quotes)
+          (define-key map (kbd "C-d") 'lispy-forward-delete)
+          (define-key map (kbd "<C-return>") 'lispy-open-line)
+          map))
+  (lispy-set-key-theme '(special lispy c-digits))
+  ;; (lispy-define-key lispy-mode-map "?"
+  ;;                     (defhydra pkg/hydra/group/lispy-help
+  ;;                       (lispy-mode-map "" :timeout pkg/hydra/timeout-sec :exit t)
+  ;;                       ("q" nil nil :exit)))
+  )
+
 (use-package dired
   :defer t
   :config
@@ -309,27 +378,8 @@ Number of marked: %(pkg/dired/count-marked)
 (use-package treemacs
   :defer t
   :config
+  (setq treemacs-mode-map (make-sparse-keymap))
   (bind-keys :map treemacs-mode-map
-             ("r"     . nil) ("d"     . nil)
-             ("R"     . nil) ("u"     . nil)
-             ("P"     . nil) ("n"     . nil)
-             ("p"     . nil) ("w"     . nil)
-             ("g"     . nil) ("s"     . nil)
-             ("b"     . nil) ("h"     . nil)
-             ("l"     . nil) ("H"     . nil)
-             ("c f"   . nil) ("c d"   . nil)
-             ("t h"   . nil) ("t w"   . nil)
-             ("t v"   . nil) ("t g"   . nil)
-             ("t f"   . nil) ("t a"   . nil)
-             ("o v"   . nil) ("o o"   . nil)
-             ("o x"   . nil) ("o h"   . nil)
-             ("o a a" . nil) ("o a h" . nil)
-             ("o a v" . nil)
-             ("y y"   . nil) ("y r"   . nil)
-             ("C-p"   . nil) ("C-j"   . nil)
-             ("C-k"   . nil)
-             ("M-n"   . nil) ("M-p"   . nil)
-             ("M-N"   . nil) ("M-P"   . nil)
              ([mouse-1] . treemacs-single-click-expand-action)
              ("?"       . pkg/hydra/group/treemacs-help/body))
   (defhydra pkg/hydra/group/treemacs-help
@@ -469,72 +519,101 @@ PROJECT: %(projectile-project-root)
   ("c"   helm-projectile-ack                        "ack      "                    ) ;; (projectile-ack)
   ;; todo
   ;; helm-projectile-browse-dirty-projects
-  ;; C-c p V         projectile-browse-dirty-projects
-  ;; C-c p c         projectile-compile-project
-  ;; C-c p I         projectile-ibuffer
-  ;; C-c p S         projectile-save-project-buffers
-  ;; C-c p j         projectile-find-tag
-  ;; C-c p R         projectile-regenerate-tags
-  ;; C-c p i         projectile-invalidate-cache
-  ;; C-c p z         projectile-cache-current-file
+  ;; V         projectile-browse-dirty-projects
+  ;; c         projectile-compile-project
+  ;; I         projectile-ibuffer
+  ;; S         projectile-save-project-buffers
+  ;; j         projectile-find-tag
+  ;; R         projectile-regenerate-tags
+  ;; i         projectile-invalidate-cache
+  ;; z         projectile-cache-current-file
   ("q" pkg/hydra/quit nil :exit t))
 
 (defhydra pkg/hydra/group/flymake
   (:timeout pkg/hydra/timeout-sec :exit t)
   ("q" pkg/hydra/quit nil :exit t))
 
-(defhydra pkg/hydra/group/flycheck
-  (:timeout pkg/hydra/timeout-sec :exit t)
-  ("n" flycheck-next-error             "next     " :column "error  " :exit nil)
-  ("p" flycheck-previous-error         "prev     "                   :exit nil)
-  ("l" helm-flycheck                   "helm list"                            )
-  ("L" flycheck-list-errors            "list     "                            )
-  ;; 'flycheck-error-list-mode-map in (flycheck-list-errors)
-  ;; "<return>" :: go to the current error in the source buffer
-  ;; "e" :: explain the error
-  ;; "f" :: filter the error list by level
-  ;; "F" :: remove the filter
-  ;; "S" :: sort the error list by the column at point
-  ;; "g" :: check the source buffer and update the error list
-  ;; "q" :: quit the error list and hide its window
-  ("h" flycheck-display-error-at-point "display  " :column "detail "          )
-  ("H" flycheck-explain-error-at-point "explain  "                            )
-  ("y" flycheck-copy-errors-as-kill    "copy     "                            )
-  ("?" flycheck-describe-checker       "describe " :column "checker"          )
-  ("e" pkg/flycheck/enable-checker     "enable   "                            )
-  ("d" flycheck-disable-checker        "disable  "                            )
-  ("j" flycheck-select-checker         "select   "                            )
-  ("v" flycheck-verify-setup           "info     " :column "buffer "          )
-  ("g" flycheck-buffer                 "refresh  "                            )
-  ("G" flycheck-compile                "compile  "                            )
-  ("k" flycheck-clear                  "clear    "                            )
-  ("q" pkg/hydra/quit nil :exit t))
+(use-package flycheck
+  :defer t
+  :config
+  (unbind-key flycheck-keymap-prefix flycheck-mode-map)
+  (defhydra pkg/hydra/group/flycheck
+    (:timeout pkg/hydra/timeout-sec :exit t)
+    ("n" flycheck-next-error             "next     " :column "error  " :exit nil)
+    ("p" flycheck-previous-error         "prev     "                   :exit nil)
+    ("l" helm-flycheck                   "helm list"                            )
+    ("L" flycheck-list-errors            "list     "                            )
+    ;; 'flycheck-error-list-mode-map in (flycheck-list-errors)
+    ;; "<return>" :: go to the current error in the source buffer
+    ;; "e" :: explain the error
+    ;; "f" :: filter the error list by level
+    ;; "F" :: remove the filter
+    ;; "S" :: sort the error list by the column at point
+    ;; "g" :: check the source buffer and update the error list
+    ;; "q" :: quit the error list and hide its window
+    ("h" flycheck-display-error-at-point "display  " :column "detail "          )
+    ("H" flycheck-explain-error-at-point "explain  "                            )
+    ("y" flycheck-copy-errors-as-kill    "copy     "                            )
+    ("?" flycheck-describe-checker       "describe " :column "checker"          )
+    ("e" pkg/flycheck/enable-checker     "enable   "                            )
+    ("d" flycheck-disable-checker        "disable  "                            )
+    ("j" flycheck-select-checker         "select   "                            )
+    ("v" flycheck-verify-setup           "info     " :column "buffer "          )
+    ("g" flycheck-buffer                 "refresh  "                            )
+    ("G" flycheck-compile                "compile  "                            )
+    ("k" flycheck-clear                  "clear    "                            )
+    ("q" pkg/hydra/quit nil :exit t))
+  )
 
-(defhydra pkg/hydra/group/ggtags
-  (:timeout pkg/hydra/timeout-sec :exit t)
-  ("."   ggtags-find-tag-dwim            "M-.        " :column "jump    ")
-  (","   xref-pop-marker-stack           "M-,        "                   )
-  ("n"   ggtags-next-mark                "M-n        "                   )
-  ("p"   ggtags-prev-mark                "M-p        "                   )
-  ("/"   ggtags-view-tag-history         "M-/        "                   )
-  ("o d" ggtags-find-definition          "definition " :column "search  ")
-  ("o r" ggtags-find-reference           "reference  "                   )
-  ("o o" ggtags-grep                     "grep       "                   )
-  ("o O" ggtags-find-tag-regexp          "pattern    "                   )
-  ("o s" ggtags-find-other-symbol        "symbol     "                   )
-  ("o f" ggtags-find-file                "file       "                   )
-  ("s"   ggtags-save-to-register         "register   " :column "history ")
-  ("r"   jump-to-register                "restore    "                   )
-  ("l"   ggtags-view-search-history      "show       "                   )
-  ("g"   ggtags-update-tags              "refresh    " :column "database")
-  ("G"   ggtags-create-tags              "setup      "                   )
-  ("X"   ggtags-delete-tags              "cleanup    "                   )
-  ("d"   ggtags-visit-project-root       "dired @root" :column "advance ")
-  ("1"   ggtags-kill-file-buffers        "kill others"                   )
-  ("v h" ggtags-browse-file-as-hypertext "view html  "                   )
-  ("w"   ggtags-query-replace            "replace    "                   )
-  ("C-q" ggtags-toggle-project-read-only "readonly   "                   )
-  ("q" pkg/hydra/quit nil :exit t))
+(use-package ggtags
+  :defer t
+  :config
+  (unbind-key ggtags-mode-prefix-key ggtags-mode-map)
+  (bind-keys :map ggtags-mode-map
+             ("M-." . ggtags-find-tag-dwim)
+             ("M-n" . ggtags-next-mark)
+             ("M-p" . ggtags-prev-mark)
+             ("M-/" . ggtags-view-tag-history))
+  (setq ggtags-navigation-mode-map (make-sparse-keymap))
+  (bind-keys :map ggtags-navigation-mode-map
+             ("M-n" . next-error)
+             ("M-p" . previous-error)
+             ("C-M-n" . ggtags-navigation-next-file)
+             ("C-M-p" . ggtags-navigation-previous-file)
+             ("M-<" . first-error)
+             ("M->" . ggtags-navigation-last-error)
+             ("M-s" . ggtags-navigation-isearch-forward)
+             ;; 搜索结果中的文件路径名可能会变成缩写，可利用此命令缩放
+             ("M-a" . ggtags-navigation-visible-mode)
+             ("<return>" . ggtags-navigation-mode-done)
+             ("M-," . ggtags-navigation-mode-abort)
+             ("M-u" . ggtags-navigation-start-file))
+  (defhydra pkg/hydra/group/ggtags
+    (:timeout pkg/hydra/timeout-sec :exit t)
+    ("."   ggtags-find-tag-dwim            "M-.        " :column "jump    ")
+    (","   xref-pop-marker-stack           "M-,        "                   )
+    ("n"   ggtags-next-mark                "M-n        "                   )
+    ("p"   ggtags-prev-mark                "M-p        "                   )
+    ("/"   ggtags-view-tag-history         "M-/        "                   )
+    ("o d" ggtags-find-definition          "definition " :column "search  ")
+    ("o r" ggtags-find-reference           "reference  "                   )
+    ("o o" ggtags-grep                     "grep       "                   )
+    ("o O" ggtags-find-tag-regexp          "pattern    "                   )
+    ("o s" ggtags-find-other-symbol        "symbol     "                   )
+    ("o f" ggtags-find-file                "file       "                   )
+    ("s"   ggtags-save-to-register         "register   " :column "history ")
+    ("r"   jump-to-register                "restore    "                   )
+    ("l"   ggtags-view-search-history      "show       "                   )
+    ("g"   ggtags-update-tags              "refresh    " :column "database")
+    ("G"   ggtags-create-tags              "setup      "                   )
+    ("X"   ggtags-delete-tags              "cleanup    "                   )
+    ("d"   ggtags-visit-project-root       "dired @root" :column "advance ")
+    ("1"   ggtags-kill-file-buffers        "kill others"                   )
+    ("v h" ggtags-browse-file-as-hypertext "view html  "                   )
+    ("w"   ggtags-query-replace            "replace    "                   )
+    ("C-q" ggtags-toggle-project-read-only "readonly   "                   )
+    ("q" pkg/hydra/quit nil :exit t))
+  )
 
 ;; todo :: 在以下交互函数执行时，输入"C-u"，还可限定搜索的目录路径
 (defhydra pkg/hydra/group/helm-gtags

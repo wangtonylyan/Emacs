@@ -114,9 +114,16 @@
     :config
     (use-package flyspell-correct-helm
       :after (helm)
-      :if (my/package-enabled-p 'flyspell-correct-helm)
-      :config
-      (setq flyspell-correct-interface #'flyspell-correct-helm)))
+      :if (and (my/package-enabled-p 'helm)
+               (my/package-enabled-p 'flyspell-correct-helm))
+      :init
+      (setq flyspell-correct-interface #'flyspell-correct-helm))
+    (use-package flyspell-correct-ivy
+      :after (counsel)
+      :if (and (my/package-enabled-p 'counsel)
+               (my/package-enabled-p 'flyspell-correct-ivy))
+      :init
+      (setq flyspell-correct-interface #'flyspell-correct-ivy)))
   )
 
 (use-package avy
@@ -170,6 +177,27 @@
   (mapc (lambda (mode)
           (my/add-mode-hook mode #'enable-paredit-mode))
         '("org" "lisp" "elisp" "ilisp" "slime" "scheme")))
+
+(use-package lispy
+  :diminish lispy-mode
+  :preface
+  (defun pkg/lispy/show-backend ()
+    (cond
+     ((my/package-enabled-p 'helm) 'helm)
+     ((my/package-enabled-p 'counsel) 'ivy)
+     (t 'default)))
+  :if (my/package-enabled-p 'lispy)
+  :init
+  (setq lispy-no-permanent-semantic t
+        lispy-close-quotes-at-end-p t
+        lispy-completion-method (pkg/lispy/show-backend)
+        lispy-occur-backend (pkg/lispy/show-backend))
+  (mapc (lambda (mode)
+          (my/add-mode-hook mode (lambda () (lispy-mode 1))))
+        '("org" "lisp" "elisp" "ilisp" "slime" "scheme"))
+  :config
+  ;; (advice-add 'semantic-idle-scheduler-function :around #'ignore)
+  )
 
 (use-package parinfer
   :if (my/package-enabled-p 'parinfer)

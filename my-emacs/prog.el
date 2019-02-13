@@ -272,7 +272,6 @@
       :after (helm)
       :commands (helm-flycheck)
       :if (my/package-enabled-p 'helm-flycheck))
-    (unbind-key flycheck-keymap-prefix flycheck-mode-map)
     ;; (global-flycheck-mode 1)
     ))
 
@@ -299,24 +298,6 @@
           ggtags-mode-prefix-key (kbd "C-c g"))
     (pkg/gtags/add-hook #'pkg/gtags/start)
     :config
-    (unbind-key ggtags-mode-prefix-key ggtags-mode-map)
-    (bind-keys :map ggtags-mode-map
-               ("M-." . ggtags-find-tag-dwim)
-               ("M-n" . ggtags-next-mark)
-               ("M-p" . ggtags-prev-mark)
-               ("M-/" . ggtags-view-tag-history)
-               :map ggtags-navigation-mode-map
-               ("M-n" . next-error)
-               ("M-p" . previous-error)
-               ("C-M-n" . ggtags-navigation-next-file)
-               ("C-M-p" . ggtags-navigation-previous-file)
-               ("M-<" . first-error)
-               ("M->" . ggtags-navigation-last-error)
-               ("M-s" . ggtags-navigation-isearch-forward)
-               ;; 搜索结果中的文件路径名可能会变成缩写，可利用此命令缩放
-               ("M-o" . ggtags-navigation-visible-mode)
-               ("<return>" . ggtags-navigation-mode-done)
-               ("M-," . ggtags-navigation-mode-abort))
     ;; (ggtags-global-mode 1)
     )
   (use-package helm-gtags
