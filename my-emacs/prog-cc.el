@@ -224,7 +224,8 @@
         ;; 以下设置完全可以在(pkg/cedet/start)中被执行
         ;; 使用mode-hook的方式触发，仅仅是为了与上面的配置项相邻排列
         (setq semantic-stickyfunc-sticky-classes '(type function)) ;; variable, include, package
-        (setq semanticdb-find-default-throttle '(local project unloaded system recursive) ;; omniscience
+        (setq semanticdb-find-default-throttle
+              '(file local project recursive) ;; unloaded, system, omniscience
               semanticdb-project-system-databases
               (mapcar (lambda (path)
                         (semanticdb-create-database

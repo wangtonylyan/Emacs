@@ -242,14 +242,24 @@
   ;; 设置安装包的存储目录，该目录也需要被包含至'load-path中
   ;; (add-to-list 'package-directory-list "~/.emacs.d/elpa/" t) ;; system-wide dir
   (setq package-user-dir (my/set-user-emacs-file "elpa/")) ;; user-wide dir
-  ;; Emacs使用的默认更新源为：("gnu" . "http://elpa.gnu.org/")
-  ;; 添加更新源：MELPA每天更新，其包含了绝大多数插件
-  ;; (add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/") t)
-  (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-  ;; (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
-  ;; 以下使用国内的清华镜像源
-  ;; (setq package-archives '(("gnu"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
-  ;;                          ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")))
+  (defconst pkg/package/source-mirror
+    ;; 'origin ;; 官方源，速度较慢
+    'tsinghua ;; 国内的清华镜像源
+    )
+  (setq package-archives
+        (cond
+         ((eq pkg/package/source-mirror 'origin)
+          '(("gnu" . "https://elpa.gnu.org/packages/")
+            ;; ("melpa-stable" . "http://stable.melpa.org/packages/")
+            ("melpa" . "http://melpa.org/packages/")
+            ;; ("org" . "http://orgmode.org/elpa/")
+            ))
+         ((eq pkg/package/source-mirror 'tsinghua)
+          '(("gnu" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
+            ;; ("melpa-stable" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa-stable/")
+            ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
+            ;; ("org" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/")
+            ))))
   ;; 以下列表用于设置被允许加载的插件，因此无论是在安装还是使用插件的过程中
   ;; 都必须提前详细地列举出所有的插件，且要根据插件之间的依赖关系进行先后地声明
   (setq package-load-list '(all ;; e.g. (dash) (epl) (let-alist) (pkg-info) (flycheck)
@@ -292,7 +302,7 @@
                                     ;; ace-pinyin
                                     undo-tree
                                     smart-hungry-delete
-                                    paredit ;; parinfer
+                                    lispy ;; paredit, parinfer
                                     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
                                     ;;;;;; [init-util.el]
                                     eshell
