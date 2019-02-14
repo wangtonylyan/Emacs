@@ -243,7 +243,6 @@
         ;; (setq flycheck-gcc-language-standard "c++11") ;; 由cpputils-cmake插件设置
         ))
     (use-package flycheck-pyflakes
-      :demand t
       :if (my/package-enabled-p 'flycheck-pyflakes))
     (defun pkg/flycheck/python-mode-hook ()
       (when (my/package-enabled-p 'flycheck-pyflakes)
@@ -325,15 +324,7 @@
           ;; 启用以下配置项会使得某些常用快捷键不再绑定于上述前缀中
           ;; 例如将(helm-gtags-dwim)绑定于"M-."
           helm-gtags-suggested-key-mapping nil)
-    (pkg/gtags/add-hook #'pkg/gtags/start)
-    :config
-    (unbind-key helm-gtags-prefix-key helm-gtags-mode-map)
-    (bind-keys :map helm-gtags-mode-map
-               ("M-." . helm-gtags-dwim)
-               ("M-," . helm-gtags-pop-stack)
-               ("M-n" . helm-gtags-next-history)
-               ("M-p" . helm-gtags-previous-history)
-               ("M-/" . helm-gtags-show-stack)))
+    (pkg/gtags/add-hook #'pkg/gtags/start))
   )
 
 (defun pkg/gtags/start ()
