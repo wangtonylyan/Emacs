@@ -49,19 +49,21 @@
     :if (my/package-enabled-p 'spaceline)
     :config
     (spaceline-emacs-theme)
-    (when (my/package-enabled-p 'helm)
-      (with-eval-after-load 'helm
-        (spaceline-helm-mode))))
+    (use-package helm
+      :defer t
+      :if (my/package-enabled-p 'helm)
+      :config
+      (spaceline-helm-mode)))
   (use-package spaceline-all-the-icons
     :if (my/package-enabled-p 'spaceline-all-the-icons)
     :config
     (spaceline-all-the-icons-theme)
     ;; (spaceline-all-the-icons--setup-package-updates)
     (use-package spaceline-all-the-icons
+      :after (neotree)
       :if (my/package-enabled-p 'neotree)
       :config
-      (with-eval-after-load 'neotree
-        (spaceline-all-the-icons--setup-neotree)))))
+      (spaceline-all-the-icons--setup-neotree))))
 
 
 (let* ((dir (my/set-user-emacs-file "theme/" t))
@@ -77,12 +79,13 @@
 
 (use-package doom-themes
   :if (my/package-enabled-p 'doom-themes)
-  :config
+  :init
   (setq doom-themes-enable-bold nil
         doom-themes-enable-italic nil
         doom-spacegrey-brighter-modeline t
         doom-spacegrey-brighter-comments t
         doom-spacegrey-comment-bg nil)
+  :config
   (load-theme 'doom-spacegrey t) ;; 'doom-one, 'doom-nova, 'doom-spacegrey
   (when visible-bell
     (doom-themes-visual-bell-config))
@@ -94,14 +97,12 @@
           doom-treemacs-line-spacing 1
           doom-treemacs-use-generic-icons nil)
     :config
-    (with-eval-after-load 'treemacs
-      (doom-themes-treemacs-config)))
+    (doom-themes-treemacs-config))
   (use-package doom-themes
     :after (neotree)
     :if (my/package-enabled-p 'neotree)
     :config
-    (with-eval-after-load 'neotree
-      (doom-themes-neotree-config))))
+    (doom-themes-neotree-config)))
 
 (use-package github-theme
   :if (my/package-enabled-p 'github-theme)
@@ -188,19 +189,20 @@
     ;; 该子模式似乎并不完善，不建议启用
     (treemacs-fringe-indicator-mode 1))
   (use-package treemacs-icons-dired
-    :ensure t
+    :after (dired)
+    :if (my/package-enabled-p 'treemacs-icons-dired)
     :config
     (treemacs-icons-dired-mode))
   (use-package treemacs-projectile
     :after (projectile)
     :commands (treemacs-projectile)
-    :if (my/package-enabled-p 'projectile))
+    :if (and (my/package-enabled-p 'projectile)
+             (my/package-enabled-p 'treemacs-projectile)))
   (when (and (my/locate-exec "git")
              (my/locate-exec "python3"))
     (treemacs-git-mode 'deferred)))
 
 (use-package neotree
-  :ensure all-the-icons
   :commands (neotree-toggle)
   :preface
   (defun pkg/neotree/toggle ()
@@ -224,7 +226,10 @@
         neo-show-updir-line t
         neo-window-width 35)
   :config
-  (when (my/package-enabled-p 'projectile)
+  (use-package neotree
+    :after (projectile)
+    :if (my/package-enabled-p 'projectile)
+    :config
     (add-hook 'pkg/projectile/switch-hook #'neotree-projectile-action t)))
 
 (use-package windmove

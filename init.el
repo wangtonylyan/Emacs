@@ -268,108 +268,130 @@
   (setq package-enable-at-startup nil) ;; 方式1) 随Emacs的启动而自动加载插件
   (package-initialize) ;; 方式2) 主动执行该函数以加载插件
   ;; 目前使用此全局变量来管理插件的启用/禁用，其中包括了ELPA更新源中所没有的插件
-  (setq package-selected-packages '(;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-                                    ;;;;;; [init-gui.el]
-                                    ;;;; [gui]
-                                    all-the-icons
-                                    diminish
-                                    dashboard
-                                    nyan-mode
-                                    spaceline ;; spaceline-all-the-icons, smart-mode-line
-                                    doom-themes ;; solarized-theme, zenburn-theme
-                                    ;;;; [window]
-                                    tabbar ;; awesome-tab
-                                    treemacs ;; neotree, sr-speedbar, ecb
-                                    treemacs-icons-dired
-                                    buffer-move
-                                    ;; dimmer
-                                    zoom
-                                    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-                                    ;;;;;; [init-edit.el]
-                                    ;;;; [frame]
-                                    beacon
-                                    ;; nlinum-hl
-                                    ;; yascroll
-                                    ;; sublimity, minimap
-                                    ;; fill-column-indicator, whitespace
-                                    rainbow-delimiters
-                                    ;; rainbow-identifiers ;; 会覆盖配色主题所使用的字体颜色
-                                    highlight-thing
-                                    ;;;; [edit]
-                                    flyspell-correct ;; flyspell
-                                    flyspell-correct-helm
-                                    avy ;; ace-jump-mode
-                                    ;; ace-pinyin
-                                    undo-tree
-                                    smart-hungry-delete
-                                    lispy ;; paredit, parinfer
-                                    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-                                    ;;;;;; [init-util.el]
-                                    eshell
-                                    ;; all-the-icons-dired
-                                    dired-hacks-utils
-                                    ;; evil
-                                    hydra
-                                    helm ;; icomplete, anything, ido, smex, ivy
-                                    bm
-                                    helm-bm
-                                    ediff ;; vdiff
-                                    ;;;; [project]
-                                    projectile ;; eproject
-                                    helm-projectile
-                                    treemacs-projectile
-                                    magit
-                                    ;; vdiff-magit
-                                    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-                                    ;;;;;; [text.el]
-                                    ;; pdf-tools
-                                    org
-                                    ;; markdown-mode
-                                    ;; markdown-preview-mode
-                                    ;; auctex
+  (setq package-selected-packages
+        '(;; =============================================================================
+          ;; ["init-gui.el"]
+          ;; [gui]
+          all-the-icons
+          diminish
+          dashboard
+          nyan-mode
+          spaceline ;; spaceline-all-the-icons, smart-mode-line
+          doom-themes ;; solarized-theme, zenburn-theme
+          ;; [window]
+          tabbar ;; awesome-tab
+          treemacs ;; neotree, sr-speedbar, ecb
+          treemacs-icons-dired
+          buffer-move
+          ;; dimmer
+          zoom
+          ;; =============================================================================
+          ;; ["init-edit.el"]
+          ;; [frame]
+          beacon
+          ;; nlinum-hl
+          ;; yascroll
+          ;; sublimity, minimap
+          ;; fill-column-indicator, whitespace
+          rainbow-delimiters
+          ;; rainbow-identifiers ;; 会覆盖配色主题所使用的字体颜色
+          highlight-thing
+          ;; [edit]
+          flyspell-correct ;; flyspell
+          avy ;; ace-jump-mode
+          ;; ace-pinyin
+          undo-tree
+          smart-hungry-delete
+          lispy ;; paredit, parinfer
+          ;; =============================================================================
+          ;; ["init-util.el"]
+          eshell
+          ;; all-the-icons-dired
+          ;; dired-hacks-utils ;; TODO
+          ;; evil
+          hydra
+          bm
+          ediff ;; vdiff
+          ;; [project]
+          projectile ;; eproject
+          treemacs-projectile
+          magit
+          ;; vdiff-magit
+          ;; =============================================================================
+          ;; [text.el]
+          ;; pdf-tools
+          org
+          ;; markdown-mode
+          ;; markdown-preview-mode
+          ;; auctex
 
-
-                                    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-                                    ;; [programming]
-                                    yasnippet
-                                    flycheck ;; flymake
-                                    helm-flycheck
-                                    company ;; auto-complete
-                                    company-jedi
-                                    ggtags ;; helm-gtags
-                                    asn1-mode
-                                    ;; [c, c++]
-                                    ;; stickyfunc-enhance
-                                    ;; cmake-mode ;; cmake-ide, cmake-project
-                                    ;; cmake-font-lock
-                                    ;; cpputils-cmake
-                                    ;; [python]
-                                    ;; elpy ;; ropemacs
-                                    ;; flycheck-pyflakes
-                                    ;; py-autopep8
-                                    ;; auto-virtualenvwrapper ;; virtualenvwrapper
-                                    ;; [haskell]
-                                    haskell-mode
-                                    hindent
-                                    flycheck-haskell
-                                    ;; [ml]
-                                    sml-mode
-                                    ;; [web]
-                                    ;; web-mode
-                                    ;; w3m
-                                    ;; erc ;; circe, rcirc
-                                    use-package))
+          ;; =============================================================================
+          ;; [programming]
+          yasnippet
+          flycheck ;; flymake
+          company ;; auto-complete
+          company-jedi
+          ggtags ;; helm-gtags, counsel-gtags, counsel-etags
+          asn1-mode
+          ;; [c, c++]
+          ;; stickyfunc-enhance
+          ;; cmake-mode ;; cmake-ide, cmake-project
+          ;; cmake-font-lock
+          ;; cpputils-cmake
+          ;; [python]
+          ;; elpy ;; ropemacs
+          ;; flycheck-pyflakes
+          ;; py-autopep8
+          ;; auto-virtualenvwrapper ;; virtualenvwrapper
+          ;; [haskell]
+          haskell-mode
+          hindent
+          flycheck-haskell
+          ;; [ml]
+          sml-mode
+          ;; [web]
+          ;; web-mode
+          ;; w3m
+          ;; erc ;; circe, rcirc
+          use-package))
+  (defconst pkg/package/completion-backend
+    '(helm ivy smex ido icomplete))
+  (defconst pkg/package/helm-enabled-list
+    '(helm
+      ;; helm-bm
+      helm-projectile
+      helm-flycheck
+      ;; helm-gtags
+      flyspell-correct-helm
+      ))
+  (defconst pkg/package/ivy-enabled-list
+    '(ivy
+      counsel
+      counsel-projectile
+      ;; counsel-gtags, counsel-etags
+      flyspell-correct-ivy
+      ))
+  (let ((bkd (car pkg/package/completion-backend)))
+    (my/map (lambda (pkg)
+              (add-to-list 'package-selected-packages pkg))
+            (cond
+             ((eq bkd 'helm) pkg/package/helm-enabled-list)
+             ((eq bkd' ivy) pkg/package/ivy-enabled-list)
+             (t (list bkd)))))
   (when (not package-archive-contents)
     (package-refresh-contents))
   (package-install-selected-packages))
 
 (eval-when-compile
   ;; disabled, diminish
-  ;; ensure, after, demand
+  ;; ensure, require
+  ;; after, demand
   ;; defer ;; used in init-keys.el only
   ;; commands, binds
   ;; mode, magic, interpreter
   ;; preface, if, init, config
+  (setq use-package-always-defer nil
+        use-package-verbose nil)
   (require 'use-package))
 
 (require 'bind-key)

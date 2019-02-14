@@ -496,38 +496,52 @@ PROJECT: %(projectile-project-root)
 
 "
   ("h"   helm-projectile                            "helm     " :column "project  ")
-  ("p"   helm-projectile-switch-project             "open     "                    ) ;; (projectile-switch-project)
+  ("p"   projectile-switch-project                  "open     "                    )
   ("P"   projectile-switch-open-project             "switch   "                    )
   ("v"   projectile-vc                              "version  "                    )
   ("x"   projectile-remove-known-project            "remove   "                    )
   ("X"   projectile-cleanup-known-projects          "cleanup  "                    )
-  ("b"   helm-projectile-switch-to-buffer           "switch   " :column "buffer   ") ;; (projectile-switch-to-buffer)
+  ("b"   projectile-switch-to-buffer                "switch   " :column "buffer   ")
   ("k"   projectile-kill-buffers                    "kill     "                    )
-  ("f"   helm-projectile-find-file                  "this proj" :column "find file") ;; (projectile-find-file)
+  ("f"   projectile-find-file                       "this proj" :column "find file")
   ("F"   projectile-find-file-in-known-projects     "all proj "                    )
   ("j"   projectile-find-file-in-directory          "the dir  "                    )
-  ("r"   helm-projectile-recentf                    "recent   "                    ) ;; (projectile-recentf)
+  ("r"   projectile-recentf                         "recent   "                    )
   ("t"   projectile-find-other-file                 "same name"                    )
-  ("d"   helm-projectile-find-dir                   "find     " :column "directory") ;; (projectile-find-dir)
+  ("d"   projectile-find-dir                        "find     " :column "directory")
   ("D"   projectile-dired                           "dired    "                    )
-  ("o"   helm-projectile-grep                       "grep     " :column "symbol   ") ;; (projectile-grep)
+  ("o"   projectile-grep                            "grep     " :column "symbol   ")
   ("O"   projectile-multi-occur                     "occur    "                    )
   ("w"   projectile-replace                         "replace  "                    )
   ("!"   projectile-run-shell-command-in-root       "shell    " :column "external ")
   ("&"   projectile-run-async-shell-command-in-root "shell &  "                    )
-  ("a"   helm-projectile-ag                         "ag       "                    ) ;; (projectile-ag)
-  ("c"   helm-projectile-ack                        "ack      "                    ) ;; (projectile-ack)
+  ("a"   projectile-ag                              "ag       "                    )
+  ("c"   projectile-ack                             "ack      "                    )
   ;; todo
-  ;; helm-projectile-browse-dirty-projects
-  ;; V         projectile-browse-dirty-projects
-  ;; c         projectile-compile-project
-  ;; I         projectile-ibuffer
-  ;; S         projectile-save-project-buffers
-  ;; j         projectile-find-tag
-  ;; R         projectile-regenerate-tags
-  ;; i         projectile-invalidate-cache
-  ;; z         projectile-cache-current-file
+  ;; V projectile-browse-dirty-projects
+  ;; c projectile-compile-project
+  ;; I projectile-ibuffer
+  ;; S projectile-save-project-buffers
+  ;; j projectile-find-tag
+  ;; R projectile-regenerate-tags
+  ;; i projectile-invalidate-cache
+  ;; z projectile-cache-current-file
   ("q" pkg/hydra/quit nil :exit t))
+
+(use-package helm-projectile
+  :defer t
+  :config
+  (bind-keys :map pkg/hydra/group/project/keymap
+             ([remap projectile-switch-project]        . helm-projectile-switch-project)
+             ([remap projectile-switch-to-buffer]      . helm-projectile-switch-to-buffer)
+             ([remap projectile-find-file]             . helm-projectile-find-file)
+             ([remap projectile-recentf]               . helm-projectile-recentf)
+             ([remap projectile-find-dir]              . helm-projectile-find-dir)
+             ([remap projectile-grep]                  . helm-projectile-grep)
+             ([remap projectile-ag]                    . helm-projectile-ag)
+             ([remap projectile-ack]                   . helm-projectile-ack)
+             ([remap projectile-browse-dirty-projects] . helm-projectile-browse-dirty-projects))
+  )
 
 (defhydra pkg/hydra/group/flymake
   (:timeout pkg/hydra/timeout-sec :exit t)
@@ -616,27 +630,38 @@ PROJECT: %(projectile-project-root)
   )
 
 ;; todo :: 在以下交互函数执行时，输入"C-u"，还可限定搜索的目录路径
-(defhydra pkg/hydra/group/helm-gtags
-  (:timeout pkg/hydra/timeout-sec :exit t)
-  ("."   helm-gtags-dwim                  "M-.        " :column "jump    ")
-  (","   helm-gtags-pop-stack             "M-,        "                   )
-  ("n"   helm-gtags-next-history          "M-n        "                   )
-  ("p"   helm-gtags-previous-history      "M-p        "                   )
-  ("/"   helm-gtags-show-stack            "M-/        "                   )
-  ("o d" helm-gtags-find-tag              "definition " :column "search  ")
-  ("o r" helm-gtags-find-rtag             "reference  "                   )
-  ("o o" helm-gtags-find-pattern          "pattern    "                   )
-  ("o s" helm-gtags-find-symbol           "symbol     "                   )
-  ("o f" helm-gtags-find-files            "file       "                   )
-  ("i"   helm-gtags-tags-in-this-function "this func  " :column "select  ")
-  ("f"   helm-gtags-parse-file            "this file  "                   )
-  ("l"   helm-gtags-select                "this proj  "                   )
-  ("d"   helm-gtags-select-path           "path       "                   )
-  ("g"   helm-gtags-update-tags           "refresh    " :column "database")
-  ("G"   helm-gtags-create-tags           "setup      "                   )
-  ("x"   helm-gtags-clear-all-stacks      "clear stack"                   )
-  ("X"   helm-gtags-clear-all-cache       "clear cache"                   )
-  ("q" pkg/hydra/quit nil :exit t))
+(use-package helm-gtags
+  :defer t
+  :config
+  (unbind-key helm-gtags-prefix-key helm-gtags-mode-map)
+  (bind-keys :map helm-gtags-mode-map
+             ("M-." . helm-gtags-dwim)
+             ("M-," . helm-gtags-pop-stack)
+             ("M-n" . helm-gtags-next-history)
+             ("M-p" . helm-gtags-previous-history)
+             ("M-/" . helm-gtags-show-stack))
+  (defhydra pkg/hydra/group/helm-gtags
+    (:timeout pkg/hydra/timeout-sec :exit t)
+    ("."   helm-gtags-dwim                  "M-.        " :column "jump    ")
+    (","   helm-gtags-pop-stack             "M-,        "                   )
+    ("n"   helm-gtags-next-history          "M-n        "                   )
+    ("p"   helm-gtags-previous-history      "M-p        "                   )
+    ("/"   helm-gtags-show-stack            "M-/        "                   )
+    ("o d" helm-gtags-find-tag              "definition " :column "search  ")
+    ("o r" helm-gtags-find-rtag             "reference  "                   )
+    ("o o" helm-gtags-find-pattern          "pattern    "                   )
+    ("o s" helm-gtags-find-symbol           "symbol     "                   )
+    ("o f" helm-gtags-find-files            "file       "                   )
+    ("i"   helm-gtags-tags-in-this-function "this func  " :column "select  ")
+    ("f"   helm-gtags-parse-file            "this file  "                   )
+    ("l"   helm-gtags-select                "this proj  "                   )
+    ("d"   helm-gtags-select-path           "path       "                   )
+    ("g"   helm-gtags-update-tags           "refresh    " :column "database")
+    ("G"   helm-gtags-create-tags           "setup      "                   )
+    ("x"   helm-gtags-clear-all-stacks      "clear stack"                   )
+    ("X"   helm-gtags-clear-all-cache       "clear cache"                   )
+    ("q" pkg/hydra/quit nil :exit t))
+  )
 
 
 ;; todo

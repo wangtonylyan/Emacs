@@ -1,25 +1,24 @@
 ;; -*- coding: utf-8 -*-
 
 (use-package eshell
-  :config
-  ;; (add-to-list 'eshell-visual-commands)
-  (bind-key "C-c e"
-            (lambda ()
-              (interactive)
-              (if (eq major-mode 'eshell-mode)
-                  (progn
-                    (insert "exit")
-                    (eshell-send-input)
-                    (delete-window))
-                (progn
-                  (let* ((dir (if (buffer-file-name)
-                                  (my/get-file-directory (buffer-file-name))
-                                default-directory))
-                         (name (car (last (split-string dir "/" t)))))
-                    (split-window-vertically (- (/ (window-total-height) 3)))
-                    (other-window 1)
-                    (eshell "new")
-                    (rename-buffer (concat "*eshell: " name "*"))))))))
+  :bind (("C-c e" . pkg/eshell/startup))
+  :preface
+  (defun pkg/eshell/startup ()
+    (interactive)
+    (if (eq major-mode 'eshell-mode)
+        (progn
+          (insert "exit")
+          (eshell-send-input)
+          (delete-window))
+      (progn
+        (let* ((dir (if (buffer-file-name)
+                        (my/get-file-directory (buffer-file-name))
+                      default-directory))
+               (name (car (last (split-string dir "/" t)))))
+          (split-window-vertically (- (/ (window-total-height) 3)))
+          (other-window 1)
+          (eshell "new")
+          (rename-buffer (concat "*eshell: " name "*")))))))
 
 (use-package dired
   :commands (dired)
@@ -46,13 +45,15 @@
 
 (use-package ido
   :if (my/package-enabled-p 'ido)
-  :config
-  (ido-mode 1)
-  (ido-everywhere -1) ;; 仅使ido支持find-file和switch-to-buffer
+  :init
   (setq ido-enable-prefix t
         ido-enable-flex-matching t
         ido-use-filename-at-point t
-        ido-enter-matching-directory nil))
+        ido-enter-matching-directory nil)
+  :config
+  (ido-mode 1)
+  ;; 仅使ido支持find-file和switch-to-buffer
+  (ido-everywhere -1))
 
 (use-package smex
   :bind (("M-x" . smex)
@@ -65,7 +66,6 @@
 
 (use-package helm
   :diminish helm-mode
-  :ensure t
   :commands (helm-command-prefix
              helm-M-x
              helm-show-kill-ring
@@ -129,9 +129,8 @@
   (add-hook 'after-revert-hook #'bm-buffer-restore t)
   (use-package helm-bm
     :after (helm)
-    :demand t
-    :if (my/package-enabled-p 'helm-bm)
-    :bind (("C-c b b" . helm-bm)))
+    :bind (("C-c b b" . helm-bm))
+    :if (my/package-enabled-p 'helm-bm))
   (unbind-key "C-x r"))
 
 (use-package ediff
@@ -180,35 +179,24 @@
 
 (use-package projectile
   :diminish projectile-mode
-  :ensure t
   :commands (projectile-project-root)
   :preface
   (defvar pkg/projectile/switch-hook)
   (defun pkg/projectile/switch-action ()
     (run-hooks 'pkg/projectile/switch-hook))
+  :if (my/package-enabled-p 'projectile)
   :init
   (setq projectile-indexing-method 'alien
         projectile-enable-caching t
         projectile-project-search-path pvt/project/root-directories
         projectile-switch-project-action 'pkg/projectile/switch-action)
   :config
-  ;; (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-  (projectile-mode 1)
   ;; (add-to-list 'projectile-other-file-alist '("html" "js"))
-  ;; 使用helm-projectile包装原projectile插件
-  ;; 包括替换'projectile-mode-map中的快捷键
+  ;; (bind-key "C-c p" 'projectile-command-map projectile-mode-map)
+  (projectile-mode 1)
   (use-package helm-projectile
-    :ensure t
     :after (helm)
-    :commands (helm-projectile
-               helm-projectile-switch-project
-               helm-projectile-switch-to-buffer
-               helm-projectile-find-file
-               helm-projectile-recentf
-               helm-projectile-find-dir
-               helm-projectile-grep
-               helm-projectile-ag
-               helm-projectile-ack)
+    :if (my/package-enabled-p 'helm-projectile)
     :init
     (setq projectile-completion-system 'helm
           helm-projectile-fuzzy-match t)

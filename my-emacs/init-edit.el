@@ -7,14 +7,17 @@
   (beacon-mode 1))
 
 (use-package nlinum-hl
+  :commands (nlinum-hl-flush-window
+             nlinum-hl-flush-all-windows
+             nlinum-hl-do-flush)
   :if (my/package-enabled-p 'nlinum-hl)
-  :config
+  :init
   (run-with-idle-timer 5 t #'nlinum-hl-flush-window)
   (run-with-idle-timer 30 t #'nlinum-hl-flush-all-windows)
   (add-hook 'focus-in-hook #'nlinum-hl-flush-all-windows)
   (add-hook 'focus-out-hook #'nlinum-hl-flush-all-windows)
-  (advice-add 'select-window :before 'nlinum-hl-do-flush)
-  (advice-add 'select-window :after 'nlinum-hl-do-flush))
+  (advice-add 'select-window :before #'nlinum-hl-do-flush)
+  (advice-add 'select-window :after #'nlinum-hl-do-flush))
 
 (use-package yascroll
   :if (my/package-enabled-p 'yascroll)
@@ -39,7 +42,7 @@
 
 (use-package minimap
   :if (my/package-enabled-p 'minimap)
-  :config
+  :init
   (setq minimap-always-recenter nil ;; 设置为nil才有效?
         minimap-recenter-type 'middle
         minimap-buffer-name-prefix "MINI" ;; 不能为空，否则无法启动minimap窗口
@@ -68,20 +71,22 @@
         whitespace-line-column 80))
 
 (use-package rainbow-delimiters
+  :commands (rainbow-delimiters-mode)
   :if (my/package-enabled-p 'rainbow-delimiters)
-  :config
+  :init
   (my/add-mode-hook "prog" #'rainbow-delimiters-mode))
 
 ;; 修改默认字体颜色，从而将文字与符号区分开来
 (use-package rainbow-identifiers
+  :commands (rainbow-identifiers-mode)
   :if (my/package-enabled-p 'rainbow-identifiers)
   :init
   (setq rainbow-identifiers-face-count 1)
-  :config
   (my/add-mode-hook "prog" #'rainbow-identifiers-mode))
 
 (use-package highlight-thing
   :diminish highlight-thing-mode
+  :commands (highlight-thing-mode)
   :if (my/package-enabled-p 'highlight-thing)
   :init
   (setq highlight-thing-what-thing 'symbol
@@ -89,14 +94,14 @@
         highlight-thing-delay-seconds 0.5
         highlight-thing-limit-to-defun nil
         highlight-thing-case-sensitive-p t)
-  :config
-  ;; (global-hl-line-mode -1)
-  (my/add-mode-hook "text" #'hl-line-mode)
+  (my/add-mode-hook "text" #'hl-line-mode) ;; (global-hl-line-mode -1)
   (my/add-mode-hook "prog" #'highlight-thing-mode))
 
 
 (use-package flyspell
   :diminish flyspell-mode
+  :commands (flyspell-mode
+             flyspell-prog-mode)
   :if (and (or (my/package-enabled-p 'flyspell)
                (my/package-enabled-p 'flyspell-correct))
            (my/locate-exec "aspell"))
@@ -114,17 +119,14 @@
     :config
     (use-package flyspell-correct-helm
       :after (helm)
-      :if (and (my/package-enabled-p 'helm)
-               (my/package-enabled-p 'flyspell-correct-helm))
+      :if (my/package-enabled-p 'flyspell-correct-helm)
       :init
       (setq flyspell-correct-interface #'flyspell-correct-helm))
     (use-package flyspell-correct-ivy
-      :after (counsel)
-      :if (and (my/package-enabled-p 'counsel)
-               (my/package-enabled-p 'flyspell-correct-ivy))
+      :after (ivy)
+      :if (my/package-enabled-p 'flyspell-correct-ivy)
       :init
-      (setq flyspell-correct-interface #'flyspell-correct-ivy)))
-  )
+      (setq flyspell-correct-interface #'flyspell-correct-ivy))))
 
 (use-package avy
   :bind (("C-:" . avy-goto-char-timer) ;; (avy-goto-char)
@@ -163,7 +165,6 @@
   (global-undo-tree-mode 1))
 
 (use-package smart-hungry-delete
-  :ensure t
   :bind (("<backspace>" . smart-hungry-delete-backward-char)
          ("C-d" . smart-hungry-delete-forward-char))
   :if (my/package-enabled-p 'smart-hungry-delete)
@@ -172,6 +173,7 @@
 
 (use-package paredit
   :diminish paredit-mode
+  :commands (enable-paredit-mode)
   :if (my/package-enabled-p 'paredit)
   :init
   (mapc (lambda (mode)
@@ -180,26 +182,27 @@
 
 (use-package lispy
   :diminish lispy-mode
+  :commands (lispy-mode)
   :preface
-  (defun pkg/lispy/show-backend ()
-    (cond
-     ((my/package-enabled-p 'helm) 'helm)
-     ((my/package-enabled-p 'counsel) 'ivy)
-     (t 'default)))
+  (defconst pkg/lispy/show-backend
+    (or (my/package-enabled-p 'helm)
+        (my/package-enabled-p 'ivy)
+        'default))
   :if (my/package-enabled-p 'lispy)
   :init
   (setq lispy-no-permanent-semantic t
         lispy-close-quotes-at-end-p t
-        lispy-completion-method (pkg/lispy/show-backend)
-        lispy-occur-backend (pkg/lispy/show-backend))
+        lispy-completion-method pkg/lispy/show-backend
+        lispy-occur-backend pkg/lispy/show-backend)
   (mapc (lambda (mode)
           (my/add-mode-hook mode (lambda () (lispy-mode 1))))
         '("org" "lisp" "elisp" "ilisp" "slime" "scheme"))
   :config
-  ;; (advice-add 'semantic-idle-scheduler-function :around #'ignore)
-  )
+  ;; FIXME: to fix a semantic bug
+  (advice-add 'semantic-idle-scheduler-function :around #'ignore))
 
 (use-package parinfer
+  :commands (parinfer-mode)
   :if (my/package-enabled-p 'parinfer)
   :init
   (setq parinfer-extensions '(defaults
