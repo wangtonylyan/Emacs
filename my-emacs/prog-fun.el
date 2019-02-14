@@ -88,9 +88,9 @@
                ("" . haskell-process-cabal-build)
                :map haskell-cabal-mode-map)
     (if (my/package-enabled-p 'hindent)
-        (progn
-          (use-package hindent
-            :commands (hindent-mode))
+        (use-package hindent
+          :commands (hindent-mode)
+          :init
           (my/add-mode-hook "haskell" #'hindent-mode))
       (my/add-mode-hook "haskell" #'haskell-indentation-mode) ;; (turn-on-haskell-indent(ation))
       )
