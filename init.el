@@ -242,24 +242,30 @@
   ;; 设置安装包的存储目录，该目录也需要被包含至'load-path中
   ;; (add-to-list 'package-directory-list "~/.emacs.d/elpa/" t) ;; system-wide dir
   (setq package-user-dir (my/set-user-emacs-file "elpa/")) ;; user-wide dir
-  (defconst pkg/package/source-mirror
-    ;; 'origin ;; 官方源，速度较慢
-    'tsinghua ;; 国内的清华镜像源
-    )
   (setq package-archives
-        (cond
-         ((eq pkg/package/source-mirror 'origin)
-          '(("gnu" . "https://elpa.gnu.org/packages/")
-            ;; ("melpa-stable" . "http://stable.melpa.org/packages/")
-            ("melpa" . "http://melpa.org/packages/")
-            ;; ("org" . "http://orgmode.org/elpa/")
-            ))
-         ((eq pkg/package/source-mirror 'tsinghua)
-          '(("gnu" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
-            ;; ("melpa-stable" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa-stable/")
-            ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
-            ;; ("org" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/")
-            ))))
+        (let ((mirror
+               ;; 'origin
+               'china ;; 'tsinghua
+               ))
+          (cond
+           ((eq mirror 'origin)
+            '(("gnu" . "http://elpa.gnu.org/packages/")
+              ;; ("melpa-stable" . "http://stable.melpa.org/packages/")
+              ("melpa" . "http://melpa.org/packages/")
+              ;; ("org" . "http://orgmode.org/elpa/")
+              ))
+           ((eq mirror 'china)
+            '(("gnu" . "http://elpa.emacs-china.org/gnu/")
+              ;; ("melpa-stable" . "http://elpa.emacs-china.org/melpa-stable/")
+              ("melpa" . "http://elpa.emacs-china.org/melpa/")
+              ;; ("org" . "http://elpa.emacs-china.org/org/")
+              ))
+           ((eq mirror 'tsinghua)
+            '(("gnu" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
+              ;; ("melpa-stable" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa-stable/")
+              ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
+              ;; ("org" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/")
+              )))))
   ;; 以下列表用于设置被允许加载的插件，因此无论是在安装还是使用插件的过程中
   ;; 都必须提前详细地列举出所有的插件，且要根据插件之间的依赖关系进行先后地声明
   (setq package-load-list '(all ;; e.g. (dash) (epl) (let-alist) (pkg-info) (flycheck)
@@ -282,6 +288,7 @@
           tabbar ;; awesome-tab
           treemacs ;; neotree, sr-speedbar, ecb
           treemacs-icons-dired
+          treemacs-projectile
           buffer-move
           ;; dimmer
           zoom
@@ -314,7 +321,6 @@
           ediff ;; vdiff
           ;; [project]
           projectile ;; eproject
-          treemacs-projectile
           magit
           ;; vdiff-magit
           ;; =============================================================================
