@@ -1,69 +1,113 @@
 ;; -*- coding: utf-8 -*-
 
-(when (fboundp 'x-send-client-message)
-  ((lambda ()
-     ;; 全屏
-     ;; (interactive)
-     ;; (x-send-client-message nil 0 nil "_NET_WM_STATE" 32 '(2 "_NET_WM_STATE_FULLSCREEN" 0))
-     ;; 或
-     ;; (set-frame-parameter nil 'fullscreen 'fullboth)
-     ;; 窗口最大化需要分别经过水平和垂直两个方向的最大化
-     (interactive)
-     (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
-                            '(1 "_NET_WM_STATE_MAXIMIZED_HORZ" 0))
-     (interactive)
-     (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
-                            '(1 "_NET_WM_STATE_MAXIMIZED_VERT" 0)))))
+(defun my/fullscreen ()
+  (when (fboundp 'x-send-client-message)
+    ((lambda ()
+       ;; 全屏
+       ;; (interactive)
+       ;; (x-send-client-message nil 0 nil "_NET_WM_STATE" 32 '(2 "_NET_WM_STATE_FULLSCREEN" 0))
+       ;; 或
+       ;; (set-frame-parameter nil 'fullscreen 'fullboth)
+       ;; 窗口最大化需要分别经过水平和垂直两个方向的最大化
+       (interactive)
+       (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
+                              '(1 "_NET_WM_STATE_MAXIMIZED_HORZ" 0))
+       (interactive)
+       (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
+                              '(1 "_NET_WM_STATE_MAXIMIZED_VERT" 0))))))
+
+(add-hook 'after-init-hook 'my/fullscreen t)
 
 
 (use-package dashboard
+  :diminish (page-break-lines-mode)
+  :hook (after-init . pkg/dashboard/start)
+  :preface
+  (defun pkg/dashboard/start ()
+    (dashboard-setup-startup-hook))
   :if (my/package-enabled-p 'dashboard)
   :init
   (setq dashboard-banner-logo-title "Welcome to Emacs"
         dashboard-startup-banner 'official
         dashboard-items '((recents  . 10)
                           (bookmarks . 10)
-                          (projects . 10)))
-  :config
-  (dashboard-setup-startup-hook))
+                          (projects . 10))))
 
 (use-package nyan-mode
+  :hook (after-init . pkg/nyan-mode/start)
+  :preface
+  (defun pkg/nyan-mode/start ()
+    (nyan-mode 1))
   :if (my/package-enabled-p 'nyan-mode)
   :init
   (setq nyan-animate-nyancat nil
-        nyan-wavy-trail nil)
-  :config
-  (nyan-mode 1))
+        nyan-wavy-trail nil))
+
+(use-package powerline
+  :defer t
+  :init
+  (setq powerline-default-separator 'arrow
+        powerline-default-separator-dir '(left . right)))
 
 (use-package spaceline
-  :if (or (my/package-enabled-p 'spaceline)
-          (my/package-enabled-p 'spaceline-all-the-icons))
+  :defer t
   :init
-  (setq spaceline-highlight-face-func 'spaceline-highlight-face-modified)
+  (setq spaceline-highlight-face-func 'spaceline-highlight-face-modified))
+
+(use-package spaceline-config
+  :hook (after-init . pkg/spaceline/start)
+  :preface
+  (defun pkg/spaceline/start ()
+    (spaceline-emacs-theme))
+  :if (my/package-enabled-p 'spaceline)
   :config
-  (use-package powerline
-    :init
-    (setq powerline-default-separator 'arrow
-          powerline-default-separator-dir '(left . right)))
   (use-package spaceline-config
-    :if (my/package-enabled-p 'spaceline)
+    :after (helm)
+    :if (my/package-enabled-p 'helm)
     :config
-    (spaceline-emacs-theme)
-    (use-package helm
-      :defer t
-      :if (my/package-enabled-p 'helm)
-      :config
-      (spaceline-helm-mode)))
+    (spaceline-helm-mode)))
+
+(use-package spaceline-all-the-icons
+  :hook (after-init . pkg/spaceline-all-the-icons/start)
+  :preface
+  (defun pkg/spaceline-all-the-icons/start ()
+    (spaceline-all-the-icons-theme))
+  :if (my/package-enabled-p 'spaceline-all-the-icons)
+  :config
   (use-package spaceline-all-the-icons
-    :if (my/package-enabled-p 'spaceline-all-the-icons)
+    :after (package)
     :config
-    (spaceline-all-the-icons-theme)
-    ;; (spaceline-all-the-icons--setup-package-updates)
-    (use-package spaceline-all-the-icons
-      :after (neotree)
-      :if (my/package-enabled-p 'neotree)
-      :config
-      (spaceline-all-the-icons--setup-neotree))))
+    (spaceline-all-the-icons--setup-package-updates))
+  (use-package spaceline-all-the-icons
+    :after (neotree)
+    :if (my/package-enabled-p 'neotree)
+    :config
+    (spaceline-all-the-icons--setup-neotree)))
+
+(use-package doom-modeline
+  :hook (after-init . pkg/doom-modeline/start)
+  :preface
+  (defun pkg/doom-modeline/start ()
+    (doom-modeline-mode 1))
+  :if (my/package-enabled-p 'doom-modeline)
+  :config
+  (setq doom-modeline-buffer-file-name-style 'relative-to-project
+        doom-modeline-python-executable (or (my/locate-exec "python3")
+                                            (my/locate-exec "python"))
+        doom-modeline-icon t
+        doom-modeline-major-mode-icon t
+        doom-modeline-major-mode-color-icon t
+        doom-modeline-minor-modes t
+        doom-modeline-enable-word-count t
+        doom-modeline-persp-name t
+        doom-modeline-lsp t
+        doom-modeline-github nil
+        doom-modeline-github-interval (* 60 60)
+        doom-modeline-version t
+        doom-modeline-mu4e nil)
+  ;; FIXME: modeline in 'helm window is redefined by spaceline,
+  ;; but not by doom-modeline, here is just a workaround
+  (advice-add #'helm-display-mode-line :override #'ignore))
 
 
 (let* ((dir (my/set-user-emacs-file "theme/" t))
@@ -73,11 +117,18 @@
     (add-to-list 'custom-theme-load-path path)))
 
 (use-package atom-one-dark-theme
-  :if (my/package-enabled-p 'atom-one-dark-theme)
-  :config
-  (load-theme 'atom-one-dark t))
+  :hook (after-init . pkg/atom-one-dark-theme/start)
+  :preface
+  (defun pkg/atom-one-dark-theme/start ()
+    (load-theme 'atom-one-dark t))
+  :if (my/package-enabled-p 'atom-one-dark-theme))
 
 (use-package doom-themes
+  :hook (after-init . pkg/doom-themes/start)
+  :preface
+  (defun pkg/doom-themes/start ()
+    ;; 'doom-one, 'doom-nova, 'doom-spacegrey
+    (load-theme 'doom-spacegrey t))
   :if (my/package-enabled-p 'doom-themes)
   :init
   (setq doom-themes-enable-bold nil
@@ -86,7 +137,6 @@
         doom-spacegrey-brighter-comments t
         doom-spacegrey-comment-bg nil)
   :config
-  (load-theme 'doom-spacegrey t) ;; 'doom-one, 'doom-nova, 'doom-spacegrey
   (when visible-bell
     (doom-themes-visual-bell-config))
   (use-package doom-themes-treemacs
@@ -105,38 +155,47 @@
     (doom-themes-neotree-config)))
 
 (use-package github-theme
+  :hook (after-init . pkg/github-theme/start)
+  :preface
+  (defun pkg/github-theme/start ()
+    (load-theme 'github t))
   :if (my/package-enabled-p 'github-theme)
   :init
   (setq github-override-colors-alist '(("github-white" . "#FBF9E1")
                                        ("github-comment" . "#009E73")
-                                       ("github-text" . "#000000")))
-  :config
-  (load-theme 'github t))
+                                       ("github-text" . "#000000"))))
 
 (use-package solarized-theme
+  :hook (after-init . pkg/solarized-theme/start)
+  :preface
+  (defun pkg/solarized-theme/start ()
+    ;; (load-theme 'solarized-dark t)
+    (load-theme 'solarized-light t))
   :if (my/package-enabled-p 'solarized-theme)
   :init
   (setq solarized-distinct-fringe-background nil
         solarized-distinct-doc-face t
         solarized-high-contrast-mode-line t
         solarized-use-more-italic t
-        solarized-emphasize-indicators t)
-  :config
-  ;; (load-theme 'solarized-dark t)
-  (load-theme 'solarized-light t))
+        solarized-emphasize-indicators t))
 
 (use-package zenburn-theme
+  :hook (after-init . pkg/zenburn-theme/start)
+  :preface
+  (defun pkg/zenburn-theme/start ()
+    (load-theme 'zenburn t))
   :if (my/package-enabled-p 'zenburn-theme)
   :init
   ;; (setq zenburn-override-colors-alist '(("zenburn-fg" . "#EDEDDD")))
-  :config
-  (load-theme 'zenburn t))
+  )
 
 
 (use-package tabbar
-  :if (my/package-enabled-p 'tabbar)
-  :config
-  (tabbar-mode 1))
+  :hook (after-init . pkg/tabbar/start)
+  :preface
+  (defun pkg/tabbar/start ()
+    (tabbar-mode 1))
+  :if (my/package-enabled-p 'tabbar))
 
 (use-package treemacs
   :commands (treemacs-select-window
@@ -188,19 +247,21 @@
   (when (not treemacs-show-cursor)
     ;; 该子模式似乎并不完善，不建议启用
     (treemacs-fringe-indicator-mode 1))
-  (use-package treemacs-icons-dired
-    :after (dired)
-    :if (my/package-enabled-p 'treemacs-icons-dired)
-    :config
-    (treemacs-icons-dired-mode))
-  (use-package treemacs-projectile
-    :after (projectile)
-    :commands (treemacs-projectile)
-    :if (and (my/package-enabled-p 'projectile)
-             (my/package-enabled-p 'treemacs-projectile)))
   (when (and (my/locate-exec "git")
              (my/locate-exec "python3"))
     (treemacs-git-mode 'deferred)))
+
+(use-package treemacs-icons-dired
+  :after (dired)
+  :if (my/package-enabled-p 'treemacs-icons-dired)
+  :config
+  (treemacs-icons-dired-mode))
+
+(use-package treemacs-projectile
+  :after (projectile)
+  :commands (treemacs-projectile)
+  :if (and (my/package-enabled-p 'projectile)
+           (my/package-enabled-p 'treemacs-projectile)))
 
 (use-package neotree
   :commands (neotree-toggle)
@@ -243,8 +304,10 @@
 
 (use-package winner
   :ensure t
-  :config
-  (winner-mode 1))
+  :hook (after-init . pkg/winner/start)
+  :preface
+  (defun pkg/winner/start ()
+    (winner-mode 1)))
 
 (use-package buffer-move
   :commands (buf-move-left
@@ -254,18 +317,21 @@
   :if (my/package-enabled-p 'buffer-move))
 
 (use-package dimmer
-  :if (my/package-enabled-p 'dimmer)
-  :config
-  (dimmer-mode 1))
+  :hook (after-init . pkg/dimmer/start)
+  :preface
+  (defun pkg/dimmer/start ()
+    (dimmer-mode 1))
+  :if (my/package-enabled-p 'dimmer))
 
 (use-package zoom
-  :diminish zoom-mode
+  :diminish (zoom-mode)
   :commands (zoom)
+  :preface
+  (defun pkg/zoom/start ()
+    (zoom-mode 1))
   :if (my/package-enabled-p 'zoom)
   :init
-  (setq zoom-minibuffer-preserve-layout nil)
-  :config
-  ;; (zoom-mode 1)
-  )
+  (setq zoom-minibuffer-preserve-layout nil))
+
 
 (provide 'my/init-gui)

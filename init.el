@@ -103,7 +103,7 @@
 
 ;; 目前暂没有对于该函数实现上的额外需求
 ;; (load)本身的实现逻辑就类似于(my/locate-file)
-(defun my/load-file (file &optional dir) ;; todo
+(defun my/load-file (file &optional dir) ;; TODO
   (load (my/concat-directory-file dir file) t))
 
 (defun my/package-enabled-p (pkg)
@@ -142,8 +142,7 @@
             ;; [my]
             ("my/prog"        my/prog/start-hook        )
             ("my/prog-cc"     my/prog-cc/start-hook     )
-            ("my/prog-py"     my/prog-py/start-hook     )
-            ))
+            ("my/prog-py"     my/prog-py/start-hook     )))
     dict))
 
 (defun my/get-mode-hook (mode)
@@ -176,7 +175,8 @@
     (when path
       (setq shell-file-name path
             shell-command-switch "-c")))
-  (my/locate-exec "git.exe" "Git" t))
+  (my/locate-exec "git.exe" "Git" t)
+  (setq inhibit-compacting-font-caches t))
  ((eq system-type 'gnu/linux)
   (mapc (lambda (dir)
           (let ((path (my/path-exists-p dir)))
@@ -278,11 +278,9 @@
         '(;; =============================================================================
           ;; ["init-gui.el"]
           ;; [gui]
-          all-the-icons
-          diminish
           dashboard
           nyan-mode
-          spaceline ;; spaceline-all-the-icons, smart-mode-line
+          spaceline ;; doom-modeline, spaceline-all-the-icons, smart-mode-line
           doom-themes ;; solarized-theme, zenburn-theme
           ;; [window]
           tabbar ;; awesome-tab
@@ -304,7 +302,8 @@
           ;; rainbow-identifiers ;; 会覆盖配色主题所使用的字体颜色
           highlight-thing
           ;; [edit]
-          flyspell-correct ;; flyspell
+          flyspell
+          flyspell-correct
           avy ;; ace-jump-mode
           ;; ace-pinyin
           undo-tree
@@ -316,7 +315,7 @@
           ;; all-the-icons-dired
           ;; dired-hacks-utils ;; TODO
           ;; evil
-          hydra
+          hydra ;; which-key
           bm
           ediff ;; vdiff
           ;; [project]
@@ -390,10 +389,10 @@
 
 (eval-when-compile
   ;; disabled, diminish
-  ;; ensure, require
+  ;; ensure, requires
   ;; after, demand
-  ;; defer ;; used in init-keys.el only
-  ;; commands, binds
+  ;; defer
+  ;; commands, bind, hook
   ;; mode, magic, interpreter
   ;; preface, if, init, config
   (setq use-package-always-defer nil
@@ -404,6 +403,7 @@
 
 (use-package all-the-icons
   :ensure t
+  :defer t
   :init
   ;; 此插件在首次使用前需要额外地安装字体，否则启用后mode-line中的图片会显示为乱码
   ;; 执行以下命令会自动下载并安装所需字体，Windows上只能手动执行
@@ -414,13 +414,18 @@
 
 (use-package diminish
   :ensure t
-  :config
-  (diminish 'eldoc-mode)
-  (diminish 'abbrev-mode)
-  (diminish 'hi-lock-mode))
+  :hook (after-init . pkg/diminish/start)
+  :preface
+  (defun pkg/diminish/start ()
+    (diminish 'eldoc-mode)
+    (diminish 'abbrev-mode)
+    (diminish 'hi-lock-mode)))
 
 (use-package xref
-  :init
+  :ensure t
+  :commands (xref-find-definitions
+             xref-pop-marker-stack)
+  :config ;; FIXME: can't use :init for 'xref-after-jump-hook
   (add-hook 'xref-after-jump-hook
             (lambda () (read-only-mode 1)) t))
 
@@ -643,5 +648,6 @@
 
 ;; =============================================================================
 (message "emacs init time = %s" (emacs-init-time))
+
 
 (provide 'my/init)
