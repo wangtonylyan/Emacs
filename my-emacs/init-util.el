@@ -35,25 +35,27 @@
         dired-copy-preserve-time t))
 
 (use-package dired-hacks-utils
-  :if (my/package-enabled-p 'dired-hacks-utils)
-  )
+  :if (my/package-enabled-p 'dired-hacks-utils))
 
 (use-package icomplete
+  :defer t
   :if (not (my/package-enabled-p 'icomplete))
   :config
   (icomplete-mode -1))
 
 (use-package ido
+  :hook (after-init . pkg/ido/start)
+  :preface
+  (defun pkg/ido/sart ()
+    (ido-mode 1)
+    ;; 仅使ido支持find-file和switch-to-buffer
+    (ido-everywhere -1))
   :if (my/package-enabled-p 'ido)
   :init
   (setq ido-enable-prefix t
         ido-enable-flex-matching t
         ido-use-filename-at-point t
-        ido-enter-matching-directory nil)
-  :config
-  (ido-mode 1)
-  ;; 仅使ido支持find-file和switch-to-buffer
-  (ido-everywhere -1))
+        ido-enter-matching-directory nil))
 
 (use-package smex
   :bind (("M-x" . smex)
@@ -65,7 +67,7 @@
   (smex-initialize))
 
 (use-package helm
-  :diminish helm-mode
+  :diminish (helm-mode)
   :commands (helm-command-prefix
              helm-M-x
              helm-show-kill-ring
@@ -105,7 +107,11 @@
   (helm-autoresize-mode 1)
   (helm-mode 1))
 
-(use-package bm
+(use-package ivy
+  :if (my/package-enabled-p 'ivy)
+  )
+
+(use-package bm ;; TODO
   :commands (bm-next
              bm-previous
              bm-toggle)
@@ -130,7 +136,8 @@
   (use-package helm-bm
     :after (helm)
     :bind (("C-c b b" . helm-bm))
-    :if (my/package-enabled-p 'helm-bm))
+    :if (and (my/package-enabled-p 'helm)
+             (my/package-enabled-p 'helm-bm)))
   (unbind-key "C-x r"))
 
 (use-package ediff
@@ -178,10 +185,12 @@
 
 
 (use-package projectile
-  :diminish projectile-mode
+  :diminish (projectile-mode)
   :commands (projectile-project-root)
   :preface
   (defvar pkg/projectile/switch-hook)
+  (defun pkg/projectile/add-switch-action (func)
+    (add-hook 'pkg/projectile/switch-hook func t))
   (defun pkg/projectile/switch-action ()
     (run-hooks 'pkg/projectile/switch-hook))
   :if (my/package-enabled-p 'projectile)
@@ -193,16 +202,19 @@
   :config
   ;; (add-to-list 'projectile-other-file-alist '("html" "js"))
   ;; (bind-key "C-c p" 'projectile-command-map projectile-mode-map)
-  (projectile-mode 1)
-  (use-package helm-projectile
-    :after (helm)
-    :if (my/package-enabled-p 'helm-projectile)
-    :init
-    (setq projectile-completion-system 'helm
-          helm-projectile-fuzzy-match t)
-    :config
-    (add-hook 'pkg/projectile/switch-hook #'helm-projectile t)
-    (helm-projectile-on)))
+  (projectile-mode 1))
+
+(use-package helm-projectile
+  :after (helm projectile)
+  :if (and (my/package-enabled-p 'helm)
+           (my/package-enabled-p 'projectile)
+           (my/package-enabled-p 'helm-projectile))
+  :init
+  (setq projectile-completion-system 'helm
+        helm-projectile-fuzzy-match t)
+  :config
+  (pkg/projectile/add-switch-action #'helm-projectile)
+  (helm-projectile-on))
 
 (use-package magit
   :commands (magit-status)
@@ -217,18 +229,21 @@
         ;; 执行(magit-list-repositories)，可以打印出以下列表所指示的路径下搜索到的git项目
         magit-repository-directories
         (my/map (lambda (dir) (cons dir 1)) ;; directory depth = 1
-                pvt/project/root-directories))
+                pvt/project/root-directories)))
+
+(use-package vdiff-magit
+  :after (magit)
+  :if (and (my/package-enabled-p 'vdiff)
+           (my/package-enabled-p 'magit)
+           (my/package-enabled-p 'vdiff-magit))
   :config
-  (use-package vdiff-magit
-    :if (and (my/package-enabled-p 'vdiff)
-             (my/package-enabled-p 'vdiff-magit))
-    :config
-    (bind-keys :map magit-mode-map
-               ("e" . vdiff-magit-dwim)
-               ("E" . vdiff-magit-popup))
-    (setcdr (assoc ?e (plist-get magit-dispatch-popup :actions))
-            '("vdiff dwim" 'vdiff-magit-dwim))
-    (setcdr (assoc ?E (plist-get magit-dispatch-popup :actions))
-            '("vdiff popup" 'vdiff-magit-popup))))
+  (bind-keys :map magit-mode-map
+             ("e" . vdiff-magit-dwim)
+             ("E" . vdiff-magit-popup))
+  (setcdr (assoc ?e (plist-get magit-dispatch-popup :actions))
+          '("vdiff dwim" 'vdiff-magit-dwim))
+  (setcdr (assoc ?E (plist-get magit-dispatch-popup :actions))
+          '("vdiff popup" 'vdiff-magit-popup)))
+
 
 (provide 'my/init-util)

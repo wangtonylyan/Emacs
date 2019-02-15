@@ -5,18 +5,16 @@
 ;; 在global-map中新增快捷键前缀"x"
 ;; (bind-key "x" #'foo/body global-map)
 (use-package hydra
-  :ensure t
-  :demand t
   :preface
   (defconst pkg/hydra/timeout-sec 30)
   (defun pkg/hydra/quit ()
     (interactive)
     (message "Hydra Quit"))
+  :if (my/package-enabled-p 'hydra)
   :init
   ;; 目前发现启用此项会导致，Hydra子窗口过小，无法完整地呈现提示文字
   ;; 此外，启用全局的zoom mode似乎也可以避免该问题
-  (setq hydra-lv nil)
-  )
+  (setq hydra-lv nil))
 
 ;; 与输入法切换键冲突
 ;; (global-set-key (kbd "C-S-SPC") 'set-mark-command)
@@ -102,8 +100,7 @@
   (bind-keys :map package-menu-mode-map
              ("r" . nil)
              ("g" . package-menu-refresh)
-             ("G" . package-refresh-contents))
-  )
+             ("G" . package-refresh-contents)))
 
 (use-package tabbar
   :defer t
@@ -113,47 +110,44 @@
              ("C-S-i" . tabbar-forward-tab)
              ("C-S-u" . tabbar-backward-tab)
              ("C-S-o" . tabbar-forward-group)
-             ("C-S-y" . tabbar-backward-group))
-  )
+             ("C-S-y" . tabbar-backward-group)))
 
 (use-package helm
   :defer t
   :config
   (bind-keys ("C-x c" . nil)
              :map helm-map
-             ("<tab>"   . helm-execute-persistent-action)
-             ("M-x"     . helm-select-action)
+             ("<tab>" . helm-execute-persistent-action)
+             ("M-x" . helm-select-action)
              ("C-c C-f" . helm-follow-mode)
              :map minibuffer-local-map
              ("M-p" . helm-minibuffer-history)
-             ("M-n" . helm-minibuffer-history))
-  )
+             ("M-n" . helm-minibuffer-history)))
 
 (use-package vdiff
   :defer t
   :config
   (bind-keys :map vdiff-mode-map
-             ("C-c d"   . vdiff-mode-prefix-map)
-             ("C-c d h" . vdiff-hydra/body))
-  )
+             ("C-c d" . vdiff-mode-prefix-map)
+             ("C-c d h" . vdiff-hydra/body)))
 
 (use-package flyspell
   :defer t
   :config
   (bind-keys :map flyspell-mode-map
-             ("C-,"   . nil) ;; (flyspell-goto-next-error)
-             ("C-;"   . nil) ;; (flyspell-auto-correct-previous-word)
-             ("C-."   . nil) ;; (flyspell-auto-correct-word)
+             ("C-," . nil) ;; (flyspell-goto-next-error)
+             ("C-;" . nil) ;; (flyspell-auto-correct-previous-word)
+             ("C-." . nil) ;; (flyspell-auto-correct-word)
              ("C-M-i" . nil) ;; (flyspell-auto-correct-word)
              ("C-c $" . nil) ;; (flyspell-correct-word-before-point)
-             ("C-\""  . flyspell-goto-next-error)
-             ("C-'"   . flyspell-auto-correct-word))
-  (use-package flyspell-correct
-    :defer t
-    :config
-    (bind-keys :map flyspell-mode-map
-               ("C-'" . flyspell-correct-wrapper)))
-  )
+             ("C-\"" . flyspell-goto-next-error)
+             ("C-'" . flyspell-auto-correct-word)))
+
+(use-package flyspell-correct
+  :defer t
+  :config
+  (bind-keys :map flyspell-mode-map
+             ("C-'" . flyspell-correct-wrapper)))
 
 (use-package undo-tree
   :defer t
@@ -165,9 +159,8 @@
              ("M-_" . nil) ;; (undo-tree-redo)
              :map undo-tree-visualizer-mode-map
              ("<return>" . undo-tree-visualizer-quit)
-             ("C-p"      . undo-tree-visualize-undo-to-x)
-             ("C-n"      . undo-tree-visualize-redo-to-x))
-  )
+             ("C-p" . undo-tree-visualize-undo-to-x)
+             ("C-n" . undo-tree-visualize-redo-to-x)))
 
 (defhydra pkg/hydra/group
   (:timeout pkg/hydra/timeout-sec :exit t)
@@ -247,8 +240,7 @@
              ("C-M-l" . paredit-forward-up)
              ("C-M-k" . paredit-backward-down)
              ("C-M-j" . paredit-forward-down)
-             ("C-M-h" . paredit-backward-up))
-  )
+             ("C-M-h" . paredit-backward-up)))
 
 (use-package lispy
   :defer t
@@ -291,8 +283,8 @@
           ;; misc
           (lispy-define-key map "m" 'lispy-mark-list)
           (lispy-define-key map "o" 'lispy-occur)
-          (lispy-define-key map "a" 'lispy-narrow)
-          (lispy-define-key map "A" 'lispy-widen)
+          (lispy-define-key map "a" 'lispy-widen)
+          (lispy-define-key map "A" 'lispy-narrow)
           (define-key map (kbd "SPC") 'lispy-space)
           map))
   (setq lispy-mode-map-lispy
@@ -360,8 +352,7 @@ Number of marked: %(pkg/dired/count-marked)
     (": g" dired-do-chgrp               "chgrp            "                   )
     (": t" dired-do-touch               "touch            "                   )
     ("!"   dired-do-shell-command       "shell            " :column "external")
-    ("&"   dired-do-async-shell-command "shell &          "                   ))
-  )
+    ("&"   dired-do-async-shell-command "shell &          "                   )))
 
 (defhydra pkg/hydra/group/treemacs
   (:timeout pkg/hydra/timeout-sec :exit t)
@@ -415,8 +406,7 @@ Number of marked: %(pkg/dired/count-marked)
     (": w"       treemacs-set-width                  "set width      "                   )
     (": m"       treemacs-toggle-fixed-width         "fixed width    "                   )
     ("q"         treemacs-quit                       "quit           "                   )
-    ("Q"         treemacs-kill-buffer                "terminate      "                   ))
-  )
+    ("Q"         treemacs-kill-buffer                "terminate      "                   )))
 
 (defhydra pkg/hydra/group/neotree
   (:timeout pkg/hydra/timeout-sec :exit t)
@@ -436,8 +426,7 @@ Number of marked: %(pkg/dired/count-marked)
     ("C-n" neotree-select-next-sibling-node     "next dir ")
     ("C-p" neotree-select-previous-sibling-node "prev dir ")
     ("l"   neotree-select-up-node               "parent   ")
-    ("a"   neotree-hidden-file-toggle           "hidden   "))
-  )
+    ("a"   neotree-hidden-file-toggle           "hidden   ")))
 
 (defhydra pkg/hydra/group/highlight
   (:timeout pkg/hydra/timeout-sec)
@@ -517,7 +506,7 @@ PROJECT: %(projectile-project-root)
   ("&"   projectile-run-async-shell-command-in-root "shell &  "                    )
   ("a"   projectile-ag                              "ag       "                    )
   ("c"   projectile-ack                             "ack      "                    )
-  ;; todo
+  ;; TODO
   ;; V projectile-browse-dirty-projects
   ;; c projectile-compile-project
   ;; I projectile-ibuffer
@@ -540,8 +529,7 @@ PROJECT: %(projectile-project-root)
              ([remap projectile-grep]                  . helm-projectile-grep)
              ([remap projectile-ag]                    . helm-projectile-ag)
              ([remap projectile-ack]                   . helm-projectile-ack)
-             ([remap projectile-browse-dirty-projects] . helm-projectile-browse-dirty-projects))
-  )
+             ([remap projectile-browse-dirty-projects] . helm-projectile-browse-dirty-projects)))
 
 (defhydra pkg/hydra/group/flymake
   (:timeout pkg/hydra/timeout-sec :exit t)
@@ -576,8 +564,7 @@ PROJECT: %(projectile-project-root)
     ("g" flycheck-buffer                 "refresh  "                            )
     ("G" flycheck-compile                "compile  "                            )
     ("k" flycheck-clear                  "clear    "                            )
-    ("q" pkg/hydra/quit nil :exit t))
-  )
+    ("q" pkg/hydra/quit nil :exit t)))
 
 (use-package ggtags
   :defer t
@@ -626,8 +613,7 @@ PROJECT: %(projectile-project-root)
     ("v h" ggtags-browse-file-as-hypertext "view html  "                   )
     ("w"   ggtags-query-replace            "replace    "                   )
     ("C-q" ggtags-toggle-project-read-only "readonly   "                   )
-    ("q" pkg/hydra/quit nil :exit t))
-  )
+    ("q" pkg/hydra/quit nil :exit t)))
 
 ;; todo :: 在以下交互函数执行时，输入"C-u"，还可限定搜索的目录路径
 (use-package helm-gtags
@@ -660,8 +646,7 @@ PROJECT: %(projectile-project-root)
     ("G"   helm-gtags-create-tags           "setup      "                   )
     ("x"   helm-gtags-clear-all-stacks      "clear stack"                   )
     ("X"   helm-gtags-clear-all-cache       "clear cache"                   )
-    ("q" pkg/hydra/quit nil :exit t))
-  )
+    ("q" pkg/hydra/quit nil :exit t)))
 
 
 ;; todo
@@ -682,7 +667,7 @@ PROJECT: %(projectile-project-root)
   ("," semantic-ia-fast-jump)
   ("." semantic-ia-show-summary)
   ("/" semantic-ia-show-doc)
-  ("b" semantic-mrub-switch-tags)
-  )
+  ("b" semantic-mrub-switch-tags))
+
 
 (provide 'my/init-keys)
