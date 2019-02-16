@@ -212,7 +212,7 @@
   :init
   (setq treemacs-python-executable (or (my/locate-exec "python3")
                                        (my/locate-exec "python"))
-        treemacs-persist-file (my/set-user-emacs-file ".treemacs/treemacs-persist")
+        treemacs-persist-file (my/set-user-emacs-file ".treemacs/persist")
         treemacs-display-in-side-window t
         treemacs-is-never-other-window t
         treemacs-no-delete-other-windows t

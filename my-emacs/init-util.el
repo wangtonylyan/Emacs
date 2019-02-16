@@ -18,7 +18,9 @@
           (split-window-vertically (- (/ (window-total-height) 3)))
           (other-window 1)
           (eshell "new")
-          (rename-buffer (concat "*eshell: " name "*")))))))
+          (rename-buffer (concat "*eshell: " name "*"))))))
+  :init
+  (setq eshell-directory-name (my/set-user-emacs-file ".eshell/")))
 
 (use-package dired
   :commands (dired)
@@ -105,22 +107,7 @@
         )
   :config
   (helm-autoresize-mode 1)
-  (helm-mode 1)
-  (use-package helm-grep
-    :after (grep)
-    :config
-    (mapc
-     (lambda (dir)
-       (add-to-list 'grep-find-ignored-directories dir)
-       (add-to-list 'helm-grep-ignored-directories dir))
-     '())
-    (mapc
-     (lambda (file)
-       (add-to-list 'grep-find-ignored-files file)
-       (add-to-list 'helm-grep-ignored-files file))
-     '("*.zip" "*.rar"
-       "*.bmp" "*.jpg" "*.jpeg" "*.png" "*.gif" "*.svg"
-       "GPATH" "GRTAGS" "GTAGS"))))
+  (helm-mode 1))
 
 (use-package ivy
   :if (my/package-enabled-p 'ivy))
@@ -212,7 +199,11 @@
   (setq projectile-indexing-method 'alien
         projectile-enable-caching t
         projectile-project-search-path pvt/project/root-directories
-        projectile-switch-project-action 'pkg/projectile/switch-action)
+        projectile-switch-project-action 'pkg/projectile/switch-action
+        projectile-cache-file (my/set-user-emacs-file
+                               ".projectile/cache")
+        projectile-known-projects-file (my/set-user-emacs-file
+                                        ".projectile/bookmarks"))
   :config
   ;; (add-to-list 'projectile-other-file-alist '("html" "js"))
   ;; (bind-key "C-c p" 'projectile-command-map projectile-mode-map)
