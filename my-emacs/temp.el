@@ -4,6 +4,83 @@
 ;;    user-emacs, private
 ;;    add-hook, cc
 
+;; this is a template for 'use-package
+(use-package package
+  :disabled t
+  :diminish (mode1
+             mode2)
+  :ensure t
+  ;; 1. list dependent packages not shown in (package-list-packages)
+  :requires (package1
+             package2)
+  :after (package1
+          package2)
+  :demand t
+  ;; 1. mostly used in init-keys.el file only
+  ;; 2. this package is required by some others
+  :defer t
+  ;; 1. list commands that are bound in init-keys.el file
+  ;; 2. non-autoload commands
+  :commands (command1
+             command2)
+  ;; 1. mostly this should be defined in init-keys.el
+  :bind (("key1" . command1)
+         ([remap command1] . command2))
+  :hook ((before-init . pkg/package/init)
+         (after-init . pkg/package/start))
+  :preface
+  ;; When this function is added to 'after-init-hook, it should either directly load this package,
+  ;; or register some triggers for loading this package.
+  ;; In the former case, the remaining procedure in this function is executed right after :config part.
+  (defun pkg/package/start ()
+    nil)
+  :if (my/package-enabled-p 'package)
+  ;; 1. executed during emacs initialization, i.e. loading init.el file
+  :init
+  (setq customized-config nil)
+  ;; 1. executed after this package has been loaded or whenever reloaded
+  :config)
+
+
+
+(use-package w3m
+  :preface
+  (defvar pkg/w3m/exists-p
+    (if (eq system-type 'windows-nt)
+        (my/locate-exec "w3m.exe" "w3m" t)
+      (my/locate-exec "w3m")))
+  :if (and (my/package-enabled-p 'w3m) pkg/w3m/exists-p)
+  :config
+  (setq w3m-home-page "http://www.baidu.com/"
+        w3m-command-arguments '("-cookie" "-F")
+        w3m-quick-start t
+        w3m-use-cookies t
+        w3m-use-favicon t
+        w3m-use-symbol t
+        w3m-default-display-inline-images t
+        w3m-show-graphic-icons-in-header-line nil
+        w3m-show-graphic-icons-in-mode-line nil)
+  (setq browse-url-browser-function 'w3m-browse-url)
+  (my/add-mode-hook "w3m" #'visual-line-mode))
+
+(use-package erc
+  :if (my/package-enabled-p 'erc)
+  :config
+  (bind-keys :map erc-mode-map
+             ;; ("<return>" . nil)
+             ("C-<return>" . erc-send-current-line))
+  (setq erc-autojoin-channels-alist nil ;; '(("freenode.net" "#emacs"))
+        erc-interpret-mirc-color t
+        erc-kill-buffer-on-part t))
+
+(use-package circe
+  :if (my/package-enabled-p 'circe)
+  :config
+  (setq circe-network-options '(("Freenode" ;; http://freenode.net/
+                                 :nick ""
+                                 :sasl-username ""
+                                 :sasl-password ""
+                                 :channels ("#emacs" "#c_lang_cn")))))
 
 
 (defun my-func-prog-mode-beautify ()

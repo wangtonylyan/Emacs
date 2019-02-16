@@ -108,8 +108,7 @@
   (helm-mode 1))
 
 (use-package ivy
-  :if (my/package-enabled-p 'ivy)
-  )
+  :if (my/package-enabled-p 'ivy))
 
 (use-package bm ;; TODO
   :commands (bm-next

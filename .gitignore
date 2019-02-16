@@ -36,3 +36,4 @@ GPATH
 /.virtualenvs
 /.venv
 /venv
+/transient

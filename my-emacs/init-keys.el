@@ -291,14 +291,15 @@
         (let ((map (copy-keymap lispy-mode-map-base)))
           (define-key map (kbd "]") 'lispy-forward)
           (define-key map (kbd "[") 'lispy-backward)
-          (define-key map (kbd "{") 'lispy-braces)
-          (define-key map (kbd "}") 'lispy-brackets)
+          (define-key map (kbd "{") 'lispy-brackets)
+          (define-key map (kbd "}") 'lispy-braces)
           (define-key map (kbd ")") 'lispy-right-nostring)
           (define-key map (kbd "\"") 'lispy-doublequote) ;; (lispy-quotes)
           (define-key map (kbd "C-d") 'lispy-forward-delete)
           (define-key map (kbd "<C-return>") 'lispy-open-line)
           map))
   (lispy-set-key-theme '(special lispy c-digits))
+  ;; TODO
   ;; (lispy-define-key lispy-mode-map "?"
   ;;                     (defhydra pkg/hydra/group/lispy-help
   ;;                       (lispy-mode-map "" :timeout pkg/hydra/timeout-sec :exit t)

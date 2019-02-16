@@ -94,13 +94,15 @@
   (setq doom-modeline-buffer-file-name-style 'relative-to-project
         doom-modeline-python-executable (or (my/locate-exec "python3")
                                             (my/locate-exec "python"))
+        doom-modeline-height 1 ;; lowest
+        doom-modeline-bar-width 1 ;; lowest
         doom-modeline-icon t
         doom-modeline-major-mode-icon t
         doom-modeline-major-mode-color-icon t
         doom-modeline-minor-modes t
         doom-modeline-enable-word-count t
         doom-modeline-persp-name t
-        doom-modeline-lsp t
+        doom-modeline-lsp (when (my/package-enabled-p 'lsp-mode) t)
         doom-modeline-github nil
         doom-modeline-github-interval (* 60 60)
         doom-modeline-version t
@@ -249,19 +251,23 @@
     (treemacs-fringe-indicator-mode 1))
   (when (and (my/locate-exec "git")
              (my/locate-exec "python3"))
-    (treemacs-git-mode 'deferred)))
-
-(use-package treemacs-icons-dired
-  :after (dired)
-  :if (my/package-enabled-p 'treemacs-icons-dired)
-  :config
-  (treemacs-icons-dired-mode))
-
-(use-package treemacs-projectile
-  :after (projectile)
-  :commands (treemacs-projectile)
-  :if (and (my/package-enabled-p 'projectile)
-           (my/package-enabled-p 'treemacs-projectile)))
+    (treemacs-git-mode 'deferred))
+  ;; the following two packages DO NOT define their own mode-map
+  ;; neither do they remap or provide any key-binding configurations
+  ;; instead, they both directly set 'treemacs-mode-map
+  ;; which results in conflict with current init-keys.el
+  ;; in which 'treemacs-mode-map is reset right after 'treemacs is loaded
+  ;; FIXME: load these packages in this 'treemacs :config part
+  ;; additionally, use :demand as an indication for this kind of workaround
+  (use-package treemacs-icons-dired
+    :demand t
+    :if (my/package-enabled-p 'treemacs-icons-dired)
+    :config
+    (treemacs-icons-dired-mode))
+  (use-package treemacs-projectile
+    :demand t
+    :if (and (my/package-enabled-p 'projectile)
+             (my/package-enabled-p 'treemacs-projectile))))
 
 (use-package neotree
   :commands (neotree-toggle)
