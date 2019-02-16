@@ -105,7 +105,22 @@
         )
   :config
   (helm-autoresize-mode 1)
-  (helm-mode 1))
+  (helm-mode 1)
+  (use-package helm-grep
+    :after (grep)
+    :config
+    (mapc
+     (lambda (dir)
+       (add-to-list 'grep-find-ignored-directories dir)
+       (add-to-list 'helm-grep-ignored-directories dir))
+     '())
+    (mapc
+     (lambda (file)
+       (add-to-list 'grep-find-ignored-files file)
+       (add-to-list 'helm-grep-ignored-files file))
+     '("*.zip" "*.rar"
+       "*.bmp" "*.jpg" "*.jpeg" "*.png" "*.gif" "*.svg"
+       "GPATH" "GRTAGS" "GTAGS"))))
 
 (use-package ivy
   :if (my/package-enabled-p 'ivy))

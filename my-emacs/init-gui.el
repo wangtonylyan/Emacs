@@ -212,7 +212,7 @@
   :init
   (setq treemacs-python-executable (or (my/locate-exec "python3")
                                        (my/locate-exec "python"))
-        treemacs-persist-file (my/set-user-emacs-file ".cache/treemacs-persist")
+        treemacs-persist-file (my/set-user-emacs-file ".treemacs/treemacs-persist")
         treemacs-display-in-side-window t
         treemacs-is-never-other-window t
         treemacs-no-delete-other-windows t
@@ -252,22 +252,24 @@
   (when (and (my/locate-exec "git")
              (my/locate-exec "python3"))
     (treemacs-git-mode 'deferred))
-  ;; the following two packages DO NOT define their own mode-map
-  ;; neither do they remap or provide any key-binding configurations
-  ;; instead, they both directly set 'treemacs-mode-map
-  ;; which results in conflict with current init-keys.el
+  ;; the following package DOES NOT define its own mode-map
+  ;; neither does it remap or provide any key-binding configurations
+  ;; instead, it directly sets the 'treemacs-mode-map
+  ;; which results in the conflict with current init-keys.el
   ;; in which 'treemacs-mode-map is reset right after 'treemacs is loaded
-  ;; FIXME: load these packages in this 'treemacs :config part
+  ;; FIXME: load this packages in this 'treemacs :config part
   ;; additionally, use :demand as an indication for this kind of workaround
-  (use-package treemacs-icons-dired
-    :demand t
-    :if (my/package-enabled-p 'treemacs-icons-dired)
-    :config
-    (treemacs-icons-dired-mode))
   (use-package treemacs-projectile
     :demand t
     :if (and (my/package-enabled-p 'projectile)
              (my/package-enabled-p 'treemacs-projectile))))
+
+(use-package treemacs-icons-dired
+  :after (dired)
+  :if (and (my/package-enabled-p 'treemacs)
+           (my/package-enabled-p 'treemacs-icons-dired))
+  :config
+  (treemacs-icons-dired-mode))
 
 (use-package neotree
   :commands (neotree-toggle)

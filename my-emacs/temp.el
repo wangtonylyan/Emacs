@@ -11,6 +11,7 @@
              mode2)
   :ensure t
   ;; 1. list dependent packages not shown in (package-list-packages)
+  ;; 2. this keyword DOES NOT introduce any autoload
   :requires (package1
              package2)
   :after (package1

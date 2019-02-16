@@ -175,7 +175,7 @@
             semantic-idle-work-update-headers-flag t
             semantic-idle-work-parse-neighboring-files-flag t)
       (setq semanticdb-default-save-directory ;; 作为缺省路径，仅主动生成的数据库的文件才会保存于此
-            (my/set-user-emacs-file "semanticdb/")
+            (my/set-user-emacs-file ".semanticdb/")
             ;; semanticdb-default-file-name ""
             semanticdb-persistent-path '(always)
             ;; 可以预先主动地对某些目录生成数据库，以便今后复用

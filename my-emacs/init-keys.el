@@ -393,7 +393,8 @@ Number of marked: %(pkg/dired/count-marked)
     ("f"         treemacs-RET-action                 "open           "                   )
     ("C-M-n"     treemacs-next-line-other-window     "peek next line "                   )
     ("C-M-p"     treemacs-previous-line-other-window "peek prev line "                   )
-    ("Y"         treemacs-rename                     "move           " :column "action  ")
+    ("y"         treemacs-copy-file                  "copy           " :column "action  ")
+    ("Y"         treemacs-rename                     "move           "                   )
     ("D"         treemacs-delete                     "delete         "                   )
     ("+"         treemacs-create-file                "create file    "                   )
     ("="         treemacs-create-dir                 "create dir     "                   )
@@ -521,16 +522,24 @@ PROJECT: %(projectile-project-root)
 (use-package helm-projectile
   :defer t
   :config
-  (bind-keys :map pkg/hydra/group/project/keymap
-             ([remap projectile-switch-project]        . helm-projectile-switch-project)
-             ([remap projectile-switch-to-buffer]      . helm-projectile-switch-to-buffer)
-             ([remap projectile-find-file]             . helm-projectile-find-file)
-             ([remap projectile-recentf]               . helm-projectile-recentf)
-             ([remap projectile-find-dir]              . helm-projectile-find-dir)
-             ([remap projectile-grep]                  . helm-projectile-grep)
-             ([remap projectile-ag]                    . helm-projectile-ag)
-             ([remap projectile-ack]                   . helm-projectile-ack)
-             ([remap projectile-browse-dirty-projects] . helm-projectile-browse-dirty-projects)))
+  (mapc
+   (lambda (cmd)
+     (let* ((cmd (symbol-name cmd))
+            (group (symbol-name 'pkg/hydra/group/project))
+            (keymap (concat group "/keymap"))
+            (hydra (concat group "/" cmd "-and-exit"))
+            (helm (concat "helm-" cmd)))
+       (define-key (symbol-value (intern keymap))
+         `[remap ,(intern hydra)] (intern helm))))
+   '(projectile-switch-project
+     projectile-switch-to-buffer
+     projectile-find-file
+     projectile-recentf
+     projectile-find-dir
+     projectile-grep
+     projectile-ag
+     projectile-ack
+     projectile-browse-dirty-projects)))
 
 (defhydra pkg/hydra/group/flymake
   (:timeout pkg/hydra/timeout-sec :exit t)
