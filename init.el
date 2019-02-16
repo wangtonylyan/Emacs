@@ -280,12 +280,12 @@
           ;; [gui]
           dashboard
           nyan-mode
-          spaceline ;; doom-modeline, spaceline-all-the-icons, smart-mode-line
+          doom-modeline ;; spaceline, spaceline-all-the-icons, smart-mode-line
           doom-themes ;; solarized-theme, zenburn-theme
           ;; [window]
           tabbar ;; awesome-tab
           treemacs ;; neotree, sr-speedbar, ecb
-          treemacs-icons-dired
+          ;; treemacs-icons-dired
           treemacs-projectile
           buffer-move
           ;; dimmer
@@ -604,49 +604,6 @@
         "init-gui"
         "init-keys"))
 
-;; =============================================================================
-
-
-(use-package w3m
-  :preface
-  (defvar pkg/w3m/exists-p
-    (if (eq system-type 'windows-nt)
-        (my/locate-exec "w3m.exe" "w3m" t)
-      (my/locate-exec "w3m")))
-  :if (and (my/package-enabled-p 'w3m) pkg/w3m/exists-p)
-  :config
-  (setq w3m-home-page "http://www.baidu.com/"
-        w3m-command-arguments '("-cookie" "-F")
-        w3m-quick-start t
-        w3m-use-cookies t
-        w3m-use-favicon t
-        w3m-use-symbol t
-        w3m-default-display-inline-images t
-        w3m-show-graphic-icons-in-header-line nil
-        w3m-show-graphic-icons-in-mode-line nil)
-  (setq browse-url-browser-function 'w3m-browse-url)
-  (my/add-mode-hook "w3m" #'visual-line-mode))
-
-(use-package erc
-  :if (my/package-enabled-p 'erc)
-  :config
-  (bind-keys :map erc-mode-map
-             ;; ("<return>" . nil)
-             ("C-<return>" . erc-send-current-line))
-  (setq erc-autojoin-channels-alist nil ;; '(("freenode.net" "#emacs"))
-        erc-interpret-mirc-color t
-        erc-kill-buffer-on-part t))
-
-(use-package circe
-  :if (my/package-enabled-p 'circe)
-  :config
-  (setq circe-network-options '(("Freenode" ;; http://freenode.net/
-                                 :nick ""
-                                 :sasl-username ""
-                                 :sasl-password ""
-                                 :channels ("#emacs" "#c_lang_cn")))))
-
-;; =============================================================================
 (message "emacs init time = %s" (emacs-init-time))
 
 

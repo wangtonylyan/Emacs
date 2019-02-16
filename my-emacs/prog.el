@@ -13,12 +13,12 @@
     (setq prettify-symbols-unprettify-at-point 'right-edge)
     (my/prog/add-start-hook #'pkg/prog-mode/start)
     :config
-    (which-function-mode 1) ;; 在mode-line显示当前光标所在的函数名
-    (add-to-list 'prettify-symbols-alist '("lambda" . 955)) ;; lambda = λ
-    ))
+    ;; 在mode-line显示当前光标所在的函数名
+    (which-function-mode 1)
+    ;; show "lambda" as "λ"
+    (add-to-list 'prettify-symbols-alist '("lambda" . 955))))
 
-(defun pkg/prog-mode/start ()
-  )
+(defun pkg/prog-mode/start ())
 
 
 (defun pkg/yasnippet/init ()
@@ -324,8 +324,7 @@
           ;; 启用以下配置项会使得某些常用快捷键不再绑定于上述前缀中
           ;; 例如将(helm-gtags-dwim)绑定于"M-."
           helm-gtags-suggested-key-mapping nil)
-    (pkg/gtags/add-hook #'pkg/gtags/start))
-  )
+    (pkg/gtags/add-hook #'pkg/gtags/start)))
 
 (defun pkg/gtags/start ()
   (when (my/package-enabled-p 'ggtags)

@@ -222,7 +222,7 @@
         lispy-completion-method pkg/lispy/show-backend
         lispy-occur-backend pkg/lispy/show-backend)
   :config
-  (use-package semantic ;; FIXME: for a semantic bug
+  (use-package semantic ;; FIXME: workaround for a semantic bug
     :defer t
     :config
     (advice-add 'semantic-idle-scheduler-function :around #'ignore)))
