@@ -399,7 +399,7 @@
   (my/add-mode-hook "prog" 'my/prog/start))
 
 (defun my/prog/start ()
-  (linum-mode 1)
+  ;; (linum-mode 1)
   (my/prog/run-start-hook))
 
 (add-hook 'after-init-hook 'my/prog/init t)

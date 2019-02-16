@@ -245,7 +245,7 @@
   (setq package-archives
         (let ((mirror
                ;; 'origin
-               'china ;; 'tsinghua
+	           'tsinghua ;; 'china
                ))
           (cond
            ((eq mirror 'origin)
@@ -421,17 +421,15 @@
     (diminish 'abbrev-mode)
     (diminish 'hi-lock-mode)))
 
-(use-package xref
-  :ensure t
-  :commands (xref-find-definitions
-             xref-pop-marker-stack)
-  :config ;; FIXME: can't use :init for 'xref-after-jump-hook
-  (add-hook 'xref-after-jump-hook
-            (lambda () (read-only-mode 1)) t))
+(use-package transient
+  :defer t
+  :init
+  (let ((dir (my/set-user-emacs-file ".transient/")))
+    (setq transient-levels-file (concat dir "levels.el")
+          transient-values-file (concat dir "values.el")
+          transient-history-file (concat dir "history.el"))))
 
-;; =============================================================================
-;; 配置杂项
-;; -----------------------------------------------------------------------------
+
 (setq user-full-name "TonyLYan"
       user-mail-address "wangtonylyan@outlook.com"
       inhibit-startup-message 1 ;; 取消启动界面
@@ -444,27 +442,54 @@
       debug-on-signal nil
       debug-on-quit nil
       select-enable-clipboard t
-      auto-revert-use-notify t
-      auto-revert-interval 1
-      auto-revert-verbose nil
-      auto-revert-stop-on-user-input t
       delete-by-moving-to-trash t
-      make-backup-files t ;; 启用自动备份
-      version-control t ;; 启用版本控制，即可以备份多次
-      kept-old-versions 1 ;; 备份最旧的版本个数
-      kept-new-versions 1 ;; 备份最新的版本个数
-      delete-old-versions t
-      dired-kept-versions 2
-      backup-directory-alist '(("." . "~/.emacs.d.backups"))
-      backup-by-copying t)
+      auto-save-list-file-prefix (my/set-user-emacs-file
+                                  ".emacs.auto-save/.saves-"))
 (defalias 'yes-or-no-p 'y-or-n-p) ;; 以y/n替换yes/no
 (tool-bar-mode -1)
 (menu-bar-mode -1)
-;; 该模式用于监控磁盘上的文件是否被外部程序修改，并提示用户或自动重新加载该文件
-(global-auto-revert-mode 1)
-(recentf-mode 1)
 (auto-image-file-mode 1) ;; 允许打开图片
 (auto-compression-mode 1) ;; 允许查看和写入压缩包
+
+(use-package files
+  :init
+  (setq make-backup-files t
+        backup-by-copying t
+        backup-directory-alist `(("." . ,(my/set-user-emacs-file
+                                          ".emacs.backup/")))
+        version-control t
+        kept-old-versions 1
+        kept-new-versions 1
+        delete-old-versions t
+        dired-kept-versions 2
+        require-final-newline t)
+  :config
+  (add-hook 'before-save-hook
+            (lambda ()
+              (delete-trailing-whitespace) ;; 删除每行末尾的空格
+              (when (derived-mode-p 'lisp-mode 'emacs-lisp-mode)
+                (indent-region (point-min) (point-max)))
+              ;; 每次保存buffer时都将删除现有的改动高亮
+              ;; 替换成另外两个hook就会无效，原因未知：
+              ;; write-content-functions或write-file-functions
+              (highlight-changes-remove-highlight
+               (point-min) (point-max))) t)
+  (add-hook 'find-file-hook (lambda () (read-only-mode 1)) t))
+
+(use-package recentf
+  :init
+  (setq recentf-save-file (my/set-user-emacs-file ".emacs.recentf"))
+  :config
+  (recentf-mode 1))
+
+(use-package autorevert
+  :init
+  (setq auto-revert-use-notify t
+        auto-revert-interval 1
+        auto-revert-verbose nil
+        auto-revert-stop-on-user-input t)
+  :config
+  (global-auto-revert-mode 1))
 
 ;; -----------------------------------------------------------------------------
 ;; 若打开的中文文件中仍然存在乱码，则尝试执行(revert-buffer-with-coding-system 'gb18030)
@@ -515,7 +540,7 @@
 ;; -----------------------------------------------------------------------------
 (global-font-lock-mode 1) ;; 语法高亮
 ;; (add-hook 'xxx-mode-hook #'turn-on-font-lock) ;; (font-lock-mode 1)
-;; (global-linum-mode 1) ;; 左侧行号，推荐仅将其显示于主要的编辑文档中
+(global-linum-mode -1)
 ;; (add-hook 'xxx-mode-hook #'linum-mode)
 (global-hi-lock-mode 1)
 (global-hl-line-mode 1)
@@ -556,7 +581,6 @@
       word-wrap nil
       line-move-visual t
       track-eol t
-      require-final-newline t
       show-paren-style 'parentheses
       blink-matching-paren t
       blink-matching-paren-on-screen t
@@ -573,16 +597,6 @@
 
 (put 'downcase-region 'disabled nil) ;; 去除每次执行此命令时的提示，强制执行
 (put 'upcase-region 'disabled nil)
-
-(add-hook 'before-save-hook
-          (lambda ()
-            (delete-trailing-whitespace) ;; 删除每行末尾的空格
-            (when (derived-mode-p 'lisp-mode 'emacs-lisp-mode)
-              (indent-region (point-min) (point-max)))
-            ;; 每次保存buffer时都将删除现有的改动高亮
-            ;; 替换成另外两个hook就会无效，原因未知：write-content-functions或write-file-functions
-            (highlight-changes-remove-highlight (point-min) (point-max)))
-          t)
 
 ;; File Extension
 ;; (setq auto-mode-alist (cons '("\\.emacs\\'" . emacs-lisp-mode) auto-mode-alist))

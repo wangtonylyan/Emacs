@@ -5,13 +5,15 @@
 !/backup
 !/site-lisp/*.el
 
+.*
+/.*
+
 *.elc
 *.eld
 *projectile*
 *recentf*
-.history
 *ido.last*
-.*desktop*
+
 ac-comphist.dat
 bookmarks
 ede-projects.el
@@ -23,17 +25,8 @@ GTAGS
 GRTAGS
 GPATH
 
-/auto-save-list
 /elpa
 /eshell
-/semanticdb
 /site-lisp
 /bm-repository
-/.cache
-/.idea
-/.private
-/.python-environments
-/.virtualenvs
-/.venv
 /venv
-/transient
