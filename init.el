@@ -491,6 +491,37 @@
   :config
   (global-auto-revert-mode 1))
 
+(use-package grep
+  :defer t
+  :config
+  (mapc (lambda (dir)
+          (add-to-list 'grep-find-ignored-directories dir))
+        '(".semanticdb"))
+  (mapc (lambda (file)
+          (add-to-list 'grep-find-ignored-files file))
+        '("*.zip" "*.rar"
+          "*.bmp" "*.jpg" "*.jpeg" "*.png" "*.gif" "*.svg"
+          "TAGS" "GTAGS" "GRTAGS" "GPATH"
+          ".*")))
+
+(use-package desktop
+  :hook (after-init . pkg/desktop/start)
+  :preface
+  (defun pkg/desktop/start ()
+    (desktop-save-mode 1))
+  :init
+  (setq desktop-save 'ask-if-exists
+        desktop-dirname (my/set-user-emacs-file ".emacs.desktop/")
+        desktop-path (list (my/set-user-emacs-file ".emacs.desktop/"))
+        desktop-base-file-name "desktop"
+        desktop-base-lock-name "desktop.lock"
+        desktop-restore-frames t
+        desktop-restore-reuses-frames t
+        desktop-restore-in-current-display t
+        desktop-restore-forces-onscreen t
+        desktop-auto-save-timeout (* 60 10)))
+
+
 ;; -----------------------------------------------------------------------------
 ;; 若打开的中文文件中仍然存在乱码，则尝试执行(revert-buffer-with-coding-system 'gb18030)
 ;; 字符集和编码的名称可查询：'language-info-alist
@@ -540,7 +571,7 @@
 ;; -----------------------------------------------------------------------------
 (global-font-lock-mode 1) ;; 语法高亮
 ;; (add-hook 'xxx-mode-hook #'turn-on-font-lock) ;; (font-lock-mode 1)
-(global-linum-mode -1)
+(global-linum-mode -1) ;; (setq linum-format "%5d")
 ;; (add-hook 'xxx-mode-hook #'linum-mode)
 (global-hi-lock-mode 1)
 (global-hl-line-mode 1)
