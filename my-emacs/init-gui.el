@@ -1,23 +1,6 @@
 ;; -*- coding: utf-8 -*-
 
-(defun my/fullscreen ()
-  (when (fboundp 'x-send-client-message)
-    ((lambda ()
-       ;; 全屏
-       ;; (interactive)
-       ;; (x-send-client-message nil 0 nil "_NET_WM_STATE" 32 '(2 "_NET_WM_STATE_FULLSCREEN" 0))
-       ;; 或
-       ;; (set-frame-parameter nil 'fullscreen 'fullboth)
-       ;; 窗口最大化需要分别经过水平和垂直两个方向的最大化
-       (interactive)
-       (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
-                              '(1 "_NET_WM_STATE_MAXIMIZED_HORZ" 0))
-       (interactive)
-       (x-send-client-message nil 0 nil "_NET_WM_STATE" 32
-                              '(1 "_NET_WM_STATE_MAXIMIZED_VERT" 0))))))
-
-(add-hook 'after-init-hook 'my/fullscreen t)
-
+(add-hook 'after-init-hook 'toggle-frame-maximized t)
 
 (use-package dashboard
   :diminish (page-break-lines-mode)

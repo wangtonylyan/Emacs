@@ -94,6 +94,13 @@
  ;; , :: CEDET/Semantic
  )
 
+(use-package kmacro
+  :defer t
+  :config
+  (bind-keys ("C-x C-k" . ;; (kmacro-keymap)
+              (lambda () (interactive)
+                (kill-buffer)))))
+
 (use-package package
   :defer t
   :config
