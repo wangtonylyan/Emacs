@@ -88,6 +88,7 @@ source $ZSH/oh-my-zsh.sh
 
 alias ll='ls -l'
 alias la='ls -al'
+alias cl='clear'
 
 # 在命令行直接输入以下后缀名的文件名，会自动解压
 alias -s gz='tar -xzvf'
