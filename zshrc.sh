@@ -2,19 +2,10 @@
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-  export ZSH="/home/tony/.oh-my-zsh"
+export ZSH="/home/tony/.oh-my-zsh"
 
-# Set name of the theme to load --- if set to "random", it will
-# load a random theme each time oh-my-zsh is loaded, in which case,
-# to know which specific one was loaded, run: echo $RANDOM_THEME
-# See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
-ZSH_THEME="agnoster"
-
-# Set list of themes to pick from when loading at random
-# Setting this variable when ZSH_THEME=random will cause zsh to load
-# a theme from this variable instead of looking in ~/.oh-my-zsh/themes/
-# If set to an empty array, this variable will have no effect.
-# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
+# ZSH_THEME="agnoster"
+ZSH_THEME="powerlevel9k/powerlevel9k"
 
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
@@ -68,10 +59,9 @@ colored-man-pages
 )
 
 source $ZSH/oh-my-zsh.sh
-source /usr/share/powerlevel9k/powerlevel9k.zsh-theme
-source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
-# User configuration
+
+#### User configuration
 
 # export MANPATH="/usr/local/man:$MANPATH"
 
@@ -95,7 +85,19 @@ source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 # plugins, and themes. Aliases can be placed here, though oh-my-zsh
 # users are encouraged to define aliases within the ZSH_CUSTOM folder.
 # For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
+
+alias ll='ls -l'
+alias la='ls -al'
+
+# 在命令行直接输入以下后缀名的文件名，会自动解压
+alias -s gz='tar -xzvf'
+alias -s tgz='tar -xzvf'
+alias -s zip='unzip'
+alias -s bz2='tar -xjvf'
+
+POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(user root_indicator dir)
+POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status background_jobs vcs time)
+POWERLEVEL9K_PROMPT_ADD_NEWLINE=true
+
+
+source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
