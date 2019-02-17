@@ -1,6 +1,25 @@
 ;; -*- coding: utf-8 -*-
 
-(use-package eshell
+(use-package shell ;; inferior shell
+  :commands (shell))
+
+(use-package term ;; terminal emulator
+  :commands (term ansi-term)
+  :preface
+  (defun pkg/term/toggle-mode ()
+    (interactive)
+    (cond ((term-in-char-mode) (term-line-mode))
+          ((term-in-line-mode) (term-char-mode))))
+  :init
+  (setq explicit-shell-file-name shell-file-name)
+  :config
+  (bind-keys :map term-raw-map
+             ("C-q" . pkg/term/toggle-mode)
+             :map term-mode-map
+             ("C-q" . pkg/term/toggle-mode)))
+
+(use-package eshell ;; emacs shell
+  :commands (eshell)
   :bind (("C-c e" . pkg/eshell/startup))
   :preface
   (defun pkg/eshell/startup ()

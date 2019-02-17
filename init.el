@@ -181,7 +181,10 @@
   (mapc (lambda (dir)
           (let ((path (my/path-exists-p dir)))
             (when path (add-to-list 'exec-path path))))
-        '("~/.local/bin"))))
+        '("~/.local/bin"))
+  (let ((path (my/locate-exec "zsh")))
+    (when path
+      (setq shell-file-name path)))))
 
 ;; (setq user-init-file "~/.emacs.d/init.el")
 ;; (load user-init-file)
@@ -245,7 +248,7 @@
   (setq package-archives
         (let ((mirror
                ;; 'origin
-	           'tsinghua ;; 'china
+	           'china ;; 'tsinghua
                ))
           (cond
            ((eq mirror 'origin)
