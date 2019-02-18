@@ -195,7 +195,7 @@
               user-emacs-directory user-emacs-directory)
 
 (defconst my/self-emacs-directory
-  (my/locate 'exist user-emacs-directory "my-emacs/" t))
+  (my/locate 'exist user-emacs-directory "my.emacs/" t))
 
 (defun my/set-user-emacs-file (file &optional self)
   (let ((dir (if self my/self-emacs-directory
@@ -467,17 +467,8 @@
         dired-kept-versions 2
         require-final-newline t)
   :config
-  (add-hook 'before-save-hook
-            (lambda ()
-              (delete-trailing-whitespace) ;; 删除每行末尾的空格
-              (when (derived-mode-p 'lisp-mode 'emacs-lisp-mode)
-                (indent-region (point-min) (point-max)))
-              ;; 每次保存buffer时都将删除现有的改动高亮
-              ;; 替换成另外两个hook就会无效，原因未知：
-              ;; write-content-functions或write-file-functions
-              (highlight-changes-remove-highlight
-               (point-min) (point-max))) t)
-  (add-hook 'find-file-hook (lambda () (read-only-mode 1)) t))
+  (add-hook 'find-file-hook (lambda () (read-only-mode 1)) t)
+  (add-hook 'before-save-hook 'my/reformat-current-file t))
 
 (use-package recentf
   :init
@@ -653,6 +644,44 @@
         "init-keys"))
 
 (message "emacs init time = %s" (emacs-init-time))
+
+
+(defun my/reformat-current-file ()
+  (interactive)
+  ((lambda (func)
+     (let ((state buffer-read-only))
+       (when state (read-only-mode -1))
+       (delete-trailing-whitespace) ;; 删除每行末尾的空格
+       (funcall func)
+       ;; 每次保存buffer时都将删除现有的改动高亮
+       ;; 替换成另外两个hook就会无效，原因未知：
+       ;; write-content-functions或write-file-functions
+       (highlight-changes-remove-highlight (point-min) (point-max))
+       (when state (read-only-mode 1))))
+   (lambda ()
+     (let* ((file (my/locate-file buffer-file-name))
+            (mode (when file (assoc-default file auto-mode-alist 'string-match))))
+       (cond
+        ((and (provided-mode-derived-p mode 'c-mode)
+              (derived-mode-p 'c-mode))
+         (my/reformat-current-file/c))
+        ((and (provided-mode-derived-p mode 'lisp-mode 'emacs-lisp-mode)
+              (derived-mode-p 'lisp-mode 'emacs-lisp-mode))
+         (my/reformat-current-file/lisp))
+        (t nil))))))
+
+(defun my/reformat-current-file/c ()
+  (interactive)
+  (let ((cfg (my/set-user-emacs-file "my.config/uncrustify.c.cfg"))
+        (cmd (my/locate-exec "uncrustify" "/usr/local/bin/")))
+    (when (and cfg cmd)
+      (shell-command-on-region (point-min) (point-max)
+                               (concat cmd " -l C -c " cfg " --no-backup")
+                               t t "*Shell Error Output*"))))
+
+(defun my/reformat-current-file/lisp ()
+  (interactive)
+  (indent-region (point-min) (point-max)))
 
 
 (provide 'my/init)
