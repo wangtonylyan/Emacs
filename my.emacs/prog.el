@@ -64,17 +64,18 @@
                              ,(when (and (my/package-enabled-p 'company-jedi)
                                          (require 'company-jedi nil t))
                                 'company-jedi)
-                             (company-semantic ;; Semantic
-                              ;; company-clang ;; Clang
-                              company-gtags
-                              company-etags)
-                             company-cmake ;; CMake
+                             ;; company-semantic
+                             ;; company-clang
+                             company-cmake
                              ;; company-eclim ;; Eclipse
-                             ;; company-xcode ;; Xcode
-                             ;; company-css ;; CSS
-                             (company-dabbrev-code company-keywords)
+                             ;; company-xcode
+                             ;; company-css
+                             (company-dabbrev-code
+                              company-gtags
+                              company-etags
+                              company-keywords)
+                             company-capf ;; completion-at-point-functions
                              company-files
-                             ;; company-capf ;; completion-at-point-functions
                              ;; company-nxml
                              ;; company-bbdb ;; Big Brother Database, an address book
                              ;; company-oddmuse
