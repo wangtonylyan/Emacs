@@ -13,66 +13,75 @@
     (my/prog-cc/add-start-hook #'pkg/cc-mode/start)
     :config
     (c-add-style "my/cc-style"
-                 '("stroustrup"
+                 '("bsd"
                    (c-basic-offset . 4)
-                   (c-offsets-alist . ((substatement-open . 0)))
-                   ;; (c-indent-comment-alist . )
-                   ;; (c-indent-comments-syntactically-p . )
-                   ;; (c-comment-only-line-offset . )
-                   ;; (c-special-indent-hook . ())
-                   ;; (c-label-minimum-indentation . )
                    (c-tab-always-indent . t)
                    (c-echo-syntactic-information-p . nil)
-                   (c-report-syntactic-errors . t)
+                   (c-report-syntactic-errors . nil)
+                   (c-ignore-auto-fill . (string cpp code)) ;; 设置在哪些地方禁用auto-fill功能，目前仅在注释中启用
+                   ;; (c-special-indent-hook . ())
+                   ;; (c-label-minimum-indentation . )
+                   (c-indent-comments-syntactically-p . t)
+                   ;; (c-comment-only-line-offset . )
                    (c-comment-prefix-regexp . ((c-mode . "//+\\|\\**")
                                                (c++-mode . "//+\\|\\**")))
                    (c-block-comment-prefix . "*") ;; 设置block comment在换行时自动添加的前缀
-                   (c-ignore-auto-fill . (string cpp code)) ;; 设置在哪些地方禁用auto-fill功能，目前仅在注释中启用
+                   (c-offsets-alist . ((case-label . +)))
+                   (c-indent-comment-alist . ((empty-line       . (column . nil))
+                                              (anchored-comment . (column . nil))
+                                              (end-block        . (space . 1))
+                                              (cpp-end-block    . (space . 1))
+                                              (other            . (align . (space . 1)))))
                    ;; 设置大括号的前后是否应换行，即"{"将位于行头或行尾或单行或任意位置
                    ;; 不在以下alist中列出的syntactic symbol，将执行默认行为：(before after)
-                   (c-hanging-braces-alist . ((defun-open)
-                                              (defun-close)
-                                              (class-open)
-                                              (class-close)
-                                              (inline-open)
-                                              (inline-close)
-                                              (block-open)
-                                              (block-close           . c-snug-do-while)
+                   (c-hanging-braces-alist . ((defun-open            . (before))
+                                              (defun-close           . (before))
+                                              (class-open            . (before))
+                                              (class-close           . (before))
+                                              (inline-open           . (before))
+                                              (inline-close          . (before))
+                                              (block-open            . (before))
+                                              (block-close           . c-snug-do-while) ;;
                                               (statement-cont)
-                                              (substatement-open     . after)
-                                              (statement-case-open   . (before after))
+                                              (substatement-open     . (before))
+                                              (statement-case-open   . (before after)) ;;
                                               (brace-list-open)
                                               (brace-list-close)
                                               (brace-list-intro)
                                               (brace-entry-open)
-                                              (extern-lang-open      . after)
-                                              (extern-lang-close     . before)
-                                              (namespace-open        . after)
-                                              (namespace-close       . before)
-                                              (module-open           . after)
-                                              (module-close          . before)
-                                              (composition-open      . after)
-                                              (composition-close     . before)
-                                              (inexpr-class-open     . after)
-                                              (inexpr-class-close    . before)
+                                              (extern-lang-open      . (before))
+                                              (extern-lang-close     . (before))
+                                              (namespace-open        . (before))
+                                              (namespace-close       . (before))
+                                              (module-open           . (before))
+                                              (module-close          . (before))
+                                              (composition-open      . (before))
+                                              (composition-close     . (before))
+                                              (inexpr-class-open     . (before))
+                                              (inexpr-class-close    . (before))
                                               (arglist-cont-nonempty)))
                    ;; 设置冒号的前后是否应换行
                    ;; 不在以下alist中列出的syntactic symbol，将执行默认行为：()
-                   (c-hanging-colons-alist . ((case-label)
-                                              (label        . after)
-                                              (access-label . after)))
+                   (c-hanging-colons-alist . ((case-label        . (after))
+                                              (label             . (after))
+                                              (access-label      . (after))
+                                              (member-init-intro . (after))
+                                              (inher-intro       . (after))))
                    ;; 设置分号和逗号的前后是否应换行
-                   (c-hanging-semi&comma-criteria . (c-semi&comma-no-newlines-before-nonblanks
-                                                     c-semi&comma-inside-parenlist
+                   (c-hanging-semi&comma-criteria . (c-semi&comma-inside-parenlist
+                                                     c-semi&comma-no-newlines-before-nonblanks
                                                      c-semi&comma-no-newlines-for-oneline-inliners))
                    ;; 清理whitespace，并作为上述hanging的补充(在其后生效)
-                   (c-cleanup-list . (brace-else-brace
-                                      brace-elseif-brace
-                                      brace-catch-brace
+                   (c-cleanup-list . (;; brace-else-brace
+                                      ;; brace-elseif-brace
+                                      ;; brace-catch-brace
                                       ;; empty-defun-braces
+                                      ;; one-liner-defun
                                       defun-close-semi
                                       list-close-comma
                                       scope-operator
+                                      ;; space-before-funcall
+                                      ;; compact-empty-funcall
                                       comment-close-slash))
                    (c-backslash-column . 48)
                    (c-backslash-max-column . 72)
