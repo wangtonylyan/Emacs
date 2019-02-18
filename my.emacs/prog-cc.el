@@ -451,9 +451,7 @@
 (defun pkg/gud/init ()
   (use-package gud
     :init
-    (my/prog-cc/add-start-hook #'pkg/gud/start)
-    )
-  )
+    (my/prog-cc/add-start-hook #'pkg/gud/start)))
 
 (defun pkg/gud/start ()
   )

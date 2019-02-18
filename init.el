@@ -623,9 +623,6 @@
 (put 'downcase-region 'disabled nil) ;; 去除每次执行此命令时的提示，强制执行
 (put 'upcase-region 'disabled nil)
 
-;; File Extension
-;; (setq auto-mode-alist (cons '("\\.emacs\\'" . emacs-lisp-mode) auto-mode-alist))
-
 ;; 加载其他配置文件
 (mapc (lambda (file)
         (my/load-file (my/set-user-emacs-file file t)))
@@ -648,27 +645,36 @@
 
 (defun my/reformat-current-file ()
   (interactive)
-  ((lambda (func)
-     (let ((state buffer-read-only))
-       (when state (read-only-mode -1))
-       (delete-trailing-whitespace) ;; 删除每行末尾的空格
-       (funcall func)
-       ;; 每次保存buffer时都将删除现有的改动高亮
-       ;; 替换成另外两个hook就会无效，原因未知：
-       ;; write-content-functions或write-file-functions
-       (highlight-changes-remove-highlight (point-min) (point-max))
-       (when state (read-only-mode 1))))
-   (lambda ()
-     (let* ((file (my/locate-file buffer-file-name))
-            (mode (when file (assoc-default file auto-mode-alist 'string-match))))
-       (cond
-        ((and (provided-mode-derived-p mode 'c-mode)
-              (derived-mode-p 'c-mode))
-         (my/reformat-current-file/c))
-        ((and (provided-mode-derived-p mode 'lisp-mode 'emacs-lisp-mode)
-              (derived-mode-p 'lisp-mode 'emacs-lisp-mode))
-         (my/reformat-current-file/lisp))
-        (t nil))))))
+  (defun my/save-point (func)
+    (let ((line (line-number-at-pos)))
+      (funcall func)
+      (goto-char (point-min))
+      (forward-line (if (>= line 1) (- line 1) line))
+      (recenter-top-bottom)))
+  (defun my/reformat-wrapper (func)
+    (let ((state buffer-read-only))
+      (when state (read-only-mode -1))
+      (delete-trailing-whitespace) ;; 删除每行末尾的空格
+      (when (< (- (point-max) (point-min)) (* 1024 1024))
+        (funcall func))
+      ;; 每次保存buffer时都将删除现有的改动高亮
+      ;; 替换成另外两个hook就会无效，原因未知：
+      ;; write-content-functions或write-file-functions
+      (highlight-changes-remove-highlight (point-min) (point-max))
+      (when state (read-only-mode 1))))
+  (defun my/reformat ()
+    (let* ((file (my/locate-file buffer-file-name))
+           (mode (when file (assoc-default file auto-mode-alist
+                                           'string-match))))
+      (cond
+       ((and (provided-mode-derived-p mode 'c-mode)
+             (derived-mode-p 'c-mode))
+        (my/reformat-current-file/c))
+       ((and (provided-mode-derived-p mode 'lisp-mode 'emacs-lisp-mode)
+             (derived-mode-p 'lisp-mode 'emacs-lisp-mode))
+        (my/reformat-current-file/lisp))
+       (t nil))))
+  (my/save-point (lambda () (my/reformat-wrapper 'my/reformat))))
 
 (defun my/reformat-current-file/c ()
   (interactive)
