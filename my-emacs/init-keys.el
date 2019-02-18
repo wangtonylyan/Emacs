@@ -274,9 +274,6 @@
           (lispy-define-key map ":" 'lispy-ace-symbol
             :override '(cond ((looking-at lispy-outline)
                               (lispy-meta-return))))
-          (lispy-define-key map "C-:" 'lispy-teleport
-            :override '(cond ((looking-at lispy-outline)
-                              (end-of-line))))
           (lispy-define-key map "t" 'lispy-goto-local)
           (lispy-define-key map "T" 'lispy-goto-symbol)
           ;; edit
@@ -298,8 +295,8 @@
         (let ((map (copy-keymap lispy-mode-map-base)))
           (define-key map (kbd "]") 'lispy-forward)
           (define-key map (kbd "[") 'lispy-backward)
-          (define-key map (kbd "{") 'lispy-brackets)
-          (define-key map (kbd "}") 'lispy-braces)
+          (define-key map (kbd "{") 'lispy-braces)
+          (define-key map (kbd "}") 'lispy-brackets)
           (define-key map (kbd ")") 'lispy-right-nostring)
           (define-key map (kbd "\"") 'lispy-doublequote) ;; (lispy-quotes)
           (define-key map (kbd "C-d") 'lispy-forward-delete)

@@ -74,12 +74,12 @@
                              ;; company-css ;; CSS
                              (company-dabbrev-code company-keywords)
                              company-files
-                             company-capf ;; completion-at-point-functions
+                             ;; company-capf ;; completion-at-point-functions
                              ;; company-nxml
                              ;; company-bbdb ;; Big Brother Database, an address book
                              ;; company-oddmuse
                              company-dabbrev)
-          company-minimum-prefix-length 1
+          company-minimum-prefix-length 3
           company-idle-delay 0)
     ;; 常用的快捷键：
     ;; <tab>用于补全候选项中的公共字段，<return>用于补全所选项，C-g用于终止补全
