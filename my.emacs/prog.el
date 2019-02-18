@@ -133,7 +133,7 @@
           ac-fuzzy-enable t
           ac-candidate-menu-height 8
           ;; [performance]
-          ac-auto-start 2 ;; ac会在输入指定个数的字符后自动生效
+          ac-auto-start 3 ;; ac会在输入指定个数的字符后自动生效
           ac-delay 0.5
           ac-auto-show-menu nil ;; 不会自动显示候选词菜单
           ac-use-comphist t
