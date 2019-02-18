@@ -22,7 +22,7 @@
                    ;; (c-special-indent-hook . ())
                    ;; (c-label-minimum-indentation . )
                    (c-indent-comments-syntactically-p . t)
-                   ;; (c-comment-only-line-offset . )
+                   (c-comment-only-line-offset . 0)
                    (c-comment-prefix-regexp . ((c-mode . "//+\\|\\**")
                                                (c++-mode . "//+\\|\\**")))
                    (c-block-comment-prefix . "*") ;; 设置block comment在换行时自动添加的前缀
@@ -68,9 +68,9 @@
                                               (member-init-intro . (after))
                                               (inher-intro       . (after))))
                    ;; 设置分号和逗号的前后是否应换行
-                   (c-hanging-semi&comma-criteria . (c-semi&comma-inside-parenlist
-                                                     c-semi&comma-no-newlines-before-nonblanks
-                                                     c-semi&comma-no-newlines-for-oneline-inliners))
+                   (c-hanging-semi&comma-criteria . (c-semi&comma-no-newlines-for-oneline-inliners
+                                                     c-semi&comma-inside-parenlist
+                                                     c-semi&comma-no-newlines-before-nonblanks))
                    ;; 清理whitespace，并作为上述hanging的补充(在其后生效)
                    (c-cleanup-list . (;; brace-else-brace
                                       ;; brace-elseif-brace
@@ -93,9 +93,9 @@
 (defun pkg/cc-mode/start ()
   (c-set-style "my/cc-style") ;; 也可以通过(setq c-default-style)实现
   (c-toggle-syntactic-indentation 1) ;; 启用根据语法缩进，否则任何基于语法的style都将失效
-  (c-toggle-auto-newline 1) ;; 启用auto newline
   (c-toggle-electric-state 1) ;; 按下某些符号如semicolon后自动格式化当前行
-  )
+  (c-toggle-auto-newline 1)
+  (c-toggle-auto-hungry-state -1))
 
 
 (defun pkg/cedet/init()
