@@ -519,6 +519,28 @@
         desktop-restore-forces-onscreen t
         desktop-auto-save-timeout (* 60 10)))
 
+(use-package paren
+  :hook (after-init . pkg/paren/start)
+  :preface
+  (defun pkg/paren/start ()
+    (show-paren-mode 1))
+  :init
+  (setq show-paren-style 'parenthesis
+        show-paren-ring-bell-on-mismatch nil
+        show-paren-when-point-inside-paren nil
+        show-paren-when-point-in-periphery nil))
+
+(use-package saveplace
+  :hook (after-init . pkg/saveplace/start)
+  :preface
+  (defun pkg/saveplace/start ()
+    (save-place-mode 1))
+  :init
+  (setq save-place-file (my/set-user-emacs-file ".emacs.save-place")
+        save-place-version-control nil
+        save-place-limit 400
+        save-place-forget-unreadable-files t
+        save-place-save-skipped nil))
 
 ;; -----------------------------------------------------------------------------
 ;; 若打开的中文文件中仍然存在乱码，则尝试执行(revert-buffer-with-coding-system 'gb18030)
@@ -575,14 +597,12 @@
 (global-hl-line-mode 1)
 ;; (global-highlight-changes-mode 1)
 (mouse-avoidance-mode 'animate) ;; 当光标移动至鼠标位置时，为避免遮挡视线，自动移开鼠标
-;; (save-place-mode 1) ;; 记录光标在每个文件中最后一次访问时所在的位置
 ;; (set-cursor-color "gold")
 ;; (blink-cursor-mode -1)
 (column-number-mode 1) ;; 在mode-line显示列数
 (scroll-bar-mode -1) ;; 取消滚动条
 (global-visual-line-mode -1) ;; 对中文支持不好
 ;; (my/add-mode-hook "text" #'visual-line-mode)
-(show-paren-mode 1) ;; 显示匹配的左右括号
 (electric-pair-mode -1)
 (electric-quote-mode -1)
 (electric-indent-mode -1) ;; 自动缩进
@@ -610,7 +630,6 @@
       word-wrap nil
       line-move-visual t
       track-eol t
-      show-paren-style 'parentheses
       blink-matching-paren t
       blink-matching-paren-on-screen t
       tab-always-indent 'complete)
@@ -647,22 +666,22 @@
 (message "emacs init time = %s" (emacs-init-time))
 
 
+(defun my/save-point (func)
+  (let ((line (line-number-at-pos)))
+    (funcall func)
+    (goto-char (point-min))
+    (when (>= line 1) (forward-line (- line 1)))
+    (recenter-top-bottom)))
+
 (defun my/reformat-current-file ()
   (interactive)
-  (defun my/save-point (func)
-    (let ((line (line-number-at-pos)))
-      (funcall func)
-      (goto-char (point-min))
-      (forward-line (if (>= line 1) (- line 1) line))
-      (recenter-top-bottom)))
   (defun my/reformat-wrapper (func)
     (let ((state buffer-read-only))
       (when state (read-only-mode -1))
       (delete-trailing-whitespace) ;; 删除每行末尾的空格
       (when (< (- (point-max) (point-min)) (* 1024 1024))
         (funcall func))
-      ;; 每次保存buffer时都将删除现有的改动高亮
-      ;; 替换成另外两个hook就会无效，原因未知：
+      ;; 每次保存buffer时都将删除现有的改动高亮，替换成以下两个hook无法生效，原因未知
       ;; write-content-functions或write-file-functions
       (highlight-changes-remove-highlight (point-min) (point-max))
       (when state (read-only-mode 1))))
@@ -678,16 +697,18 @@
              (derived-mode-p 'lisp-mode 'emacs-lisp-mode))
         (my/reformat-current-file/lisp))
        (t nil))))
-  (my/save-point (lambda () (my/reformat-wrapper 'my/reformat))))
+  (my/reformat-wrapper 'my/reformat))
 
 (defun my/reformat-current-file/c ()
   (interactive)
-  (let ((cfg (my/set-user-emacs-file "my.config/uncrustify.c.cfg"))
-        (cmd (my/locate-exec "uncrustify" "/usr/local/bin/")))
-    (when (and cfg cmd)
-      (shell-command-on-region (point-min) (point-max)
-                               (concat cmd " -l C -c " cfg " --no-backup")
-                               t t "*Shell Error Output*"))))
+  (my/save-point
+   (lambda ()
+     (let ((cfg (my/set-user-emacs-file "my.config/uncrustify.c.cfg"))
+           (cmd (my/locate-exec "uncrustify" "/usr/local/bin/")))
+       (when (and cfg cmd)
+         (shell-command-on-region (point-min) (point-max)
+                                  (concat cmd " -l C -c " cfg " --no-backup")
+                                  t t "*Shell Error Output*"))))))
 
 (defun my/reformat-current-file/lisp ()
   (interactive)
