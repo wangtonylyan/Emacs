@@ -361,7 +361,11 @@
           ;; web-mode
           ;; w3m
           ;; erc ;; circe, rcirc
-          use-package))
+          ;; [ensure]
+          use-package
+          diminish
+          bind-key
+          all-the-icons))
   (defconst pkg/package/completion-backend
     '(helm ivy smex ido icomplete))
   (defconst pkg/package/helm-enabled-list
@@ -380,12 +384,12 @@
       flyspell-correct-ivy
       ))
   (let ((bkd (car pkg/package/completion-backend)))
-    (my/map (lambda (pkg)
-              (add-to-list 'package-selected-packages pkg))
-            (cond
-             ((eq bkd 'helm) pkg/package/helm-enabled-list)
-             ((eq bkd' ivy) pkg/package/ivy-enabled-list)
-             (t (list bkd)))))
+    (mapc (lambda (pkg)
+            (add-to-list 'package-selected-packages pkg))
+          (cond
+           ((eq bkd 'helm) pkg/package/helm-enabled-list)
+           ((eq bkd' ivy) pkg/package/ivy-enabled-list)
+           (t (list bkd)))))
   (when (not package-archive-contents)
     (package-refresh-contents))
   (package-install-selected-packages))

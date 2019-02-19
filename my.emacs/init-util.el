@@ -37,7 +37,7 @@
           (split-window-vertically (- (/ (window-total-height) 3)))
           (other-window 1)
           (eshell "new")
-          (rename-buffer (concat "*eshell: " name "*"))))))
+          (rename-buffer (concat "*EShell: " name "*"))))))
   :init
   (setq eshell-directory-name (my/set-user-emacs-file ".eshell/")))
 

@@ -285,7 +285,6 @@
     (add-hook 'pkg/projectile/switch-hook #'neotree-projectile-action t)))
 
 (use-package windmove
-  :ensure t
   :commands (windmove-left
              windmove-right
              windmove-up
@@ -294,7 +293,6 @@
   (windmove-default-keybindings))
 
 (use-package winner
-  :ensure t
   :hook (after-init . pkg/winner/start)
   :preface
   (defun pkg/winner/start ()

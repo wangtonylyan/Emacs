@@ -9,6 +9,8 @@
   :disabled t
   :diminish (mode1
              mode2)
+  ;; 1. used for packages in (package-list-packages) only
+  ;;    especially not used for built-in packages
   :ensure t
   ;; 1. list dependent packages not shown in (package-list-packages)
   ;; 2. this keyword DOES NOT introduce any autoload
