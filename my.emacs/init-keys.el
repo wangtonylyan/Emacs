@@ -148,13 +148,12 @@
              ("C-M-i" . nil) ;; (flyspell-auto-correct-word)
              ("C-c $" . nil) ;; (flyspell-correct-word-before-point)
              ("C-\"" . flyspell-goto-next-error)
-             ("C-'" . flyspell-auto-correct-word)))
-
-(use-package flyspell-correct
-  :defer t
-  :config
-  (bind-keys :map flyspell-mode-map
-             ("C-'" . flyspell-correct-wrapper)))
+             ("C-'" . flyspell-auto-correct-word))
+  (use-package flyspell-correct
+    :defer t
+    :config
+    (bind-keys :map flyspell-mode-map
+               ("C-'" . flyspell-correct-wrapper))))
 
 (use-package undo-tree
   :defer t
