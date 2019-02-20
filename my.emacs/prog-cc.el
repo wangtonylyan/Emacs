@@ -6,9 +6,27 @@
 (defun my/prog-cc/run-start-hook ()
   (my/run-mode-hook "my/prog-cc"))
 
+(defun my/prog-cc/init ()
+  (pkg/cc-mode/init)
+  (pkg/cedet/init)
+  (my/add-mode-hook "c" #'my/prog-cc/run-start-hook)
+  (my/add-mode-hook "c++" #'my/prog-cc/run-start-hook))
+
+(my/add-mode-hook "CC" #'my/prog-cc/init)
+
 
 (defun pkg/cc-mode/init ()
   (use-package cc-mode
+    :preface
+    (defun pkg/cc-mode/start ()
+      ;; 也可以通过(setq c-default-style)实现
+      (c-set-style "my/cc-style")
+      ;; 启用根据语法缩进，否则任何基于语法的style都将失效
+      (c-toggle-syntactic-indentation 1)
+      ;; 按下某些符号如semicolon后自动格式化当前行
+      (c-toggle-electric-state 1)
+      (c-toggle-auto-newline 1)
+      (c-toggle-auto-hungry-state -1))
     :init
     (my/prog-cc/add-start-hook #'pkg/cc-mode/start)
     :config
@@ -27,46 +45,46 @@
                                                (c++-mode . "//+\\|\\**")))
                    (c-block-comment-prefix . "*") ;; 设置block comment在换行时自动添加的前缀
                    (c-offsets-alist . ((case-label . +)))
-                   (c-indent-comment-alist . ((empty-line       . (column . nil))
+                   (c-indent-comment-alist . ((empty-line . (column . nil))
                                               (anchored-comment . (column . nil))
-                                              (end-block        . (space . 1))
-                                              (cpp-end-block    . (space . 1))
-                                              (other            . (align . (space . 1)))))
+                                              (end-block . (space . 1))
+                                              (cpp-end-block . (space . 1))
+                                              (other . (align . (space . 1)))))
                    ;; 设置大括号的前后是否应换行，即"{"将位于行头或行尾或单行或任意位置
                    ;; 不在以下alist中列出的syntactic symbol，将执行默认行为：(before after)
-                   (c-hanging-braces-alist . ((defun-open            . (before))
-                                              (defun-close           . (before))
-                                              (class-open            . (before))
-                                              (class-close           . (before))
-                                              (inline-open           . (before))
-                                              (inline-close          . (before))
-                                              (block-open            . (before))
-                                              (block-close           . c-snug-do-while) ;;
+                   (c-hanging-braces-alist . ((defun-open . (before))
+                                              (defun-close . (before))
+                                              (class-open . (before))
+                                              (class-close . (before))
+                                              (inline-open . (before))
+                                              (inline-close . (before))
+                                              (block-open . (before))
+                                              (block-close . c-snug-do-while) ;;
                                               (statement-cont)
-                                              (substatement-open     . (before))
-                                              (statement-case-open   . (before after)) ;;
+                                              (substatement-open . (before))
+                                              (statement-case-open . (before after)) ;;
                                               (brace-list-open)
                                               (brace-list-close)
                                               (brace-list-intro)
                                               (brace-entry-open)
-                                              (extern-lang-open      . (before))
-                                              (extern-lang-close     . (before))
-                                              (namespace-open        . (before))
-                                              (namespace-close       . (before))
-                                              (module-open           . (before))
-                                              (module-close          . (before))
-                                              (composition-open      . (before))
-                                              (composition-close     . (before))
-                                              (inexpr-class-open     . (before))
-                                              (inexpr-class-close    . (before))
+                                              (extern-lang-open . (before))
+                                              (extern-lang-close . (before))
+                                              (namespace-open . (before))
+                                              (namespace-close . (before))
+                                              (module-open . (before))
+                                              (module-close . (before))
+                                              (composition-open . (before))
+                                              (composition-close . (before))
+                                              (inexpr-class-open . (before))
+                                              (inexpr-class-close . (before))
                                               (arglist-cont-nonempty)))
                    ;; 设置冒号的前后是否应换行
                    ;; 不在以下alist中列出的syntactic symbol，将执行默认行为：()
-                   (c-hanging-colons-alist . ((case-label        . (after))
-                                              (label             . (after))
-                                              (access-label      . (after))
+                   (c-hanging-colons-alist . ((case-label . (after))
+                                              (label . (after))
+                                              (access-label . (after))
                                               (member-init-intro . (after))
-                                              (inher-intro       . (after))))
+                                              (inher-intro . (after))))
                    ;; 设置分号和逗号的前后是否应换行
                    (c-hanging-semi&comma-criteria . (c-semi&comma-no-newlines-for-oneline-inliners
                                                      c-semi&comma-inside-parenlist
@@ -90,25 +108,21 @@
                ;; 换行后自动缩进
                ("<return>" . c-context-line-break))))
 
-(defun pkg/cc-mode/start ()
-  (c-set-style "my/cc-style") ;; 也可以通过(setq c-default-style)实现
-  (c-toggle-syntactic-indentation 1) ;; 启用根据语法缩进，否则任何基于语法的style都将失效
-  (c-toggle-electric-state 1) ;; 按下某些符号如semicolon后自动格式化当前行
-  (c-toggle-auto-newline 1)
-  (c-toggle-auto-hungry-state -1))
-
-
-(defun pkg/cedet/init()
-  ;; CEDET的相关配置可以通过在相应buffer或模式下利用以下命令查看
-  ;; (semantic-describe-buffer)
-  ;; (semantic-c-describe-environment)
+(defun pkg/cedet/init ()
   (use-package cedet
+    ;; CEDET的相关配置可以通过在相应buffer或模式下利用以下命令查看
+    ;; (cedet-version)
+    ;; (semantic-describe-buffer)
+    ;; (semantic-c-describe-environment)
     :preface
+    (defun pkg/cedet/start ())
     (defun pkg/cedet/submode-enabled-p (mode)
       (member mode semantic-default-submodes))
     :init
     (use-package cedet-global
       :commands (cedet-gnu-global-version-check))
+    (my/prog-cc/add-start-hook #'pkg/cedet/start)
+    :config
     (use-package ede
       :disabled
       :config
@@ -133,130 +147,20 @@
       (mapc #'my/load-file pvt/project/ede-config-files)
       (global-ede-mode 1)
       (ede-enable-generic-projects))
+    (use-package srecode
+      :disabled)
     (use-package semantic
-      :commands (semantic-mode semantic-toggle-minor-mode-globally)
       :init ;; 以下是由semantic及其子模块所定义的配置项，其必须在相应模块被加载前被设置
-      ;; 由于(semantic-mode)是全局性的，通过设置以下过滤函数可避免其对其他语言也提供支持
-      (add-hook 'semantic-inhibit-functions
-                ;; 当前semantic仅用于C和C++，没有针对ObjC或Java等进行任何适配
-                (lambda () (not (member major-mode '(c-mode c++-mode))))
-                t)
-      ;; 此外，也可局部性地启用，即将其子模式加入至各mode-hook中
-      ;; 但目前发现idle相关的几个子模式必须全局性地启用，可能是由于被其他子模式所依赖的缘故
-      ;; (my/prog-cc/add-start-hook #'semantic-idle-scheduler-mode)
-      ;; 除了设置'semantic-default-submodes，还可调用以下函数来启用支持指定功能的子模块
-      ;; (semantic-load-enable-minimum-features)
-      ;; (semantic-load-enable-code-helpers)
-      ;; (semantic-load-enable-guady-code-helpers)
-      ;; (semantic-load-enable-excessive-code-helpers)
-      ;; (semantic-load-enable-semantic-debugging-helpers)
-      (setq semantic-default-submodes '(;; [Idle Scheduler]
-                                        global-semantic-idle-scheduler-mode
-                                        ;; 目前发现该模式高亮的符号并不全，即使启用它，也没有必要禁用highlight-thing插件
-                                        ;; global-semantic-idle-local-symbol-highlight-mode
-                                        ;; global-semantic-idle-summary-mode ;; 基于Smart Summary
-                                        ;; global-semantic-idle-completions-mode ;; 基于Smart Completion，用company替代
-                                        ;; [SemanticDB] tag database
-                                        global-semanticdb-minor-mode
-                                        ;; [Display and Decoration]
-                                        ;; 该模式可以使用stickyfunc-enhance插件进行增强
-                                        ;; 此外，其主要功能可被内置的(which-function-mode)替代
-                                        ;; 由于其还会与tabbar插件相冲突，因此两者只能选其一
-                                        ;; global-semantic-stickyfunc-mode
-                                        ;; global-semantic-highlight-func-mode
-                                        ;; global-semantic-decoration-mode
-                                        ;; [Tag]
-                                        global-semantic-mru-bookmark-mode ;; mostly recently used
-                                        ;; [Debug]
-                                        ;; global-semantic-show-unmatched-syntax-mode
-                                        ;; global-semantic-show-parser-state-mode
-                                        ;; global-semantic-highlight-edits-mode
-                                        ;; [Mouse Context Menu]
-                                        ;; global-cedet-m3-minor-mode
-                                        ;; [CEDET 1.x] 以下功能并没有集成于Emacs内置的CEDET 2.x中
-                                        ;; global-semantic-tag-folding-mode ;; (require 'semantic-tag-folding)
-                                        ))
-      (setq semantic-idle-scheduler-idle-time 3
-            semantic-idle-scheduler-work-idle-time 15
-            semantic-idle-scheduler-max-buffer-size 10240
-            semantic-idle-scheduler-verbose-flag nil ;; 与semantic-idle-summary-mode冲突，故禁用
-            ;; 比较耗时的任务
-            semantic-idle-work-update-headers-flag t
-            semantic-idle-work-parse-neighboring-files-flag t)
-      (setq semanticdb-default-save-directory ;; 作为缺省路径，仅主动生成的数据库的文件才会保存于此
-            (my/set-user-emacs-file ".semanticdb/")
-            ;; semanticdb-default-file-name ""
-            semanticdb-persistent-path '(always)
-            ;; 可以预先主动地对某些目录生成数据库，以便今后复用
-            semanticdb-search-system-databases t
-            semanticdb-project-root-functions (when (my/package-enabled-p 'projectile)
-                                                '(projectile-project-root)))
-      (setq semantic-decoration-styles '(("semantic-tag-boundary" . t)
-                                         ("semantic-decoration-on-private-members" . nil)
-                                         ("semantic-decoration-on-protected-members" . nil)
-                                         ("semantic-decoration-on-includes" . nil)))
-      (setq semantic-c-obey-conditional-section-parsing-flag t)
-      (defun pkg/cedet/setup-semantic () ;; 会在每次semantic被重新启用后执行
-        (use-package semantic/symref
-          :if (my/package-enabled-p 'projectile)
-          :config
-          (defalias 'semantic-symref-calculate-rootdir #'projectile-project-root))
-        (use-package semantic/bovine/gcc
-          :if (my/locate-exec "gcc")
-          :config
-          (semantic-gcc-setup))
-        ;; (semantic-reset-system-include 'c-mode) ;; 若要完全地自定义，则需先重置再追加
-        (semantic-add-system-include "/usr/include" 'c-mode)
-        (semantic-add-system-include "/usr/include" 'c++-mode)
-        (semantic-add-system-include "/usr/local/include" 'c-mode)
-        (semantic-add-system-include "/usr/local/include" 'c++-mode)
-        (semantic-add-system-include "/usr/include/boost" 'c++-mode)
-        ;; 指定用于支持SemanticDB的tagging system，默认使用的是Ebrowse
-        (use-package semantic/db-ebrowse ;; Ebrowse
-          :disabled)
-        (use-package semantic/db-global ;; GNU Global
-          :if (cedet-gnu-global-version-check t)
-          :config
-          (semanticdb-enable-gnu-global-databases 'c-mode)
-          (semanticdb-enable-gnu-global-databases 'c++-mode))
-        ;; 若Semantic始终不能正常解析某些特定的符号，则可作如下设置
-        ;; (add-to-list 'semantic-lex-c-preprocessor-symbol-map '("symbol" . "value"))
-        ;; (add-to-list 'semantic-lex-c-preprocessor-symbol-file "path/file")
-        (defun pkg/cedet/setup-c++-boost (path)
-          (when (file-accessible-directory-p path)
-            (let ((cfiles (cedet-files-list-recursively path "\\(config\\|user\\)\\.hpp")))
-              (dolist (file cfiles)
-                (add-to-list 'semantic-lex-c-preprocessor-symbol-file file))))))
-      (my/add-mode-hook "SEMANTIC" #'pkg/cedet/setup-semantic)
-      (defun pkg/cedet/c&c++-mode-hook ()
-        ;; 不知为何在:config中使用CEDET中定义的(setq-mode-local)无法生效
-        ;; 以下设置完全可以在(pkg/cedet/start)中被执行
-        ;; 使用mode-hook的方式触发，仅仅是为了与上面的配置项相邻排列
-        (setq semantic-stickyfunc-sticky-classes '(type function)) ;; variable, include, package
-        (setq semanticdb-find-default-throttle
-              '(file local project recursive) ;; unloaded, system, omniscience
-              semanticdb-project-system-databases
-              (mapcar (lambda (path)
-                        (semanticdb-create-database
-                         semanticdb-new-database-class path))
-                      ;; e.g. "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
-                      '("/usr/include" "/usr/local/include")))
-        ;; 1. 对于'semanticdb-find-default-throttle中的'project，主要可交由EDE或JDE等组件控制
-        ;; (add-hook 'semanticdb-project-predicate-functions)
-        ;; (add-hook 'semanticdb-project-root-functions)
-        ;; 甚至还可以通过设置以下变量，来具体指定某些项目的根目录
-        ;; 注意，'semantic-project-root-functions中注册的函数也会修改该变量
-        ;; (setq semanticdb-project-roots '())
-        ;; 2. 对于'semanticdb-find-default-throttle中的'system，主要是利用编译器的输出信息
-        )
+      (pkg/semantic/init) ;; 在'semantic被加载时执行
+      (my/add-mode-hook "SEMANTIC" #'pkg/semantic/setup) ;; 在每次'semantic被全局地(重新)启用时执行
+      (my/prog-cc/add-start-hook #'pkg/semantic/start) ;; 在每次打开文件时执行
       :config
-      (my/add-mode-hook "c" #'pkg/cedet/c&c++-mode-hook)
-      (my/add-mode-hook "c++" #'pkg/cedet/c&c++-mode-hook))
-    (my/prog-cc/add-start-hook #'pkg/cedet/start)
-    :config
-    (semantic-mode 1) ;; global minor mode
+      (semantic-mode 1)
+      (bind-keys :map semantic-mode-map
+                 ("C-c ," . pkg/hydra/group/cedet/body)))
 
-    ;; todo: move into (pkg/cedet/setup-semantic)
+
+    ;; todo: move into (pkg/semantic/setup)
     ;; 以下模块未必随semantic的启用而被加载，因此可于'semantic-init-hook中被执行
     ;; 但又由于其大多是对key-map的设置，在semantic/:config中也能被执行，目前只是暂置于此
     (defun pkg/cedet/fold-block ()
@@ -268,8 +172,7 @@
       (if (pkg/cedet/submode-enabled-p 'global-semantic-tag-folding-mode)
           ;; (senator-unfold-tag)
           (semantic-tag-folding-show-block) (senator-fold-tag-toggle)))
-    (bind-keys :map semantic-mode-map
-               ("C-c ," . pkg/hydra/group/cedet/body))
+
 
     ;; -------------------------------------------------------------------------
     ;; 以下是代码浏览功能的相关设置，主要涉及到了Complete、Senator、IA这三个组件
@@ -332,147 +235,123 @@
     (use-package semantic/sb ;; 此为CEDET中内置的Speedbar，暂不启用
       :disabled)
     (use-package stickyfunc-enhance
-      :demand t
       :if (and (my/package-enabled-p 'stickyfunc-enhance)
-               (pkg/cedet/submode-enabled-p 'global-semantic-stickyfunc-mode)))
-    ))
+               (pkg/cedet/submode-enabled-p 'global-semantic-stickyfunc-mode)))))
 
-(defun pkg/cedet/start ()
-  )
+(defun pkg/semantic/init ()
+  ;; 由于(semantic-mode)是全局性的，通过设置以下过滤函数可避免其对其他语言也提供支持
+  (add-hook 'semantic-inhibit-functions
+            ;; 当前semantic仅用于C和C++，没有针对ObjC或Java等进行任何适配
+            (lambda () (not (member major-mode '(c-mode c++-mode))))
+            t)
+  ;; 此外，也可局部性地启用，即将其子模式加入至各mode-hook中
+  ;; 但目前发现idle相关的几个子模式必须全局性地启用，可能是由于被其他子模式所依赖的缘故
+  ;; (my/prog-cc/add-start-hook #'semantic-idle-scheduler-mode)
+  ;; 除了设置'semantic-default-submodes，还可调用以下函数来启用支持指定功能的子模块
+  ;; (semantic-load-enable-minimum-features)
+  ;; (semantic-load-enable-code-helpers)
+  ;; (semantic-load-enable-guady-code-helpers)
+  ;; (semantic-load-enable-excessive-code-helpers)
+  ;; (semantic-load-enable-semantic-debugging-helpers)
+  (setq semantic-default-submodes '(;; [Idle Scheduler]
+                                    global-semantic-idle-scheduler-mode
+                                    ;; 目前发现该模式高亮的符号并不全，即使启用它，也没有必要禁用highlight-thing插件
+                                    ;; global-semantic-idle-local-symbol-highlight-mode
+                                    ;; global-semantic-idle-summary-mode ;; 基于Smart Summary
+                                    ;; global-semantic-idle-completions-mode ;; 基于Smart Completion，用company替代
+                                    ;; [SemanticDB] tag database
+                                    global-semanticdb-minor-mode
+                                    ;; [Display and Decoration]
+                                    ;; 该模式可以使用stickyfunc-enhance插件进行增强
+                                    ;; 此外，其主要功能可被内置的(which-function-mode)替代
+                                    ;; 由于其还会与tabbar插件相冲突，因此两者只能选其一
+                                    ;; global-semantic-stickyfunc-mode
+                                    ;; global-semantic-highlight-func-mode
+                                    ;; global-semantic-decoration-mode
+                                    ;; [Tag]
+                                    global-semantic-mru-bookmark-mode ;; mostly recently used
+                                    ;; [Debug]
+                                    ;; global-semantic-show-unmatched-syntax-mode
+                                    ;; global-semantic-show-parser-state-mode
+                                    ;; global-semantic-highlight-edits-mode
+                                    ;; [Mouse Context Menu]
+                                    ;; global-cedet-m3-minor-mode
+                                    ;; [CEDET 1.x] 以下功能并没有集成于Emacs内置的CEDET 2.x中
+                                    ;; global-semantic-tag-folding-mode ;; (require 'semantic-tag-folding)
+                                    ))
+  (setq semantic-idle-scheduler-idle-time 3
+        semantic-idle-scheduler-work-idle-time 15
+        semantic-idle-scheduler-max-buffer-size 10240
+        semantic-idle-scheduler-verbose-flag nil ;; 与semantic-idle-summary-mode冲突，故禁用
+        ;; 比较耗时的任务
+        semantic-idle-work-update-headers-flag t
+        semantic-idle-work-parse-neighboring-files-flag t)
+  (setq semanticdb-default-save-directory ;; 作为缺省路径，仅主动生成的数据库的文件才会保存于此
+        (my/set-user-emacs-file ".semanticdb/")
+        ;; semanticdb-default-file-name ""
+        semanticdb-persistent-path '(always)
+        ;; 可以预先主动地对某些目录生成数据库，以便今后复用
+        semanticdb-search-system-databases t
+        semanticdb-project-root-functions (when (my/package-enabled-p 'projectile)
+                                            '(projectile-project-root)))
+  (setq semantic-decoration-styles '(("semantic-tag-boundary" . t)
+                                     ("semantic-decoration-on-private-members" . nil)
+                                     ("semantic-decoration-on-protected-members" . nil)
+                                     ("semantic-decoration-on-includes" . nil)))
+  (setq semantic-c-obey-conditional-section-parsing-flag t))
 
-
-(defun pkg/ecb/init ()
-  (use-package ecb
-    :if (my/package-enabled-p 'ecb)
-    :commands (ecb-minor-mode)
-    :init
-    (my/prog-cc/add-start-hook #'pkg/ecb/start)
+(defun pkg/semantic/setup ()
+  (use-package semantic/symref
+    :if (my/package-enabled-p 'projectile)
     :config
-    (save-excursion
-      (unless (boundp 'stack-trace-on-error)
-        (defvar stack-trace-on-error nil)) ;; 兼容性
-      (setq ecb-layout-name "left15"
-            ;; ecb-toggle-layout-sequence '()
-            ;; ecb-layout-window-sizes nil ;; 推荐通过调用ecb-change-layout命令，以交互式的方式修改
-            ecb-windows-width 0.2
-            ecb-primary-secondary-mouse-buttons 'mouse-1--C-mouse-1
-            ecb-tip-of-the-day nil
-            ;; ecb-auto-compatibility-check nil
-            ;; [directories window]
-            ecb-source-path '("~")
-            ecb-tree-buffer-style 'image
-            ecb-auto-expand-directory-tree 'best
-            ecb-excluded-directories-regexps '("^\\(\\.\\|\\.\\.\\)$")
-            ecb-show-sources-in-directories-buffer '("left15")
-            ;; [sources window]
-            ;; ecb-source-file-regexps '()
-            ;; ecb-sources-exclude-cvsignore '()
-            ;; [methods window]
-            ecb-process-non-semantic-files nil ;; 禁用non-semantic-sources
-            ;; [history window]
-            ;; ecb-history-exclude-file-regexps '()
-            ;; [compilation window]
-            ecb-compile-window-height 0.2
-            ecb-compile-window-width 'edit-window
-            ecb-compile-window-temporally-enlarge 'both
-            ecb-enlarged-compilation-window-max-height 0.5
-            ecb-compilation-buffer-names ;; 以下名称的buffer内容将被呈现于该窗口
-            (append ecb-compilation-buffer-names '(("*Process List*")
-                                                   ("*Proced*")
-                                                   (".notes")
-                                                   ("*appt-buf*")
-                                                   ("*Compile-Log*")
-                                                   ("*etags tmp*")
-                                                   ("*svn-process*")
-                                                   ("*svn-info-output*")
-                                                   ("*Python Output*")
-                                                   ("*Org Agenda*")
-                                                   ("*EMMS Playlist*")
-                                                   ("*Moccur*")
-                                                   ("*Directory")))
-            ecb-compilation-major-modes ;; 以下模式的buffer内容将被呈现于该窗口
-            (append ecb-compilation-major-modes '(change-log-mode
-                                                  calendar-mode
-                                                  diary-mode
-                                                  diary-fancy-display-mode
-                                                  xgtags-select-mode
-                                                  svn-status-mode
-                                                  svn-info-mode
-                                                  svn-status-diff-mode
-                                                  svn-log-view-mode
-                                                  svn-log-edit-mode
-                                                  erc-mode
-                                                  gud-mode)))
-      (ecb-minor-mode 1) ;; global minor mode
-      )))
+    (defalias 'semantic-symref-calculate-rootdir #'projectile-project-root))
+  (use-package semantic/bovine/gcc
+    :if (my/locate-exec "gcc")
+    :config
+    (semantic-gcc-setup))
+  ;; (semantic-reset-system-include 'c-mode) ;; 若要完全地自定义，则需先重置再追加
+  (semantic-add-system-include "/usr/include" 'c-mode)
+  (semantic-add-system-include "/usr/include" 'c++-mode)
+  (semantic-add-system-include "/usr/local/include" 'c-mode)
+  (semantic-add-system-include "/usr/local/include" 'c++-mode)
+  (semantic-add-system-include "/usr/include/boost" 'c++-mode)
+  ;; 指定用于支持SemanticDB的tagging system，默认使用的是Ebrowse
+  (use-package semantic/db-ebrowse ;; Ebrowse
+    :disabled)
+  (use-package semantic/db-global ;; GNU Global
+    :if (cedet-gnu-global-version-check t)
+    :config
+    (semanticdb-enable-gnu-global-databases 'c-mode)
+    (semanticdb-enable-gnu-global-databases 'c++-mode))
+  ;; 若Semantic始终不能正常解析某些特定的符号，则可作如下设置
+  ;; (add-to-list 'semantic-lex-c-preprocessor-symbol-map '("symbol" . "value"))
+  ;; (add-to-list 'semantic-lex-c-preprocessor-symbol-file "path/file")
+  (defun pkg/semantic/setup-c++-boost (path)
+    (when (file-accessible-directory-p path)
+      (let ((cfiles (cedet-files-list-recursively path "\\(config\\|user\\)\\.hpp")))
+        (dolist (file cfiles)
+          (add-to-list 'semantic-lex-c-preprocessor-symbol-file file))))))
 
-(defun pkg/ecb/start ()
+(defun pkg/semantic/start ()
+  ;; 不知为何在:config中使用CEDET中定义的(setq-mode-local)无法生效
+  ;; 以下设置也可以在(pkg/cedet/start)中被执行
+  (setq semantic-stickyfunc-sticky-classes '(type function)) ;; variable, include, package
+  (setq semanticdb-find-default-throttle
+        '(file local project recursive) ;; unloaded, system, omniscience
+        semanticdb-project-system-databases
+        (my/map (lambda (path)
+                  (semanticdb-create-database
+                   semanticdb-new-database-class path))
+                ;; e.g. "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
+                '("/usr/include" "/usr/local/include")))
+  ;; 1. 对于'semanticdb-find-default-throttle中的'project，主要可交由EDE或JDE等组件控制
+  ;; (add-hook 'semanticdb-project-predicate-functions)
+  ;; (add-hook 'semanticdb-project-root-functions)
+  ;; 甚至还可以通过设置以下变量，来具体指定某些项目的根目录
+  ;; 注意，'semantic-project-root-functions中注册的函数也会修改该变量
+  ;; (setq semanticdb-project-roots '())
+  ;; 2. 对于'semanticdb-find-default-throttle中的'system，主要是利用编译器的输出信息
   )
 
-
-;; todo
-;; 此插件会读取CMake所使用的项目配置文件，包括CMakeLists.txt
-;; 用于设置但不依赖于以下插件的存在，其仅依赖于CMake
-;; [Flymake]
-;; [Flycheck]
-;; 'flycheck-clang-language-standard
-;; 'flycheck-gcc-language-standard
-;; 'flycheck-clang-include-path
-;; 'flycheck-clang-definitions
-;; [Company]
-;; 'company-clang-arguments
-;; [Company-C-Headers]
-;; 'company-c-headers-path-system
-;; [Auto-Complete]
-;; 'ac-clang-flags
-;; [Semantic]
-;; (semantic-add-system-include)
-;; (semantic-remove-system-include)
-(defun pkg/cpputils-cmake/init ()
-  (use-package cpputils-cmake
-    :if (and (my/package-enabled-p 'cmake-mode)
-             (my/package-enabled-p 'cpputils-cmake))
-    :commands (cppcm-reload-all)
-    :init
-    (setq cppcm-write-flymake-makefile nil ;; since flymake is not used for now
-          ;; optional, specify extra preprocess flags forwarded to compiler
-          ;; cppcm-extra-preprocss-flags-from-user '("-I/usr/src/linux/include" "-DNDEBUG")
-          )
-    (my/prog-cc/add-start-hook #'pkg/cpputils-cmake/start)))
-
-(defun pkg/cpputils-cmake/start ()
-  (cppcm-reload-all))
-
-
-;; Grand Unified Debugger
-;; optional, avoid typing full path when starting gdb
-;; (bind-keys ("C-c C-g" . (lambda () (interactive)
-;; (gud-gdb (concat "gdb --fullname " (cppcm-get-exe-path-current-buffer))))))
-(defun pkg/gud/init ()
-  (use-package gud
-    :init
-    (my/prog-cc/add-start-hook #'pkg/gud/start)))
-
-(defun pkg/gud/start ()
-  )
-
-
-(defun my/prog-cc/init ()
-  (pkg/cc-mode/init)
-  ;; 所有依赖于CEDET的插件都必须在CEDET之后被加载/启用
-  ;; 否则其会自动加载/启用CEDET，导致上述对于CEDET的设置失效
-  ;; 所有与CEDET相互关联的插件的加载/启动顺序将在此被显示地指定
-  ;; 而不是也不应依赖于hook的执行顺序
-  (pkg/cedet/init)
-  (pkg/ecb/init)
-  (pkg/cpputils-cmake/init)
-  (pkg/gud/init)
-  (my/add-mode-hook "c" #'my/prog-cc/start)
-  (my/add-mode-hook "c++" #'my/prog-cc/start))
-
-(defun my/prog-cc/start ()
-  (my/prog-cc/run-start-hook))
-
-(eval-after-load 'cc-mode '(add-hook 'c-initialization-hook #'my/prog-cc/init t))
 
 (provide 'my/prog-cc)

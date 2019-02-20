@@ -114,7 +114,14 @@
 (defconst my/mode-hook-dict
   (let ((dict (make-hash-table :test 'equal)))
     (mapc (lambda (tup) (puthash (car tup) (cadr tup) dict))
-          '(;; [edit]
+          '(;; [emacs]
+            ("init"           after-init-hook           )
+            ("my/init-gui"    my/init-gui/start-hook    )
+            ("my/init-vis"    my/init-vis/start-hook    )
+            ("my/prog"        my/prog/start-hook        )
+            ("my/prog-cc"     my/prog-cc/start-hook     )
+            ("my/prog-py"     my/prog-py/start-hook     )
+            ;; [edit]
             ("text"           text-mode-hook            )
             ("org"            org-mode-hook             )
             ;; [programming]
@@ -130,7 +137,8 @@
             ("ilisp"          lisp-interaction-mode-hook)
             ("slime"          slime-mode-hook           )
             ("scheme"         scheme-mode-hook          )
-            ("cc"             c-mode-common-hook        ) ;; c, c++, objc, java, idl, pike, awk
+            ("CC"             c-initialization-hook     ) ;; c, c++, objc, java, idl, pike, awk
+            ("cc"             c-mode-common-hook        )
             ("c"              c-mode-hook               )
             ("c++"            c++-mode-hook             )
             ("python"         python-mode-hook          )
@@ -138,11 +146,9 @@
             ("sml"            sml-mode-hook             )
             ("haskell"        haskell-mode-hook         )
             ;; [others]
-            ("w3m"            w3m-mode-hook             )
-            ;; [my]
-            ("my/prog"        my/prog/start-hook        )
-            ("my/prog-cc"     my/prog-cc/start-hook     )
-            ("my/prog-py"     my/prog-py/start-hook     )))
+            ("DIRED"          dired-load-hook           )
+            ("dired"          dired-mode-hook           )
+            ("w3m"            w3m-mode-hook             )))
     dict))
 
 (defun my/get-mode-hook (mode)
@@ -279,49 +285,62 @@
   ;; 目前使用此全局变量来管理插件的启用/禁用，其中包括了ELPA更新源中所没有的插件
   (setq package-selected-packages
         '(;; =============================================================================
-          ;; ["init-gui.el"]
-          ;; [gui]
+          ;; [interface] init-gui.el
+          doom-themes ;; solarized-theme, zenburn-theme
           dashboard
           nyan-mode
           doom-modeline ;; spaceline, spaceline-all-the-icons, smart-mode-line
-          doom-themes ;; solarized-theme, zenburn-theme
-          ;; [window]
           tabbar ;; awesome-tab
           treemacs ;; neotree, sr-speedbar, ecb
-          ;; treemacs-icons-dired
           treemacs-projectile
-          buffer-move
-          ;; dimmer
-          zoom
+          ;; treemacs-icons-dired
           ;; =============================================================================
-          ;; ["init-edit.el"]
-          ;; [frame]
+          ;; [visual] init-vis.el
           beacon
           ;; nlinum-hl
           ;; yascroll
           ;; sublimity, minimap
-          ;; fill-column-indicator, whitespace
+          ;; whitespace, fill-column-indicator
           rainbow-delimiters
           ;; rainbow-identifiers ;; 会覆盖配色主题所使用的字体颜色
           highlight-thing
-          ;; [edit]
-          flyspell
-          flyspell-correct
+          zoom ;; dimmer
+          ;; =============================================================================
+          ;; [editing] init-edit.el
+          windmove
+          buffer-move
           avy ;; ace-jump-mode
           ;; ace-pinyin
           undo-tree
           smart-hungry-delete
           lispy ;; paredit, parinfer
+          flyspell
+          flyspell-correct
+          ;; evil
+          hydra ;; which-key
           ;; =============================================================================
-          ;; ["init-util.el"]
+          ;; [programming] prog.el
+          yasnippet
+          company ;; auto-complete
+          company-jedi
+          flycheck ;; flymake
+          ;; flycheck-pyflakes
+          flycheck-haskell
+          ggtags ;; helm-gtags, counsel-gtags, counsel-etags
+          ;; =============================================================================
+          ;; [c, c++] prog-cc.el
+          ;; stickyfunc-enhance
+
+
+          ;; =============================================================================
+          ;; =============================================================================
+          ;; [TODO]
+          ;; [utility] init-util.el
           eshell
           ;; all-the-icons-dired
           ;; dired-hacks-utils ;; TODO
-          ;; evil
-          hydra ;; which-key
           bm
           ediff ;; vdiff
-          ;; [project]
           projectile ;; eproject
           magit
           ;; vdiff-magit
@@ -332,29 +351,19 @@
           ;; markdown-mode
           ;; markdown-preview-mode
           ;; auctex
-
-          ;; =============================================================================
-          ;; [programming]
-          yasnippet
-          flycheck ;; flymake
-          company ;; auto-complete
-          company-jedi
-          ggtags ;; helm-gtags, counsel-gtags, counsel-etags
           asn1-mode
-          ;; [c, c++]
-          ;; stickyfunc-enhance
           ;; cmake-mode ;; cmake-ide, cmake-project
           ;; cmake-font-lock
           ;; cpputils-cmake
           ;; [python]
           ;; elpy ;; ropemacs
-          ;; flycheck-pyflakes
+
           ;; py-autopep8
           ;; auto-virtualenvwrapper ;; virtualenvwrapper
           ;; [haskell]
           haskell-mode
           hindent
-          flycheck-haskell
+
           ;; [ml]
           sml-mode
           ;; [web]
@@ -471,7 +480,7 @@
         dired-kept-versions 2
         require-final-newline t)
   :config
-  (add-hook 'find-file-hook (lambda () (read-only-mode 1)) t)
+  (add-hook 'find-file-hook 'my/find-file-read-only t)
   (add-hook 'before-save-hook 'my/reformat-current-file t))
 
 (use-package recentf
@@ -518,6 +527,12 @@
         desktop-restore-in-current-display t
         desktop-restore-forces-onscreen t
         desktop-auto-save-timeout (* 60 10)))
+
+(use-package winner
+  :hook (after-init . pkg/winner/start)
+  :preface
+  (defun pkg/winner/start ()
+    (winner-mode 1)))
 
 (use-package paren
   :hook (after-init . pkg/paren/start)
@@ -660,11 +675,21 @@
         ;; "prog-web" ;; web-mode
         ;; "text-tex" ;; tex-mode, latex-mode
         ;; "web-browser" ;; web browser
+        "init-vis"
         "init-gui"
         "init-keys"))
 
 (message "emacs init time = %s" (emacs-init-time))
 
+
+(defun my/find-file-read-only ()
+  (let ((file (buffer-file-name))
+        (skiplist '(".*-autoloads.el$")))
+    (unless (or (not file)
+                (my/map (lambda (regexp)
+                          (string-match-p regexp file))
+                        skiplist))
+      (read-only-mode 1))))
 
 (defun my/save-point (func)
   (let ((line (line-number-at-pos)))

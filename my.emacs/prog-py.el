@@ -95,7 +95,7 @@
     ;; ELPY所默认依赖的插件，基于Python库virtualenvwrapper
     (use-package pyvenv
       ;; 目前使用virtualenvwrapper插件替代
-      :disabled t)))
+      :disabled)))
 
 (defun pkg/elpy/start ()
   ;; (elpy-mode 1) ;; 由(elpy-enable)追加
