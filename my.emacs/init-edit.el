@@ -12,7 +12,8 @@
   (pkg/lispy/init)
   (pkg/parinfer/init)
   (pkg/flyspell/init)
-  (pkg/flyspell-correct/init))
+  (pkg/flyspell-correct/init)
+  (pkg/hydra/init))
 
 (my/add-mode-hook "init" #'my/init-edit/init)
 
@@ -176,6 +177,20 @@
                (my/package-enabled-p 'flyspell-correct-ivy))
       :init
       (setq flyspell-correct-interface #'flyspell-correct-ivy))))
+
+(defun pkg/hydra/init ()
+  (use-package hydra
+    :defer t
+    :preface
+    (defconst pkg/hydra/timeout-sec 30)
+    (defun pkg/hydra/quit ()
+      (interactive)
+      (message "Hydra Quit"))
+    :if (my/package-enabled-p 'hydra)
+    :init
+    ;; 目前发现启用此项会导致，Hydra子窗口过小，无法完整地呈现提示文字
+    ;; 此外，启用全局的zoom mode似乎也可以避免该问题
+    (setq hydra-lv nil)))
 
 
 (provide 'my/init-edit)
