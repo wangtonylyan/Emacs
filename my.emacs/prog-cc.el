@@ -9,6 +9,7 @@
 (defun my/prog-cc/init ()
   (pkg/cc-mode/init)
   (pkg/cedet/init)
+  (pkg/irony/init)
   (my/add-mode-hook "c" #'my/prog-cc/run-start-hook)
   (my/add-mode-hook "c++" #'my/prog-cc/run-start-hook))
 
@@ -352,6 +353,28 @@
   ;; (setq semanticdb-project-roots '())
   ;; 2. 对于'semanticdb-find-default-throttle中的'system，主要是利用编译器的输出信息
   )
+
+(defun pkg/irony/init ()
+  (use-package irony
+    :preface
+    (defun pkg/irony/setup ()
+      (irony-cdb-autosetup-compile-options)
+      (use-package irony-completion
+        :init
+        (setq irony-duplicate-candidates-filter t)
+        :config
+        (bind-keys :map irony-mode-map
+                   ([remap complete-symbol] . irony-completion-at-point-async)
+                   ([remap completion-at-point] . irony-completion-at-point-async))))
+    (defun pkg/irony/start ()
+      (irony-mode 1))
+    :if (my/package-enabled-p 'irony)
+    :init
+    (setq irony-server-install-prefix (my/set-user-emacs-file ".irony/")
+          irony-user-dir irony-server-install-prefix
+          irony-supported-major-modes '(c-mode c++-mode))
+    (my/add-mode-hook "irony" #'pkg/irony/setup)
+    (my/prog-cc/add-start-hook #'pkg/irony/start)))
 
 
 (provide 'my/prog-cc)

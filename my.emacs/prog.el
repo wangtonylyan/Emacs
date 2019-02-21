@@ -78,13 +78,20 @@
       (when (pkg/flycheck/checker-enabled-p 'emacs-lisp)
         (add-to-list 'flycheck-disabled-checkers 'emacs-lisp-checkdoc)
         (setq flycheck-emacs-lisp-load-path 'inherit)))
+    (use-package flycheck-irony
+      :after (cc-mode irony)
+      :if (and (my/package-enabled-p 'irony)
+               (my/package-enabled-p 'flycheck-irony))
+      :init
+      (my/add-mode-hook "flycheck" #'flycheck-irony-setup))
     (defun pkg/flycheck/c&c++-mode-hook ()
       (when (pkg/flycheck/checker-enabled-p 'c/c++-gcc)
         ;; (setq flycheck-gcc-language-standard "c++11") ;; 由cpputils-cmake插件设置
         ))
-    (use-package flycheck-pyflakes
-      :after (python-mode)
-      :if (and (my/package-enabled-p 'flycheck-pyflakes)
+    (use-package flycheck-pyflakes ;; add 'flycheck-pyflakes to checker list
+      :after (python)
+      :if (and (my/package-enabled-p 'python)
+               (my/package-enabled-p 'flycheck-pyflakes)
                (my/locate-exec "pyflakes")))
     (defun pkg/flycheck/python-mode-hook ()
       (when (pkg/flycheck/checker-enabled-p 'flycheck-pyflakes)
@@ -94,9 +101,10 @@
         (add-to-list 'flycheck-flake8-error-level-alist '("^E305$" . info) t)))
     (use-package flycheck-haskell
       :after (haskell-mode)
-      :if (my/package-enabled-p 'flycheck-haskell)
+      :if (and (my/package-enabled-p 'haskell-mode)
+               (my/package-enabled-p 'flycheck-haskell))
       :init
-      (my/add-mode-hook "haskell" #'flycheck-haskell-setup))
+      (my/add-mode-hook "flycheck" #'flycheck-haskell-setup))
     (defun pkg/flycheck/haskell-mode-hook ()
       (when (and (pkg/flycheck/checker-enabled-p 'haskell-hlint)
                  (my/locate-exec "hlint"))

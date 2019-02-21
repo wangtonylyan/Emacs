@@ -49,6 +49,10 @@
 
 (defun pkg/haskell-mode/init ()
   (use-package haskell-mode
+    :defer t
+    :preface
+    (defun pkg/haskell-mode/start ()
+      (setq haskell-indentation-electric-flag t))
     :if (my/package-enabled-p 'haskell-mode)
     :init
     (setq haskell-process-type 'stack-ghci ;; rely entirely on Stack
@@ -99,8 +103,7 @@
     ;; (my/add-mode-hook "haskell" #'haskell-auto-insert-module-template)
     ))
 
-(defun pkg/haskell-mode/start ()
-  (setq haskell-indentation-electric-flag t))
+
 
 
 

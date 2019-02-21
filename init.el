@@ -140,6 +140,8 @@
             ("cc"             c-mode-common-hook        )
             ("c"              c-mode-hook               )
             ("c++"            c++-mode-hook             )
+            ("objc"           objc-mode-hook            )
+            ("irony"          irony-mode-hook           )
             ("python"         python-mode-hook          )
             ("elpy"           elpy-mode-hook            )
             ("sml"            sml-mode-hook             )
@@ -180,6 +182,8 @@
       (setq shell-file-name path
             shell-command-switch "-c")))
   (my/locate-exec "git.exe" "Git" t)
+  (or (my/locate-exec "python.exe" "Python3" t)
+      (my/locate-exec "python.exe" "Python" t))
   (setq inhibit-compacting-font-caches t))
  ((eq system-type 'gnu/linux)
   (mapc (lambda (dir)
@@ -327,16 +331,30 @@
           hydra ;; which-key
           ;; =============================================================================
           ;; [programming] prog.el
-          yasnippet
-          company ;; auto-complete
-          company-jedi
           flycheck ;; flymake
+          flycheck-irony
           ;; flycheck-pyflakes
           flycheck-haskell
           ggtags ;; helm-gtags, counsel-gtags, counsel-etags
+          ;; asn1-mode
+          ;; =============================================================================
+          ;; [utility] prog-util.el
+          yasnippet
+          company ;; auto-complete
+          company-irony
+          company-jedi
           ;; =============================================================================
           ;; [c, c++] prog-cc.el
           ;; stickyfunc-enhance
+          irony
+          ;; =============================================================================
+          ;; =============================================================================
+          ;; [python] prog-py.el
+          python ;; python-mode
+          ;; elpy ;; ropemacs
+          ;; py-autopep8
+          ;; auto-virtualenvwrapper ;; virtualenvwrapper
+
 
           ;; =============================================================================
           ;; =============================================================================
@@ -348,14 +366,9 @@
           ;; markdown-mode
           ;; markdown-preview-mode
           ;; auctex
-          asn1-mode
           ;; cmake-mode ;; cmake-ide, cmake-project
           ;; cmake-font-lock
           ;; cpputils-cmake
-          ;; [python]
-          ;; elpy ;; ropemacs
-          ;; py-autopep8
-          ;; auto-virtualenvwrapper ;; virtualenvwrapper
           ;; [haskell]
           haskell-mode
           hindent

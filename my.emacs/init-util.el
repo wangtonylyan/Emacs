@@ -96,16 +96,27 @@
                helm-mini
                helm-buffers-list
                helm-occur)
+    :preface
+    (defun pkg/helm/spacemacs/hide-minibuffer ()
+      "Hide minibuffer in Helm session if we use the header line as input field."
+      (when (with-helm-buffer helm-echo-input-in-header-line)
+        (let ((ov (make-overlay (point-min) (point-max) nil nil t)))
+          (overlay-put ov 'window (selected-window))
+          (overlay-put ov 'face (let ((bg-color (face-background 'default nil)))
+                                  `(:background ,bg-color :foreground ,bg-color)))
+          (setq-local cursor-type nil))))
     :if (my/package-enabled-p 'helm)
     :init
     (require 'helm-config)
     (setq helm-split-window-inside-p t
+          helm-always-two-windows nil
           helm-full-frame nil
           helm-use-frame-when-more-than-two-windows nil
-          helm-display-header-line nil
-          helm-echo-input-in-header-line nil
           helm-autoresize-max-height 30
-          helm-autoresize-min-height 0
+          helm-autoresize-min-height 10
+          helm-display-header-line nil
+          helm-echo-input-in-header-line t
+          helm-prevent-escaping-from-minibuffer t
           helm-ff-search-library-in-sexp t
           helm-ff-file-name-history-use-recentf t
           helm-mode-fuzzy-match nil ;; globally disabled
@@ -122,10 +133,13 @@
           helm-buffer-skip-remote-checking t
           ;; 配置该参数可以指定不同的后台支持，包括imenu、ido、smex等
           ;; helm-completing-read-handlers-alist
-          )
+          helm-bookmark-show-location t
+          helm-imenu-execute-action-at-once-if-one nil
+          helm-org-format-outline-path t)
     :config
-    (helm-mode 1)
-    (helm-autoresize-mode 1)))
+    (add-hook 'helm-minibuffer-set-up-hook #'pkg/helm/spacemacs/hide-minibuffer)
+    (helm-autoresize-mode 1)
+    (helm-mode 1)))
 
 (defun pkg/ivy/init ()
   (use-package ivy
