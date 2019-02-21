@@ -116,8 +116,6 @@
     (mapc (lambda (tup) (puthash (car tup) (cadr tup) dict))
           '(;; [emacs]
             ("init"           after-init-hook           )
-            ("my/init-gui"    my/init-gui/start-hook    )
-            ("my/init-vis"    my/init-vis/start-hook    )
             ("my/prog"        my/prog/start-hook        )
             ("my/prog-util"   my/prog-util/start-hook   )
             ("my/prog-cc"     my/prog-cc/start-hook     )
@@ -164,9 +162,8 @@
   (remove-hook (my/get-mode-hook mode) func local))
 
 (defun my/add-modes-hook (list)
-  (mapc (lambda (elem)
-          (my/add-mode-hook (car elem) (cadr elem) (caddr elem)))
-        list))
+  (dolist (elem list)
+    (my/add-mode-hook (car elem) (cadr elem) (caddr elem))))
 
 (defun my/run-mode-hook (mode)
   (run-hooks (my/get-mode-hook mode)))
@@ -402,13 +399,6 @@
   (package-install-selected-packages))
 
 (eval-when-compile
-  ;; disabled, diminish
-  ;; ensure, requires
-  ;; after, demand
-  ;; defer
-  ;; commands, bind, hook
-  ;; mode, magic, interpreter
-  ;; preface, if, init, config
   (setq use-package-always-defer nil
         use-package-verbose nil)
   (require 'use-package))
@@ -416,7 +406,6 @@
 (require 'bind-key)
 
 (use-package all-the-icons
-  :ensure t
   :defer t
   :init
   ;; 此插件在首次使用前需要额外地安装字体，否则启用后mode-line中的图片会显示为乱码
@@ -427,7 +416,6 @@
   )
 
 (use-package diminish
-  :ensure t
   :hook (after-init . pkg/diminish/start)
   :preface
   (defun pkg/diminish/start ()
@@ -439,9 +427,9 @@
   :defer t
   :init
   (let ((dir (my/set-user-emacs-file ".transient/")))
-    (setq transient-levels-file (concat dir "levels.el")
-          transient-values-file (concat dir "values.el")
-          transient-history-file (concat dir "history.el"))))
+    (setq transient-levels-file (my/concat-directory-file dir "levels.el")
+          transient-values-file (my/concat-directory-file dir "values.el")
+          transient-history-file (my/concat-directory-file dir "history.el"))))
 
 
 (setq user-full-name "TonyLYan"
@@ -682,8 +670,10 @@
 
 
 (defun my/find-file-read-only ()
-  (let ((file (buffer-file-name))
-        (skiplist '(".*-autoloads.el$")))
+  (let ((file (my/file-exists-p buffer-file-name))
+        (skiplist `(".*-autoloads.el$"
+                    ,(my/set-user-emacs-file "\\..*/.*")
+                    ,(file-truename (my/set-user-emacs-file "\\..*/.*")))))
     (unless (or (not file)
                 (my/map (lambda (regexp)
                           (string-match-p regexp file))
