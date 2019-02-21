@@ -52,13 +52,17 @@
     :config
     ;; 没有必要为每个模式分别启用其独享的后端，因为筛选适用后端的过程非常效率
     (setq company-clang-executable (my/locate-exec "clang")
-          company-backends `(company-elisp
+          company-backends `(;; [Elisp]
+                             company-elisp
+                             ;; [C, C++]
+                             ;; company-semantic ;; 'semantic is too slow
+                             ,(when company-clang-executable
+                                (if (and (my/package-enabled-p 'irony)
+                                         (my/package-enabled-p 'company-irony))
+                                    'company-irony 'company-clang))
+                             ;; [Python]
                              ,(when (my/package-enabled-p 'company-jedi)
                                 'company-jedi)
-                             ;; company-semantic ;; too slow
-                             ,(when company-clang-executable
-                                (if (my/package-enabled-p 'company-irony)
-                                    'company-irony 'company-clang))
                              company-cmake
                              ;; company-eclim ;; Eclipse
                              ;; company-xcode
@@ -67,7 +71,9 @@
                               company-gtags
                               company-etags
                               company-keywords)
-                             ;; company-capf ;; by (completion-at-point-functions)
+                             ,(when (my/package-enabled-p 'irony)
+                                ;; (completion-at-point-functions) use 'semantic by default
+                                'company-capf)
                              company-files
                              ;; company-nxml
                              ;; company-bbdb ;; Big Brother Database, an address book
@@ -88,7 +94,20 @@
                ("M-p" . nil) ;; (company-select-previous)
                ("C-n" . company-select-next)
                ("C-p" . company-select-previous)
-               ("C-t" . company-search-toggle-filtering))))
+               ("C-t" . company-search-toggle-filtering))
+    (use-package company-irony
+      :defer t
+      :preface
+      (defun pkg/company-irony/setup ()
+        (company-irony-setup-begin-commands))
+      :if (and (my/package-enabled-p 'irony)
+               (my/package-enabled-p 'company-irony))
+      :init
+      (setq company-irony-ignore-case nil)
+      (my/add-mode-hook "irony" #'pkg/company-irony/setup))
+    (use-package company-jedi
+      :defer t
+      :if (and (my/package-enabled-p 'company-jedi)))))
 
 (defun pkg/auto-complete/init ()
   (use-package auto-complete

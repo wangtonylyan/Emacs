@@ -1,3 +1,12 @@
+# http_proxy=http://CHT1HTSH3191:Alps1911@10.25.71.1:8080
+# https_proxy=https://CHT1HTSH3191:Alps1911@10.25.71.1:8080
+
+[http]
+proxy = http://CHT1HTSH3191:Alps1911@10.25.71.1:8080
+sslverify = false
+[https]
+proxy = https://CHT1HTSH3191:Alps1911@10.25.71.1:8080
+
 ;; 重构
 ;; 1. 检查包含以下字符串的符号名
 ;;    my-, plugin
@@ -139,43 +148,6 @@
       (load-file file)
       (add-to-list 'load-path (concat path "contrib"))
       (add-to-list 'Info-directory-list (concat path "doc/info/")))))
-
-
-
-# http_proxy=http://CHT1HTSH3191:Alps1911@10.25.71.1:8080
-# https_proxy=https://CHT1HTSH3191:Alps1911@10.25.71.1:8080
-
-
-[http]
-proxy = http://CHT1HTSH3191:Alps1911@10.25.71.1:8080
-sslverify = false
-[https]
-proxy = https://CHT1HTSH3191:Alps1911@10.25.71.1:8080
-
-
-;; This buffer is for text that is not saved, and for Lisp evaluation.
-;; To create a file, visit it with <open> and enter text in its buffer.
-
-(use-package irony ;; c-mode, c++-mode, java-mode
-  :init
-  (setq irony-server-install-prefix (my/set-user-emacs-file ".irony/")
-        irony-user-dir irony-server-install-prefix
-        irony-supported-major-modes '(c++-mode c-mode objc-mode))
-  :config
-  (use-package irony-completion
-    :init
-    (setq irony-duplicate-candidates-filter t))
-
-  )
-
-(use-package company-irony
-  :init
-  (setq company-irony-ignore-case nil)
-  )
-
-(require ')
-(add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
-(add-hook 'c-mode-hook 'irony-mode)
 
 (defun my/prog/todo ()
   ;; =============================================================================
