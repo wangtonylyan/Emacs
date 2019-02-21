@@ -119,6 +119,7 @@
             ("my/init-gui"    my/init-gui/start-hook    )
             ("my/init-vis"    my/init-vis/start-hook    )
             ("my/prog"        my/prog/start-hook        )
+            ("my/prog-util"   my/prog-util/start-hook   )
             ("my/prog-cc"     my/prog-cc/start-hook     )
             ("my/prog-py"     my/prog-py/start-hook     )
             ;; [edit]
@@ -194,8 +195,8 @@
 
 ;; (setq user-init-file "~/.emacs.d/init.el")
 ;; (load user-init-file)
-(setq default-directory "~/"
-      user-emacs-directory "~/.emacs.d/"
+(setq default-directory (my/directory-exists-p "~/")
+      user-emacs-directory (my/directory-exists-p "~/.emacs.d/")
       command-line-default-directory default-directory)
 (setq-default default-directory default-directory
               user-emacs-directory user-emacs-directory)
@@ -306,6 +307,15 @@
           highlight-thing
           zoom ;; dimmer
           ;; =============================================================================
+          ;; [utility] init-util.el
+          ;; shell, term, ansi-term, eshell
+          ;; all-the-icons-dired
+          ;; dired-hacks-utils ;; TODO
+          ediff ;; vdiff
+          ;; vdiff-magit
+          projectile ;; eproject
+          magit
+          ;; =============================================================================
           ;; [editing] init-edit.el
           windmove
           buffer-move
@@ -331,20 +341,10 @@
           ;; [c, c++] prog-cc.el
           ;; stickyfunc-enhance
 
-
           ;; =============================================================================
           ;; =============================================================================
           ;; [TODO]
-          ;; [utility] init-util.el
-          eshell
-          ;; all-the-icons-dired
-          ;; dired-hacks-utils ;; TODO
           bm
-          ediff ;; vdiff
-          projectile ;; eproject
-          magit
-          ;; vdiff-magit
-          ;; =============================================================================
           ;; [text.el]
           ;; pdf-tools
           org
@@ -357,13 +357,11 @@
           ;; cpputils-cmake
           ;; [python]
           ;; elpy ;; ropemacs
-
           ;; py-autopep8
           ;; auto-virtualenvwrapper ;; virtualenvwrapper
           ;; [haskell]
           haskell-mode
           hindent
-
           ;; [ml]
           sml-mode
           ;; [web]
@@ -666,7 +664,8 @@
         (my/load-file (my/set-user-emacs-file file t)))
       '("init-util"
         "init-edit"
-        "prog" ;; prog-mode
+        "prog" ;; prog-mode, asn1-mode
+        "prog-util"
         "prog-cc" ;; cc-mode
         ;; lisp-mode, emacs-lisp-mode, lisp-interaction-mode,
         ;; sml-mode, haskell-mode
