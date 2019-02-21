@@ -211,8 +211,8 @@ proxy = https://CHT1HTSH3191:Alps1911@10.25.71.1:8080
   (use-package cmake-project
     :if (my/package-enabled-p 'cmake-project))
 
-  (use-package asn1-mode
-    :if (my/package-enabled-p 'asn1-mode)))
+
+  )
 
 (defun pkg/ecb/init ()
   (use-package ecb
@@ -328,3 +328,49 @@ proxy = https://CHT1HTSH3191:Alps1911@10.25.71.1:8080
 
 (defun pkg/gud/start ()
   )
+
+(defun pkg/shell/start ()
+  (interactive)
+  (if (eq major-mode 'eshell-mode)
+      (progn
+        (insert "exit")
+        (eshell-send-input)
+        (delete-window))
+    (progn
+      (let* ((dir (if (buffer-file-name)
+                      (my/get-file-directory (buffer-file-name))
+                    default-directory))
+             (name (car (last (split-string dir "/" t)))))
+        (split-window-vertically (- (/ (window-total-height) 3)))
+        (other-window 1)
+        (eshell "new")
+        (rename-buffer (concat "*EShell: " name "*"))))))
+
+(use-package bm ;; TODO
+  :commands (bm-next
+             bm-previous
+             bm-toggle)
+  :if (my/package-enabled-p 'bm)
+  :config
+  (setq bm-marker 'bm-marker-left
+        bm-cycle-all-buffers t
+        temporary-bookmark-p t
+        bm-buffer-persistence t
+        bm-restore-repository-on-load t
+        bm-repository-file (my/set-user-emacs-file "bm-repository/"))
+  (setq-default bm-buffer-persistence bm-buffer-persistence)
+  (add-hook' after-init-hook #'bm-repository-load t)
+  (add-hook 'find-file-hooks #'bm-buffer-restore t)
+  (add-hook 'kill-buffer-hook #'bm-buffer-save t)
+  (add-hook 'kill-emacs-hook (lambda ()
+                               (progn
+                                 (bm-buffer-save-all)
+                                 (bm-repository-save))) t)
+  (add-hook 'after-save-hook #'bm-buffer-save t)
+  (add-hook 'after-revert-hook #'bm-buffer-restore t)
+  (use-package helm-bm
+    :after (helm)
+    :bind (("C-c b b" . helm-bm))
+    :if (and (my/package-enabled-p 'helm)
+             (my/package-enabled-p 'helm-bm)))
+  (unbind-key "C-x r"))

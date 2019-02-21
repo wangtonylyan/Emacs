@@ -483,6 +483,8 @@ Number of marked: %(pkg/dired/count-marked)
   ("a" org-agenda  "agenda "                   )
   ("q" pkg/hydra/quit nil :exit t))
 
+
+;; (bind-key "C-c p" 'projectile-command-map projectile-mode-map)
 (defhydra pkg/hydra/group/project
   (:timeout pkg/hydra/timeout-sec :exit t)
   "
