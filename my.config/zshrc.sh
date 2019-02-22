@@ -101,6 +101,12 @@ alias -s tgz='tar -xzvf'
 alias -s zip='unzip'
 alias -s bz2='tar -xjvf'
 
+autoload -Uz vcs_info
+zstyle ':vcs_info:*' enable git  # only enable offline VCS
+precmd() {
+    vcs_info
+}
+
 POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(user root_indicator dir)
 POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status background_jobs vcs time)
 POWERLEVEL9K_PROMPT_ADD_NEWLINE=true

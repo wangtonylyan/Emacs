@@ -72,13 +72,9 @@
    ("M-j"            . nil) ;; (indent-new-comment-line)
    ("C-M-x"          . nil) ;; (eval-defun)
    ("C-x e"          . nil) ;; ((kmacro-end-and-call-macro)
-   ("M-x"            . helm-M-x                )
-   ("M-y"            . helm-show-kill-ring     )
-   ("C-x C-f"        . helm-find-files         )
-   ("C-x C-r"        . helm-recentf            )
-   ("C-x b"          . helm-mini               )
-   ("C-x C-b"        . helm-buffers-list       )
-   ("C-o"            . helm-occur              )
+   ("C-h h"          . nil) ;; (view-hello-file)
+   ("C-h f"          . nil) ;; (describe-function)
+   ("C-h v"          . nil) ;; (describe-variable)
    ("C-S-h"          . windmove-left           )
    ("C-S-l"          . windmove-right          )
    ("C-S-k"          . windmove-up             )
@@ -135,23 +131,57 @@
     :config
     (define-key tabbar-mode-map tabbar-prefix-key nil)
     (bind-keys :map tabbar-mode-map
-               ("C-S-i" . tabbar-forward-tab)
-               ("C-S-u" . tabbar-backward-tab)
-               ("C-S-o" . tabbar-forward-group)
-               ("C-S-y" . tabbar-backward-group))))
+               ("C-S-f" . tabbar-forward-tab)
+               ("C-S-b" . tabbar-backward-tab)
+               ("C-S-n" . tabbar-forward-group)
+               ("C-S-p" . tabbar-backward-group))))
 
 (defun my/init-keys/helm ()
+  (defhydra pkg/hydra/group/helm
+    (global-map "" :timeout pkg/hydra/timeout-sec :exit t)
+    ("M-x"     helm-M-x               "M-x              " :column "emacs   ")
+    (""        helm-colors            "colors           "                   )
+    (""        helm-calcul-expression "calcul-expression"                   )
+    ("M-y"     helm-show-kill-ring    "show-kill-ring   " :column "ring    ")
+    ("C-h SPC" helm-all-mark-rings    "all-mark-rings   "                   )
+    ("C-x C-f" helm-find-files        "find-files       " :column "file    ")
+    ("C-x C-r" helm-recentf           "recentf          "                   )
+    ("C-x b"   helm-mini              "mini             " :column "buffer  ")
+    ("C-x C-b" helm-buffers-list      "buffers-list     "                   )
+    ("C-o"     helm-occur             "occur            " :column "symbol  ")
+    ("C-S-o"   helm-regexp            "regexp           "                   )
+    ("C-s"     helm-semantic-or-imenu "semantic-or-imenu"                   )
+    ("C-h f"   helm-apropos           "apropos          "                   )
+    ("C-h v"   helm-apropos           "apropos          "                   )
+    ("C-h h"   helm-man-woman         "man-woman        " :column "external")
+    (""        helm-locate            "locate           "                   )
+    (""        helm-find              "find             "                   ))
   (use-package helm
     :defer t
     :config
-    (bind-keys ("C-x c" . nil)
+    (bind-keys (helm-command-prefix-key . nil)
+               :map minibuffer-local-map
+               ("C-c C-l" . helm-minibuffer-history)
                :map helm-map
+               ("C-z" . nil)
+               ("C-j" . helm-execute-persistent-action)
                ("<tab>" . helm-execute-persistent-action)
+               ("C-i" . helm-select-action)
                ("M-x" . helm-select-action)
                ("C-c C-f" . helm-follow-mode)
-               :map minibuffer-local-map
-               ("M-p" . helm-minibuffer-history)
-               ("M-n" . helm-minibuffer-history))))
+               ("C-o" . helm-next-source))
+    (use-package helm-files
+      :defer t
+      :config
+      (bind-keys :map helm-find-files-map
+                 ("C-l" . helm-find-files-up-one-level)
+                 ("C-r" . helm-find-files-down-last-level)
+                 ("C-s" . helm-ff-run-grep)))
+    (use-package helm-buffers
+      :defer t
+      :config
+      (bind-keys :map helm-buffer-map
+                 ("M-a" . helm-mark-all)))))
 
 (defun my/init-keys/undo-tree ()
   (use-package undo-tree
@@ -188,7 +218,7 @@
 (defun my/init-keys/hydra/group ()
   (defhydra pkg/hydra/group
     (:timeout pkg/hydra/timeout-sec :exit t)
-    ("h" helm-command-prefix
+    ("h" pkg/hydra/group/helm/body
      "helm" :column "")
     ("b" pkg/hydra/group/window/body
      "window, windmove, winner, buffer-move, zoom")
@@ -336,6 +366,8 @@
     :defer t
     :config
     (bind-keys :map dired-mode-map
+               ("A" . nil) ("C" . nil) ("R" . nil)
+               ("* c" . nil) ("* s" . nil)
                ("?" . pkg/hydra/group/dired-help/body))
     (defhydra pkg/hydra/group/dired-help
       (dired-mode-map "" :timeout pkg/hydra/timeout-sec :exit t)
@@ -361,6 +393,11 @@ Number of marked: %(pkg/dired/count-marked)
       ("t"   dired-toggle-marks           "toggle (un)marked"                   )
       ("M-n" dired-next-marked-file       "next marked      "                   )
       ("M-p" dired-prev-marked-file       "prev marked      "                   )
+      ("* a,/,*,@" nil                    "mark all/dir/exe/link"               )
+      ("* a" dired-mark-subdir-files      nil                                   )
+      ("* /" dired-mark-directories       nil                                   )
+      ("* *" dired-mark-executables       nil                                   )
+      ("* @" dired-mark-symlinks          nil                                   )
       ("v"   dired-view-file              "peek             " :column "view    ")
       ("V"   dired-display-file           "display          "                   )
       ("f"   dired-find-file              "open             "                   )
