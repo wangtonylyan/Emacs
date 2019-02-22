@@ -6,6 +6,40 @@
 (defun my/prog-py/run-start-hook ()
   (my/run-mode-hook "my/prog-py"))
 
+(defun my/prog-py/init ()
+  (pkg/python/init)
+  (pkg/elpy/init)
+  ;; (my-plugin-auto-virtualenvwrapper-init)
+
+  (my/add-mode-hook "python" #'my/prog-py/run-start-hook))
+
+(with-eval-after-load 'python
+  (my/prog-py/init))
+
+
+(defun pkg/python/init ()
+  (use-package python
+    :preface
+    (defun pkg/python/start ())
+    :if (my/package-enabled-p 'python)
+    :init
+    (setq python-shell-interpreter (or (my/locate-exec "python3")
+                                       (my/locate-exec "python"))
+          python-shell-interpreter-args "-i"
+          ;; python-shell-interpreter-args "--pylab=osx --pdb --nosep --classic"
+          ;; python-shell-prompt-regexp ">>> "
+          ;; python-shell-prompt-output-regexp ""
+          ;; python-shell-completion-setup-code "from IPython.core.completerlib import module_completion"
+          ;; python-shell-completion-module-string-code "';'.join(module_completion('''%s'''))\n"
+          ;; python-shell-completion-string-code "';'.join(get_ipython().Completer.all_completions('''%s'''))\n"
+          )
+    (my/prog-py/add-start-hook #'pkg/python/start)
+    :config
+    (bind-keys :map python-mode-map
+               ("<backspace>" . python-indent-dedent-line-backspace))
+    (my/del-mode-hook "python" #'wisent-python-default-setup)))
+
+
 
 ;; =============================================================================
 ;; 关于Emacs对于Python支持方面的介绍可参考如下：
@@ -18,34 +52,6 @@
 ;; Emacs内置了该插件，并将其作为对python-mode主模式的默认支持
 ;; 实现理念是简洁，尽可能地依赖并融合于Emacs中已有的功能
 ;; -----------------------------------------------------------------------------
-(defun pkg/python/init ()
-  (let ((exe "python3")) ;; python或python3
-    (when (eq system-type 'windows-nt)
-      (when (my/locate-exec "python.exe" "python3" t)
-        (setq exe "python.exe")))
-    (use-package python
-      :if (my/locate-exec exe)
-      ;; 此函数的执行就是在(load 'python)之后，因此:init与:config的效果理应是等价的
-      ;; 今后可以使用:mode改进当前实现
-      :init
-      (setq python-shell-interpreter exe
-            python-shell-interpreter-args "-i"
-            ;; python-shell-interpreter-args "--pylab=osx --pdb --nosep --classic"
-            ;; python-shell-prompt-regexp ">>> "
-            ;; python-shell-prompt-output-regexp ""
-            ;; python-shell-completion-setup-code "from IPython.core.completerlib import module_completion"
-            ;; python-shell-completion-module-string-code "';'.join(module_completion('''%s'''))\n"
-            ;; python-shell-completion-string-code "';'.join(get_ipython().Completer.all_completions('''%s'''))\n"
-            )
-      (my/prog-py/add-start-hook #'pkg/python/start)
-      :config
-      (bind-keys :map python-mode-map
-                 ("<backspace>" . python-indent-dedent-line-backspace))
-      (my/del-mode-hook "python" #'wisent-python-default-setup))))
-
-(defun pkg/python/start ()
-  )
-
 
 ;; =============================================================================
 ;; python-mode.el
@@ -67,12 +73,16 @@
 ;; -----------------------------------------------------------------------------
 (defun pkg/elpy/init ()
   (use-package elpy
+    :preface
+    (defun pkg/elpy/start ()
+      ;; (elpy-mode 1) ;; 由(elpy-enable)追加
+      )
     :if (my/package-enabled-p 'elpy)
-    :commands (elpy-enable elpy-mode)
     :init
-    (eval-after-load 'python '(elpy-enable))
     (my/prog-py/add-start-hook #'pkg/elpy/start)
-    :config ;; (elpy-config)
+    :config
+    ;; (elpy-config)
+    (elpy-enable)
     (bind-keys :map elpy-mode-map
                ("C-c C-c" . elpy-shell-send-region-or-buffer))
     (setq elpy-rpc-python-command python-shell-interpreter
@@ -83,9 +93,13 @@
 
     ;; (elpy-use-ipython) ;; (elpy-use-cpython) ;; 指定Python解释器
     ;; elpy默认支持并使用Emacs内置的flymake，但可随意地切换成flycheck
-    (with-eval-after-load 'flycheck
+
+    (use-package flycheck
+      :defer t
+      :config
       (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
       (my/add-mode-hook "elpy" #'flycheck-mode-on-safe))
+
     (use-package py-autopep8
       :if (and (my-func-package-enabled-p 'py-autopep8)
                (executable-find "autopep8"))
@@ -97,9 +111,7 @@
       ;; 目前使用virtualenvwrapper插件替代
       :disabled)))
 
-(defun pkg/elpy/start ()
-  ;; (elpy-mode 1) ;; 由(elpy-enable)追加
-  )
+
 
 ;; =============================================================================
 ;; Ropemacs
@@ -111,30 +123,6 @@
 ;; 每当roepmacs-mode启用时，一个pymacs客户进程和一个Python解释器将被启动，并彼此相连
 ;; 随后Emacs将通过与该客户进程进行通信，从而获取rope库的相关支持
 ;; -----------------------------------------------------------------------------
-(defun my-plugin-ropemacs-init ()
-  (use-package ropemacs
-    :if (my-func-package-enabled-p 'ropemacs)
-    :demand t
-    :commands (ropemacs-mode)
-    :init
-    (let ((path (concat package-user-dir "/ropemacs")))
-      (when (file-directory-p path)
-        (add-to-list 'load-path path t)))
-    (add-hook 'my-prog-py-mode-start-hook 'my-plugin-ropemacs-start t)
-    :config
-    (when (and (require 'pymacs nil t)
-               (pymacs-load "ropemacs" "rope-" t))
-      ;; ropemacs模式中的自动补全快捷键与auto-complete不同，默认为M-/，可作为后者的补充
-      ;; 因为后者在某些情况下必须至少输入一个字符，而此时就可以使用前者
-      (setq ropemacs-confirm-saving t
-            ropemacs-enable-autoimport t
-            ropemacs-autoimport-modules '("os" "sys" "inspect")))))
-
-(defun my-plugin-ropemacs-start ()
-  ;; (ropemacs-mode 1) ;;无需手动启用
-  (when (boundp 'ac-sources)
-    (set (make-local-variable 'ac-sources)
-         (add-to-list 'ac-sources 'ac-source-ropemacs t))))
 
 ;; =============================================================================
 ;; 插件virtualenvwrapper是Python同名库的Elisp实现，可完全替代后者
@@ -167,17 +155,6 @@
 
 ;; =============================================================================
 ;; =============================================================================
-(defun my/prog-py/init ()
-  (pkg/python/init)
-  (pkg/elpy/init)
-  ;; (my-plugin-ropemacs-init)
-  ;; (my-plugin-auto-virtualenvwrapper-init)
-  (my/add-mode-hook "python" #'my/prog-py/start))
 
-(defun my/prog-py/start ()
-  (prettify-symbols-mode 1)
-  (my/prog-py/run-start-hook))
-
-(eval-after-load 'python '(my/prog-py/init))
 
 (provide 'my/prog-py)

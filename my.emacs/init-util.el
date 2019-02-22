@@ -88,14 +88,7 @@
 (defun pkg/helm/init ()
   (use-package helm
     :diminish (helm-mode)
-    :commands (helm-command-prefix
-               helm-M-x
-               helm-show-kill-ring
-               helm-find-files
-               helm-recentf
-               helm-mini
-               helm-buffers-list
-               helm-occur)
+    :defer t
     :preface
     (defun pkg/helm/spacemacs/hide-minibuffer ()
       "Hide minibuffer in Helm session if we use the header line as input field."
@@ -124,8 +117,10 @@
           helm-buffers-fuzzy-matching t
           helm-recentf-fuzzy-match t
           helm-locate-fuzzy-match t
-          ;; helm-apropos-fuzzy-match t
-          ;; helm-etags-fuzzy-match t
+          helm-semantic-fuzzy-match nil
+          helm-imenu-fuzzy-match t
+          helm-etags-fuzzy-match nil
+          helm-apropos-fuzzy-match t
           helm-move-to-line-cycle-in-source t
           helm-follow-input-idle-delay 0.5
           helm-follow-mode-persistent nil
@@ -133,8 +128,8 @@
           helm-buffer-skip-remote-checking t
           ;; 配置该参数可以指定不同的后台支持，包括imenu、ido、smex等
           ;; helm-completing-read-handlers-alist
-          helm-bookmark-show-location t
           helm-imenu-execute-action-at-once-if-one nil
+          helm-bookmark-show-location t
           helm-org-format-outline-path t)
     :config
     (add-hook 'helm-minibuffer-set-up-hook #'pkg/helm/spacemacs/hide-minibuffer)
@@ -210,17 +205,16 @@
     :diminish (projectile-mode)
     :commands (projectile-project-root)
     :preface
-    (defvar pkg/projectile/switch-hook)
     (defun pkg/projectile/add-switch-action (func)
       (add-hook 'pkg/projectile/switch-hook func t))
-    (defun pkg/projectile/switch-action ()
+    (defun pkg/projectile/do-switch-action ()
       (run-hooks 'pkg/projectile/switch-hook))
     :if (my/package-enabled-p 'projectile)
     :init
     (setq projectile-indexing-method 'alien
           projectile-enable-caching t
           projectile-project-search-path pvt/project/root-directories
-          projectile-switch-project-action #'pkg/projectile/switch-action
+          projectile-switch-project-action #'pkg/projectile/do-switch-action
           projectile-cache-file (my/set-user-emacs-file
                                  ".projectile/cache")
           projectile-known-projects-file (my/set-user-emacs-file

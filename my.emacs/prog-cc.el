@@ -359,20 +359,18 @@
     :preface
     (defun pkg/irony/setup ()
       (irony-cdb-autosetup-compile-options)
-      (use-package irony-completion
-        :init
-        (setq irony-duplicate-candidates-filter t)
-        :config
-        (bind-keys :map irony-mode-map
-                   ([remap complete-symbol] . irony-completion-at-point-async)
-                   ([remap completion-at-point] . irony-completion-at-point-async))))
+      (bind-keys :map irony-mode-map
+                 ([remap complete-symbol] . irony-completion-at-point)
+                 ([remap completion-at-point] . irony-completion-at-point)))
     (defun pkg/irony/start ()
       (irony-mode 1))
     :if (my/package-enabled-p 'irony)
     :init
+    ;; (irony-install-server) ;; 首次启用时会提示手动执行
     (setq irony-server-install-prefix (my/set-user-emacs-file ".irony/")
           irony-user-dir irony-server-install-prefix
-          irony-supported-major-modes '(c-mode c++-mode))
+          irony-supported-major-modes '(c-mode c++-mode)
+          irony-duplicate-candidates-filter t)
     (my/add-mode-hook "irony" #'pkg/irony/setup)
     (my/prog-cc/add-start-hook #'pkg/irony/start)))
 

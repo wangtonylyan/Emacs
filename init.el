@@ -190,7 +190,7 @@
           (let ((path (my/path-exists-p dir)))
             (when path (add-to-list 'exec-path path))))
         '("~/.local/bin"))
-  (let ((path (my/locate-exec "zsh")))
+  (let ((path (my/locate-exec "bash"))) ;; not recommend "zsh"
     (when path
       (setq shell-file-name path)))))
 
@@ -467,6 +467,7 @@
 (auto-compression-mode 1) ;; 允许查看和写入压缩包
 
 (use-package files
+  :defer t
   :init
   (setq make-backup-files t
         backup-by-copying t
@@ -483,19 +484,23 @@
   (add-hook 'before-save-hook 'my/reformat-current-file t))
 
 (use-package recentf
+  :hook (after-init . pkg/recentf/start)
+  :preface
+  (defun pkg/recentf/start ()
+    (recentf-mode 1))
   :init
-  (setq recentf-save-file (my/set-user-emacs-file ".emacs.recentf"))
-  :config
-  (recentf-mode 1))
+  (setq recentf-save-file (my/set-user-emacs-file ".emacs.recentf")))
 
 (use-package autorevert
+  :hook (after-init . pkg/autorevert/start)
+  :preface
+  (defun pkg/autorevert/start ()
+    (global-auto-revert-mode 1))
   :init
   (setq auto-revert-use-notify t
         auto-revert-interval 1
         auto-revert-verbose nil
-        auto-revert-stop-on-user-input t)
-  :config
-  (global-auto-revert-mode 1))
+        auto-revert-stop-on-user-input t))
 
 (use-package grep
   :defer t

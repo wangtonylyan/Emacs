@@ -178,13 +178,12 @@ proxy = https://CHT1HTSH3191:Alps1911@10.25.71.1:8080
       (add-hook 'cmake-mode-hook 'cmake-font-lock-activate t)))
 
   (use-package cmake-ide
-    :if (my/package-enabled-p 'cmake-ide))
+    :if (my/package-enabled-p 'cmake-ide)
+    :config
+    (cmake-ide-setup))
 
   (use-package cmake-project
-    :if (my/package-enabled-p 'cmake-project))
-
-
-  )
+    :if (my/package-enabled-p 'cmake-project)))
 
 (defun pkg/ecb/init ()
   (use-package ecb
