@@ -27,6 +27,7 @@
   (my/init-keys/flycheck)
   (my/init-keys/ggtags)
   (my/init-keys/helm-gtags)
+  (my/init-keys/company)
   (my/init-keys/cedet))
 
 (my/add-mode-hook "init" #'my/init-keys/init)
@@ -742,6 +743,48 @@ PROJECT: %(projectile-project-root)
       ("x"   helm-gtags-clear-all-stacks      "clear stack"                   )
       ("X"   helm-gtags-clear-all-cache       "clear cache"                   )
       ("q" pkg/hydra/quit nil :exit t))))
+
+(defun my/init-keys/company ()
+  (use-package company
+    :defer t
+    :config
+    (bind-keys :map company-active-map
+               ("C-w" . nil) ;; (company-show-location)
+               ("<f1>" . nil) ;; (company-show-doc-buffer)
+               ("C-M-s" . nil) ;; (company-filter-candidates)
+               :map company-search-map
+               ("C-o" . nil) ;; (company-search-toggle-filtering)
+               )
+    (defun pkg/company/move-next ()
+      (interactive)
+      (company-complete-common-or-cycle 1))
+    (defun pkg/company/move-prev ()
+      (interactive)
+      (company-complete-common-or-cycle -1))
+    (defhydra pkg/hydra/group/company-active
+      (company-active-map "" :timeout pkg/hydra/timeout-sec :exit t)
+      ("C-n"      company-select-next        "next       " :column "move    ")
+      ("C-p"      company-select-previous    "prev       "                   )
+      ("M-n"      pkg/company/move-next      "next/common"                   )
+      ("M-p"      pkg/company/move-prev      "prev/common"                   )
+      ("<tab>"    company-complete-common    "common     " :column "complete")
+      ("<return>" company-complete-selection "select     "                   )
+      ("C-h"      company-show-doc-buffer    "docstring  " :column "help    ")
+      ("C-S-h"    company-show-location      "code       "                   )
+      ("C-?"      company-diag               "company    "                   )
+      ("C-s"      company-search-candidates  "search     " :column "search  ")
+      ("C-f"      company-filter-candidates  "filter     "                   )
+      ("C-g"      company-abort              nil                             ))
+    (defhydra pkg/hydra/group/company-search
+      (company-search-map "" :timeout pkg/hydra/timeout-sec :exit t)
+      ("C-n" company-select-next             "next       " :column "move  ")
+      ("C-p" company-select-previous         "prev       "                 )
+      ("M-n" pkg/company/move-next           "next/common"                 )
+      ("M-p" pkg/company/move-prev           "prev/common"                 )
+      ("C-s" company-search-repeat-forward   "forward    " :column "search")
+      ("C-r" company-search-repeat-backward  "backward   "                 )
+      ("C-t" company-search-toggle-filtering "toggle     "                 )
+      ("C-g" company-search-abort            nil                           ))))
 
 
 ;; todo ","

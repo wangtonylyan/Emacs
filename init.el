@@ -128,6 +128,7 @@
             ("yas"            yas-minor-mode-hook       ) ;; when enabled as local mode
             ("YAS"            yas-global-mode-hook      ) ;; when enabled as global mode
             ("flycheck"       flycheck-mode-hook        )
+            ("company"        company-mode-hook         )
             ("SEMANTIC"       semantic-init-hook        ) ;; when enabled as global mode
             ("semantic"       semantic-init-mode-hook   ) ;; mode-local hook
             ;; [language]
@@ -341,6 +342,7 @@
           ;; [utility] prog-util.el
           yasnippet
           company ;; auto-complete
+          company-quickhelp ;; company-box
           company-irony
           company-jedi
           ;; =============================================================================
