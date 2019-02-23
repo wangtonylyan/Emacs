@@ -563,16 +563,16 @@
         save-place-forget-unreadable-files t
         save-place-save-skipped nil))
 
-;; -----------------------------------------------------------------------------
+;; =======================================================================================
 ;; 若打开的中文文件中仍然存在乱码，则尝试执行(revert-buffer-with-coding-system 'gb18030)
 ;; 字符集和编码的名称可查询：'language-info-alist
 (set-language-environment "Chinese-GB18030")
 (prefer-coding-system 'utf-8)
 ;; (set-face-background 'default "#C7EDCC") ;; 设置背景颜色为绿色护眼色
 ;; 字体的名字源自于.ttf或.otf文件内自带的元信息，包括family和style等
-;; 英文字体：Consolas，Fira Mono
-;; 中文字体：SimSun，MicrosoftYaHei，SourceHanSerifSC (思源宋体简体中文)，SourceHanSansSC (思源黑体简体中文)
-;; 混合字体：YaHeiConsolasHybrid，MicrosoftYaHeiMono
+;; 英文字体：Consolas, Fira Mono, Source Code Pro
+;; 中文字体：SimSun, MicrosoftYaHei, SourceHanSerifSC(思源宋体), SourceHanSansSC(思源黑体)
+;; 混合字体：YaHeiConsolasHybrid, MicrosoftYaHeiMono
 ;; Emacs中设置中文字体有以下几种方案
 ;; 1. 默认编码：英文字体，中文编码：中文字体
 ;; 此方案存在的缺陷在于，中英文字体高度不同，导致含有中文字体的行与纯英文字体的行之间行距不均
@@ -580,8 +580,6 @@
 ;; (add-to-list 'face-font-rescale-alist '("SimSun" . 0.8) t)
 ;; 2. 默认编码：中英文混合字体
 ;; 网上提供的混合字体，拥有统一的行高，但通常都不能完善地支持斜体、粗体等形式
-
-;; http://emacser.com/torture-emacs.htm
 (let* ((rsltn (* (display-pixel-width) (display-pixel-height)))
        ;; 针对中英文字体分别设置两种字号
        (efont (cond ((<= rsltn (* 1600 900)) 11)
@@ -589,27 +587,24 @@
                     ((< rsltn (* 2560 1440)) 13)
                     (t 15)))
        (cfont (- efont 1))
-       (chsets '(kana han symbol cjk-misc bopomofo)))
-  (if (eq system-type 'windows-nt)
-      ;; Windows系统上的Emacs25版本对中文字体的显示存在问题，打开中文文档时会存在卡顿的现象
-      ;; 必须手动指定中文字体为宋体才可避免。
-      (progn
-        (set-face-font 'default (font-spec :family "Consolas" :size efont))
-        (dolist (chset chsets)
-          (set-fontset-font t chset
-                            (font-spec :family "SimSun" :size cfont) nil 'prepend)))
-    (progn
-      ;; e.g. 设置字体的方式有以下三种
-      ;; (set-frame-font (font-spec))
-      ;; (set-face-attribute 'default nil :font (font-spec))
-      (set-face-font 'default (font-spec :family "Fira Mono" :size efont))
-      ;; 'charset-script-alist
-      (dolist (chset chsets)
-        (set-fontset-font t chset
-                          (font-spec :family "SourceHanSansSC" :size cfont) nil 'prepend))))
+       (espec (font-spec
+               :family (if (eq system-type 'windows-nt)
+                           "Consolas" "Fira Mono")
+               ;; :weight 'semi-bold
+               :size efont))
+       ;; Windows系统上的Emacs25版本对中文字体的显示存在问题，打开中文文档时会存在卡顿的现象
+       ;; 必须手动指定中文字体为宋体才可避免。
+       (cspec (font-spec
+               :family (if (eq system-type 'windows-nt)
+                           "SimSun" "SourceHanSansSC")
+               :size cfont)))
+  ;; (set-face-attribute 'default nil :font espec)
+  (set-face-font 'default espec) ;; ASCII
+  (dolist (chset '(kana han symbol cjk-misc bopomofo))
+    (set-fontset-font t chset cspec nil)) ;; non-ASCII
   (setq-default line-spacing (/ efont 3)))
 
-;; -----------------------------------------------------------------------------
+;; =======================================================================================
 (global-font-lock-mode 1) ;; 语法高亮
 ;; (add-hook 'xxx-mode-hook #'turn-on-font-lock) ;; (font-lock-mode 1)
 (global-linum-mode -1) ;; (setq linum-format "%5d")
