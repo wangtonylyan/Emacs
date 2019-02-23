@@ -52,6 +52,9 @@
     :config
     ;; 没有必要为每个模式分别启用其独享的后端，因为筛选适用后端的过程非常效率
     (setq company-clang-executable (my/locate-exec "clang")
+          company-minimum-prefix-length 3
+          company-idle-delay 0
+          company-selection-wrap-around t
           company-backends `(;; [Elisp]
                              company-elisp
                              ;; [C, C++]
@@ -60,12 +63,14 @@
                                 (if (and (my/package-enabled-p 'irony)
                                          (my/package-enabled-p 'company-irony))
                                     'company-irony 'company-clang))
+                             ,(when (my/locate-exec "cmake")
+                                'company-cmake)
+                             ;; company-eclim ;; Eclipse
+                             ;; company-xcode
                              ;; [Python]
                              ,(when (my/package-enabled-p 'company-jedi)
                                 'company-jedi)
-                             company-cmake
-                             ;; company-eclim ;; Eclipse
-                             ;; company-xcode
+                             ;; [others]
                              ;; company-css
                              (company-dabbrev-code
                               company-gtags
@@ -79,22 +84,26 @@
                              ;; company-bbdb ;; Big Brother Database, an address book
                              ;; company-oddmuse
                              company-dabbrev)
-          company-minimum-prefix-length 3
-          company-idle-delay 0)
-    ;; 常用的快捷键：
-    ;; <tab>用于补全候选项中的公共字段，<return>用于补全所选项，C-g用于终止补全
-    ;; (define-key company-active-map (kbd "<tab>") 'company-complete-common-or-cycle)
-    (bind-keys :map company-active-map
-               ("M-n" . nil) ;; (company-select-next)
-               ("M-p" . nil) ;; (company-select-previous)
-               ("C-n" . company-select-next)
-               ("C-p" . company-select-previous)
-               :map company-search-map
-               ("M-n" . nil) ;; (company-select-next)
-               ("M-p" . nil) ;; (company-select-previous)
-               ("C-n" . company-select-next)
-               ("C-p" . company-select-previous)
-               ("C-t" . company-search-toggle-filtering))
+          company-backends (delq nil company-backends))
+    (use-package company-quickhelp
+      :if (my/package-enabled-p 'company-quickhelp)
+      :init
+      (setq company-quickhelp-delay 0.5
+            company-quickhelp-use-propertized-text t)
+      :config
+      (company-quickhelp-mode 1))
+    (use-package company-box
+      :defer t
+      :preface
+      (defun pkg/company-box/start ()
+        (company-box-mode 1))
+      :if (my/package-enabled-p 'company-box)
+      :init
+      (setq company-box-enable-icon nil
+            company-box-show-single-candidate nil
+            company-box-doc-enable t
+            company-box-doc-delay 0.5)
+      (my/add-mode-hook "company" #'pkg/company-box/start))
     (use-package company-irony
       :defer t
       :preface
