@@ -112,4 +112,4 @@
      (pkg/haskell-mode/init)))
 
 
-(provide 'my/prog-fun)
+(provide 'my/prog/functional)

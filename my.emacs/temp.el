@@ -61,6 +61,9 @@ proxy = https://CHT1HTSH3191:Alps1911@10.25.71.1:8080
     nil)
   :if (my/package-enabled-p 'package)
   ;; 1. executed during emacs initialization, i.e. loading init.el file
+  ;; 2. add hooks, e.g. self loading when :defer occurs
+  ;;    especially when the execution sequence of functions in a hook DOES matter
+  ;;    with regard to the loading sequence of their belonging packages
   :init
   (setq customized-config nil)
   ;; 1. executed after this package has been loaded or whenever reloaded
@@ -345,3 +348,106 @@ proxy = https://CHT1HTSH3191:Alps1911@10.25.71.1:8080
     :if (and (my/package-enabled-p 'helm)
              (my/package-enabled-p 'helm-bm)))
   (unbind-key "C-x r"))
+
+
+(setq wocaotodo '(;; =============================================================================
+                  ;; [python] prog-py.el
+                  python ;; python-mode
+                  ;; elpy ;; ropemacs
+                  ;; py-autopep8
+                  ;; auto-virtualenvwrapper ;; virtualenvwrapper
+
+                  ;; =============================================================================
+                  ;; [navigation] --> editing.el
+                  bm
+                  ;; [text.el]
+                  ;; pdf-tools
+                  org
+                  ;; markdown-mode
+                  ;; markdown-preview-mode
+                  ;; auctex
+                  ;; cmake-mode ;; cmake-ide, cmake-project
+                  ;; cmake-font-lock
+                  ;; cpputils-cmake
+                  ;; [haskell]
+                  haskell-mode
+                  hindent
+                  ;; [ml]
+                  sml-mode
+                  ;; [web]
+                  ;; web-mode
+                  ;; w3m
+                  ;; erc ;; circe, rcirc
+                  ))
+
+
+(use-package helm-dash
+  :if (pkg/package/enabled-p 'helm-dash)
+  :init
+  (setq helm-dash-docsets-path (my/set-user-emacs-file ".docsets")
+        helm-dash-docsets-url "https://raw.github.com/Kapeli/feeds/master"))
+;; https://github.com/areina/helm-dash
+
+
+(global-eldoc-mode -1)
+
+;; eldoc-overlay, eldoc-box
+(use-package eldoc
+  :defer t
+  :if (pkg/package/enabled-p 'eldoc)
+  :init
+  (setq eldoc-idle-delay 0.5)
+  (dolist (mode '("elisp" "ilisp"))
+    (my/add-mode-hook mode #'eldoc-mode)))
+;; 'semantic-idle-summary
+
+
+
+;; awesome packages
+[Editing]
+Helm-swoop - Efficiently jump between matched string/lines.
+bm - Visual Bookmarks, provides an easy way to navigate in a buffer.
+vertigo.el - Jump lines using the home row.
+multifiles.el - View and edit parts of multiple files in one buffer.
+lentic - Create views of the same content in two Emacs buffers.
+ialign - Interactively align lines using a regular expression.
+crux - A Collection of Ridiculously Useful eXtensions for Emacs.
+god-mode - Global minor mode for entering Emacs commands without modifier keys.
+modalka - Introduce native modal editing of your own design.
+xah-fly-keys - A modal keybinding for emacs (like vim), but based on command frequency and ergonomics.
+ergoemacs-mode - Global minor mode to use both common interface keys and ergonomic keys for emacs.
+general - A convient, unified interface for key definitions - like use-package but for key-bindings.
+[Interface Enhancement]
+ace-popup-menu - Replace GUI popup menu with something more efficient.
+ElScreen - Utility for multiple screens.
+workgroups2 - Session manager, saves all your opened buffers, their location and sizes on disk to restore later.
+Eyebrowse - A simple-minded way of managing window configs in emacs.
+[File Manager]
+Dired+ - Functional & interface extensions for Dired.
+dired-hacks - Collection of useful Dired additions.
+dired-k - Highlight Dired buffer by file size, modified time, git status.
+Direx - directory tree explorer.
+ztree - Directory tree comparison mode.
+Ranger - ranger like file manager based on Dired.
+Sunrise Commander - Twin-pane file manager for Emacs based on Dired and inspired by Midnight Commander.
+tramp-hdfs - Browse HDFS in Emacs with dired using Tramp.
+[Programming]
+auto-yasnippet - Advanced copy-paste using Yasnippet.
+tiny - Templates based on linear range transformations.
+evil-nerd-commenter - Comment/uncomment lines efficiently. Like Nerd Commenter in Vim. This program can be used independently without evil-mode.
+mmm-mode - allows Multiple Major Modes to coexist in one buffer (ex: Embedded CSS & JS in HTML file).
+SmartParens - Deals with parens pairs and tries to be smart about it.
+indent-guide - Show vertical lines to guide indentation.
+Doxymacs - Doxymacs is Doxygen + {X}Emacs.
+whitespace-cleanup-mode - Intelligently call whitespace-cleanup on save.
+realgud - A modular front-end for interacting with external debuggers.
+ws-butler - Unobtrusively trim extraneous white-space ONLY in lines edited.
+format-all - Auto-format source code in many languages using the same command.
+Aggressive-indent - Keeps your code always indented automatically.
+Helm-dash - Browse Dash docsets via Helm interface.
+eldoc - [built-in] shows function arguments / variable doc in minibuffer when coding.
+Dumb Jump - easy jump to definition package for multiple languages using ag or grep.
+vimish-fold - Vim-like text folding.
+hideshow - [built-in] Folding regions by balanced-expression code.
+hideshowvis - Based on hideshow, just display its nodes on fringe.
+Origami.el - Feature rich text folding minor mode.
