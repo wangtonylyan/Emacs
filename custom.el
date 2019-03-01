@@ -26,4 +26,6 @@
 
  ;; '(rainbow-identifiers-identifier-1 ((t (:foreground "#333333")))) ;; light
  ;; '(rainbow-identifiers-identifier-1 ((t (:foreground "#CCCCCC")))) ;; dark
+
+ '(aw-leading-char-face ((t (:foreground "red" :weight ultra-bold :height 3.0))))
  )

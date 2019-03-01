@@ -52,4 +52,4 @@
 
 (add-hook 'after-init-hook 'my-prog-web-mode-init t)
 
-(provide 'my/prog-web)
+(provide 'my/prog/web)
