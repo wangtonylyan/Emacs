@@ -114,7 +114,7 @@
         (let* ((name (substring (symbol-name feature) (length prefix)))
                (file (my/set-user-emacs-file name t)))
           (require feature file))
-      (user-error "*my/load-init-file* illegal feature name"))))
+      (user-error "*my/load-init-file* illegal feature %s" feature))))
 
 (defalias 'my/minor-mode-on-p 'bound-and-true-p)
 

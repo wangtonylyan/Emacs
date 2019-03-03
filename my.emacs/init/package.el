@@ -24,7 +24,8 @@
 (setq package-archives
       (let ((mirror
              ;; 'origin
-             'china ;; 'tsinghua
+             ;; 'china
+             'tsinghua
              ))
         (cond
          ((eq mirror 'origin)
