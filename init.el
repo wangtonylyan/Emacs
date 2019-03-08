@@ -12,6 +12,9 @@
 ;; directory :: 以斜杠结尾
 ;; dwim :: Do What I Mean
 
+(defun my/listp (list)
+  (and list (listp list)))
+
 (defun my/map (func seq)
   (delq nil (mapcar func seq)))
 
@@ -118,70 +121,103 @@
 
 (defalias 'my/minor-mode-on-p 'bound-and-true-p)
 
-(defconst my/mode-hook-dict
-  (let ((dict (make-hash-table :test 'equal)))
-    (mapc (lambda (tup) (puthash (car tup) (cadr tup) dict))
-          '(("my/prog/init"       my/prog/start-hook/init      )
-            ("my/prog/completion" my/prog/start-hook/completion)
-            ("my/prog/cpp"        my/prog/start-hook/cpp       )
-            ("my/prog/python"     my/prog/start-hook/python    )
-            ;; [Emacs]
-            ("init"           after-init-hook              )
-            ("capf"           completion-at-point-functions)
-            ;; [Editing]
-            ("text"           text-mode-hook               )
-            ("org"            org-mode-hook                )
-            ;; [Programming]
-            ("prog"           prog-mode-hook               )
-            ("yas"            yas-minor-mode-hook          ) ;; when enabled as local mode
-            ("YAS"            yas-global-mode-hook         ) ;; when enabled as global mode
-            ("flycheck"       flycheck-mode-hook           )
-            ("company"        company-mode-hook            )
-            ("SEMANTIC"       semantic-init-hook           ) ;; when enabled as global mode
-            ("semantic"       semantic-init-mode-hook      ) ;; mode-local hook
-            ;; [Language]
-            ("lisp"           lisp-mode-hook               )
-            ("elisp"          emacs-lisp-mode-hook         )
-            ("ilisp"          lisp-interaction-mode-hook   )
-            ("slime"          slime-mode-hook              )
-            ("scheme"         scheme-mode-hook             )
-            ("CC"             c-initialization-hook        )
-            ("cc"             c-mode-common-hook           )
-            ("c"              c-mode-hook                  )
-            ("c++"            c++-mode-hook                )
-            ("objc"           objc-mode-hook               )
-            ("irony"          irony-mode-hook              )
-            ("ycmd"           ycmd-mode-hook               )
-            ("python"         python-mode-hook             )
-            ("elpy"           elpy-mode-hook               )
-            ("sml"            sml-mode-hook                )
-            ("haskell"        haskell-mode-hook            )
-            ;; [Others]
-            ("DIRED"          dired-load-hook              )
-            ("dired"          dired-mode-hook              )
-            ("w3m"            w3m-mode-hook                )))
-    dict))
 
-(defun my/get-mode-hook (mode)
-  (let ((hook (gethash mode my/mode-hook-dict)))
-    (unless hook (user-error "*my/get-mode-hook* MODE=%s" mode))
+(defun my/get-hook (dict mode)
+  (let ((hook (gethash mode dict)))
+    (unless hook (user-error "*my/get-hook* MODE=%s" mode))
     hook))
 
-(defun my/add-mode-hook (mode func &optional local)
-  (add-hook (my/get-mode-hook mode) func :append local))
+(defun my/push-hook (dict mode func &optional local)
+  (add-hook (my/get-hook dict mode) func nil local))
 
-(defun my/push-mode-hook (mode func &optional local)
-  (add-hook (my/get-mode-hook mode) func nil local))
+(defun my/add-hook (dict mode func &optional local)
+  (add-hook (my/get-hook dict mode) func :append local))
 
-(defun my/del-mode-hook (mode func &optional local)
-  (remove-hook (my/get-mode-hook mode) func local))
-
-(defun my/add-modes-hook (list)
+(defun my/add-hooks (dict list)
   (dolist (elem list)
-    (my/add-mode-hook (car elem) (cadr elem) (caddr elem))))
+    (my/add-hook dict (car elem) (cadr elem) (caddr elem))))
 
-(defun my/run-mode-hook (mode)
-  (run-hooks (my/get-mode-hook mode)))
+(defun my/del-hook (dict mode func &optional local)
+  (remove-hook (my/get-hook dict mode) func local))
+
+(defun my/run-hook (dict mode)
+  (run-hooks (my/get-hook dict mode)))
+
+(defmacro my/create-hook-interface (name dict)
+  (list 'progn
+        (list 'defun (intern (concat "my/get-" name "-hook"))
+              (list 'mode)
+              (list 'my/get-hook dict 'mode))
+        (list 'defun (intern (concat "my/push-" name "-hook"))
+              (list 'mode 'func '&optional 'local)
+              (list 'my/push-hook dict 'mode 'func 'local))
+        (list 'defun (intern (concat "my/add-" name "-hook"))
+              (list 'mode 'func '&optional 'local)
+              (list 'my/add-hook dict 'mode 'func 'local))
+        (list 'defun (intern (concat "my/add-" name "-hooks"))
+              (list 'list)
+              (list 'my/add-hooks dict 'list))
+        (list 'defun (intern (concat "my/del-" name "-hook"))
+              (list 'mode 'func '&optional 'local)
+              (list 'my/del-hook dict 'mode 'func 'local))
+        (list 'defun (intern (concat "my/run-" name "-hook"))
+              (list 'mode)
+              (list 'my/run-hook dict 'mode))))
+
+(defun my/create-hook (list)
+  (let ((dict (make-hash-table :test 'equal)))
+    (mapc (lambda (tup) (puthash (car tup) (cadr tup) dict)) list)
+    dict))
+
+(defconst my/mode-hook-dict
+  (my/create-hook
+   '(("my/prog/init"     my/prog/start-hook/init    )
+     ("my/prog/complete" my/prog/start-hook/complete)
+     ("my/prog/cpp"      my/prog/start-hook/cpp     )
+     ("my/prog/python"   my/prog/start-hook/python  )
+     ;; [Emacs]
+     ("init"             after-init-hook            )
+     ;; [Editing]
+     ("text"             text-mode-hook             )
+     ("org"              org-mode-hook              )
+     ;; [Programming]
+     ("prog"             prog-mode-hook             )
+     ("yas"              yas-minor-mode-hook        ) ;; when enabled as local mode
+     ("YAS"              yas-global-mode-hook       ) ;; when enabled as global mode
+     ("flycheck"         flycheck-mode-hook         )
+     ("company"          company-mode-hook          )
+     ("SEMANTIC"         semantic-init-hook         ) ;; when enabled as global mode
+     ("semantic"         semantic-init-mode-hook    ) ;; mode-local hook
+     ;; [Language]
+     ("lisp"             lisp-mode-hook             )
+     ("elisp"            emacs-lisp-mode-hook       )
+     ("ilisp"            lisp-interaction-mode-hook )
+     ("slime"            slime-mode-hook            )
+     ("scheme"           scheme-mode-hook           )
+     ("CC"               c-initialization-hook      )
+     ("cc"               c-mode-common-hook         )
+     ("c"                c-mode-hook                )
+     ("c++"              c++-mode-hook              )
+     ("objc"             objc-mode-hook             )
+     ("irony"            irony-mode-hook            )
+     ("ycmd"             ycmd-mode-hook             )
+     ("python"           python-mode-hook           )
+     ("elpy"             elpy-mode-hook             )
+     ("sml"              sml-mode-hook              )
+     ("haskell"          haskell-mode-hook          )
+     ;; [Others]
+     ("DIRED"            dired-load-hook            )
+     ("dired"            dired-mode-hook            )
+     ("w3m"              w3m-mode-hook              ))))
+
+(defconst my/package-hook-dict
+  (my/create-hook
+   '(("minibuffer/capf"   completion-at-point-functions)
+     ("projectile/switch" pkg/projectile/switch-hook   ))))
+
+(my/create-hook-interface "mode" my/mode-hook-dict)
+(my/create-hook-interface "pkg" my/package-hook-dict)
+
 
 (defun my/find-file-read-only ()
   (let ((file (my/file-exists-p buffer-file-name))
@@ -194,12 +230,12 @@
                         skiplist))
       (read-only-mode 1))))
 
-(defun my/save-point (func)
-  (let ((line (line-number-at-pos)))
-    (funcall func)
-    (goto-char (point-min))
-    (when (>= line 1) (forward-line (- line 1)))
-    (recenter-top-bottom)))
+(defmacro my/save-point (func)
+  `(let ((line (line-number-at-pos)))
+     ,func
+     (goto-char (point-min))
+     (when (>= line 1) (forward-line (- line 1)))
+     (recenter-top-bottom)))
 
 (defun my/reformat-current-file ()
   (interactive)
@@ -218,25 +254,11 @@
            (mode (when file (assoc-default file auto-mode-alist
                                            'string-match))))
       (cond
-       ((and (provided-mode-derived-p mode 'c-mode)
-             (derived-mode-p 'c-mode))
-        (my/reformat-current-file/c))
        ((and (provided-mode-derived-p mode 'lisp-mode 'emacs-lisp-mode)
              (derived-mode-p 'lisp-mode 'emacs-lisp-mode))
         (my/reformat-current-file/lisp))
        (t nil))))
   (my/reformat-wrapper 'my/reformat))
-
-(defun my/reformat-current-file/c ()
-  (interactive)
-  (my/save-point
-   (lambda ()
-     (let ((cfg (my/get-user-emacs-file "my.config/uncrustify.c.cfg"))
-           (cmd (my/locate-exec "uncrustify" "/usr/local/bin/")))
-       (when (and cfg cmd)
-         (shell-command-on-region (point-min) (point-max)
-                                  (concat cmd " -l C -c " cfg " --no-backup")
-                                  t t "*Shell Error Output*"))))))
 
 (defun my/reformat-current-file/lisp ()
   (interactive)
@@ -254,9 +276,6 @@
     (when path
       (setq shell-file-name path
             shell-command-switch "-c")))
-  (my/locate-exec "git.exe" "Git" t)
-  (or (my/locate-exec "python.exe" "Python3" t)
-      (my/locate-exec "python.exe" "Python" t))
   (setq inhibit-compacting-font-caches t))
  ((eq system-type 'gnu/linux)
   (mapc (lambda (dir)
@@ -266,6 +285,25 @@
   (let ((path (my/locate-exec "bash"))) ;; not recommend "zsh"
     (when path
       (setq shell-file-name path)))))
+
+(defun my/select-by-system (tuples)
+  (if (nlistp tuples)
+      (user-error "*my/select-system* no info for current system '%s" system-type)
+    (if (eq system-type (caar tuples))
+        (eval (cadar tuples))
+      (my/select-system (cdr tuples)))))
+
+(defconst my/bin/python-interpreter
+  (my/select-by-system
+   '((gnu/linux (or (my/locate-exec "python3")
+                    (my/locate-exec "python")))
+     (windows-nt (or (my/locate-exec "python.exe" "Python3" t)
+                     (my/locate-exec "python.exe" "Python" t))))))
+
+(defconst my/bin/git-command
+  (my/select-by-system
+   '((gnu/linux (my/locate-exec "git"))
+     (windows-nt (my/locate-exec "git.exe" "Git" t)))))
 
 
 ;; (setq user-init-file "~/.emacs.d/init.el")
@@ -287,6 +325,7 @@
 (defun my/get-user-emacs-file (&optional file self)
   (my/exists-p (my/set-user-emacs-file file self)))
 
+
 (defconst my/private-emacs-directory
   (my/get-user-emacs-file ".private/"))
 
@@ -294,22 +333,36 @@
   (let ((dir my/private-emacs-directory))
     (when dir (my/exists-p file dir))))
 
+(defun my/get-private-config (symbol validate read &optional default keep)
+  (let ((config (when (and (symbolp symbol) (boundp symbol)
+                           (funcall validate (symbol-value symbol)))
+                  (symbol-value symbol))))
+    (unless keep (unintern symbol nil))
+    (if config
+        (let ((result (funcall read config)))
+          (if (funcall validate result) result default))
+      default)))
+
 (my/load-file (my/get-private-emacs-file "init.el"))
 ;; *************************** sample code in .private/init.el ***************************
 ;; (defvar pvt/project/root-directories '("~/Projects/" "~/projects/"))
-;; (defvar pvt/project/ede-config-file-names '("ede-projects.el"))
+;; (defvar pvt/project/ede-config-files '("ede-projects.el"))
+;; (defvar pvt/project/python-global-virtualenvs '("~/.virtualenvs/"))
 ;; ***************************************************************************************
 
-(defconst pvt/project/root-directories
-  (when (boundp 'pvt/project/root-directories)
-    (my/map 'my/directory-exists-p pvt/project/root-directories)))
+(defconst my/project/root-directories
+  (my/get-private-config 'pvt/project/root-directories #'my/listp
+                         (lambda (dirs) (my/map 'my/directory-exists-p dirs))))
 
-(defconst pvt/project/ede-config-files
-  (when (and pvt/project/root-directories
-             (boundp 'pvt/project/ede-config-file-names))
-    (mapcan (lambda (file)
-              (my/file-exists-p file pvt/project/root-directories))
-            pvt/project/ede-config-file-names)))
+(defconst my/project/ede-config-files
+  (my/get-private-config 'pvt/project/ede-config-files #'my/listp
+                         (lambda (files)
+                           (when my/project/root-directories
+                             (mapcan
+                              (lambda (file)
+                                (my/file-exists-p file my/project/root-directories))
+                              files)))))
+
 
 ;; 指定由(customize)写入配置信息的文件，随后每当Emacs自动写入时就不会再修改当前文件了
 (setq custom-file (my/get-user-emacs-file "custom.el"))
@@ -319,24 +372,22 @@
 ;; 加载其他配置文件
 (mapc #'my/load-init-file '(my/init/package
                             my/init/emacs
-                            my/init/interface
-                            my/init/visual
-                            my/init/editing
                             my/init/utility
-
+                            my/init/editing
+                            my/init/visual
+                            my/init/interface
                             my/prog/init ;; prog-mode, asn1-mode
-                            my/prog/completion
+                            my/prog/complete
                             my/prog/cpp ;; cc-mode
                             my/prog/python ;; python-mode
-                            ;; my/prog/functional ;; lisp-mode, sml-mode, haskell-mode
+                            my/prog/function ;; sml-mode, haskell-mode
                             ;; my/prog/web ;; web-mode
-
+                            ;; my/text/init ;; org-mode, tex-mode, latex-mode
                             my/keys/init
                             my/keys/buffer
                             my/keys/directory
                             my/keys/misc
                             my/keys/programming))
-;; "text-tex" ;; tex-mode, latex-mode
 ;; "web-browser" ;; web browser
 
 

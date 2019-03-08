@@ -3,10 +3,6 @@
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
-export http_proxy="http://CHT1HTSH3191:Alps1912@10.25.71.1:8080"
-export https_proxy="https://CHT1HTSH3191:Alps1912@10.25.71.1:8080"
-
-
 # Path to your oh-my-zsh installation.
 export ZSH="/home/$(whoami)/.oh-my-zsh"
 
@@ -92,10 +88,7 @@ source $ZSH/oh-my-zsh.sh
 # users are encouraged to define aliases within the ZSH_CUSTOM folder.
 # For a full list of active aliases, run `alias`.
 
-alias ll='ls -l'
-alias la='ls -al'
-alias cl='clear'
-alias em='emacs'
+source "$HOME/.emacs.d/my.config/bashrc.sh"
 
 # 在命令行直接输入以下后缀名的文件名，会自动解压
 alias -s gz='tar -xzvf'
@@ -109,9 +102,11 @@ precmd() {
     vcs_info
 }
 
-POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(user root_indicator dir)
+POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(virtualenv user root_indicator dir)
 POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status background_jobs vcs time)
 POWERLEVEL9K_PROMPT_ADD_NEWLINE=true
-
+# Python's virtualenv
+VIRTUAL_ENV_DISABLE_PROMPT=1  # conflict with POWERLEVEL9K
+POWERLEVEL9K_VIRTUALENV_SHOW_VERSION=true
 
 source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

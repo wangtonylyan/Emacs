@@ -1,15 +1,15 @@
 ;; -*- coding: utf-8 -*-
 
-(defun my/prog/completion/add-hook (func)
-  (my/add-mode-hook "my/prog/completion" func))
+(defun my/prog/complete/add-hook (func)
+  (my/add-mode-hook "my/prog/complete" func))
 
-(defun my/prog/completion/run-hook ()
-  (my/run-mode-hook "my/prog/completion"))
+(defun my/prog/complete/run-hook ()
+  (my/run-mode-hook "my/prog/complete"))
 
-(my/add-mode-hook "prog" #'my/prog/completion/run-hook)
+(my/add-mode-hook "prog" #'my/prog/complete/run-hook)
 
 
-(defun my/prog/completion/add-backends (defaults backends)
+(defun my/prog/complete/add-backends (defaults backends)
   (if (and (and (symbolp defaults) (boundp defaults)
                 (listp (symbol-value defaults)))
            (or (listp backends) (symbolp backends)))
@@ -17,11 +17,14 @@
                     (intern (symbol-name defaults)))))
         (cond
          ((listp backends)
-          (dolist (backend (nreverse backends))
-            (my/prog/completion/add-backends local backend)))
+          (mapc (lambda (backend)
+                  (let ((backend (if (listp backend)
+                                     (delq nil backend) backend)))
+                    (when backend (add-to-list local backend))))
+                (delq nil (nreverse backends))))
          (backends
           (add-to-list local backends))))
-    (user-error "*my/prog/completion/add-backends* illegal parameters")))
+    (user-error "*my/prog/complete/add-backends* illegal parameters")))
 
 
 (use-package yasnippet
@@ -33,14 +36,14 @@
     (yas-minor-mode 1))
   :if (pkg/package/enabled-p 'yasnippet)
   :init
+  (my/prog/complete/add-hook #'pkg/yasnippet/start)
+  :config
   ;; 设置解决同名snippet的方式
   (setq yas-prompt-functions
         (if (eq system-type 'windows-nt)
             ;; Windows环境下推荐，其余支持不好
             '(yas-ido-prompt yas-dropdown-prompt)
           '(yas-x-prompt yas-dropdown-prompt)))
-  (my/prog/completion/add-hook #'pkg/yasnippet/start)
-  :config
   (let ((dir (my/get-user-emacs-file "my.snippet/" t)))
     (when dir (add-to-list 'yas-snippet-dirs dir)))
   (when (or (pkg/package/enabled-p 'company)
@@ -54,20 +57,23 @@
   (defun pkg/company/start ()
     (company-mode 1))
   (defun pkg/company/add-backends (backends)
-    (my/prog/completion/add-backends 'company-backends backends))
+    (my/prog/complete/add-backends 'company-backends backends))
   :if (pkg/package/enabled-p 'company)
   :init
-  (my/add-modes-hook '(("elisp" pkg/company/elisp-mode-hook)
+  (my/add-mode-hooks '(("elisp" pkg/company/elisp-mode-hook)
                        ("c" pkg/company/c&c++-mode-hook)
                        ("c++" pkg/company/c&c++-mode-hook)
                        ("python" pkg/company/python-mode-hook)))
-  (my/prog/completion/add-hook #'pkg/company/start)
+  (my/prog/complete/add-hook #'pkg/company/start)
   :config
-  ;; 没有必要为每个模式分别启用其独享的后端，因为筛选适用后端的过程非常效率
   (setq company-clang-executable (my/locate-exec "clang")
         company-minimum-prefix-length 3
         company-idle-delay 0
         company-selection-wrap-around t
+        ;; 1. 从效率的角度而言，是没有必要为每个模式分别启用其独享的后端，因为筛选适用后端的过程非常效率
+        ;; 2. make sure that 'company-backends is not changed in sub-package's loading
+        ;;    I'd rather enable each backend in the corresponding mode hooks
+        ;;    各种complete子插件都将通过后端的启用而被惰性加载
         company-backends `(;; company-semantic ;; 'semantic is too slow
                            ;; company-capf ;; use 'semantic by default
                            ;; company-css
@@ -84,24 +90,21 @@
     (pkg/company/add-backends 'company-elisp))
   (defun pkg/company/c&c++-mode-hook ()
     (pkg/company/add-backends `(,(when company-clang-executable
-                                   (cond
-                                    ((pkg/package/enabled-p 'irony) 'company-irony)
-                                    ((pkg/package/enabled-p 'ycmd) 'company-ycmd)
-                                    (t 'company-clang)))
-                                ,(when (my/locate-exec "cmake")
-                                   'company-cmake)
+                                   (or (pkg/package/enabled-p 'company-irony)
+                                       (pkg/package/enabled-p 'company-ycmd)
+                                       'company-clang))
+                                ;; company-cmake ;; CMake
                                 ;; company-eclim ;; Eclipse
                                 ;; company-xcode
                                 )))
   (defun pkg/company/python-mode-hook ()
-    (pkg/company/add-backends (when (pkg/package/enabled-p 'company-jedi)
-                                'company-jedi)))
+    (pkg/company/add-backends `((,(pkg/package/enabled-p 'company-anaconda)
+                                 ,(pkg/package/enabled-p 'company-jedi)))))
   (use-package company-quickhelp
     :if (pkg/package/enabled-p 'company-quickhelp)
-    :init
+    :config
     (setq company-quickhelp-delay 0.5
           company-quickhelp-use-propertized-text t)
-    :config
     (company-quickhelp-mode 1))
   (use-package company-box
     :defer t
@@ -110,34 +113,12 @@
       (company-box-mode 1))
     :if (pkg/package/enabled-p 'company-box)
     :init
+    (my/add-mode-hook "company" #'pkg/company-box/start)
+    :config
     (setq company-box-enable-icon nil
           company-box-show-single-candidate nil
           company-box-doc-enable t
-          company-box-doc-delay 0.5)
-    (my/add-mode-hook "company" #'pkg/company-box/start))
-  (use-package company-irony
-    :defer t
-    :preface
-    (defun pkg/company-irony/setup ()
-      (company-irony-setup-begin-commands))
-    :if (and (pkg/package/enabled-p 'irony)
-             (pkg/package/enabled-p 'company-irony))
-    :init
-    (setq company-irony-ignore-case nil)
-    (my/add-mode-hook "irony" #'pkg/company-irony/setup))
-  (use-package company-ycmd
-    :defer t
-    :preface
-    (defun pkg/company-ycmd/setup ()
-      (company-ycmd-setup))
-    :if (and (pkg/package/enabled-p 'ycmd)
-             (pkg/package/enabled-p 'company-ycmd))
-    :init
-    (my/add-mode-hook "ycmd" #'pkg/company-ycmd/setup))
-  (use-package company-jedi
-    :defer t ;; TODO
-    :if (and (pkg/package/enabled-p 'python)
-             (pkg/package/enabled-p 'company-jedi))))
+          company-box-doc-delay 0.5)))
 
 (use-package auto-complete
   :defer t
@@ -145,15 +126,15 @@
   (defun pkg/auto-complete/start ()
     (auto-complete-mode 1))
   (defun pkg/auto-complete/add-sources (sources)
-    (my/prog/completion/add-backends 'ac-sources sources))
+    (my/prog/complete/add-backends 'ac-sources sources))
   :if (pkg/package/enabled-p 'auto-complete)
   :init
-  (my/add-modes-hook '(("yas" pkg/auto-complete/yas-mode-hook)
+  (my/add-mode-hooks '(("yas" pkg/auto-complete/yas-mode-hook)
                        ("lisp" pkg/auto-complete/lisp-mode-hook)
                        ("elisp" pkg/auto-complete/elisp-mode-hook)
                        ("c" pkg/auto-complete/c&c++-mode-hook)
                        ("c++" pkg/auto-complete/c&c++-mode-hook)))
-  (my/prog/completion/add-hook #'pkg/auto-complete/start)
+  (my/prog/complete/add-hook #'pkg/auto-complete/start)
   :config
   (ac-config-default)
   (add-to-list 'ac-dictionary-directories
@@ -219,4 +200,4 @@
                                          'ac-source-gtags 'ac-source-semantic)))))
 
 
-(provide 'my/prog/completion)
+(provide 'my/prog/complete)

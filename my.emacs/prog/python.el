@@ -1,160 +1,239 @@
 ;; -*- coding: utf-8 -*-
 
-(defun my/prog-py/add-start-hook (func)
-  (my/add-mode-hook "my/prog-py" func))
+(defun my/prog/python/add-hook (func)
+  (my/add-mode-hook "my/prog/python" func))
 
-(defun my/prog-py/run-start-hook ()
-  (my/run-mode-hook "my/prog-py"))
+(defun my/prog/python/run-hook ()
+  (my/run-mode-hook "my/prog/python"))
 
-(defun my/prog-py/init ()
-  (pkg/python/init)
-  (pkg/elpy/init)
-  ;; (my-plugin-auto-virtualenvwrapper-init)
-
-  (my/add-mode-hook "python" #'my/prog-py/run-start-hook))
-
-(with-eval-after-load 'python
-  (my/prog-py/init))
+(my/add-mode-hook "python" #'my/prog/python/run-hook)
 
 
-(defun pkg/python/init ()
-  (use-package python
-    :preface
-    (defun pkg/python/start ())
-    :if (my/package-enabled-p 'python)
-    :init
-    (setq python-shell-interpreter (or (my/locate-exec "python3")
-                                       (my/locate-exec "python"))
-          python-shell-interpreter-args "-i"
-          ;; python-shell-interpreter-args "--pylab=osx --pdb --nosep --classic"
-          ;; python-shell-prompt-regexp ">>> "
-          ;; python-shell-prompt-output-regexp ""
-          ;; python-shell-completion-setup-code "from IPython.core.completerlib import module_completion"
-          ;; python-shell-completion-module-string-code "';'.join(module_completion('''%s'''))\n"
-          ;; python-shell-completion-string-code "';'.join(get_ipython().Completer.all_completions('''%s'''))\n"
-          )
-    (my/prog-py/add-start-hook #'pkg/python/start)
-    :config
-    (bind-keys :map python-mode-map
-               ("<backspace>" . python-indent-dedent-line-backspace))
-    (my/del-mode-hook "python" #'wisent-python-default-setup)))
+;; 'my/bin/python-interpreter
+;; 0. 'my/bin/python-virtualenv
+;; 1. 'python-shell-interpreter
+;; 2. 'pyvenv-virtualenvwrapper-python
+;; 3. 'elpy-rpc-python-command
+
+;; 'my/bin/python-virtualenv
+;; 1. python-environment-virtualenv
+;; 2. venv-virtualenv-command
+;; 3. jedi:environment-virtualenv
+
+;; virtualenv directory
+;; 1. python-environment-directory
+;; 2. venv-location
+;;    venv-dirlookup-names
+;; 3. jedi:environment-root
+
+(defconst my/bin/python-virtualenv
+  (when (my/locate-exec "virtualenv")
+    (list (my/locate-exec "virtualenv")
+          "--python" my/bin/python-interpreter
+          "--no-site-packages")))
+
+(defconst my/project/python-global-virtualenvs
+  (my/get-private-config 'pvt/project/python-global-virtualenvs #'my/listp
+                         (lambda (dirs) (my/map 'my/directory-exists-p dirs))
+                         '("~/.virtualenvs/")))
+
+(defconst my/project/python-local-virtualenvs
+  '(".venv" ".pyenv" ".pyvenv"))
 
 
+(use-package python
+  :defer t
+  :preface
+  (defun pkg/python/start ())
+  :if (pkg/package/enabled-p 'python)
+  :init
+  (my/prog/python/add-hook #'pkg/python/start)
+  :config
+  (setq python-shell-interpreter my/bin/python-interpreter
+        python-shell-interpreter-args "-i"
+        python-shell-interpreter-interactive-arg "-i"
+        python-shell-buffer-name "*Python shell*"
+        ;; python-shell-process-environment
+        ;; python-shell-virtualenv-root
+        python-indent-offset 4
+        python-indent-guess-indent-offset t
+        python-indent-guess-indent-offset-verbose t)
+  (my/del-mode-hook "python" #'wisent-python-default-setup)
+  (bind-keys :map python-mode-map
+             ("<backspace>" . python-indent-dedent-line-backspace)))
 
-;; =============================================================================
-;; 关于Emacs对于Python支持方面的介绍可参考如下：
-;; https://wiki.python.org/moin/EmacsEditor
-;; http://emacswiki.org/emacs/PythonProgrammingInEmacs
-;; https://realpython.com/blog/python/emacs-the-best-python-editor/
+(use-package python-mode
+  :defer t
+  :if (pkg/package/enabled-p 'python-mode))
 
-;; =============================================================================
-;; python.el
-;; Emacs内置了该插件，并将其作为对python-mode主模式的默认支持
-;; 实现理念是简洁，尽可能地依赖并融合于Emacs中已有的功能
-;; -----------------------------------------------------------------------------
 
-;; =============================================================================
-;; python-mode.el
-;; 该插件用于完全代替python.el，其优点是能够支持单元测试、IPython等额外功能
-;; 实现设计理念是大而全，尽可能地不依赖并独立于其他工具
-;; https://launchpad.net/python-mode
-;; https://github.com/emacsmirror/python-mode
-;; -----------------------------------------------------------------------------
+(use-package python-environment ;; required by 'jedi-core
+  :after (:or python python-mode)
+  :defer t
+  :if my/bin/python-virtualenv
+  :config
+  (setq python-environment-virtualenv my/bin/python-virtualenv
+        python-environment-directory (car my/project/python-global-virtualenvs)
+        python-environment-default-root-name "emacs"))
 
-;; 下述插件都依赖于额外的Python库的支持，需要首先安装对应的Python库才能够正常使用
-;; ELPY与Ropemacs这两者所提供的作用类似，一般互斥使用
-;; 两者都提供了对于Python解释器的调用，以及一些Python库的额外支持
+(use-package pyvenv ;; required by 'elpy
+  :after (:or python python-mode)
+  :defer t
+  :commands (pyvenv-workon pyvenv-activate)
+  :preface
+  (defun pkg/pyvenv/start ()
+    ;; (setq pyvenv-workon nil)
+    ;; (setq pyvenv-activate nil)
+    )
+  :if my/bin/python-virtualenv ;; maybe implicitly required
+  :init
+  (when (pkg/package/enabled-p 'pyvenv) ;; if explicitly enabled
+    (my/prog/python/add-hook #'pkg/pyvenv/start))
+  :config
+  (setq pyvenv-virtualenvwrapper-python my/bin/python-interpreter
+        pyvenv-exec-shell shell-file-name
+        pyvenv-tracking-ask-before-change t))
 
-;; =============================================================================
-;; ELPY (Emacs Lisp Python Environment)
-;; https://github.com/jorgenschaefer/elpy
-;; 必要的Python库：jedi, flake8, autopep8, virtualenv
-;; 可选的Python库：virtualenvwrapper
-;; -----------------------------------------------------------------------------
-(defun pkg/elpy/init ()
-  (use-package elpy
-    :preface
-    (defun pkg/elpy/start ()
-      ;; (elpy-mode 1) ;; 由(elpy-enable)追加
-      )
-    :if (my/package-enabled-p 'elpy)
-    :init
-    (my/prog-py/add-start-hook #'pkg/elpy/start)
-    :config
-    ;; (elpy-config)
-    (elpy-enable)
-    (bind-keys :map elpy-mode-map
-               ("C-c C-c" . elpy-shell-send-region-or-buffer))
-    (setq elpy-rpc-python-command python-shell-interpreter
-          elpy-rpc-backend "jedi" ;; 支持jedi和rope这两个库
-          elpy-modules (delq 'elpy-module-highlight-indentation elpy-modules))
-    (setq-default elpy-rpc-python-command elpy-rpc-python-command
-                  elpy-rpc-backend elpy-rpc-backend)
+(use-package auto-virtualenv
+  :after (:or python python-mode)
+  :defer t
+  :preface
+  (defun pkg/auto-virtualenv/start ()
+    (auto-virtualenv-set-virtualenv))
+  :if (and my/bin/python-virtualenv
+           (pkg/package/enabled-p '(python
+                                    pyvenv ;; should be explicitly enabled
+                                    auto-virtualenv)))
+  :init
+  (my/prog/python/add-hook #'pkg/auto-virtualenv/start))
 
-    ;; (elpy-use-ipython) ;; (elpy-use-cpython) ;; 指定Python解释器
-    ;; elpy默认支持并使用Emacs内置的flymake，但可随意地切换成flycheck
-
-    (use-package flycheck
+(use-package virtualenvwrapper
+  :after (:or python python-mode)
+  :defer t
+  :commands (venv-workon)
+  :if my/bin/python-virtualenv
+  :init
+  (when (pkg/package/enabled-p 'virtualenvwrapper)
+    (use-package projectile
       :defer t
       :config
-      (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-      (my/add-mode-hook "elpy" #'flycheck-mode-on-safe))
+      (my/add-pkg-hook "projectile/switch" #'venv-projectile-auto-workon)))
+  :config
+  (venv-initialize-interactive-shells)
+  (venv-initialize-eshell)
+  (setq venv-virtualenv-command (car my/bin/python-virtualenv)
+        venv-location (car my/project/python-global-virtualenvs)
+        venv-dirlookup-names my/project/python-local-virtualenvs
+        venv-workon-cd t)
+  (setq mode-line-format (add-to-list 'mode-line-format
+                                      '(:exec venv-current-name)))
+  (setq-default mode-line-format mode-line-format))
 
-    (use-package py-autopep8
-      :if (and (my-func-package-enabled-p 'py-autopep8)
-               (executable-find "autopep8"))
-      :commands (py-autopep8-enable-on-save)
-      :init
-      (my/add-mode-hook "elpy" #'py-autopep8-enable-on-save))
-    ;; ELPY所默认依赖的插件，基于Python库virtualenvwrapper
-    (use-package pyvenv
-      ;; 目前使用virtualenvwrapper插件替代
-      :disabled)))
+(use-package auto-virtualenvwrapper
+  :after (:or python python-mode)
+  :defer t
+  :preface
+  (defun pkg/auto-virtualenvwrapper/start ()
+    (auto-virtualenvwrapper-activate))
+  :if (and my/bin/python-virtualenv
+           (pkg/package/enabled-p '(python
+                                    virtualenvwrapper
+                                    auto-virtualenvwrapper)))
+  :init
+  (my/prog/python/add-hook #'pkg/auto-virtualenvwrapper/start))
+
+(use-package pyenv-mode
+  :after (:or python python-mode)
+  :defer t
+  :if my/bin/python-virtualenv)
 
 
+(use-package flycheck-pyflakes
+  :after ((:or python python-mode) flycheck)
+  :if (and (pkg/package/enabled-p 'flycheck-pyflakes)
+           (my/locate-exec "pyflakes")))
 
-;; =============================================================================
-;; Ropemacs
-;; 依赖的python库：rope, pymacs, ropemacs
-;; 其中pymacs库在安装后会自动生成pymacs.el插件，需要将该插件加入至'load-path中
-;; 而ropemacs库则为Emacs提供了一个使用rope库的子模式ropemacs-mode
-;; 该子模式会随pymacs.el插件的加载而被自动关联至'python-mode-hook中
-;; 即(add-hook 'python-mode-hook 'ropemacs-mode)
-;; 每当roepmacs-mode启用时，一个pymacs客户进程和一个Python解释器将被启动，并彼此相连
-;; 随后Emacs将通过与该客户进程进行通信，从而获取rope库的相关支持
-;; -----------------------------------------------------------------------------
+(use-package flycheck-pycheckers
+  :after ((:or python python-mode) flycheck)
+  :if (pkg/package/enabled-p 'flycheck-pycheckers)
+  :config
+  (setq flycheck-pycheckers-max-line-length 100)
+  (flycheck-pycheckers-setup))
 
-;; =============================================================================
-;; 插件virtualenvwrapper是Python同名库的Elisp实现，可完全替代后者
-;; 插件auto-virtualenvwrapper则是对于插件virtualenvwrapper的封装
-(defun my-plugin-auto-virtualenvwrapper-init ()
-  (use-package auto-virtualenvwrapper
-    :if (my-func-package-enabled-p 'auto-virtualenvwrapper)
-    :ensure virtualenvwrapper
-    :commands (auto-virtualenvwrapper-activate
-               venv-projectile-auto-workon venv-workon venv-lsvirtualenv)
-    :init
-    ;; note that setting `venv-location` is not necessary if you
-    ;; use the default location (`~/.virtualenvs`), or if the
-    ;; the environment variable `WORKON_HOME` points to the right place
-    ;; (setq venv-location '("/path/")) ;; (venv-set-location)
-    (setq venv-dirlookup-names '(".venv" "venv"))
-    (with-eval-after-load 'projectile
-      ;; 自动启用此插件的前提是，使用projectile切换项目后必须首先打开.py文件
-      ;; 否则就需要手动执行(venv-workon)等命令
-      (add-hook 'projectile-find-file-hook
-                ;; (venv-projectile-auto-workon)
-                'auto-virtualenvwrapper-activate t))
-    (add-hook 'my-prog-py-mode-start-hook 'my-plugin-auto-virtualenvwrapper-start t)
-    :config
-    (venv-initialize-interactive-shells)
-    (venv-initialize-eshell)))
 
-(defun my-plugin-auto-virtualenvwrapper-start ()
-  )
+(use-package jedi-core
+  :after (:or python python-mode)
+  :defer t
+  :preface
+  (defun pkg/jedi-core/start ()
+    (jedi:setup))
+  :init
+  ;; (jedi:install-server) ;; 安装后需要交互式地手动执行一次
+  ;; (jedi:show-version-info), (jedi:show-setup-info)
+  (when (pkg/package/enabled-p 'jedi-core)
+    (my/prog/python/add-hook #'pkg/jedi-core/start))
+  :config
+  (setq jedi:environment-virtualenv nil ;; inherit 'python-environment
+        jedi:environment-root nil ;; inherit 'python-environment
+        jedi:complete-on-dot t
+        jedi:tooltip-method nil))
 
-;; =============================================================================
-;; =============================================================================
+(use-package company-jedi
+  :after ((:or python python-mode) company)
+  :commands (company-jedi)
+  :if (pkg/package/enabled-p 'company-jedi))
+
+(use-package jedi
+  :after ((:or python python-mode) auto-complete)
+  :defer t
+  :preface
+  (defun pkg/jedi/start ()
+    (jedi:ac-setup))
+  :if (pkg/package/enabled-p 'jedi))
+
+
+(use-package anaconda-mode
+  :after (:or python python-mode)
+  :defer t
+  :preface
+  (defun pkg/anaconda-mode/start ()
+    (anaconda-mode 1)
+    (anaconda-eldoc-mode 1))
+  :if (pkg/package/enabled-p '(python anaconda-mode))
+  :init
+  (my/prog/python/add-hook #'pkg/anaconda-mode/start)
+  :config
+  (setq anaconda-mode-installation-directory
+        (my/set-user-emacs-file ".anaconda/")))
+
+(use-package company-anaconda
+  :after ((:or python python-mode) company anaconda-mode)
+  :commands (company-anaconda)
+  :if (pkg/package/enabled-p 'company-anaconda))
+
+(use-package elpy
+  :after (:or python python-mode)
+  :defer t
+  :preface
+  (defun pkg/elpy/start ()
+    ;; (elpy-mode 1) ;; 由(elpy-enable)追加
+    )
+  :if (pkg/package/enabled-p 'elpy)
+  :init
+  (my/prog/python/add-hook #'pkg/elpy/start)
+  :config
+  ;; (elpy-config)
+  (elpy-enable)
+  (setq elpy-rpc-python-command my/bin/python-interpreter
+        elpy-rpc-backend "jedi" ;; or "rope"
+        elpy-modules (delq 'elpy-module-highlight-indentation elpy-modules))
+  (setq-default elpy-rpc-python-command elpy-rpc-python-command
+                elpy-rpc-backend elpy-rpc-backend)
+  (when (pkg/package/enabled-p 'flycheck)
+    (setq elpy-modules (delq 'elpy-module-flymake elpy-modules)))
+  ;; (elpy-use-ipython) or (elpy-use-cpython)
+  (bind-keys :map elpy-mode-map
+             ("C-c C-c" . elpy-shell-send-region-or-buffer)))
 
 
 (provide 'my/prog/python)

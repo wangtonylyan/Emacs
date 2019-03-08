@@ -1,7 +1,10 @@
 ;; -*- coding: utf-8 -*-
 
-(defun pkg/package/enabled-p (package)
-  (car (package--user-selected-p package)))
+(defun pkg/package/enabled-p (packages)
+  (if (listp packages)
+      (when (equal (my/map #'pkg/package/enabled-p packages) packages)
+        (if (= (length packages) 1) (car packages) packages))
+    (car (package--user-selected-p packages))))
 
 (defun pkg/package/select (packages)
   (cond
@@ -48,7 +51,7 @@
             )))))
 ;; 以下列表用于设置被允许加载的插件，因此无论是在安装还是使用插件的过程中
 ;; 都必须提前详细地列举出所有的插件，且要根据插件之间的依赖关系进行先后地声明
-(setq package-load-list '(all ;; e.g. (dash) (epl) (let-alist) (pkg-info) (flycheck)
+(setq package-load-list '(all ;; e.g. (dash) (epl) (let-alist) (pkg-info)
                           ))
 ;; 设置加载上述列表中所指定插件的时机
 (setq package-enable-at-startup nil) ;; 方式1) 随Emacs的启动而自动加载插件
@@ -61,9 +64,10 @@
                       nyan-mode
                       doom-modeline ;; spaceline, spaceline-all-the-icons, smart-mode-line
                       tabbar        ;; awesome-tab
-                      treemacs      ;; neotree, sidebar, sr-speedbar, ecb
-                      treemacs-projectile
-                      ;; treemacs-icons-dired
+                      (treemacs
+                       treemacs-projectile
+                       ;; treemacs-icons-dired
+                       ) ;; neotree, sidebar, sr-speedbar, ecb
                       ))
 ;; [Visual]
 (pkg/package/select '(beacon
@@ -73,7 +77,7 @@
                       ;; whitespace, fill-column-indicator
                       rainbow-delimiters
                       ;; color-identifiers, rainbow-identifiers ;; 会覆盖配色主题所使用的字体颜色
-                      highlight-thing
+                      ;; highlight-thing
                       zoom ;; dimmer
                       ;; typo
                       ))
@@ -81,16 +85,15 @@
 (pkg/package/select '(windmove
                       ace-window ;; switch-window
                       buffer-move
-                      avy ;; ace-jump-mode
-                      ;; ace-pinyin
-                      ace-link
+                      (avy ;; ace-jump-mode
+                       ;; ace-pinyin
+                       ace-link)
                       undo-tree
                       smart-hungry-delete
                       lispy ;; paredit, parinfer
                       expand-region
                       multiple-cursors ;; highlight-symbol
-                      flyspell
-                      flyspell-correct
+                      (flyspell flyspell-correct)
                       hydra ;; which-key
                       ;; evil
                       ))
@@ -106,24 +109,36 @@
 ;; [Programming]
 (pkg/package/select '(;; prog-mode
                       flycheck ;; flymake
-                      ;; flycheck-pyflakes
-                      flycheck-haskell
-                      ggtags ;; helm-gtags, counsel-gtags, counsel-etags
+                      ggtags   ;; helm-gtags, counsel-gtags, counsel-etags
                       ;; asn1-mode
+                      reformatter ;; py-autopep8, py-yapf, yapfify, hindent
                       ))
 ;; [Completion]
 (pkg/package/select '(yasnippet
-                      company ;; auto-complete
-                      company-quickhelp ;; company-box
-                      company-jedi))
-;; [C, C++]
-(pkg/package/select '(;; cc-mode
-                      ;; cedet, semantic
-                      ;; stickyfunc-enhance
-                      ycmd ;; irony
-                      flycheck-ycmd ;; flycheck-irony
-                      company-ycmd  ;; company-irony
+                      (company
+                       company-quickhelp ;; company-box
+                       ) ;; auto-complete
                       ))
+;; [C, C++]
+(pkg/package/select '(;; cc-mode, cedet, semantic
+                      ;; stickyfunc-enhance
+                      ;; (irony flycheck-irony company-irony)
+                      (ycmd flycheck-ycmd company-ycmd)))
+;; [Python]
+(pkg/package/select '(python ;; python-mode
+                      (anaconda-mode company-anaconda) ;; elpy
+                      flycheck-pycheckers ;; flycheck-pyflakes
+                      company-jedi
+
+                      ;; (python-environment)
+                      ;; (pyvenv auto-virtualenv)
+                      ;; (virtualenvwrapper auto-virtualenvwrapper)
+                      ;; conda ; ?
+                      ;; pipenv ; ?
+                      ))
+;; [Haskell]
+(pkg/package/select '(haskell-mode
+                      flycheck-haskell))
 (cond
  ((pkg/package/enabled-p 'helm)
   (pkg/package/select '(;; helm-bm
@@ -142,11 +157,9 @@
 (package-install-selected-packages)
 
 
-(use-package use-package
-  :defer t
-  :init
-  (setq use-package-always-defer nil
-        use-package-verbose nil))
+(eval-when-compile (require 'use-package))
+(setq use-package-verbose nil
+      use-package-always-defer nil)
 
 (use-package diminish
   :defer t
@@ -167,7 +180,7 @@
 
 (use-package transient
   :defer t
-  :init
+  :config
   (let ((dir (my/set-user-emacs-file ".transient/")))
     (setq transient-levels-file (my/concat-directory-file dir "levels.el")
           transient-values-file (my/concat-directory-file dir "values.el")
@@ -175,8 +188,9 @@
 
 (use-package request
   :defer t
-  :init
-  (setq request-message-level 'error))
+  :config
+  (setq request-storage-directory (my/set-user-emacs-file ".request")
+        request-message-level 'error))
 
 
 (provide 'my/init/package)

@@ -14,24 +14,23 @@
 (use-package doom-themes
   :if (pkg/package/enabled-p 'doom-themes)
   :init
+  ;; 'doom-one, 'doom-nova, 'doom-spacegrey
+  (load-theme 'doom-spacegrey t)
+  :config
   (setq doom-themes-enable-bold nil
         doom-themes-enable-italic nil
         doom-spacegrey-brighter-modeline t
         doom-spacegrey-brighter-comments t
         doom-spacegrey-comment-bg nil)
-  ;; 'doom-one, 'doom-nova, 'doom-spacegrey
-  (load-theme 'doom-spacegrey t)
-  :config
   (when visible-bell
     (doom-themes-visual-bell-config))
   (use-package doom-themes-treemacs
     :after (treemacs)
     :if (pkg/package/enabled-p 'treemacs)
-    :init
+    :config
     (setq doom-treemacs-enable-variable-pitch t
           doom-treemacs-line-spacing 1
           doom-treemacs-use-generic-icons nil)
-    :config
     (doom-themes-treemacs-config))
   (use-package doom-themes
     :after (neotree)
@@ -42,57 +41,59 @@
 (use-package github-theme
   :if (pkg/package/enabled-p 'github-theme)
   :init
+  (load-theme 'github t)
+  :config
   (setq github-override-colors-alist '(("github-white" . "#FBF9E1")
                                        ("github-comment" . "#009E73")
-                                       ("github-text" . "#000000")))
-  (load-theme 'github t))
+                                       ("github-text" . "#000000"))))
 
 (use-package solarized-theme
   :if (pkg/package/enabled-p 'solarized-theme)
   :init
+  ;; (load-theme 'solarized-dark t)
+  (load-theme 'solarized-light t)
+  :config
   (setq solarized-distinct-fringe-background nil
         solarized-distinct-doc-face t
         solarized-high-contrast-mode-line t
         solarized-use-more-italic t
-        solarized-emphasize-indicators t)
-  ;; (load-theme 'solarized-dark t)
-  (load-theme 'solarized-light t))
+        solarized-emphasize-indicators t))
 
 (use-package zenburn-theme
   :if (pkg/package/enabled-p 'zenburn-theme)
   :init
+  (load-theme 'zenburn t)
+  :config
   ;; (setq zenburn-override-colors-alist '(("zenburn-fg" . "#EDEDDD")))
-  (load-theme 'zenburn t))
+  )
 
 (use-package dashboard
   :diminish (page-break-lines-mode)
   :if (pkg/package/enabled-p 'dashboard)
-  :init
+  :config
   (setq dashboard-banner-logo-title "Welcome to Emacs"
         dashboard-startup-banner 'official
         dashboard-items '((recents . 10)
                           (bookmarks . 10)
                           (projects . 10)))
-  :config
   (dashboard-setup-startup-hook))
 
 (use-package nyan-mode
   :if (pkg/package/enabled-p 'nyan-mode)
-  :init
+  :config
   (setq nyan-animate-nyancat nil
         nyan-wavy-trail nil)
-  :config
   (nyan-mode 1))
 
 (use-package powerline
   :defer t
-  :init
+  :config
   (setq powerline-default-separator 'arrow
         powerline-default-separator-dir '(left . right)))
 
 (use-package spaceline
   :defer t
-  :init
+  :config
   (setq spaceline-highlight-face-func 'spaceline-highlight-face-modified))
 
 (use-package spaceline-config
@@ -121,9 +122,9 @@
 
 (use-package doom-modeline
   :if (pkg/package/enabled-p 'doom-modeline)
-  :init
+  :config
   (setq doom-modeline-buffer-file-name-style 'relative-to-project
-        doom-modeline-python-executable (my/locate-exec "python3")
+        doom-modeline-python-executable my/bin/python-interpreter
         doom-modeline-height 1 ;; lowest
         doom-modeline-bar-width 1 ;; lowest
         doom-modeline-icon t
@@ -137,7 +138,6 @@
         doom-modeline-github-interval (* 60 60)
         doom-modeline-version t
         doom-modeline-mu4e nil)
-  :config
   (doom-modeline-mode 1)
   ;; FIXME: modeline in 'helm window is redefined by spaceline,
   ;; but not by doom-modeline, here is just a workaround
@@ -158,8 +158,8 @@
     (text-scale-increase 0)
     (text-scale-decrease 0.3))
   :if (pkg/package/enabled-p 'treemacs)
-  :init
-  (setq treemacs-python-executable (my/locate-exec "python3")
+  :config
+  (setq treemacs-python-executable my/bin/python-interpreter
         treemacs-persist-file (my/set-user-emacs-file ".treemacs/persist")
         treemacs-display-in-side-window t
         treemacs-is-never-other-window t
@@ -189,7 +189,6 @@
         treemacs-deferred-git-apply-delay 0.5
         treemacs-git-command-pipe ""
         treemacs-max-git-entries 5000)
-  :config
   (treemacs-resize-icons 10)
   (treemacs-follow-mode -1)
   (treemacs-tag-follow-mode -1)
@@ -197,8 +196,7 @@
   (when (not treemacs-show-cursor)
     ;; 该子模式似乎并不完善，不建议启用
     (treemacs-fringe-indicator-mode 1))
-  (when (and treemacs-python-executable
-             (my/locate-exec "git"))
+  (when (and treemacs-python-executable my/bin/git-command)
     (treemacs-git-mode 'deferred))
   ;; the following package DOES NOT define its own mode-map
   ;; neither does it remap or provide any key-binding configurations
@@ -209,16 +207,14 @@
   ;; additionally, use :demand as an indication for this kind of workaround
   (use-package treemacs-projectile
     :demand t
-    :if (and (pkg/package/enabled-p 'projectile)
-             (pkg/package/enabled-p 'treemacs-projectile))))
+    :if (pkg/package/enabled-p '(projectile treemacs-projectile))))
 
 (use-package treemacs-icons-dired
   :defer t
   :preface
   (defun pkg/treemacs-icons-dired/setup ()
     (treemacs-icons-dired-mode))
-  :if (and (pkg/package/enabled-p 'treemacs)
-           (pkg/package/enabled-p 'treemacs-icons-dired))
+  :if (pkg/package/enabled-p '(treemacs treemacs-icons-dired))
   :init
   (my/add-mode-hook "DIRED" #'pkg/treemacs-icons-dired/setup))
 
@@ -239,18 +235,17 @@
             (neotree-find file))
         (user-error "*neotree* could not find projectile project"))))
   :if (pkg/package/enabled-p 'neotree)
-  :init
+  :config
   (setq neo-theme (if (display-graphic-p) 'icons 'nerd) ;; all-the-icons
         neo-smart-open t
         neo-show-hidden-files nil
         neo-show-updir-line t
         neo-window-width 35)
-  :config
   (use-package neotree
     :after (projectile)
     :if (pkg/package/enabled-p 'projectile)
     :config
-    (pkg/projectile/add-switch-action #'neotree-projectile-action)))
+    (my/add-pkg-hook "projectile/switch" #'neotree-projectile-action)))
 
 
 (provide 'my/init/interface)

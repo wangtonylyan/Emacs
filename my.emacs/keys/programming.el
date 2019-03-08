@@ -36,7 +36,7 @@
     ("H" flycheck-explain-error-at-point "explain  "                            )
     ("y" flycheck-copy-errors-as-kill    "copy     "                            )
     ("?" flycheck-describe-checker       "describe " :column "checker"          )
-    ("e" pkg/flycheck/enable-checker     "enable   "                            )
+    ("e" pkg/flycheck/enable-checker-i   "enable   "                            )
     ("d" flycheck-disable-checker        "disable  "                            )
     ("j" flycheck-select-checker         "select   "                            )
     ("v" flycheck-verify-setup           "info     " :column "buffer "          )
@@ -58,6 +58,7 @@
   (unbind-key ggtags-mode-prefix-key ggtags-mode-map)
   (bind-keys :map ggtags-mode-map
              ("M-." . ggtags-find-tag-dwim)
+             ("M-*" . ggtags-find-reference)
              ("M-n" . ggtags-next-mark)
              ("M-p" . ggtags-prev-mark)
              ("M-/" . ggtags-view-tag-history))
@@ -83,7 +84,7 @@
     ("p"   ggtags-prev-mark                "M-p        "                   )
     ("/"   ggtags-view-tag-history         "M-/        "                   )
     ("o d" ggtags-find-definition          "definition " :column "search  ")
-    ("o r" ggtags-find-reference           "reference  "                   )
+    ("o *" ggtags-find-reference           "M-*        "                   )
     ("o o" ggtags-grep                     "grep       "                   )
     ("o O" ggtags-find-tag-regexp          "pattern    "                   )
     ("o s" ggtags-find-other-symbol        "symbol     "                   )
@@ -109,6 +110,7 @@
   (bind-keys :map helm-gtags-mode-map
              ("M-." . helm-gtags-dwim)
              ("M-," . helm-gtags-pop-stack)
+             ("M-*" . helm-gtags-find-rtag)
              ("M-n" . helm-gtags-next-history)
              ("M-p" . helm-gtags-previous-history)
              ("M-/" . helm-gtags-show-stack))
@@ -120,7 +122,7 @@
     ("p"   helm-gtags-previous-history      "M-p        "                   )
     ("/"   helm-gtags-show-stack            "M-/        "                   )
     ("o d" helm-gtags-find-tag              "definition " :column "search  ")
-    ("o r" helm-gtags-find-rtag             "reference  "                   )
+    ("o *" helm-gtags-find-rtag             "M-*        "                   )
     ("o o" helm-gtags-find-pattern          "pattern    "                   )
     ("o s" helm-gtags-find-symbol           "symbol     "                   )
     ("o f" helm-gtags-find-files            "file       "                   )
@@ -203,6 +205,16 @@
   :defer t
   :config
   (unbind-key ycmd-keymap-prefix ycmd-mode-map))
+
+(use-package anaconda-mode
+  :defer t
+  :config
+  (bind-keys :map anaconda-mode-map
+             ("C-M-i" . nil) ;; (anaconda-mode-complete)
+             ("M-=" . nil)   ;; (anaconda-mode-find-assignments)
+             ("M-?" . nil)   ;; (anaconda-mode-show-doc)
+             ("M-." . anaconda-mode-find-definitions)
+             ("M-r" . nil) ("M-*" . anaconda-mode-find-references)))
 
 
 (provide 'my/keys/programming)
