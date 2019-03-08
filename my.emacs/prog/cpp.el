@@ -218,6 +218,16 @@
   ;; 2. 对于'semanticdb-find-default-throttle中的'system，主要是利用编译器的输出信息
   )
 
+(use-package semantic
+  :defer t
+  :config
+  ;; 在'semantic被加载时执行
+  (pkg/semantic/init)
+  ;; 在每次'semantic被全局地(重新)启用时执行
+  (my/add-mode-hook "SEMANTIC" #'pkg/semantic/setup)
+  ;; 在每次打开文件时执行
+  (my/prog/cpp/add-hook #'pkg/semantic/start))
+
 (use-package cedet
   ;; CEDET的相关配置可以通过在相应buffer或模式下利用以下命令查看
   ;; (cedet-version)
@@ -255,7 +265,7 @@
                               ;; :compile-command "cd build && make"
                               )))
     ;; 目前手写的EDE项目配置信息由每个系统中的ede-projects.el文件统一地维护
-    (mapc #'my/load-file pvt/project/ede-config-files)
+    (mapc #'my/load-file my/project/ede-config-files)
     (global-ede-mode 1)
     (ede-enable-generic-projects))
   (use-package srecode
@@ -295,7 +305,7 @@
                semantic-complete-jump-local
                semantic-complete-jump-local-members
                semantic-complete-analyze-inline)
-    :init
+    :config
     (setq semantic-complete-inline-analyzer-idle-displayor-class ;; 以何种方式显示
           ;; 'semantic-displayor-ghost ;; inline
           ;; 'semantic-displayor-tooltip ;; tooltip
@@ -345,53 +355,88 @@
     :if (and (pkg/package/enabled-p 'stickyfunc-enhance)
              (pkg/cedet/submode-enabled-p 'global-semantic-stickyfunc-mode))))
 
-(use-package semantic
-  :defer t
-  :init ;; 以下是由semantic及其子模块所定义的配置项，其必须在相应模块被加载前被设置
-  ;; 在'semantic被加载时执行
-  (pkg/semantic/init)
-  ;; 在每次'semantic被全局地(重新)启用时执行
-  (my/add-mode-hook "SEMANTIC" #'pkg/semantic/setup)
-  ;; 在每次打开文件时执行
-  (my/prog/cpp/add-hook #'pkg/semantic/start))
-
 (use-package irony
   :defer t
   :preface
-  (defun pkg/irony/setup ()
-    (irony-cdb-autosetup-compile-options)
-    (my/push-mode-hook "capf" #'irony-completion-at-point :local))
   (defun pkg/irony/start ()
-    (irony-mode 1))
+    (irony-mode 1)
+    (irony-cdb-autosetup-compile-options)
+    (my/push-pkg-hook "minibuffer/capf" #'irony-completion-at-point :local))
   :if (pkg/package/enabled-p 'irony)
   :init
   ;; (irony-install-server) ;; 首次启用时会提示手动执行
+  (my/prog/cpp/add-hook #'pkg/irony/start)
+  :config
   (setq irony-server-install-prefix (my/set-user-emacs-file ".irony/")
         irony-user-dir irony-server-install-prefix
         irony-supported-major-modes '(c-mode c++-mode)
-        irony-duplicate-candidates-filter t)
-  (my/add-mode-hook "irony" #'pkg/irony/setup)
-  (my/prog/cpp/add-hook #'pkg/irony/start))
+        irony-duplicate-candidates-filter t))
+
+(use-package flycheck-irony
+  :after (flycheck irony)
+  :defer t
+  :preface
+  (defun pkg/flycheck-irony/setup ()
+    (flycheck-irony-setup))
+  :if (pkg/package/enabled-p 'flycheck-irony)
+  :init
+  (my/add-mode-hook "irony" #'pkg/flycheck-irony/setup))
+
+(use-package company-irony
+  :after (company irony)
+  :commands (company-irony)
+  :preface
+  (defun pkg/company-irony/setup ()
+    (company-irony-setup-begin-commands))
+  :if (pkg/package/enabled-p 'company-irony)
+  :init
+  (my/add-mode-hook "irony" #'pkg/company-irony/setup)
+  :config
+  (setq company-irony-ignore-case nil))
 
 (use-package ycmd
   :defer t
   :preface
-  (defun pkg/ycmd/setup ()
-    (my/push-mode-hook "capf" #'ycmd-complete-at-point :local))
   (defun pkg/ycmd/start ()
-    (ycmd-mode 1))
+    (ycmd-mode 1)
+    (my/push-pkg-hook "minibuffer/capf" #'ycmd-complete-at-point :local))
   :if (pkg/package/enabled-p 'ycmd)
   :init
   ;; 可使用(ycmd-show-debug-info)查询ycmd的部署状态
-  (setq ycmd-server-command (let ((exec (my/locate-exec "python3"))
-                                  (path (my/directory-exists-p "~/Projects/ycmd/ycmd/")))
-                              (when (and exec path) (list exec path)))
+  (my/prog/cpp/add-hook #'pkg/ycmd/start)
+  :config
+  (setq ycmd-server-command (let ((path (my/directory-exists-p "~/Projects/ycmd/ycmd/")))
+                              (when path (list my/bin/python-interpreter path)))
         ycmd-global-config (my/get-user-emacs-file
                             "my.config/ycm_extra_conf.py")
-        ycmd-extra-conf-whitelist pvt/project/root-directories
-        ycmd-force-semantic-completion t)
-  (my/add-mode-hook "ycmd" #'pkg/ycmd/setup)
-  (my/prog/cpp/add-hook #'pkg/ycmd/start))
+        ycmd-extra-conf-whitelist nil
+        ycmd-extra-conf-handler 'load
+        ycmd-force-semantic-completion t))
+
+(use-package flycheck-ycmd
+  :after (flycheck ycmd)
+  :defer t
+  :preface
+  (defun pkg/flycheck-ycmd/setup ()
+    (flycheck-ycmd-setup))
+  :if (pkg/package/enabled-p 'flycheck-ycmd)
+  :init
+  (my/add-mode-hook "ycmd" #'pkg/flycheck-ycmd/setup)
+  :config
+  (dolist (mode '("python"))
+    (my/add-mode-hook mode ;; make sure 'flycheck-ycmd is enabled in C/C++ only
+                      (lambda () (pkg/flycheck/disable-checker 'ycmd)))))
+
+(use-package company-ycmd
+  :after (company ycmd)
+  :commands (company-ycmd)
+  :preface
+  (defun pkg/company-ycmd/setup ()
+    ;; (company-ycmd-setup)
+    )
+  :if (pkg/package/enabled-p 'company-ycmd)
+  :init
+  (my/add-mode-hook "ycmd" #'pkg/company-ycmd/setup))
 
 
 (provide 'my/prog/cpp)

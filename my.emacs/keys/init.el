@@ -1,5 +1,7 @@
 ;; -*- coding: utf-8 -*-
 
+;; 两个很有用的内置命令：(ignore), (undefined)
+
 ;; 在foo-mode-map中绑定("x y" . foo)
 ;; (defhydra foo (foo-mode-map "x") ("y" . foo))
 ;; 在global-map中新增快捷键前缀"x"
@@ -32,13 +34,13 @@
  ("C-x f"          . nil) ;; (set-fill-column)
  ("C-x C-l"        . nil) ;; (downcase-region)
  ("C-x C-u"        . nil) ;; (upcase-region)
+ ("M-l"            . nil) ;; (downcase-word)
+ ("M-u"            . nil) ;; (upcase-word)
  ("M-s h"          . nil)
  ("C-M-k"          . nil) ;; (kill-sexp)
  ("C-s"            . nil) ;; (isearch-forward)
  ("C-r"            . nil) ;; (isearch-backward)
  ("M-/"            . nil) ;; (dabbrev-expand)
- ("C-_"            . nil) ;; (undo), (undo-only)
- ("C-/"            . nil) ;; (undo), (undo-only)
  ("M-c"            . nil) ;; (capitalize-word)
  ("M-m"            . nil) ;; (back-to-indentation)
  ("M-j"            . nil) ;; (indent-new-comment-line)
@@ -48,13 +50,15 @@
  ("C-h f"          . nil) ;; (describe-function)
  ("C-h v"          . nil) ;; (describe-variable)
  ("M-z"            . nil) ;; (zap-to-char)
+ ("M-h"            . nil) ;; (mark-paragraph)
  ("C-x C--"        . downcase-region         )
  ("C-x C-="        . upcase-region           )
  ("C-S-a"          . mark-whole-buffer       )
  ("C-q"            . read-only-mode          )
  ("M-!"            . shell-command           )
- ("M-."            . xref-find-definitions   )
- ("M-,"            . xref-pop-marker-stack   )
+ ("C-_"            . nil) ;; (undo), (undo-only)
+ ("C-/"            . nil) ;; (undo), (undo-only)
+ ("C-x C-u"        . undo                    )
  ("M-j"            . pkg/hydra/group/body    ))
 
 (use-package kmacro
@@ -63,6 +67,14 @@
   (bind-keys ("C-x C-k" . ;; (kmacro-keymap)
               (lambda () (interactive) ;; no need to confirm
                 (kill-buffer)))))
+
+(use-package xref
+  :defer t
+  :config
+  (bind-keys
+   ("M-." . xref-find-definitions)
+   ("M-," . xref-pop-marker-stack)
+   ("M-?" . nil) ("M-*" . xref-find-references)))
 
 (use-package package
   :defer t
@@ -76,11 +88,42 @@
   :defer t
   :config
   (bind-keys :map help-mode-map
-             ("l" . nil) ("C-c C-b" . nil) ("h" . help-go-back)
-             ("r" . nil) ("C-c C-f" . nil) ("l" . help-go-forward)
-             ("C-c C-c" . nil) ("o" . help-follow-symbol)
-             ("j" . forward-button)
-             ("k" . backward-button)))
+             ("r" . nil) ("C-c C-f" . nil) ("f" . help-go-forward)
+             ("l" . nil) ("C-c C-b" . nil) ("b" . help-go-back)
+             ("C-c C-c" . nil) ("." . help-follow-symbol)
+             ("n" . forward-button)
+             ("p" . backward-button)))
+
+(use-package info
+  :defer t
+  :config
+  (bind-keys :map Info-mode-map
+             ("." . nil) ("b" . nil) ("e" . nil)
+             ("]" . nil) ("[" . nil) ("<" . nil) (">" . nil)
+             ("d" . nil) ("t" . nil) ("u" . nil) ("^" . nil)
+             ("T" . nil) ("n" . nil) ("p" . nil)
+             ("f" . nil) ("C-m" . nil)
+             ("g" . nil) ("s" . nil) ("S" . nil)
+             ("i" . nil) ("I" . nil) ("m" . nil) ("," . nil)
+             ("r" . nil) ("l" . nil) ("L" . nil)
+             ("M-n" . nil) ("w" . nil) ("c" . nil)
+             ("?" . pkg/hydra/group/info-help/body))
+  (defhydra pkg/hydra/group/info-help
+    (Info-mode-map "" :timeout pkg/hydra/timeout-sec :exit t)
+    ("n"        Info-next-reference      "next node" :column "buffer ")
+    ("p"        Info-prev-reference      "prev node"                  )
+    ("<"        beginning-of-buffer      "beginning"                  )
+    (">"        end-of-buffer            "end      "                  )
+    ("^"        Info-up                  "up       " :column "browse ")
+    ("."        Info-follow-nearest-node "follow   "                  )
+    ("<return>" Info-follow-nearest-node nil                          )
+    ("C-s"      Info-menu                "menu     "                  )
+    ("l"        Info-goto-node           "list all "                  )
+    ("f"        Info-history-forward     "forward  " :column "history")
+    ("b"        Info-history-back        "backward "                  )
+    (","        Info-history-back        nil                          )
+    ("/"        Info-history             "show     "                  )
+    ("h"        Info-help                "help     " :column "Info   ")))
 
 (defhydra pkg/hydra/group/helm
   (global-map "" :timeout pkg/hydra/timeout-sec :exit t)
@@ -137,6 +180,8 @@
              ("C-_" . nil) ;; (undo-tree-undo)
              ("C-?" . nil) ;; (undo-tree-redo)
              ("M-_" . nil) ;; (undo-tree-redo)
+             ("C-x u" . undo-tree-visualize)
+             ("C-x C-u" . undo-tree-visualize)
              :map undo-tree-visualizer-mode-map
              ("d" . undo-tree-visualizer-toggle-diff)
              ("t" . undo-tree-visualizer-toggle-timestamps)

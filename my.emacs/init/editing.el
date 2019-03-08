@@ -3,7 +3,7 @@
 (use-package ace-window
   :defer t
   :if (pkg/package/enabled-p 'ace-window)
-  :init
+  :config
   (setq aw-background t
         aw-char-position 'top-left
         aw-ignore-current t
@@ -19,9 +19,8 @@
 (use-package avy
   :defer t
   :if (pkg/package/enabled-p 'avy)
-  :init
-  (setq avy-timeout-seconds 0.5)
   :config
+  (setq avy-timeout-seconds 0.5)
   ;; (avy-setup-default)
   )
 
@@ -39,9 +38,8 @@
         (pkg/package/enabled-p 'ace-jump-mode)))
   :if (and pkg/ace-pinyin/backend
            (pkg/package/enabled-p 'ace-pinyin))
-  :init
-  (setq ace-pinyin-use-avy (eq pkg/ace-pinyin/backend 'avy))
   :config
+  (setq ace-pinyin-use-avy (eq pkg/ace-pinyin/backend 'avy))
   (ace-pinyin-global-mode 1))
 
 (use-package ace-link
@@ -53,12 +51,11 @@
 (use-package undo-tree
   :diminish (undo-tree-mode)
   :if (pkg/package/enabled-p 'undo-tree)
-  :init
+  :config
   (setq undo-tree-visualizer-diff t
         undo-tree-visualizer-timestamps t
         undo-tree-visualizer-relative-timestamps t
         undo-tree-auto-save-history nil)
-  :config
   (global-undo-tree-mode 1))
 
 (use-package smart-hungry-delete
@@ -91,13 +88,13 @@
         'default))
   :if (pkg/package/enabled-p 'lispy)
   :init
+  (dolist (mode '("org" "lisp" "elisp" "ilisp" "slime" "scheme"))
+    (my/add-mode-hook mode #'pkg/lispy/start))
+  :config
   (setq lispy-no-permanent-semantic t
         lispy-close-quotes-at-end-p t
         lispy-completion-method pkg/lispy/show-backend
         lispy-occur-backend pkg/lispy/show-backend)
-  (dolist (mode '("org" "lisp" "elisp" "ilisp" "slime" "scheme"))
-    (my/add-mode-hook mode #'pkg/lispy/start))
-  :config
   (use-package semantic ;; FIXME: workaround for a semantic bug
     :defer t
     :config
@@ -110,6 +107,9 @@
     (parinfer-mode 1))
   :if (pkg/package/enabled-p 'parinfer)
   :init
+  (dolist (mode '("lisp" "elisp" "ilisp" "scheme"))
+    (my/add-mode-hook mode #'pkg/parinfer/start))
+  :config
   (setq parinfer-extensions '(defaults
                                pretty-parens
                                smart-yank
@@ -117,9 +117,7 @@
                                paredit)
         parinfer-auto-switch-indent-mode nil
         parinfer-auto-switch-indent-mode-when-closing nil
-        parinfer-delay-invoke-idle 1.0)
-  (dolist (mode '("lisp" "elisp" "ilisp" "scheme"))
-    (my/add-mode-hook mode #'pkg/parinfer/start)))
+        parinfer-delay-invoke-idle 1.0))
 
 (use-package expand-region
   :preface
@@ -128,15 +126,14 @@
     (setq er/try-expand-list (append er/try-expand-list
                                      '(mark-paragraph mark-page))))
   :if (pkg/package/enabled-p 'expand-region)
-  :init
-  (setq expand-region-smart-cursor t)
   :config
+  (setq expand-region-smart-cursor t)
   (er/enable-mode-expansions 'text-mode 'pkg/expand-region/text-mode))
 
 (use-package multiple-cursors
   ;; 'region-bindings-mode is not recommended when 'lispy is enabled
   :if (pkg/package/enabled-p 'multiple-cursors)
-  :init
+  :config
   (setq mc/list-file (my/set-user-emacs-file ".multiple-cursors.el")
         mc/always-repeat-command t
         mc/always-run-for-all t
@@ -150,31 +147,28 @@
   :if (and (pkg/package/enabled-p 'flyspell)
            (my/locate-exec "aspell"))
   :init
+  (my/add-mode-hook "text" #'flyspell-mode)
+  (my/add-mode-hook "prog" #'flyspell-prog-mode)
+  :config
   (setq ispell-program-name (my/locate-exec "aspell") ;; 设置后台支持程序
         ;; ispell-dictionary "english" ;; default dictionary
         ;; ispell-personal-dictionary ""
         flyspell-issue-message-flag nil)
-  (my/add-mode-hook "text" #'flyspell-mode)
-  (my/add-mode-hook "prog" #'flyspell-prog-mode)
-  :config
   (add-to-list 'ispell-skip-region-alist '("^#+BEGIN" . "^#+END") t))
 
 (use-package flyspell-correct
   :after (flyspell)
-  :if (and (pkg/package/enabled-p 'flyspell)
-           (pkg/package/enabled-p 'flyspell-correct))
+  :if (pkg/package/enabled-p '(flyspell flyspell-correct))
   :config
   (use-package flyspell-correct-helm
     :after (helm)
-    :if (and (pkg/package/enabled-p 'helm)
-             (pkg/package/enabled-p 'flyspell-correct-helm))
-    :init
+    :if (pkg/package/enabled-p '(helm flyspell-correct-helm))
+    :config
     (setq flyspell-correct-interface #'flyspell-correct-helm))
   (use-package flyspell-correct-ivy
     :after (ivy)
-    :if (and (pkg/package/enabled-p 'ivy)
-             (pkg/package/enabled-p 'flyspell-correct-ivy))
-    :init
+    :if (pkg/package/enabled-p '(ivy flyspell-correct-ivy))
+    :config
     (setq flyspell-correct-interface #'flyspell-correct-ivy)))
 
 (use-package hydra
@@ -185,7 +179,7 @@
     (interactive)
     (message "Hydra Quit"))
   :if (pkg/package/enabled-p 'hydra)
-  :init
+  :config
   ;; 目前发现启用此项会导致，Hydra子窗口过小，无法完整地呈现提示文字
   ;; 此外，启用全局的zoom mode似乎也可以避免该问题
   (setq hydra-lv nil))

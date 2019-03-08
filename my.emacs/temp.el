@@ -30,8 +30,6 @@ proxy = https://CHT1HTSH3191:Alps1911@10.25.71.1:8080
   ;; 2. this keyword DOES NOT introduce any autoload
   :requires (package1
              package2)
-  ;; =====================================================================================
-  ;; 1. (eval-after-load xxx) the following body
   :after (package1
           package2)
   :hook ((before-init . pkg/package/init)
@@ -45,6 +43,8 @@ proxy = https://CHT1HTSH3191:Alps1911@10.25.71.1:8080
   ;; those two don't always imply the loading, and when they don't and :defer occurs,
   ;; an explicit loading is still required for this package
   :defer t
+  :mode ((regexp . minor-mode)
+         (regexp . minor-mode))
   ;; 1. list commands that are bound in init-keys.el file
   ;; 2. non-autoload commands
   :commands (command1
@@ -55,19 +55,18 @@ proxy = https://CHT1HTSH3191:Alps1911@10.25.71.1:8080
   ;; =====================================================================================
   :preface
   ;; When this function is added to 'after-init-hook, it should either directly load this package,
-  ;; or register some triggers for loading this package.
-  ;; In the former case, the remaining procedure in this function is executed right after :config part.
+  ;; or register some triggers for loading this package. In the former case, the remaining procedure
+  ;; in this function is executed right after :config section.
   (defun pkg/package/start ()
     nil)
   :if (my/package-enabled-p 'package)
-  ;; 1. executed during emacs initialization, i.e. loading init.el file
-  ;; 2. add hooks, e.g. self loading when :defer occurs
-  ;;    especially when the execution sequence of functions in a hook DOES matter
-  ;;    with regard to the loading sequence of their belonging packages
   :init
-  (setq customized-config nil)
   ;; 1. executed after this package has been loaded or whenever reloaded
-  :config)
+  :config
+  (setq customized-config nil))
+;; 以下部分没有绝对可以遵循的原则，可能需要根据每个package的实现来调整
+;; 1. :after与use-package声明顺序之间的关系
+;; 2. (setq)执行于:init还是:config部分
 
 
 
@@ -370,8 +369,8 @@ proxy = https://CHT1HTSH3191:Alps1911@10.25.71.1:8080
                   ;; cmake-font-lock
                   ;; cpputils-cmake
                   ;; [haskell]
-                  haskell-mode
-                  hindent
+
+
                   ;; [ml]
                   sml-mode
                   ;; [web]
@@ -400,6 +399,37 @@ proxy = https://CHT1HTSH3191:Alps1911@10.25.71.1:8080
   (dolist (mode '("elisp" "ilisp"))
     (my/add-mode-hook mode #'eldoc-mode)))
 ;; 'semantic-idle-summary
+
+;; ycmd-server-command nil
+;; ycmd-server-args '("--log=debug" )
+;; ycmd-file-parse-result-hook nil
+;; ycmd-idle-change-delay 0.5
+;; ycmd-keepalive-period 600
+;; ycmd-startup-timeout 3
+;; ycmd-delete-process-delay 3
+;; ycmd-parse-conditions '(save new-line mode-enabled)
+;; ycmd-default-tags-file-name "tags"
+;; ycmd-auto-trigger-semantic-completion t
+;; ycmd-hide-url-status t
+;; ycmd-bypass-url-proxy-services t
+;; ycmd-tag-files nil
+;; ycmd-file-type-map
+;; ycmd-min-num-chars-for-completion 2
+;; ycmd-max-num-identifier-candidates 10
+;; ycmd-seed-identifiers-with-keywords nil
+;; ycmd-get-keywords-function 'ycmd--get-keywords-from-alist
+;; ycmd-gocode-binary-path nil
+;; ycmd-godef-binary-path nil
+;; ycmd-rust-src-path nil
+;; ycmd-swift-src-path nil
+;; ycmd-racerd-binary-path nil
+;; ycmd-python-binary-path nil
+;; ycmd-global-modes t
+;; ycmd-confirm-fixit t
+;; ycmd-after-exception-hook nil
+;; ycmd-after-teardown-hook nil
+;; ycmd-mode-line-prefix "ycmd"
+;; ycmd-completing-read-function #'completing-read
 
 
 

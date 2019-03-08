@@ -50,7 +50,7 @@
       help-window-select t
       visible-bell t ;; 以窗口闪烁的方式代替错误提示音
       echo-keystrokes 0.1
-      debug-on-error nil ;; 显示错误信息
+      debug-on-error nil
       debug-on-signal nil
       debug-on-quit nil
       select-enable-clipboard t
@@ -101,8 +101,6 @@
 (auto-compression-mode 1) ;; 允许查看和写入压缩包
 (global-font-lock-mode 1) ;; 语法高亮
 ;; (add-hook 'xxx-mode-hook #'turn-on-font-lock) ;; (font-lock-mode 1)
-(global-linum-mode -1) ;; (setq linum-format "%5d")
-;; (add-hook 'xxx-mode-hook #'linum-mode)
 (global-hi-lock-mode 1)
 (global-hl-line-mode 1)
 ;; (global-highlight-changes-mode 1)
@@ -113,16 +111,15 @@
 (scroll-bar-mode -1) ;; 取消滚动条
 (global-visual-line-mode -1) ;; 对中文支持不好
 ;; (my/add-mode-hook "text" #'visual-line-mode)
-(electric-pair-mode -1)
-(electric-quote-mode -1)
-(electric-indent-mode -1)
+(size-indication-mode -1)
+(auto-save-mode 1)
 
 (put 'downcase-region 'disabled nil) ;; 去除每次执行此命令时的提示，强制执行
 (put 'upcase-region 'disabled nil)
 
 (use-package files
   :defer t
-  :init
+  :config
   (setq make-backup-files t
         backup-by-copying t
         backup-directory-alist `(("." . ,(my/set-user-emacs-file
@@ -133,23 +130,21 @@
         delete-old-versions t
         dired-kept-versions 2
         require-final-newline t)
-  :config
   (add-hook 'find-file-hook 'my/find-file-read-only t)
   (add-hook 'before-save-hook 'my/reformat-current-file t))
 
 (use-package recentf
-  :init
-  (setq recentf-save-file (my/set-user-emacs-file ".emacs.recentf"))
   :config
+  (setq recentf-save-file (my/set-user-emacs-file ".emacs.recentf")
+        recentf-max-saved-items 100)
   (recentf-mode 1))
 
 (use-package autorevert
-  :init
+  :config
   (setq auto-revert-use-notify t
         auto-revert-interval 1
         auto-revert-verbose nil
         auto-revert-stop-on-user-input t)
-  :config
   (global-auto-revert-mode 1))
 
 (use-package grep
@@ -166,7 +161,7 @@
           ".*")))
 
 (use-package desktop
-  :init
+  :config
   (setq desktop-save 'ask-if-exists
         desktop-dirname (my/set-user-emacs-file ".emacs.desktop/")
         desktop-path (list (my/set-user-emacs-file ".emacs.desktop/"))
@@ -177,7 +172,6 @@
         desktop-restore-in-current-display t
         desktop-restore-forces-onscreen t
         desktop-auto-save-timeout (* 60 10))
-  :config
   (desktop-save-mode 1))
 
 (use-package winner
@@ -194,14 +188,31 @@
   (show-paren-mode 1))
 
 (use-package saveplace
-  :init
+  :config
   (setq save-place-file (my/set-user-emacs-file ".emacs.save-place")
         save-place-version-control nil
         save-place-limit 400
         save-place-forget-unreadable-files t
         save-place-save-skipped nil)
-  :config
   (save-place-mode 1))
+
+(use-package linum
+  :defer t
+  :config
+  (setq linum-format "%5d")
+  (global-linum-mode -1))
+
+(use-package electric
+  :defer t
+  :config
+  (electric-quote-mode -1)
+  (electric-indent-mode -1)
+  (electric-layout-mode -1))
+
+(use-package elec-pair
+  :defer t
+  :config
+  (electric-pair-mode -1))
 
 
 (toggle-frame-maximized)
