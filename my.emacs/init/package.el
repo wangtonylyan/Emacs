@@ -35,20 +35,17 @@
           '(("gnu" . "http://elpa.gnu.org/packages/")
             ;; ("melpa-stable" . "http://stable.melpa.org/packages/")
             ("melpa" . "http://melpa.org/packages/")
-            ;; ("org" . "http://orgmode.org/elpa/")
-            ))
+            ("org" . "http://orgmode.org/elpa/")))
          ((eq mirror 'china)
           '(("gnu" . "http://elpa.emacs-china.org/gnu/")
             ;; ("melpa-stable" . "http://elpa.emacs-china.org/melpa-stable/")
             ("melpa" . "http://elpa.emacs-china.org/melpa/")
-            ;; ("org" . "http://elpa.emacs-china.org/org/")
-            ))
+            ("org" . "http://elpa.emacs-china.org/org/")))
          ((eq mirror 'tsinghua)
           '(("gnu" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
             ;; ("melpa-stable" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa-stable/")
             ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
-            ;; ("org" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/")
-            )))))
+            ("org" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/"))))))
 ;; 以下列表用于设置被允许加载的插件，因此无论是在安装还是使用插件的过程中
 ;; 都必须提前详细地列举出所有的插件，且要根据插件之间的依赖关系进行先后地声明
 (setq package-load-list '(all ;; e.g. (dash) (epl) (let-alist) (pkg-info)
@@ -94,7 +91,8 @@
                       expand-region
                       multiple-cursors ;; highlight-symbol
                       (flyspell flyspell-correct)
-                      hydra ;; which-key
+                      hydra
+                      which-key
                       ;; evil
                       ))
 ;; [Utility]
@@ -108,6 +106,7 @@
                       magit))
 ;; [Programming]
 (pkg/package/select '(;; prog-mode
+                      which-func
                       flycheck ;; flymake
                       ggtags   ;; helm-gtags, counsel-gtags, counsel-etags
                       ;; asn1-mode
@@ -139,6 +138,9 @@
 ;; [Haskell]
 (pkg/package/select '(haskell-mode
                       flycheck-haskell))
+;; [Text]
+(pkg/package/select '(org
+                      org-bullets))
 (cond
  ((pkg/package/enabled-p 'helm)
   (pkg/package/select '(;; helm-bm

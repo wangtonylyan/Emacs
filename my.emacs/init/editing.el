@@ -73,7 +73,7 @@
     (enable-paredit-mode))
   :if (pkg/package/enabled-p 'paredit)
   :init
-  (dolist (mode '("org" "lisp" "elisp" "ilisp" "slime" "scheme"))
+  (dolist (mode '("lisp" "elisp" "ilisp" "slime" "scheme"))
     (my/add-mode-hook mode #'pkg/paredit/start)))
 
 (use-package lispy
@@ -88,7 +88,7 @@
         'default))
   :if (pkg/package/enabled-p 'lispy)
   :init
-  (dolist (mode '("org" "lisp" "elisp" "ilisp" "slime" "scheme"))
+  (dolist (mode '("lisp" "elisp" "ilisp" "slime" "scheme"))
     (my/add-mode-hook mode #'pkg/lispy/start))
   :config
   (setq lispy-no-permanent-semantic t
@@ -183,6 +183,22 @@
   ;; 目前发现启用此项会导致，Hydra子窗口过小，无法完整地呈现提示文字
   ;; 此外，启用全局的zoom mode似乎也可以避免该问题
   (setq hydra-lv nil))
+
+(use-package which-key
+  :if (pkg/package/enabled-p 'which-key)
+  :config
+  (setq which-key-idle-delay 0.5
+        which-key-separator " "
+        which-key-max-description-length 30
+        which-key-sort-order 'which-key-prefix-then-key-order
+        which-key-allow-multiple-replacements t)
+  (dolist (replace '((("<up>") . ("↑")) (("<down>") . ("↓"))
+                     ((nil . "RET") . (nil . "⏎"))
+                     ((nil . "^pkg/hydra/") . (nil . "η"))
+                     ((nil . "^pkg/hydra/group") . (nil . "η"))
+                     ((nil . "\\`\\?\\?\\'") . (nil . "λ"))))
+    (add-to-list 'which-key-replacement-alist replace))
+  (which-key-mode 1))
 
 
 (provide 'my/init/editing)

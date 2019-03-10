@@ -1,8 +1,3 @@
-# ~/.bashrc
-# if [ -f "$HOME/.emacs.d/my.config/bashrc.sh" ]; then
-#   source "$HOME/.emacs.d/my.config/bashrc.sh"
-# fi
-
 if [ "$USER" = "wm" ]; then
     export http_proxy="http://CHT1HTSH3191:Alps1912@10.25.71.1:8080"
     export https_proxy="https://CHT1HTSH3191:Alps1912@10.25.71.1:8080"
@@ -12,9 +7,11 @@ else
 fi
 export no_proxy="127.0.0.1, localhost"
 
-# export PATH=$HOME/bin:/usr/local/bin:$PATH
-# export PATH="/usr/share/smlnj/bin:$PATH"
-export PATH="/home/wm/miniconda3/bin:$PATH"
+CONDA_PATH="$HOME/miniconda3"
+if [ -d "$CONDA_PATH" ]; then
+    # export PATH="$CONDA_PATH/bin:$PATH"
+    source "$CONDA_PATH/etc/profile.d/conda.sh"
+fi
 
 alias ll='ls -l'
 alias la='ls -al'

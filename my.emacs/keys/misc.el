@@ -51,12 +51,6 @@
              ("C-c d" . vdiff-mode-prefix-map)
              ("C-c d h" . vdiff-hydra/body)))
 
-(defhydra pkg/hydra/group/org
-  (:timeout pkg/hydra/timeout-sec :exit t)
-  ("c" org-capture "capture" :column "org mode")
-  ("a" org-agenda  "agenda "                   )
-  ("q" pkg/hydra/quit nil :exit t))
-
 ;; (bind-key "C-c p" 'projectile-command-map projectile-mode-map)
 (defhydra pkg/hydra/group/projectile
   (:timeout pkg/hydra/timeout-sec :exit t)

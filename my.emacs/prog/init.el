@@ -9,6 +9,17 @@
 (my/add-mode-hook "prog" #'my/prog/init/run-hook)
 
 
+(use-package which-func
+  :after (prog-mode)
+  :if (pkg/package/enabled-p 'which-func)
+  :init
+  (setq which-func-unknown "∅")
+  :config
+  (setq which-func-modes '(lisp-mode
+                           emacs-lisp-mode
+                           lisp-interaction-mode))
+  (which-function-mode 1))
+
 (use-package prog-mode
   :defer t
   :preface
@@ -20,9 +31,7 @@
   :init
   (my/prog/init/add-hook #'pkg/prog-mode/start)
   :config
-  (setq prettify-symbols-unprettify-at-point t)
-  ;; 在mode-line显示当前光标所在的函数名
-  (which-function-mode 1))
+  (setq prettify-symbols-unprettify-at-point t))
 
 (use-package flymake
   :defer t
@@ -181,6 +190,29 @@
       :program pkg-reformatter-haskell-program
       :args pkg-reformatter-haskell-args)
     (my/add-mode-hook "haskell" #'pkg-reformatter-haskell-on-save-mode)))
+
+(defun my/reformat-current-file ()
+  (interactive)
+  (defmacro my/reformat-wrapper (func)
+    `(let ((state buffer-read-only))
+       (when state (read-only-mode -1))
+       (delete-trailing-whitespace)
+       (when (< (- (point-max) (point-min)) (* 1024 1024))
+         ,func)
+       ;; 每次保存buffer时都将删除现有的改动高亮，替换成以下两个hook无法生效，原因未知
+       ;; write-content-functions或write-file-functions
+       (highlight-changes-remove-highlight (point-min) (point-max))
+       (when state (read-only-mode 1))))
+  (my/reformat-wrapper
+   (let* ((file (my/locate-file buffer-file-name))
+          (mode (when file (assoc-default file auto-mode-alist
+                                          'string-match))))
+     (cond
+      ((and (provided-mode-derived-p mode 'lisp-mode 'emacs-lisp-mode)
+            (derived-mode-p 'lisp-mode 'emacs-lisp-mode))
+       (indent-region (point-min) (point-max)))))))
+
+(add-hook 'before-save-hook 'my/reformat-current-file t)
 
 
 (provide 'my/prog/init)

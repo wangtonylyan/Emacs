@@ -168,6 +168,7 @@
   (defun pkg/jedi-core/start ()
     (jedi:setup))
   :init
+  ;; 目前由于使用了:after (python)，因此只能在打开.py文件后再执行以下命令
   ;; (jedi:install-server) ;; 安装后需要交互式地手动执行一次
   ;; (jedi:show-version-info), (jedi:show-setup-info)
   (when (pkg/package/enabled-p 'jedi-core)
