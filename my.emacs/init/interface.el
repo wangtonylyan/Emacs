@@ -6,6 +6,13 @@
   (when path
     (add-to-list 'custom-theme-load-path path)))
 
+(use-package apropospriate-theme
+  :if (pkg/package/enabled-p 'apropospriate-theme)
+  :init
+  (setq apropospriate-org-level-resizing nil)
+  ;; (load-theme 'apropospriate-light t)
+  (load-theme 'apropospriate-dark t))
+
 (use-package atom-one-dark-theme
   :if (pkg/package/enabled-p 'atom-one-dark-theme)
   :init
@@ -14,14 +21,21 @@
 (use-package doom-themes
   :if (pkg/package/enabled-p 'doom-themes)
   :init
-  ;; 'doom-one, 'doom-nova, 'doom-spacegrey
-  (load-theme 'doom-spacegrey t)
+  (setq doom-themes-enable-bold t
+        doom-themes-enable-italic t
+        doom-spacegrey-brighter-modeline nil
+        doom-spacegrey-brighter-comments nil
+        doom-spacegrey-comment-bg nil
+        doom-one-brighter-modeline nil
+        doom-one-brighter-comments nil
+        doom-one-comment-bg nil
+        doom-vibrant-brighter-modeline nil
+        doom-vibrant-brighter-comments nil
+        doom-vibrant-comment-bg nil)
+  ;; (load-theme 'doom-spacegrey t)
+  ;; (load-theme 'doom-one t)
+  (load-theme 'doom-vibrant t)
   :config
-  (setq doom-themes-enable-bold nil
-        doom-themes-enable-italic nil
-        doom-spacegrey-brighter-modeline t
-        doom-spacegrey-brighter-comments t
-        doom-spacegrey-comment-bg nil)
   (when visible-bell
     (doom-themes-visual-bell-config))
   (use-package doom-themes-treemacs
@@ -46,31 +60,27 @@
 (use-package github-theme
   :if (pkg/package/enabled-p 'github-theme)
   :init
-  (load-theme 'github t)
-  :config
   (setq github-override-colors-alist '(("github-white" . "#FBF9E1")
                                        ("github-comment" . "#009E73")
-                                       ("github-text" . "#000000"))))
+                                       ("github-text" . "#000000")))
+  (load-theme 'github t))
 
 (use-package solarized-theme
   :if (pkg/package/enabled-p 'solarized-theme)
   :init
-  ;; (load-theme 'solarized-dark t)
-  (load-theme 'solarized-light t)
-  :config
   (setq solarized-distinct-fringe-background nil
         solarized-distinct-doc-face t
         solarized-high-contrast-mode-line t
         solarized-use-more-italic t
-        solarized-emphasize-indicators t))
+        solarized-emphasize-indicators t)
+  ;; (load-theme 'solarized-dark t)
+  (load-theme 'solarized-light t))
 
 (use-package zenburn-theme
   :if (pkg/package/enabled-p 'zenburn-theme)
   :init
-  (load-theme 'zenburn t)
-  :config
   ;; (setq zenburn-override-colors-alist '(("zenburn-fg" . "#EDEDDD")))
-  )
+  (load-theme 'zenburn t))
 
 (use-package dashboard
   :diminish (page-break-lines-mode)
