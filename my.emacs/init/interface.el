@@ -36,7 +36,12 @@
     :after (neotree)
     :if (pkg/package/enabled-p 'neotree)
     :config
-    (doom-themes-neotree-config)))
+    (doom-themes-neotree-config))
+  (use-package doom-themes
+    :after (org)
+    :if (pkg/package/enabled-p 'org)
+    :config
+    (doom-themes-org-config)))
 
 (use-package github-theme
   :if (pkg/package/enabled-p 'github-theme)

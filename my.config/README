@@ -2,3 +2,16 @@
 2. bash和zsh的代理设置将根据当前登陆的用户名来决定
    但目前其他软件的代理设置只能手动修改
 3. bashrc.sh将作为所有shell的默认配置文件，被各shell主动加载
+
+################################################################################
+新环境下需要执行以下命令
+$ ln -s ~/Projects/Emacs ~/.emacs.d
+
+# echo >> ~/.bashrc
+if [ -f "$HOME/.emacs.d/my.config/bashrc.sh" ]; then
+   source "$HOME/.emacs.d/my.config/bashrc.sh"
+fi
+
+$ ln -s ~/.emacs.d/my.config/zshrc.sh   ~/.zshrc
+$ ln -s ~/.emacs.d/my.config/apt.conf   /etc/apt/apt.conf
+$ ln -s ~/.emacs.d/my.config/gitconfig  ~/.gitconfig

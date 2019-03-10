@@ -100,6 +100,7 @@
   (bind-keys :map Info-mode-map
              ("." . nil) ("b" . nil) ("e" . nil)
              ("]" . nil) ("[" . nil) ("<" . nil) (">" . nil)
+             ("SPC" . nil) ("S-SPC" . nil)
              ("d" . nil) ("t" . nil) ("u" . nil) ("^" . nil)
              ("T" . nil) ("n" . nil) ("p" . nil)
              ("f" . nil) ("C-m" . nil)

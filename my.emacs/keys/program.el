@@ -217,4 +217,4 @@
              ("M-r" . nil) ("M-*" . anaconda-mode-find-references)))
 
 
-(provide 'my/keys/programming)
+(provide 'my/keys/program)

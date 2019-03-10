@@ -1,5 +1,3 @@
-# ln -s ~/.emacs.d/my.config/gitconfig ~/.gitconfig
-
 [alias]
 	st = status
 	br = branch

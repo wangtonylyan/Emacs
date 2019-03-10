@@ -1,6 +1,8 @@
 # https://jonasdevlieghere.com/a-better-youcompleteme-config/
 # https://github.com/JDevlieghere/dotfiles/blob/master/.vim/.ycm_extra_conf.py
+# 可拷贝全局配置文件至项目目录下，实现项目级别的独立配置
 # cp ~/.emacs.d/my.config/ycm_extra_conf.py PROJECT_DIR/.ycm_extra_conf.py
+
 
 import os
 import os.path

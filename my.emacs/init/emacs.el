@@ -50,9 +50,9 @@
       help-window-select t
       visible-bell t ;; 以窗口闪烁的方式代替错误提示音
       echo-keystrokes 0.1
-      debug-on-error nil
+      debug-on-error nil ;; (toggle-debug-on-error)
+      debug-on-quit nil ;; (toggle-debug-on-quit)
       debug-on-signal nil
-      debug-on-quit nil
       select-enable-clipboard t
       delete-by-moving-to-trash t
       auto-save-list-file-prefix (my/set-user-emacs-file
@@ -119,6 +119,18 @@
 
 (use-package files
   :defer t
+  :preface
+  (defun pkg/files/find-read-only ()
+    (let ((file (my/file-exists-p buffer-file-name))
+          (skiplist `(".*-autoloads.el$"
+                      ".*-loaddefs.el$"
+                      ,(my/set-user-emacs-file "\\..*/.*")
+                      ,(file-truename (my/set-user-emacs-file "\\..*/.*")))))
+      (unless (or (not file)
+                  (my/map (lambda (regexp)
+                            (string-match-p regexp file))
+                          skiplist))
+        (read-only-mode 1))))
   :config
   (setq make-backup-files t
         backup-by-copying t
@@ -130,8 +142,7 @@
         delete-old-versions t
         dired-kept-versions 2
         require-final-newline t)
-  (add-hook 'find-file-hook 'my/find-file-read-only t)
-  (add-hook 'before-save-hook 'my/reformat-current-file t))
+  (add-hook 'find-file-hook 'pkg/files/find-read-only t))
 
 (use-package recentf
   :config
@@ -175,6 +186,8 @@
   (desktop-save-mode 1))
 
 (use-package winner
+  :init
+  (setq winner-dont-bind-my-keys t)
   :config
   (winner-mode 1))
 

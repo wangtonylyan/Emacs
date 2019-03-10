@@ -8,7 +8,7 @@
 ;; pvt :: private
 ;; pkg :: package
 
-;; file, path ::
+;; file, path :: 不以斜杠结尾
 ;; directory :: 以斜杠结尾
 ;; dwim :: Do What I Mean
 
@@ -121,6 +121,13 @@
 
 (defalias 'my/minor-mode-on-p 'bound-and-true-p)
 
+(defmacro my/save-point (func)
+  `(let ((line (line-number-at-pos)))
+     ,func
+     (goto-char (point-min))
+     (when (>= line 1) (forward-line (- line 1)))
+     (recenter-top-bottom)))
+
 
 (defun my/get-hook (dict mode)
   (let ((hook (gethash mode dict)))
@@ -179,6 +186,7 @@
      ("init"             after-init-hook            )
      ;; [Editing]
      ("text"             text-mode-hook             )
+     ("ORG"              org-load-hook              )
      ("org"              org-mode-hook              )
      ;; [Programming]
      ("prog"             prog-mode-hook             )
@@ -217,52 +225,6 @@
 
 (my/create-hook-interface "mode" my/mode-hook-dict)
 (my/create-hook-interface "pkg" my/package-hook-dict)
-
-
-(defun my/find-file-read-only ()
-  (let ((file (my/file-exists-p buffer-file-name))
-        (skiplist `(".*-autoloads.el$"
-                    ,(my/set-user-emacs-file "\\..*/.*")
-                    ,(file-truename (my/set-user-emacs-file "\\..*/.*")))))
-    (unless (or (not file)
-                (my/map (lambda (regexp)
-                          (string-match-p regexp file))
-                        skiplist))
-      (read-only-mode 1))))
-
-(defmacro my/save-point (func)
-  `(let ((line (line-number-at-pos)))
-     ,func
-     (goto-char (point-min))
-     (when (>= line 1) (forward-line (- line 1)))
-     (recenter-top-bottom)))
-
-(defun my/reformat-current-file ()
-  (interactive)
-  (defun my/reformat-wrapper (func)
-    (let ((state buffer-read-only))
-      (when state (read-only-mode -1))
-      (delete-trailing-whitespace) ;; 删除每行末尾的空格
-      (when (< (- (point-max) (point-min)) (* 1024 1024))
-        (funcall func))
-      ;; 每次保存buffer时都将删除现有的改动高亮，替换成以下两个hook无法生效，原因未知
-      ;; write-content-functions或write-file-functions
-      (highlight-changes-remove-highlight (point-min) (point-max))
-      (when state (read-only-mode 1))))
-  (defun my/reformat ()
-    (let* ((file (my/locate-file buffer-file-name))
-           (mode (when file (assoc-default file auto-mode-alist
-                                           'string-match))))
-      (cond
-       ((and (provided-mode-derived-p mode 'lisp-mode 'emacs-lisp-mode)
-             (derived-mode-p 'lisp-mode 'emacs-lisp-mode))
-        (my/reformat-current-file/lisp))
-       (t nil))))
-  (my/reformat-wrapper 'my/reformat))
-
-(defun my/reformat-current-file/lisp ()
-  (interactive)
-  (indent-region (point-min) (point-max)))
 
 
 (cond ;; os-related
@@ -382,12 +344,14 @@
                             my/prog/python ;; python-mode
                             my/prog/function ;; sml-mode, haskell-mode
                             ;; my/prog/web ;; web-mode
-                            ;; my/text/init ;; org-mode, tex-mode, latex-mode
+                            my/text/init ;; org-mode, tex-mode, latex-mode
                             my/keys/init
                             my/keys/buffer
                             my/keys/directory
                             my/keys/misc
-                            my/keys/programming))
+                            my/keys/program
+                            ;; my/keys/text ;; TODO
+                            ))
 ;; "web-browser" ;; web browser
 
 
