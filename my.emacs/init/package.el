@@ -56,7 +56,8 @@
 ;; 目前使用此全局变量来管理插件的启用/禁用，其中包括了ELPA更新源中所没有的插件
 (setq package-selected-packages '(use-package diminish bind-key all-the-icons))
 ;; [Interface]
-(pkg/package/select '(doom-themes ;; solarized-theme, zenburn-theme
+(pkg/package/select '(apropospriate-theme ;; zenburn-theme
+                      ;; doom-themes, solarized-theme
                       dashboard
                       nyan-mode
                       doom-modeline ;; spaceline, spaceline-all-the-icons, smart-mode-line
