@@ -1,13 +1,56 @@
 ;; -*- coding: utf-8 -*-
 
-(defhydra pkg/hydra/group/highlight
-  (:timeout pkg/hydra/timeout-sec)
-  ("i" highlight-symbol-at-point       "at point   " :column "highlight  ")
-  ("s" highlight-phrase                "word       "                      )
-  ("r" highlight-regexp                "regexp     "                      )
-  ("l" highlight-lines-matching-regexp "regexp line"                      )
-  ("u" unhighlight-regexp              "regexp     " :column "unhighlight")
-  ("q" pkg/hydra/quit nil :exit t))
+(defun pkg/hydra/group/highlight/body ()
+  (interactive)
+  (cond
+   ((pkg/package/enabled-p 'symbol-overlay)
+    (pkg/hydra/group/symbol-overlay/body))
+   ((pkg/package/enabled-p 'highlight-symbol)
+    (pkg/hydra/group/highlight-symbol/body))
+   (t (pkg/hydra/group/hi-lock/body))))
+
+(use-package symbol-overlay
+  :defer t
+  :commands (pkg/hydra/group/symbol-overlay/body)
+  :config
+  (setq symbol-overlay-map (make-sparse-keymap))
+  (defhydra pkg/hydra/group/symbol-overlay
+    (symbol-overlay-map "" :timeout pkg/hydra/timeout-sec :exit t)
+    ("i" symbol-overlay-put                  "toggle at point" :column "highlight")
+    ("t" symbol-overlay-toggle-in-scope      "toggle scope   "                    )
+    ("u" symbol-overlay-remove-all           "unhighlight all"                    )
+    ("n" symbol-overlay-jump-next            "next           " :column "move     ")
+    ("p" symbol-overlay-jump-prev            "prev           "                    )
+    ("<" symbol-overlay-jump-first           "first          "                    )
+    (">" symbol-overlay-jump-last            "last           "                    )
+    ("f" symbol-overlay-switch-forward       "forward        " :column "others   ")
+    ("b" symbol-overlay-switch-backward      "backward       "                    )
+    ("y" symbol-overlay-save-symbol          "copy           " :column "action   ")
+    ("Y" symbol-overlay-rename               "rename         "                    )
+    ("w" symbol-overlay-query-replace        "query replace  "                    )
+    ("." symbol-overlay-jump-to-definition   "to definition  "                    )
+    ("?" pkg/hydra/group/symbol-overlay/body "key bindings   " :column "help     ")))
+
+(use-package highlight-symbol
+  :defer t
+  :commands (pkg/hydra/group/highlight-symbol/body)
+  :config
+  (defhydra pkg/hydra/group/highlight-symbol
+    (:timeout pkg/hydra/timeout-sec)
+    ("q" pkg/hydra/quit nil :exit t)))
+
+(use-package hi-lock
+  :defer t
+  :commands (pkg/hydra/group/hi-lock/body)
+  :config
+  (defhydra pkg/hydra/group/hi-lock
+    (:timeout pkg/hydra/timeout-sec)
+    ("i" highlight-symbol-at-point       "at point   " :column "highlight  ")
+    ("s" highlight-phrase                "word       "                      )
+    ("r" highlight-regexp                "regexp     "                      )
+    ("l" highlight-lines-matching-regexp "regexp line"                      )
+    ("u" unhighlight-regexp              "regexp     " :column "unhighlight")
+    ("q" pkg/hydra/quit nil :exit t)))
 
 (defhydra pkg/hydra/group/bookmark
   (:timeout pkg/hydra/timeout-sec)
@@ -51,67 +94,63 @@
              ("C-c d" . vdiff-mode-prefix-map)
              ("C-c d h" . vdiff-hydra/body)))
 
-;; (bind-key "C-c p" 'projectile-command-map projectile-mode-map)
-(defhydra pkg/hydra/group/projectile
-  (:timeout pkg/hydra/timeout-sec :exit t)
-  "
+(use-package projectile
+  :defer t
+  :commands (pkg/hydra/group/projectile/body)
+  :preface
+  (defun pkg/hydra/projectile/alternative (func)
+    (funcall (cond
+              ((pkg/package/enabled-p 'helm-projectile)
+               (intern (concat "helm-" (symbol-name func))))
+              (t func))))
+  :config
+  ;; (bind-key "C-c p" 'projectile-command-map projectile-mode-map)
+  (defhydra pkg/hydra/group/projectile
+    (:timeout pkg/hydra/timeout-sec :exit t)
+    "
 PROJECT: %(projectile-project-root)
 
 "
-  ("h"   helm-projectile                            "helm     " :column "project  ")
-  ("p"   projectile-switch-project                  "open     "                    )
-  ("P"   projectile-switch-open-project             "switch   "                    )
-  ("v"   projectile-vc                              "version  "                    )
-  ("x"   projectile-remove-known-project            "remove   "                    )
-  ("X"   projectile-cleanup-known-projects          "cleanup  "                    )
-  ("b"   projectile-switch-to-buffer                "switch   " :column "buffer   ")
-  ("k"   projectile-kill-buffers                    "kill     "                    )
-  ("f"   projectile-find-file                       "this proj" :column "find file")
-  ("F"   projectile-find-file-in-known-projects     "all proj "                    )
-  ("j"   projectile-find-file-in-directory          "the dir  "                    )
-  ("r"   projectile-recentf                         "recent   "                    )
-  ("t"   projectile-find-other-file                 "same name"                    )
-  ("d"   projectile-find-dir                        "find     " :column "directory")
-  ("D"   projectile-dired                           "dired    "                    )
-  ("o"   projectile-grep                            "grep     " :column "symbol   ")
-  ("O"   projectile-multi-occur                     "occur    "                    )
-  ("w"   projectile-replace                         "replace  "                    )
-  ("!"   projectile-run-shell-command-in-root       "shell    " :column "external ")
-  ("&"   projectile-run-async-shell-command-in-root "shell &  "                    )
-  ("a"   projectile-ag                              "ag       "                    )
-  ("c"   projectile-ack                             "ack      "                    )
-  ;; TODO
-  ;; V projectile-browse-dirty-projects
-  ;; c projectile-compile-project
-  ;; I projectile-ibuffer
-  ;; S projectile-save-project-buffers
-  ;; j projectile-find-tag
-  ;; R projectile-regenerate-tags
-  ;; i projectile-invalidate-cache
-  ;; z projectile-cache-current-file
-  ("q" pkg/hydra/quit nil :exit t))
-
-(use-package helm-projectile
-  :defer t
-  :config
-  (mapc
-   (lambda (cmd)
-     (let* ((cmd (symbol-name cmd))
-            (group (symbol-name 'pkg/hydra/group/projectile))
-            (keymap (concat group "/keymap"))
-            (hydra (concat group "/" cmd "-and-exit"))
-            (helm (concat "helm-" cmd)))
-       (define-key (symbol-value (intern keymap))
-         `[remap ,(intern hydra)] (intern helm))))
-   '(projectile-switch-project
-     projectile-switch-to-buffer
-     projectile-find-file
-     projectile-recentf
-     projectile-find-dir
-     projectile-grep
-     projectile-ag
-     projectile-ack
-     projectile-browse-dirty-projects)))
+    ("h" helm-projectile                            "helm     " :column "project  ")
+    ("p" (pkg/hydra/projectile/alternative
+          #'projectile-switch-project)              "open     "                    )
+    ("P" projectile-switch-open-project             "switch   "                    )
+    ("v" projectile-vc                              "version  "                    )
+    ("x" projectile-remove-known-project            "remove   "                    )
+    ("X" projectile-cleanup-known-projects          "cleanup  "                    )
+    ("b" (pkg/hydra/projectile/alternative
+          #'projectile-switch-to-buffer)            "switch   " :column "buffer   ")
+    ("k" projectile-kill-buffers                    "kill     "                    )
+    ("f" (pkg/hydra/projectile/alternative
+          #'projectile-find-file)                   "this proj" :column "find file")
+    ("F" projectile-find-file-in-known-projects     "all proj "                    )
+    ("j" projectile-find-file-in-directory          "the dir  "                    )
+    ("r" (pkg/hydra/projectile/alternative
+          #'projectile-recentf)                     "recent   "                    )
+    ("t" projectile-find-other-file                 "same name"                    )
+    ("d" (pkg/hydra/projectile/alternative
+          #'projectile-find-dir)                    "find     " :column "directory")
+    ("D" projectile-dired                           "dired    "                    )
+    ("o" (pkg/hydra/projectile/alternative
+          #'projectile-grep)                        "grep     " :column "symbol   ")
+    ("O" projectile-multi-occur                     "occur    "                    )
+    ("w" projectile-replace                         "replace  "                    )
+    ("!" projectile-run-shell-command-in-root       "shell    " :column "external ")
+    ("&" projectile-run-async-shell-command-in-root "shell &  "                    )
+    ("a" (pkg/hydra/projectile/alternative
+          #'projectile-ag)                          "ag       "                    )
+    ("c" (pkg/hydra/projectile/alternative
+          #'projectile-ack)                         "ack      "                    )
+    ;; TODO
+    ;; V projectile-browse-dirty-projects
+    ;; c projectile-compile-project
+    ;; I projectile-ibuffer
+    ;; S projectile-save-project-buffers
+    ;; j projectile-find-tag
+    ;; R projectile-regenerate-tags
+    ;; i projectile-invalidate-cache
+    ;; z projectile-cache-current-file
+    ("q" pkg/hydra/quit nil :exit t)))
 
 
 (provide 'my/keys/misc)

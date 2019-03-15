@@ -6,8 +6,12 @@
   :config
   (setq aw-background t
         aw-char-position 'top-left
+        aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
         aw-ignore-current t
-        aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
+        aw-ignore-on t)
+  (dolist (buffer '(magit-status-mode
+                    neotree-mode))
+    (add-to-list 'aw-ignored-buffers buffer)))
 
 (use-package buffer-move
   :commands (buf-move-left
@@ -185,6 +189,7 @@
   (setq hydra-lv nil))
 
 (use-package which-key
+  :diminish (which-key-mode)
   :if (pkg/package/enabled-p 'which-key)
   :config
   (setq which-key-idle-delay 0.5
@@ -201,4 +206,4 @@
   (which-key-mode 1))
 
 
-(provide 'my/init/editing)
+(provide 'my/init/edit)

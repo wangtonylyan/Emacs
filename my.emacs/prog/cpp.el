@@ -395,6 +395,7 @@
   (setq company-irony-ignore-case nil))
 
 (use-package ycmd
+  :diminish (ycmd-mode)
   :defer t
   :preface
   (defun pkg/ycmd/start ()

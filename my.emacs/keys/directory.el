@@ -23,8 +23,9 @@
 
 (defhydra pkg/hydra/group/neotree
   (:timeout pkg/hydra/timeout-sec :exit t)
-  ("d" dired              "enable" :column "dired ")
-  ("j" pkg/neotree/toggle "select" :column "window"))
+  ("d" dired                     "enable" :column "dired ")
+  ("j" pkg/neotree/select-window "select" :column "window")
+  ("f" pkg/neotree/toggle        "follow"                 ))
 
 (use-package dired
   :defer t
@@ -131,16 +132,46 @@ Number of marked: %(pkg/dired/count-marked)
 (use-package neotree
   :defer t
   :config
+  (defun pkg/neotree/collapse-dir ()
+    (interactive)
+    (funcall (neotree-make-executor
+              :dir-fn 'neo-open-dir-recursive)))
   (bind-keys :map neotree-mode-map
+             ("s" . nil) ;; (neotree-select-next-sibling-node)
+             ("S" . nil) ;; (neotree-select-previous-sibling-node)
+             ("U" . nil) ;; (neotree-select-up-node)
+             ("D" . nil) ;; (neotree-select-down-node)
+             ("H" . nil) ;; (neotree-hidden-file-toggle)
+             ("a" . nil) ;; (neo-open-file-ace-window)
+             ("A" . nil) ;; (neotree-stretch-toggle)
+             ("d" . nil) ;; (neo-open-dired)
+             ("o" . nil) ;; (neotree-open-file-in-system-application)
+             ("O" . nil) ;; (neo-open-dir-recursive)
+             ("SPC" . nil) ;; (neotree-quick-look)
+             ("C-c" . nil) ;; 'neo-keymap-style = 'default
+             ("C-x C-f" . nil) ;; (find-file-other-window)
              ("?" . pkg/hydra/group/neotree-help/body))
   (defhydra pkg/hydra/group/neotree-help
     (neotree-mode-map "" :timeout pkg/hydra/timeout-sec :exit t)
-    ("n"   neotree-next-line                    "next line")
-    ("p"   neotree-previous-line                "prev line")
-    ("C-n" neotree-select-next-sibling-node     "next dir ")
-    ("C-p" neotree-select-previous-sibling-node "prev dir ")
-    ("l"   neotree-select-up-node               "parent   ")
-    ("a"   neotree-hidden-file-toggle           "hidden   ")))
+    ("g"         neotree-refresh                         "refresh     " :column "show   ")
+    ("a"         neotree-hidden-file-toggle              "dot files   "                  )
+    ("<C-tab>"   pkg/neotree/collapse-dir                "collapse dir"                  )
+    ("<backtab>" neotree-collapse-all                    "collapse all"                  )
+    ("n"         neotree-next-line                       "next line   " :column "move   ")
+    ("p"         neotree-previous-line                   "prev line   "                  )
+    ("C-n"       neotree-select-next-sibling-node        "next dir    "                  )
+    ("C-p"       neotree-select-previous-sibling-node    "prev dir    "                  )
+    ("l"         neotree-select-up-node                  "parent      "                  )
+    ("j"         neotree-dir                             "jump        "                  )
+    ("v"         neotree-quick-look                      "peek        " :column "view   ")
+    ("F"         neotree-open-file-in-system-application "open in app "                  )
+    ("y"         neotree-copy-node                       "copy        " :column "action ")
+    ("Y"         neotree-rename-node                     "move        "                  )
+    ("D"         neotree-delete-node                     "delete      "                  )
+    ("="         neotree-create-node                     "create dir  "                  )
+    ("<C-return>"neotree-change-root                     "change root " :column "project")
+    (": w"       neotree-stretch-toggle                  "expand      " :column "neotree")
+    ("q"         neotree-hide                            "quit        "                  )))
 
 
 (provide 'my/keys/directory)

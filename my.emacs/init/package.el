@@ -1,10 +1,17 @@
 ;; -*- coding: utf-8 -*-
 
+(defconst my/elpa/selected-packages
+  '(awesome-tab))
+
+(defun my/elpa/package-enabled-p (package)
+  (memq package my/elpa/selected-packages))
+
 (defun pkg/package/enabled-p (packages)
   (if (listp packages)
       (when (equal (my/map #'pkg/package/enabled-p packages) packages)
         (if (= (length packages) 1) (car packages) packages))
-    (car (package--user-selected-p packages))))
+    (or (car (package--user-selected-p packages))
+        (car (my/elpa/package-enabled-p packages)))))
 
 (defun pkg/package/select (packages)
   (cond
@@ -15,10 +22,10 @@
    (t (user-error "*pkg/package/select* fails on %s" packages))))
 
 
-(setq url-max-password-attempts 2
-      ;; 不支持authentication
-      ;; url-proxy-services '(("http" . "10.25.71.1:8080"))
-      )
+(setq url-max-password-attempts 1
+      ;; url-proxy-services '(("http" . "10.25.71.1:8080")) ;; 不支持authentication
+      url-http-proxy-basic-auth-storage
+      (my/get-private-config 'pvt/proxy-authentication #'my/listp #'identity))
 
 (require 'package)
 ;; 设置安装包的存储目录，该目录也需要被包含至'load-path中
@@ -27,25 +34,28 @@
 (setq package-archives
       (let ((mirror
              ;; 'origin
-             ;; 'china
-             'tsinghua
+             'china
+             ;; 'tsinghua
              ))
         (cond
          ((eq mirror 'origin)
           '(("gnu" . "http://elpa.gnu.org/packages/")
             ;; ("melpa-stable" . "http://stable.melpa.org/packages/")
             ("melpa" . "http://melpa.org/packages/")
-            ("org" . "http://orgmode.org/elpa/")))
+            ;; ("org" . "http://orgmode.org/elpa/")
+            ))
          ((eq mirror 'china)
           '(("gnu" . "http://elpa.emacs-china.org/gnu/")
             ;; ("melpa-stable" . "http://elpa.emacs-china.org/melpa-stable/")
             ("melpa" . "http://elpa.emacs-china.org/melpa/")
-            ("org" . "http://elpa.emacs-china.org/org/")))
+            ;; ("org" . "http://elpa.emacs-china.org/org/")
+            ))
          ((eq mirror 'tsinghua)
           '(("gnu" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
             ;; ("melpa-stable" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa-stable/")
             ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
-            ("org" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/"))))))
+            ;; ("org" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/")
+            )))))
 ;; 以下列表用于设置被允许加载的插件，因此无论是在安装还是使用插件的过程中
 ;; 都必须提前详细地列举出所有的插件，且要根据插件之间的依赖关系进行先后地声明
 (setq package-load-list '(all ;; e.g. (dash) (epl) (let-alist) (pkg-info)
@@ -56,25 +66,32 @@
 ;; 目前使用此全局变量来管理插件的启用/禁用，其中包括了ELPA更新源中所没有的插件
 (setq package-selected-packages '(use-package diminish bind-key all-the-icons))
 ;; [Interface]
-(pkg/package/select '(apropospriate-theme ;; zenburn-theme
-                      ;; doom-themes, solarized-theme
+(pkg/package/select '(doom-themes
+                      spacemacs-theme
                       dashboard
                       nyan-mode
                       doom-modeline ;; spaceline, spaceline-all-the-icons, smart-mode-line
                       tabbar        ;; awesome-tab
-                      (treemacs
-                       treemacs-projectile
-                       ;; treemacs-icons-dired
-                       ) ;; neotree, sidebar, sr-speedbar, ecb
+                      ;; (treemacs treemacs-projectile treemacs-icons-dired)
+                      neotree ;; sidebar, sr-speedbar, ecb
                       ))
 ;; [Visual]
 (pkg/package/select '(beacon
+                      ;; centered-cursor-mode
                       ;; nlinum, nlinum-hl
                       ;; yascroll
                       ;; sublimity, minimap
-                      ;; whitespace, fill-column-indicator
+                      ;; whitespace
+                      fill-column-indicator
+                      visual-fill-column
                       rainbow-delimiters
                       ;; color-identifiers, rainbow-identifiers ;; 会覆盖配色主题所使用的字体颜色
+                      highlight-context-line
+                      highlight-numbers
+                      highlight-parentheses
+                      highlight-indent-guides ;; highlight-indentation
+                      ;; highlight-defined
+                      symbol-overlay ;; highlight-symbol
                       ;; highlight-thing
                       zoom ;; dimmer
                       ;; typo
@@ -90,7 +107,7 @@
                       smart-hungry-delete
                       lispy ;; paredit, parinfer
                       expand-region
-                      multiple-cursors ;; highlight-symbol
+                      multiple-cursors
                       (flyspell flyspell-correct)
                       hydra
                       which-key
@@ -114,9 +131,11 @@
                       reformatter ;; py-autopep8, py-yapf, yapfify, hindent
                       ))
 ;; [Completion]
-(pkg/package/select '(yasnippet
+(pkg/package/select '((yasnippet
+                       yasnippet-snippets ;; yasnippet-classic-snippets
+                       )
                       (company
-                       company-quickhelp ;; company-box
+                       ;; company-quickhelp, company-box
                        ) ;; auto-complete
                       ))
 ;; [C, C++]
@@ -125,9 +144,9 @@
                       ;; (irony flycheck-irony company-irony)
                       (ycmd flycheck-ycmd company-ycmd)))
 ;; [Python]
-(pkg/package/select '(python ;; python-mode
+(pkg/package/select '(python      ;; python-mode
                       (anaconda-mode company-anaconda) ;; elpy
-                      flycheck-pycheckers ;; flycheck-pyflakes
+                      flycheck-pycheckers              ;; flycheck-pyflakes
                       company-jedi
 
                       ;; (python-environment)
@@ -140,8 +159,7 @@
 (pkg/package/select '(haskell-mode
                       flycheck-haskell))
 ;; [Text]
-(pkg/package/select '(org
-                      org-bullets))
+(pkg/package/select '((org org-bullets)))
 (cond
  ((pkg/package/enabled-p 'helm)
   (pkg/package/select '(;; helm-bm
@@ -169,7 +187,8 @@
   :config
   (diminish 'eldoc-mode)
   (diminish 'abbrev-mode)
-  (diminish 'hi-lock-mode))
+  (diminish 'hi-lock-mode)
+  (diminish 'font-lock-mode))
 
 (use-package all-the-icons
   :defer t

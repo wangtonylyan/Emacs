@@ -6,7 +6,7 @@
 (defun my/prog/complete/run-hook ()
   (my/run-mode-hook "my/prog/complete"))
 
-(my/add-mode-hook "prog" #'my/prog/complete/run-hook)
+(my/add-mode-hook "init" #'my/prog/complete/run-hook)
 
 
 (defun my/prog/complete/add-backends (defaults backends)
@@ -30,32 +30,31 @@
 (use-package yasnippet
   :diminish yas-minor-mode
   :defer t
-  :preface
-  (defun pkg/yasnippet/start ()
-    ;; 会自动执行(yas-reload-all)
-    (yas-minor-mode 1))
   :if (pkg/package/enabled-p 'yasnippet)
   :init
-  (my/prog/complete/add-hook #'pkg/yasnippet/start)
+  (my/prog/complete/add-hook #'yas-global-mode)
   :config
-  ;; 设置解决同名snippet的方式
-  (setq yas-prompt-functions
-        (if (eq system-type 'windows-nt)
-            ;; Windows环境下推荐，其余支持不好
-            '(yas-ido-prompt yas-dropdown-prompt)
-          '(yas-x-prompt yas-dropdown-prompt)))
-  (let ((dir (my/get-user-emacs-file "my.snippet/" t)))
-    (when dir (add-to-list 'yas-snippet-dirs dir)))
-  (when (or (pkg/package/enabled-p 'company)
-            (pkg/package/enabled-p 'auto-complete))
-    (unbind-key "<tab>" yas-minor-mode-map)))
+  (setq yas-snippet-dirs (list (my/set-user-emacs-file "my.snippet/"))
+        yas-prompt-functions '(yas-x-prompt yas-dropdown-prompt))
+  (yas-reload-all)
+  (use-package yasnippet-snippets
+    :if (pkg/package/enabled-p 'yasnippet-snippets)
+    :config
+    (yasnippet-snippets-initialize)))
 
 (use-package company
   :diminish company-mode
   :defer t
   :preface
-  (defun pkg/company/start ()
-    (company-mode 1))
+  (defun pkg/company/backend-enabled-p (package)
+    ;; package and backend mapping
+    (let ((dict '((yasnippet . company-yasnippet)
+                  (company-irony . company-irony)
+                  (company-ycmd . company-ycmd)
+                  (company-anaconda . company-anaconda)
+                  (company-jedi . company-jedi))))
+      (when (pkg/package/enabled-p package)
+        (my/find-dict-by-key package dict))))
   (defun pkg/company/add-backends (backends)
     (my/prog/complete/add-backends 'company-backends backends))
   :if (pkg/package/enabled-p 'company)
@@ -63,13 +62,15 @@
   (my/add-mode-hooks '(("elisp" pkg/company/elisp-mode-hook)
                        ("c" pkg/company/c&c++-mode-hook)
                        ("c++" pkg/company/c&c++-mode-hook)
-                       ("python" pkg/company/python-mode-hook)))
-  (my/prog/complete/add-hook #'pkg/company/start)
+                       ("python" pkg/company/python-mode-hook)
+                       ("org" pkg/company/org-mode-hook)))
+  (my/prog/complete/add-hook #'global-company-mode)
   :config
   (setq company-clang-executable (my/locate-exec "clang")
-        company-minimum-prefix-length 3
+        company-minimum-prefix-length 2
         company-idle-delay 0
         company-selection-wrap-around t
+        company-frontends '(company-pseudo-tooltip-frontend)
         ;; 1. 从效率的角度而言，是没有必要为每个模式分别启用其独享的后端，因为筛选适用后端的过程非常效率
         ;; 2. make sure that 'company-backends is not changed in sub-package's loading
         ;;    I'd rather enable each backend in the corresponding mode hooks
@@ -85,21 +86,26 @@
                            ;; company-nxml
                            ;; company-bbdb ;; Big Brother Database, an address book
                            ;; company-oddmuse
-                           company-dabbrev))
+                           (,(pkg/company/backend-enabled-p 'yasnippet)
+                            company-dabbrev)))
   (defun pkg/company/elisp-mode-hook ()
-    (pkg/company/add-backends 'company-elisp))
+    (pkg/company/add-backends `((,(pkg/company/backend-enabled-p 'yasnippet)
+                                 company-elisp))))
   (defun pkg/company/c&c++-mode-hook ()
-    (pkg/company/add-backends `(,(when company-clang-executable
-                                   (or (pkg/package/enabled-p 'company-irony)
-                                       (pkg/package/enabled-p 'company-ycmd)
-                                       'company-clang))
-                                ;; company-cmake ;; CMake
-                                ;; company-eclim ;; Eclipse
-                                ;; company-xcode
-                                )))
+    (pkg/company/add-backends `((,(pkg/company/backend-enabled-p 'yasnippet)
+                                 ;; company-cmake ;; CMake
+                                 ;; company-eclim ;; Eclipse
+                                 ;; company-xcode
+                                 ,(when company-clang-executable
+                                    (or (pkg/company/backend-enabled-p 'company-irony)
+                                        (pkg/company/backend-enabled-p 'company-ycmd)
+                                        'company-clang))))))
   (defun pkg/company/python-mode-hook ()
-    (pkg/company/add-backends `((,(pkg/package/enabled-p 'company-anaconda)
-                                 ,(pkg/package/enabled-p 'company-jedi)))))
+    (pkg/company/add-backends `((,(pkg/company/backend-enabled-p 'yasnippet)
+                                 ,(pkg/company/backend-enabled-p 'company-anaconda)
+                                 ,(pkg/company/backend-enabled-p 'company-jedi)))))
+  (defun pkg/company/org-mode-hook ()
+    (setq-local company-minimum-prefix-length 1))
   (use-package company-quickhelp
     :if (pkg/package/enabled-p 'company-quickhelp)
     :config
@@ -121,10 +127,9 @@
           company-box-doc-delay 0.5)))
 
 (use-package auto-complete
+  :diminish auto-complete-mode
   :defer t
   :preface
-  (defun pkg/auto-complete/start ()
-    (auto-complete-mode 1))
   (defun pkg/auto-complete/add-sources (sources)
     (my/prog/complete/add-backends 'ac-sources sources))
   :if (pkg/package/enabled-p 'auto-complete)
@@ -134,7 +139,7 @@
                        ("elisp" pkg/auto-complete/elisp-mode-hook)
                        ("c" pkg/auto-complete/c&c++-mode-hook)
                        ("c++" pkg/auto-complete/c&c++-mode-hook)))
-  (my/prog/complete/add-hook #'pkg/auto-complete/start)
+  (my/prog/complete/add-hook #'global-auto-complete-mode)
   :config
   (ac-config-default)
   (add-to-list 'ac-dictionary-directories

@@ -76,10 +76,6 @@
       scroll-step 3
       scroll-conservatively 10000
       scroll-preserve-screen-position 1
-      truncate-lines nil
-      truncate-partial-width-windows nil
-      word-wrap nil
-      line-move-visual t
       track-eol t
       blink-matching-paren t
       blink-matching-paren-on-screen t
@@ -87,12 +83,19 @@
 (setq-default cursor-type '(bar . 3)
               scroll-up-aggressively 0.01
               scroll-down-aggressively 0.01
-              fill-column 100 ;; 在auto-fill-mode模式下，超过指定字符就会被强制换行
               indicate-empty-lines nil
               indent-tabs-mode nil ;; make indentation commands use space only
-              truncate-lines truncate-lines
-              word-wrap word-wrap
               tab-width 4)
+
+(setq word-wrap t
+      fill-column 100 ;; (auto-fill-mode)
+      truncate-lines nil
+      truncate-partial-width-windows nil
+      line-move-visual t)
+(setq-default word-wrap word-wrap
+              fill-column fill-column
+              truncate-lines truncate-lines)
+(global-visual-line-mode -1) ;; 对中文支持不好
 
 (defalias 'yes-or-no-p 'y-or-n-p) ;; 以y/n替换yes/no
 (tool-bar-mode -1)
@@ -109,8 +112,6 @@
 ;; (blink-cursor-mode -1)
 (column-number-mode 1) ;; 在mode-line显示列数
 (scroll-bar-mode -1) ;; 取消滚动条
-(global-visual-line-mode -1) ;; 对中文支持不好
-;; (my/add-mode-hook "text" #'visual-line-mode)
 (size-indication-mode -1)
 (auto-save-mode 1)
 
@@ -215,6 +216,16 @@
   (setq linum-format "%5d")
   (global-linum-mode -1))
 
+(use-package display-line-numbers
+  :defer t
+  :init
+  (my/add-mode-hook "text" #'display-line-numbers-mode)
+  :config
+  (setq display-line-numbers-type 'relative
+        display-line-numbers-grow-only nil
+        display-line-numbers-width-start nil)
+  (global-display-line-numbers-mode -1))
+
 (use-package electric
   :defer t
   :config
@@ -226,6 +237,10 @@
   :defer t
   :config
   (electric-pair-mode -1))
+
+(use-package delsel
+  :config
+  (delete-selection-mode 1))
 
 
 (toggle-frame-maximized)
