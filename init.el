@@ -15,6 +15,15 @@
 (defun my/listp (list)
   (and list (listp list)))
 
+(defun my/find-dict (fkey dict)
+  (when (my/listp dict)
+    (let ((first (car dict)))
+      (if (and (consp first) (funcall fkey (car first)))
+          (cdr first) (my/find-dict fkey (cdr dict))))))
+
+(defun my/find-dict-by-key (key dict)
+  (my/find-dict (lambda (x) (eq x key)) dict))
+
 (defun my/map (func seq)
   (delq nil (mapcar func seq)))
 
@@ -306,10 +315,8 @@
       default)))
 
 (my/load-file (my/get-private-emacs-file "init.el"))
-;; *************************** sample code in .private/init.el ***************************
-;; (defvar pvt/project/root-directories '("~/Projects/" "~/projects/"))
-;; (defvar pvt/project/ede-config-files '("ede-projects.el"))
-;; (defvar pvt/project/python-global-virtualenvs '("~/.virtualenvs/"))
+;; *********************************** sample code ***************************************
+;; 详见于(my/get-user-emacs-file "my.config/private.el")
 ;; ***************************************************************************************
 
 (defconst my/project/root-directories
@@ -335,9 +342,9 @@
 (mapc #'my/load-init-file '(my/init/package
                             my/init/emacs
                             my/init/utility
-                            my/init/editing
+                            my/init/edit
                             my/init/visual
-                            my/init/interface
+                            my/init/gui
                             my/prog/init ;; prog-mode, asn1-mode
                             my/prog/complete
                             my/prog/cpp ;; cc-mode
@@ -345,14 +352,14 @@
                             my/prog/function ;; sml-mode, haskell-mode
                             ;; my/prog/web ;; web-mode
                             my/text/init ;; org-mode, tex-mode, latex-mode
+                            ;; my/text/web ;; web browser
                             my/keys/init
                             my/keys/buffer
                             my/keys/directory
                             my/keys/misc
                             my/keys/program
-                            ;; my/keys/text ;; TODO
-                            ))
-;; "web-browser" ;; web browser
+                            ;; my/keys/text
+                            my/elpa/init))
 
 
 (message "emacs init time = %s" (emacs-init-time))

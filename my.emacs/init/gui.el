@@ -1,5 +1,24 @@
 ;; -*- coding: utf-8 -*-
 
+(defun my/theme/load (list)
+  (when (my/listp list)
+    (let ((first (car list)))
+      (if (and (consp first) (my/theme/style-p (car first)))
+          (load-theme (cdr first) t)
+        (my/theme/load (cdr list))))))
+
+(defun my/theme/style-p (style)
+  (eq style 'light)
+  (eq style 'dark))
+
+(defun my/theme/enabled-p (theme)
+  (eq theme 'apropospriate-theme)
+  (eq theme 'zenburn-theme)
+  (eq theme 'one-themes)
+  (eq theme 'solarized-theme)
+  (eq theme 'spacemacs-theme)
+  (eq theme 'doom-themes))
+
 (let* ((dir (my/set-user-emacs-file "theme/" t))
        (dir (my/locate 'exist dir nil t))
        (path (my/get-file-path dir)))
@@ -7,22 +26,22 @@
     (add-to-list 'custom-theme-load-path path)))
 
 (use-package apropospriate-theme
-  :if (pkg/package/enabled-p 'apropospriate-theme)
+  :if (and (pkg/package/enabled-p 'apropospriate-theme)
+           (my/theme/enabled-p 'apropospriate-theme))
   :init
   (setq apropospriate-org-level-resizing nil)
-  ;; (load-theme 'apropospriate-light t)
-  (load-theme 'apropospriate-dark t))
-
-(use-package atom-one-dark-theme
-  :if (pkg/package/enabled-p 'atom-one-dark-theme)
-  :init
-  (load-theme 'atom-one-dark t))
+  (my/theme/load '((light . apropospriate-light)
+                   (dark . apropospriate-dark))))
 
 (use-package doom-themes
-  :if (pkg/package/enabled-p 'doom-themes)
+  :if (and (pkg/package/enabled-p 'doom-themes)
+           (my/theme/enabled-p 'doom-themes))
   :init
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t
+        doom-solarized-light-brighter-modeline nil
+        doom-solarized-light-brighter-comments nil
+        doom-solarized-light-comment-bg nil
         doom-spacegrey-brighter-modeline nil
         doom-spacegrey-brighter-comments nil
         doom-spacegrey-comment-bg nil
@@ -32,9 +51,10 @@
         doom-vibrant-brighter-modeline nil
         doom-vibrant-brighter-comments nil
         doom-vibrant-comment-bg nil)
-  ;; (load-theme 'doom-spacegrey t)
-  ;; (load-theme 'doom-one t)
-  (load-theme 'doom-vibrant t)
+  (my/theme/load '((light . doom-solarized-light)
+                   (dark . doom-spacegrey)
+                   (dark . doom-one)
+                   (dark . doom-vibrant)))
   :config
   (when visible-bell
     (doom-themes-visual-bell-config))
@@ -47,6 +67,7 @@
           doom-treemacs-use-generic-icons nil)
     (doom-themes-treemacs-config))
   (use-package doom-themes
+    :disabled ;; doesn't work
     :after (neotree)
     :if (pkg/package/enabled-p 'neotree)
     :config
@@ -57,27 +78,49 @@
     :config
     (doom-themes-org-config)))
 
-(use-package github-theme
-  :if (pkg/package/enabled-p 'github-theme)
+(use-package one-themes
+  :if (and (pkg/package/enabled-p 'one-themes)
+           (my/theme/enabled-p 'one-themes))
   :init
-  (setq github-override-colors-alist '(("github-white" . "#FBF9E1")
-                                       ("github-comment" . "#009E73")
-                                       ("github-text" . "#000000")))
-  (load-theme 'github t))
+  (my/theme/load '((light . one-light)
+                   (dark . one-dark))))
+
+(use-package spacemacs-common
+  :if (and (pkg/package/enabled-p 'spacemacs-theme)
+           (my/theme/enabled-p 'spacemacs-theme))
+  :init
+  (setq spacemacs-theme-comment-bg nil
+        spacemacs-theme-comment-italic t
+        spacemacs-theme-keyword-italic nil
+        spacemacs-theme-underline-parens nil
+        spacemacs-theme-org-bold t
+        spacemacs-theme-org-height nil
+        spacemacs-theme-org-highlight t
+        spacemacs-theme-org-priority-bold t
+        spacemacs-theme-org-agenda-height nil)
+  (when (my/theme/style-p 'light)
+    (setq spacemacs-theme-custom-colors '((base . "#251330") ;; "#655370"
+                                          (base-dim . "#605462") ;; "#a094a2"
+                                          (const . "#8700af")    ;; terminal
+                                          (func . "#5c2153"))))  ;; "#6c3163"
+  (my/theme/load '((light . spacemacs-light)
+                   (dark . spacemacs-dark))))
 
 (use-package solarized-theme
-  :if (pkg/package/enabled-p 'solarized-theme)
+  :if (and (pkg/package/enabled-p 'solarized-theme)
+           (my/theme/enabled-p 'solarized-theme))
   :init
   (setq solarized-distinct-fringe-background nil
         solarized-distinct-doc-face t
         solarized-high-contrast-mode-line t
         solarized-use-more-italic t
         solarized-emphasize-indicators t)
-  ;; (load-theme 'solarized-dark t)
-  (load-theme 'solarized-light t))
+  (my/theme/load '((light . solarized-light)
+                   (dark . solarized-dark))))
 
 (use-package zenburn-theme
-  :if (pkg/package/enabled-p 'zenburn-theme)
+  :if (and (pkg/package/enabled-p 'zenburn-theme)
+           (my/theme/enabled-p 'zenburn-theme))
   :init
   ;; (setq zenburn-override-colors-alist '(("zenburn-fg" . "#EDEDDD")))
   (load-theme 'zenburn t))
@@ -114,12 +157,13 @@
 (use-package spaceline-config
   :if (pkg/package/enabled-p 'spaceline)
   :config
-  (spaceline-emacs-theme)
+  (spaceline-emacs-theme) ;; (spaceline-spacemacs-theme)
+  (spaceline-info-mode 1)
   (use-package spaceline-config
     :after (helm)
     :if (pkg/package/enabled-p 'helm)
     :config
-    (spaceline-helm-mode)))
+    (spaceline-helm-mode 1)))
 
 (use-package spaceline-all-the-icons
   :if (pkg/package/enabled-p 'spaceline-all-the-icons)
@@ -137,11 +181,9 @@
 
 (use-package doom-modeline
   :if (pkg/package/enabled-p 'doom-modeline)
-  :config
+  :init
   (setq doom-modeline-buffer-file-name-style 'relative-to-project
         doom-modeline-python-executable my/bin/python-interpreter
-        doom-modeline-height 1 ;; lowest
-        doom-modeline-bar-width 1 ;; lowest
         doom-modeline-icon t
         doom-modeline-major-mode-icon t
         doom-modeline-major-mode-color-icon t
@@ -151,8 +193,9 @@
         doom-modeline-lsp (when (pkg/package/enabled-p 'lsp-mode) t)
         doom-modeline-github nil
         doom-modeline-github-interval (* 60 60)
-        doom-modeline-version t
+        doom-modeline-env-version t
         doom-modeline-mu4e nil)
+  :config
   (doom-modeline-mode 1)
   ;; FIXME: modeline in 'helm window is redefined by spaceline,
   ;; but not by doom-modeline, here is just a workaround
@@ -234,8 +277,15 @@
   (my/add-mode-hook "DIRED" #'pkg/treemacs-icons-dired/setup))
 
 (use-package neotree
-  :commands (neotree-toggle)
+  :commands (neotree-toggle
+             neo-global--window-exists-p
+             neo-global--select-window)
   :preface
+  (defun pkg/neotree/select-window ()
+    (interactive)
+    (if (neo-global--window-exists-p)
+        (neo-global--select-window)
+      (pkg/neotree/toggle)))
   (defun pkg/neotree/toggle ()
     (interactive)
     (let ((root (when (and (fboundp 'projectile-project-p)
@@ -243,24 +293,48 @@
                            (projectile-project-p))
                   (projectile-project-root)))
           (file (buffer-file-name)))
-      (neotree-toggle)
-      (if (and root file (neo-global--window-exists-p))
-          (progn
-            (neotree-dir root)
-            (neotree-find file))
-        (user-error "*neotree* could not find projectile project"))))
+      (unless (neo-global--window-exists-p)
+        (neotree-toggle))
+      (when (and root file (neo-global--window-exists-p))
+        (neotree-dir (file-truename root))
+        (neotree-find (file-truename file)))))
   :if (pkg/package/enabled-p 'neotree)
   :config
-  (setq neo-theme (if (display-graphic-p) 'icons 'nerd) ;; all-the-icons
+  (setq neo-theme 'icons ;; 'all-the-icons
+        neo-mode-line-type 'neotree
+        neo-mode-line-custom-format nil
+        neo-window-position 'left
+        neo-window-width 35
+        neo-window-fixed-size t
+        neo-reset-size-on-open nil
+        neo-toggle-window-keep-p nil
         neo-smart-open t
+        neo-hide-cursor t
+        neo-auto-indent-point t
+        neo-show-updir-line nil
         neo-show-hidden-files nil
-        neo-show-updir-line t
-        neo-window-width 35)
+        neo-show-slash-for-folder t
+        neo-create-file-auto-open nil
+        neo-banner-message nil
+        neo-autorefresh nil
+        neo-force-change-root nil
+        neo-click-changes-root nil
+        neo-keymap-style 'default)
   (use-package neotree
     :after (projectile)
     :if (pkg/package/enabled-p 'projectile)
     :config
     (my/add-pkg-hook "projectile/switch" #'neotree-projectile-action)))
 
+;; TODO: eyebrowse, perspective, framegroups
+(use-package window-purpose
+  :commands (purpose-save-window-layout
+             purpose-load-window-layout)
+  :if (pkg/package/enabled-p 'window-purpose)
+  :config
+  (setq purpose-layout-dirs (my/set-user-emacs-file ".purpose"))
+  (purpose-mode 1)
+  (use-package window-purpose-x))
 
-(provide 'my/init/interface)
+
+(provide 'my/init/gui)

@@ -1,0 +1,95 @@
+#+TITLE: Main
+* Network
+** concept
++ IP address :: an IP-layer identifier for an interface or a set of interfaces.
+
++ unicast address :: an identifier for a single interface.
+
+ A packet sent to a unicast address is delivered to the interface identified by that address.
+
++ multicast address :: an identifier for a set of interfaces (typically belonging to different nodes).
+
+ A packet sent to a multicast address is delivered to all interfaces identified by that address.
+
++ anycast address :: an identifier for a set of interfaces (typically belonging to different nodes).
+
+ A packet sent to an anycast address is delivered to one of the interfaces identified by that address (the "nearest" one, according to the routing protocol’s measure of distance).
+
++ address realm :: a network domain in which the network addresses are uniquely assigned to entities such that datagrams can be routed to them.
+
++ link-local address :: an address having link-only scope that can be used to reach neighboring nodes attached to the same link.
+
+ All interfaces have a link-local unicast address.
+
++ global address :: an address with unlimited scope.
+
++ link-layer address :: a link-layer identifier for an interface.
+
+ Examples include IEEE 802 addresses for Ethernet links (e.g. EHA) and E.164 addresses for Integrated Services Digital Network (ISDN) links.
+
+* Git
+** git submodule
+*** initialization
++ 在首先克隆一个仓库后，只会存在有子模块的文件夹，而不会下载其代码
++ 子模块作为一个独立的仓库，也需要进行初始化
+
+**** 克隆仓库的同时，初始化子模块
+#+begin_src sh
+git clone --recurse-submodules
+#+end_src
+
+**** 克隆仓库后，初始化子模块
+#+begin_src sh
+git submodule init
+git submodule update
+#+end_src
+#+begin_src sh
+git submodule update --init
+#+end_src
+*** update
++ 子模块的相关操作需要在其目录下执行
+**** fetch and merge
+#+begin_src sh
+git submodule update --remote
+#+end_src
+
+
+* Org-Mode
+** general
+*** help
++ "C-c C-x I" :: open a suitable section of the Org manual depending on the syntax at point
+** structure template
+*** create
+:PROPERTIES:
+:END:
++ "C-c C-," :: choose and insert templates
+
+** source code block
+*** edit
++ "C-c '" :: edit code block in a editing window, or return
++ "C-x C-s" :: save the block to base buffer
++ "C-c C-v v" :: view src block in a editing window
+*** tangle
++ "C-c C-v t" :: tangle the current file
++ "C-c C-v f" :: choose a file to tangle
+*** evaluation
++ "C-c C-c", "C-c C-v e" :: evaluate the block at point
++ "C-c C-o", "C-c C-v o" :: open result in a new window
+*** navigation
++ "C-c C-v C-p", "C-c C-v C-n" :: previous/next src block
++ "C-c C-v C-u" :: goto src block head
+*** help
++ "C-c C-v C-h" :: describe key bindings
++ "C-c C-v C-I" :: view src block info
++ "C-c C-v C-a" :: get SHA1 value
+** speed command
+point must be at the beginning of a headline
+*** outline navigation
++ "n, p, f, b" :: "C-c C-"
++ "j" :: "C-c C-"
+*** outline cycle
++ "c, C" :: "<tab>", "<backtab>"
+*** todo
++ "t" ::
+*** help
++ "?" :: describe key bindings

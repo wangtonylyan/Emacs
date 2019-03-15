@@ -4,11 +4,7 @@
            ("C-x <left>" . nil) ;; (previous-buffer)
            ("C-x <right>" . nil) ;; (next-buffer)
            ("C-x o" . nil) ("M-o" . other-window)
-           ("M-r" . nil) ("M-l" . move-to-window-line-top-bottom)
-           ("<C-left>" . windmove-left)
-           ("<C-right>" . windmove-right)
-           ("<C-up>" . windmove-up)
-           ("<C-down>" . windmove-down))
+           ("M-r" . nil) ("M-l" . move-to-window-line-top-bottom))
 
 (when (pkg/package/enabled-p 'zoom)
   (bind-keys ("C-+" . zoom)))
@@ -17,18 +13,43 @@
   ;; "C-u M-o", "C-u C-u M-o"
   (bind-keys ("M-o" . ace-window)))
 
+(defun pkg/hydra/group/tabbar/alternative (func)
+  (let ((dict '((tabbar-forward-tab . awesome-tab-forward-tab)
+                (tabbar-backward-tab . awesome-tab-backward-tab)
+                (tabbar-forward-group . awesome-tab-forward-group)
+                (tabbar-backward-group . awesome-tab-backward-group))))
+    (funcall (cond
+              ((pkg/package/enabled-p 'awesome-tab)
+               (my/find-dict-by-key func dict))
+              (t func)))))
+
+(bind-keys ("<left>" . (lambda () (interactive)
+                         (pkg/hydra/group/tabbar/alternative #'tabbar-backward-tab)))
+           ("<right>" . (lambda () (interactive)
+                          (pkg/hydra/group/tabbar/alternative #'tabbar-forward-tab)))
+           ("<up>" . (lambda () (interactive)
+                       (pkg/hydra/group/tabbar/alternative #'tabbar-backward-group)))
+           ("<down>" . (lambda () (interactive)
+                         (pkg/hydra/group/tabbar/alternative #'tabbar-forward-group))))
+
 (defhydra pkg/hydra/group/buffer
   (:timeout pkg/hydra/timeout-sec)
-  ("h"       tabbar-backward-tab         "left      " :column "tabbar      ")
-  ("l"       tabbar-forward-tab          "right     "                       )
-  ("j"       tabbar-forward-group        "next group"                       )
-  ("k"       tabbar-backward-group       "prev group"                       )
+  ("b"       (pkg/hydra/group/tabbar/alternative
+              #'tabbar-backward-tab)     "left      " :column "tab bar     ")
+  ("f"       (pkg/hydra/group/tabbar/alternative
+              #'tabbar-forward-tab)      "right     "                       )
+  ("<"       awesome-tab-select-beg-tab  "first     "                       )
+  (">"       awesome-tab-select-end-tab  "last      "                       )
+  ("n"       (pkg/hydra/group/tabbar/alternative
+              #'tabbar-forward-group)    "next group"                       )
+  ("p"       (pkg/hydra/group/tabbar/alternative
+              #'tabbar-backward-group)   "prev group"                       )
   ("C-h"     buf-move-left               "left      " :column "move        ")
   ("C-l"     buf-move-right              "right     "                       )
   ("C-k"     buf-move-up                 "up        "                       )
   ("C-j"     buf-move-down               "down      "                       )
-  ("p"       scroll-other-window-down    "up        " :column "scroll other")
-  ("n"       scroll-other-window         "down      "                       )
+  ("M-p"     scroll-other-window-down    "up        " :column "scroll other")
+  ("M-n"     scroll-other-window         "down      "                       )
   ("u"       winner-undo                 "undo      " :column "layout      ")
   ("r"       winner-redo                 "redo      "                       )
   ("<left>"  enlarge-window-horizontally "++ <>     " :column "size        ")

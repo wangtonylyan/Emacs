@@ -6,6 +6,11 @@
   :config
   (beacon-mode 1))
 
+(use-package centered-cursor-mode
+  :if (pkg/package/enabled-p 'centered-cursor-mode)
+  :config
+  (global-centered-cursor-mode 1))
+
 (use-package nlinum-hl
   :if (pkg/package/enabled-p 'nlinum-hl)
   :init
@@ -53,18 +58,35 @@
   :if (pkg/package/enabled-p 'whitespace)
   :config
   (setq whitespace-style '(face lines-tail)
-        whitespace-line-column 100)
+        whitespace-line-column nil)
   (global-whitespace-mode 1))
 
 (use-package fill-column-indicator
+  :defer t
   :if (pkg/package/enabled-p 'fill-column-indicator)
+  :init
+  (my/add-mode-hook "prog" #'fci-mode)
   :config
-  (setq fci-rule-use-dashes nil
-        fci-rule-column 100)
+  (setq fci-rule-column nil
+        fci-rule-use-dashes nil
+        fci-rule-color (face-background 'hl-line)
+        fci-rule-width 3
+        fci-handle-truncate-lines truncate-lines
+        fci-handle-line-move-visual (unless line-move-visual))
   (define-globalized-minor-mode global-fci-mode fci-mode
     ;; 避免在special buffers、dired、shell等特殊模式下启用
-    (lambda () (when buffer-file-name (fci-mode 1))))
-  (global-fci-mode 1))
+    (lambda () (when buffer-file-name (fci-mode 1)))))
+
+(use-package visual-fill-column
+  :defer t
+  :preface
+  (defun pkg/visual-fill-column/start ()
+    (visual-fill-column-mode 1))
+  :if (pkg/package/enabled-p 'visual-fill-column)
+  :init
+  (my/add-mode-hook "text" #'pkg/visual-fill-column/start)
+  :config
+  (setq visual-fill-column-width 125))
 
 (use-package rainbow-delimiters
   :defer t
@@ -85,6 +107,50 @@
   :if (pkg/package/enabled-p 'color-identifiers)
   :init
   (my/add-mode-hook "prog" #'color-identifiers-mode))
+
+(use-package highlight-context-line
+  :defer t
+  :if (pkg/package/enabled-p 'highlight-context-line)
+  :init
+  (highlight-context-line-mode 1))
+
+(use-package highlight-numbers
+  :defer t
+  :if (pkg/package/enabled-p 'highlight-numbers)
+  :init
+  (my/add-mode-hook "prog" #'highlight-numbers-mode))
+
+(use-package highlight-parentheses
+  :diminish (highlight-parentheses-mode)
+  :defer t
+  :if (pkg/package/enabled-p 'highlight-parentheses)
+  :init
+  (my/add-mode-hook "prog" #'highlight-parentheses-mode)
+  :config
+  (setq hl-paren-highlight-adjacent nil
+        hl-paren-colors '("green")))
+
+(use-package highlight-indentation
+  :defer t
+  :if (pkg/package/enabled-p 'highlight-indentation)
+  :init
+  (my/add-mode-hook "python" #'highlight-indentation-mode))
+
+(use-package highlight-indent-guides
+  :defer t
+  :if (pkg/package/enabled-p 'highlight-indent-guides)
+  :init
+  (my/add-mode-hook "python" #'highlight-indent-guides-mode)
+  :config
+  (setq highlight-indent-guides-method 'character))
+
+(use-package highlight-defined
+  :defer t
+  :if (pkg/package/enabled-p 'highlight-defined)
+  :init
+  (my/add-mode-hook "elisp" #'highlight-defined-mode)
+  :config
+  (setq highlight-defined-face-use-itself t))
 
 (use-package highlight-thing
   :diminish (highlight-thing-mode)

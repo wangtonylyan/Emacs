@@ -13,31 +13,51 @@
         org-replace-disputed-keys nil)
   (my/add-mode-hook "org" #'pkg/org/start)
   :config
-  ;; org.el
-  (setq org-directory (my/set-user-emacs-file "org/")
-        org-default-notes-file (my/concat-directory-file org-directory "notes")
-        org-src-fontify-natively t
-        org-use-sub-superscripts t
-        ;; [#STARTUP]
+  (setq org-startup-indented t
         org-startup-folded t
         org-startup-truncated nil
-        org-startup-indented t
         org-startup-with-beamer-mode nil
         org-startup-align-all-tables t
         org-startup-shrink-all-tables t
         org-startup-with-latex-preview t
-        org-startup-with-inline-images nil
-        ;; [key binding]
+        org-startup-with-inline-images nil)
+  (setq org-use-speed-commands t
+        org-speed-commands-user nil
         org-support-shift-select nil
-        ;; [<tab>, cycle]
         org-cycle-separator-lines 1
-        ;; [<return>]
         org-M-RET-may-split-line '((default . nil))
-        org-insert-heading-respect-content t
+        org-insert-heading-respect-content nil
+        org-tab-follows-link nil
         org-return-follows-link nil)
-  (add-to-list 'org-babel-load-languages '(sh . t))
-  ;; ob-core.el
-  (setq org-confirm-babel-evaluate t))
+  (use-package ob-core
+    :defer t
+    :config
+    (setq org-confirm-babel-evaluate nil
+          org-babel-no-eval-on-ctrl-c-ctrl-c nil
+          org-babel-uppercase-example-markers t))
+  (use-package org-src
+    :defer t
+    :config
+    ;; TODO: org-src-lang-modes
+    (setq org-src-window-setup 'split-window-below
+          org-src-preserve-indentation t
+          org-src-ask-before-returning-to-edit-buffer nil
+          org-edit-src-persistent-message t
+          org-src-tab-acts-natively t
+          org-edit-src-turn-on-auto-save nil
+          org-edit-src-auto-save-idle-delay 0))
+
+  ;; =====================================================================================
+  (setq org-directory (my/set-user-emacs-file "org/")
+        org-default-notes-file (my/concat-directory-file org-directory "notes")
+        org-src-fontify-natively t
+        org-use-sub-superscripts t
+        org-adapt-indentation nil)
+  (dolist (lang '((latex . t) (matlab . t)
+                  (lisp . t) (sh . t)
+                  (C . nil) (C++ . nil) (java . nil)
+                  (python . t) (js . nil) (haskell . nil)))
+    (add-to-list 'org-babel-load-languages lang)))
 
 (use-package org-bullets
   :after (org)
@@ -49,6 +69,8 @@
   :init
   (my/add-mode-hook "org" #'pkg/org-bullets/start))
 
+
+;; =======================================================================================
 (defun wo ()
   (setq org-todo-keywords
         '((sequence "NEW(n)" "TODO(t)" "DOING(i)" "PEND(p)"
@@ -68,12 +90,7 @@
               (lvl2-1 '(:background "yellow" :foreground "black" :weight bold))
               (lvl2-1 '(:background "yellow" :foreground "black" :weight bold))
               (lvl2-1 '(:background "yellow" :foreground "black" :weight bold))
-              (lvl2-1 '(:background "yellow" :foreground "black" :weight bold))
-
-
-              )
-
-
+              (lvl2-1 '(:background "yellow" :foreground "black" :weight bold)))
           '(("NEW" . nil)
             ("TODO" . (:background "red" :foreground "black" :weight bold))
             ("DOING" . (:background "blue" :foreground "black" :weight bold))
@@ -88,10 +105,8 @@
             ("VERIFY" . (:background "dodger blue" :foreground "black" :weight bold))
             ("NONBUG" . (:background "dark green" :foreground "black" :weight bold))
             ("DELEGATED" . (:background "dark green" :foreground "black" :weight bold))
-            ("FIXED" . (:background "dark green" :foreground "black" :weight bold)))))
+            ("FIXED" . (:background "dark green" :foreground "black" :weight bold)))))
   (setq org-clone-delete-id nil
-        org-log-buffer-setup-hook nil
-        org-modules
         org-export-backends '(ascii html icalendar latex odt)
 
         org-loop-over-headlines-in-active-region nil
@@ -99,8 +114,7 @@
         org-closed-keep-when-no-todo nil
         org-show-context-detail '((agenda . local))
         org-indirect-buffer-display 'other-window
-        org-use-speed-commands nil
-        org-speed-commands-user nil
+
         org-bookmark-names-plist
 
         org-cycle-skip-children-state-if-no-children t
@@ -112,12 +126,7 @@
 
         org-cycle-level-after-item/entry-creation t
 
-
-        org-pre-cycle-hook nil
-        org-cycle-hook '(org-cycle-hide-archived-subtrees)
-
         org-odd-levels-only nil
-        org-adapt-indentation t
         org-special-ctrl-a/e nil
         org-special-ctrl-k nil
         org-ctrl-k-protect-subtree nil
@@ -126,14 +135,11 @@
         org-yank-folded-subtrees t
         org-yank-adjusted-subtrees nil
 
-        org-insert-heading-respect-content nil
         org-blank-before-new-entry '((heading . auto))
-        org-insert-heading-hook nil
         org-enable-fixed-width-editor t
         org-highlight-sparse-tree-matches t
         org-remove-highlights-with-change t
         org-occur-case-fold-search t
-        org-occur-hook '(org-first-headline-recenter)
         org-self-insert-cluster-for-undo nil
         org-table-tab-recognizes-table.el t
         org-link-parameters
@@ -148,10 +154,8 @@
         org-context-in-file-links t
         org-keep-stored-link-after-insertion nil
         org-link-translation-function nil
-        org-follow-link-hook nil
-        org-tab-follows-link nil
 
-        org-mouse-1-follows-link
+
         org-mark-ring-length 4
         org-link-search-must-match-exact-headline 'query-to-create
         org-link-frame-setup
@@ -179,7 +183,6 @@
         org-use-fast-todo-selection t
         org-provide-todo-statistics t
         org-hierarchical-todo-statistics t
-        org-after-todo-state-change-hook nil
         org-enforce-todo-dependencies nil
         org-enforce-todo-checkbox-dependencies nil
         org-treat-insert-todo-heading-as-state-change nil
@@ -196,7 +199,6 @@
         org-log-states-order-reversed t
         org-todo-repeat-to-state nil
         org-log-repeat 'time
-        org-todo-repeat-hook nil
         org-enable-priority-commands t
         org-highest-priority ?A
         org-lowest-priority ?C
@@ -272,25 +274,15 @@
         org-sparse-tree-open-archived-trees nil
         org-sparse-tree-default-date-type nil
         org-group-tags t
-        org-src-fontify-natively t
         org-allow-promoting-top-level-subtree nil
 
         org-structure-template-alist
         org-track-ordered-property-with-tag nil
         org-image-actual-width t
         org-agenda-inhibit-startup nil
-        org-agenda-ignore-properties nil
-        org-speed-command-hook)
-
+        org-agenda-ignore-properties nil)
 
   (setq org-list-demote-modify-bullet '(("+" . "-") ("-" . "+") ("*" . "+")))
-
-
-
-
-
-
-
 
   (let ((my-org-file-task (concat org-directory "task.org")))
     (setq org-capture-templates

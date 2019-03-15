@@ -194,6 +194,7 @@
 
 
 (use-package anaconda-mode
+  :diminish (anaconda-mode)
   :after (:or python python-mode)
   :defer t
   :preface
