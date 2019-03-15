@@ -81,12 +81,11 @@
   :defer t
   :preface
   (defun pkg/visual-fill-column/start ()
-    (visual-fill-column-mode 1))
+    (visual-fill-column-mode 1)
+    (setq visual-fill-column-width 125))
   :if (pkg/package/enabled-p 'visual-fill-column)
   :init
-  (my/add-mode-hook "text" #'pkg/visual-fill-column/start)
-  :config
-  (setq visual-fill-column-width 125))
+  (my/add-mode-hook "text" #'pkg/visual-fill-column/start))
 
 (use-package rainbow-delimiters
   :defer t
