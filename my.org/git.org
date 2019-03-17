@@ -27,6 +27,58 @@
 
  Examples include IEEE 802 addresses for Ethernet links (e.g. EHA) and E.164 addresses for Integrated Services Digital Network (ISDN) links.
 
++ tentative address :: an address whose uniqueness on a link is being verified, prior to its assignment to an interface.
+
+ A tentative address is not considered assigned to an interface in the usual sense. An interface discards received packets addressed to a tentative address, but accepts Neighbor Discovery packets related to Duplicate Address Detection for the tentative address.
+
++ preferred address :: an address assigned to an interface whose use by upper-layer protocols is unrestricted.
+
+ Preferred addresses may be used as the source (or destination) address of packets sent from (or to) the interface.
+
+ - preferred lifetime :: the length of time that a valid address is preferred (i.e., the time until deprecation).
+
+  When the preferred lifetime expires, the address becomes deprecated.
+
++ deprecated address :: an address assigned to an interface whose use is discouraged, but not forbidden.
+
+ A deprecated address should no longer be used as a source address in new communications, but packets sent from or to deprecated addresses are delivered as expected. A deprecated address may continue to be used as a source address in communications where switching to a preferred address causes hardship to a specific upper-layer activity (e.g., an existing TCP connection).
+
++ valid address :: a preferred or deprecated address.
+
+ A valid address may appear as the source or destination address of a packet, and the Internet routing system is expected to deliver packets sent to a valid address to their intended recipients.
+
+ - valid lifetime :: the length of time an address remains in the valid state (i.e., the time until invalidation).
+
+  The valid lifetime must be greater than or equal to the preferred lifetime. When the valid lifetime expires, the address becomes invalid.
+
++ invalid address :: an address that is not assigned to any interface.
+
+ A valid address becomes invalid when its valid lifetime expires.
+
+ Invalid addresses should not appear as the destination or source address of a packet. In the former case, the Internet routing system will be unable to deliver the packet; in the latter case, the recipient of the packet will be unable to respond to it.
+
++ node :: a device that implements IPv6.
+
++ router :: a node that forwards IPv6 packets not explicitly addressed to itself.
+
++ host :: any node that is not a router.
+
++ end ::
+
++ neighbor :: nodes attached to the same link.
+
++ interface :: a node’s attachment to a link.
+
++ link MTU :: the maximum transmission unit, i.e., maximum packet size in octets, that can be conveyed over a link.
+
++ path MTU :: the minimum link MTU of all the links in a path between a source node and a destination node.
+
++ session :: a set of traffic that is managed as a unit.
+
++ session/connection flow :: 由多个packet flow组成，由谁首先发起连接请求，来决定flow的方向
+
++ packet flow :: 其方向为单个packet的传输方向
+
 * Git
 ** git submodule
 *** initialization
