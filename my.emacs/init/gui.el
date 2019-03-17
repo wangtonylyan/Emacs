@@ -1,9 +1,10 @@
 ;; -*- coding: utf-8 -*-
 
 (defun my/theme/load (list)
-  (when (my/listp list)
+  (when (consp list)
     (let ((first (car list)))
-      (if (and (consp first) (my/theme/style-p (car first)))
+      (if (and (my/pairp first)
+               (my/theme/style-p (car first)))
           (load-theme (cdr first) t)
         (my/theme/load (cdr list))))))
 
@@ -15,6 +16,7 @@
   (eq theme 'apropospriate-theme)
   (eq theme 'zenburn-theme)
   (eq theme 'one-themes)
+  (eq theme 'poet-theme) ;; provide nice org themes
   (eq theme 'solarized-theme)
   (eq theme 'spacemacs-theme)
   (eq theme 'doom-themes))
@@ -84,6 +86,15 @@
   :init
   (my/theme/load '((light . one-light)
                    (dark . one-dark))))
+
+(use-package custom ;; do not directly require 'poet-theme
+  :if (and (pkg/package/enabled-p 'poet-theme)
+           (my/theme/enabled-p 'poet-theme))
+  :init
+  (my/theme/load '((light . poet)
+                   (light . poet-monochrome)
+                   (dark . poet-dark)
+                   (dark . poet-dark-monochrome))))
 
 (use-package spacemacs-common
   :if (and (pkg/package/enabled-p 'spacemacs-theme)

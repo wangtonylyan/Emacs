@@ -98,7 +98,7 @@
   :defer t
   :commands (pkg/hydra/group/projectile/body)
   :preface
-  (defun pkg/hydra/projectile/alternative (func)
+  (defun pkg/hydra/projectile/alternate (func)
     (funcall (cond
               ((pkg/package/enabled-p 'helm-projectile)
                (intern (concat "helm-" (symbol-name func))))
@@ -112,34 +112,34 @@ PROJECT: %(projectile-project-root)
 
 "
     ("h" helm-projectile                            "helm     " :column "project  ")
-    ("p" (pkg/hydra/projectile/alternative
+    ("p" (pkg/hydra/projectile/alternate
           #'projectile-switch-project)              "open     "                    )
     ("P" projectile-switch-open-project             "switch   "                    )
     ("v" projectile-vc                              "version  "                    )
     ("x" projectile-remove-known-project            "remove   "                    )
     ("X" projectile-cleanup-known-projects          "cleanup  "                    )
-    ("b" (pkg/hydra/projectile/alternative
+    ("b" (pkg/hydra/projectile/alternate
           #'projectile-switch-to-buffer)            "switch   " :column "buffer   ")
     ("k" projectile-kill-buffers                    "kill     "                    )
-    ("f" (pkg/hydra/projectile/alternative
+    ("f" (pkg/hydra/projectile/alternate
           #'projectile-find-file)                   "this proj" :column "find file")
     ("F" projectile-find-file-in-known-projects     "all proj "                    )
     ("j" projectile-find-file-in-directory          "the dir  "                    )
-    ("r" (pkg/hydra/projectile/alternative
+    ("r" (pkg/hydra/projectile/alternate
           #'projectile-recentf)                     "recent   "                    )
     ("t" projectile-find-other-file                 "same name"                    )
-    ("d" (pkg/hydra/projectile/alternative
+    ("d" (pkg/hydra/projectile/alternate
           #'projectile-find-dir)                    "find     " :column "directory")
     ("D" projectile-dired                           "dired    "                    )
-    ("o" (pkg/hydra/projectile/alternative
+    ("o" (pkg/hydra/projectile/alternate
           #'projectile-grep)                        "grep     " :column "symbol   ")
     ("O" projectile-multi-occur                     "occur    "                    )
     ("w" projectile-replace                         "replace  "                    )
     ("!" projectile-run-shell-command-in-root       "shell    " :column "external ")
     ("&" projectile-run-async-shell-command-in-root "shell &  "                    )
-    ("a" (pkg/hydra/projectile/alternative
+    ("a" (pkg/hydra/projectile/alternate
           #'projectile-ag)                          "ag       "                    )
-    ("c" (pkg/hydra/projectile/alternative
+    ("c" (pkg/hydra/projectile/alternate
           #'projectile-ack)                         "ack      "                    )
     ;; TODO
     ;; V projectile-browse-dirty-projects

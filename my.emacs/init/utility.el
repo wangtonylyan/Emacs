@@ -23,6 +23,7 @@
   (setq eshell-directory-name (my/set-user-emacs-file ".eshell/")))
 
 (use-package dired
+  :defer t
   :preface
   (defun pkg/dired/count-marked ()
     (let* ((list (dired-get-marked-files nil nil nil t))
@@ -32,8 +33,41 @@
        ((= len 2) (if (eq (car list) t) 1 2))
        (t 0))))
   :config
-  (setq dired-recursive-deletes 'top
+  (setq dired-recursive-copies 'always
+        dired-recursive-deletes 'top
         dired-copy-preserve-time t))
+
+(use-package all-the-icons-dired
+  :after (dired)
+  :defer t
+  :if (pkg/package/enabled-p 'all-the-icons-dired)
+  :init
+  (my/add-mode-hook "dired" #'all-the-icons-dired-mode))
+
+(use-package diredfl
+  :after (dired)
+  :defer t
+  :if (pkg/package/enabled-p 'diredfl)
+  :init
+  (my/add-mode-hook "dired" #'diredfl-mode))
+
+(use-package dired-hacks-utils
+  :after (dired)
+  :if (pkg/package/enabled-p 'dired-hacks-utils)
+  :config
+  (use-package dired-filter :disabled)
+  (use-package dired-avfs :disabled) ;; avfs
+  (use-package dired-open :disabled)
+  (use-package dired-rainbow :disabled)
+  (use-package dired-subtree :disabled)
+  (use-package dired-ranger :disabled)
+  (use-package dired-narrow :disabled)
+  (use-package dired-list :disabled)
+  (use-package dired-collapse
+    :defer t
+    :if (pkg/package/enabled-p 'dired-collapse)
+    :init
+    (my/add-mode-hook "dired" #'dired-collapse-mode)))
 
 (use-package icomplete
   :if (pkg/package/enabled-p 'icomplete)

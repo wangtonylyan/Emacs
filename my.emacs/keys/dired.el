@@ -174,4 +174,4 @@ Number of marked: %(pkg/dired/count-marked)
     ("q"         neotree-hide                            "quit        "                  )))
 
 
-(provide 'my/keys/directory)
+(provide 'my/keys/dired)

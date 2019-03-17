@@ -46,13 +46,18 @@
           org-src-tab-acts-natively t
           org-edit-src-turn-on-auto-save nil
           org-edit-src-auto-save-idle-delay 0))
-
   ;; =====================================================================================
+
   (setq org-directory (my/set-user-emacs-file "org/")
         org-default-notes-file (my/concat-directory-file org-directory "notes")
         org-src-fontify-natively t
         org-use-sub-superscripts t
         org-adapt-indentation nil)
+  (setq org-agenda-files org-directory
+        org-agenda-file-regexp "\\`[^.].*\\.org\\'"
+        org-agenda-text-search-extra-files nil
+        org-agenda-skip-unavailable-files nil
+        org-agenda-diary-file 'diary-file)
   (dolist (lang '((latex . t) (matlab . t)
                   (lisp . t) (sh . t)
                   (C . nil) (C++ . nil) (java . nil)
@@ -237,11 +242,7 @@
         org-columns-default-format "%25ITEM %TODO %3PRIORITY %TAGS"
         org-columns-ellipses ".."
         org-global-properties nil
-        org-agenda-files nil
-        org-agenda-file-regexp "\\`[^.].*\\.org\\'"
-        org-agenda-text-search-extra-files nil
-        org-agenda-skip-unavailable-files nil
-        org-agenda-diary-file 'diary-file
+
         org-format-latex-options
         org-format-latex-signal-error t
         org-latex-to-mathml-jar-file nil

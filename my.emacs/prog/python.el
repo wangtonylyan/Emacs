@@ -33,7 +33,7 @@
           "--no-site-packages")))
 
 (defconst my/project/python-global-virtualenvs
-  (my/get-private-config 'pvt/project/python-global-virtualenvs #'my/listp
+  (my/get-private-config 'pvt/project/python-global-virtualenvs #'consp
                          (lambda (dirs) (my/map 'my/directory-exists-p dirs))
                          '("~/.virtualenvs/")))
 

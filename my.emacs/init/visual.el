@@ -71,7 +71,7 @@
         fci-rule-use-dashes nil
         fci-rule-color (face-background 'hl-line)
         fci-rule-width 3
-        fci-handle-truncate-lines truncate-lines
+        fci-handle-truncate-lines t
         fci-handle-line-move-visual (unless line-move-visual))
   (define-globalized-minor-mode global-fci-mode fci-mode
     ;; 避免在special buffers、dired、shell等特殊模式下启用
