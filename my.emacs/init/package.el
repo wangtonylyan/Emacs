@@ -25,7 +25,7 @@
 (setq url-max-password-attempts 1
       ;; url-proxy-services '(("http" . "10.25.71.1:8080")) ;; 不支持authentication
       url-http-proxy-basic-auth-storage
-      (my/get-private-config 'pvt/proxy-authentication #'my/listp #'identity))
+      (my/get-private-config 'pvt/proxy-authentication #'consp #'identity))
 
 (require 'package)
 ;; 设置安装包的存储目录，该目录也需要被包含至'load-path中
@@ -115,8 +115,12 @@
                       ))
 ;; [Utility]
 (pkg/package/select '(;; shell, term, ansi-term, eshell
-                      ;; all-the-icons-dired
-                      ;; dired-hacks-utils ;; TODO
+                      (;; dired
+                       all-the-icons-dired
+                       ;; diredfl
+                       ;; dired-single
+                       (dired-hacks-utils
+                        dired-collapse))
                       helm ;; ivy, smex, ido, icicles, icomplete
                       ediff ;; vdiff
                       ;; vdiff-magit
@@ -167,6 +171,7 @@
                         helm-projectile
                         helm-flycheck
                         ;; helm-gtags
+                        helm-company
                         flyspell-correct-helm)))
  ((pkg/package/enabled-p 'ivy)
   (pkg/package/select '(counsel

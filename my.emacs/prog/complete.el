@@ -48,13 +48,13 @@
   :preface
   (defun pkg/company/backend-enabled-p (package)
     ;; package and backend mapping
-    (let ((dict '((yasnippet . company-yasnippet)
-                  (company-irony . company-irony)
-                  (company-ycmd . company-ycmd)
-                  (company-anaconda . company-anaconda)
-                  (company-jedi . company-jedi))))
+    (let ((alist '((yasnippet . company-yasnippet)
+                   (company-irony . company-irony)
+                   (company-ycmd . company-ycmd)
+                   (company-anaconda . company-anaconda)
+                   (company-jedi . company-jedi))))
       (when (pkg/package/enabled-p package)
-        (my/find-dict-by-key package dict))))
+        (alist-get package alist))))
   (defun pkg/company/add-backends (backends)
     (my/prog/complete/add-backends 'company-backends backends))
   :if (pkg/package/enabled-p 'company)
@@ -124,7 +124,15 @@
     (setq company-box-enable-icon nil
           company-box-show-single-candidate nil
           company-box-doc-enable t
-          company-box-doc-delay 0.5)))
+          company-box-doc-delay 0.5))
+  (use-package helm-company
+    :defer t
+    :if (pkg/package/enabled-p 'helm-company)
+    :config
+    (setq helm-company-candidate-number-limit 300
+          helm-company-initialize-pattern-with-prefix t
+          helm-company-fuzzy-match t
+          helm-company-show-annotations t)))
 
 (use-package auto-complete
   :diminish auto-complete-mode

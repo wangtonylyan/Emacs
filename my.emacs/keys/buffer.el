@@ -13,36 +13,33 @@
   ;; "C-u M-o", "C-u C-u M-o"
   (bind-keys ("M-o" . ace-window)))
 
-(defun pkg/hydra/group/tabbar/alternative (func)
-  (let ((dict '((tabbar-forward-tab . awesome-tab-forward-tab)
-                (tabbar-backward-tab . awesome-tab-backward-tab)
-                (tabbar-forward-group . awesome-tab-forward-group)
-                (tabbar-backward-group . awesome-tab-backward-group))))
-    (funcall (cond
-              ((pkg/package/enabled-p 'awesome-tab)
-               (my/find-dict-by-key func dict))
-              (t func)))))
+(defun pkg/hydra/group/tabbar/alternate (func)
+  (let* ((alist '((tabbar-forward-tab . (awesome-tab . awesome-tab-forward-tab))
+                  (tabbar-backward-tab . (awesome-tab . awesome-tab-backward-tab))
+                  (tabbar-forward-group . (awesome-tab . awesome-tab-forward-group))
+                  (tabbar-backward-group . (awesome-tab . awesome-tab-backward-group)))))
+    (funcall (pkg/hydra/alternate-key func alist))))
 
 (bind-keys ("<left>" . (lambda () (interactive)
-                         (pkg/hydra/group/tabbar/alternative #'tabbar-backward-tab)))
+                         (pkg/hydra/group/tabbar/alternate #'tabbar-backward-tab)))
            ("<right>" . (lambda () (interactive)
-                          (pkg/hydra/group/tabbar/alternative #'tabbar-forward-tab)))
+                          (pkg/hydra/group/tabbar/alternate #'tabbar-forward-tab)))
            ("<up>" . (lambda () (interactive)
-                       (pkg/hydra/group/tabbar/alternative #'tabbar-backward-group)))
+                       (pkg/hydra/group/tabbar/alternate #'tabbar-backward-group)))
            ("<down>" . (lambda () (interactive)
-                         (pkg/hydra/group/tabbar/alternative #'tabbar-forward-group))))
+                         (pkg/hydra/group/tabbar/alternate #'tabbar-forward-group))))
 
 (defhydra pkg/hydra/group/buffer
   (:timeout pkg/hydra/timeout-sec)
-  ("b"       (pkg/hydra/group/tabbar/alternative
+  ("b"       (pkg/hydra/group/tabbar/alternate
               #'tabbar-backward-tab)     "left      " :column "tab bar     ")
-  ("f"       (pkg/hydra/group/tabbar/alternative
+  ("f"       (pkg/hydra/group/tabbar/alternate
               #'tabbar-forward-tab)      "right     "                       )
   ("<"       awesome-tab-select-beg-tab  "first     "                       )
   (">"       awesome-tab-select-end-tab  "last      "                       )
-  ("n"       (pkg/hydra/group/tabbar/alternative
+  ("n"       (pkg/hydra/group/tabbar/alternate
               #'tabbar-forward-group)    "next group"                       )
-  ("p"       (pkg/hydra/group/tabbar/alternative
+  ("p"       (pkg/hydra/group/tabbar/alternate
               #'tabbar-backward-group)   "prev group"                       )
   ("C-h"     buf-move-left               "left      " :column "move        ")
   ("C-l"     buf-move-right              "right     "                       )

@@ -12,17 +12,9 @@
 ;; directory :: 以斜杠结尾
 ;; dwim :: Do What I Mean
 
-(defun my/listp (list)
-  (and list (listp list)))
-
-(defun my/find-dict (fkey dict)
-  (when (my/listp dict)
-    (let ((first (car dict)))
-      (if (and (consp first) (funcall fkey (car first)))
-          (cdr first) (my/find-dict fkey (cdr dict))))))
-
-(defun my/find-dict-by-key (key dict)
-  (my/find-dict (lambda (x) (eq x key)) dict))
+;; (consp), (atom), (listp), (nlistp)
+(defun my/pairp (list)
+  (and (consp list) (atom (cdr list))))
 
 (defun my/map (func seq)
   (delq nil (mapcar func seq)))
@@ -320,11 +312,11 @@
 ;; ***************************************************************************************
 
 (defconst my/project/root-directories
-  (my/get-private-config 'pvt/project/root-directories #'my/listp
+  (my/get-private-config 'pvt/project/root-directories #'consp
                          (lambda (dirs) (my/map 'my/directory-exists-p dirs))))
 
 (defconst my/project/ede-config-files
-  (my/get-private-config 'pvt/project/ede-config-files #'my/listp
+  (my/get-private-config 'pvt/project/ede-config-files #'consp
                          (lambda (files)
                            (when my/project/root-directories
                              (mapcan
@@ -355,7 +347,7 @@
                             ;; my/text/web ;; web browser
                             my/keys/init
                             my/keys/buffer
-                            my/keys/directory
+                            my/keys/dired
                             my/keys/misc
                             my/keys/program
                             ;; my/keys/text

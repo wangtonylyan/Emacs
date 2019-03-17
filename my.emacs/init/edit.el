@@ -182,6 +182,14 @@
   (defun pkg/hydra/quit ()
     (interactive)
     (message "Hydra Quit"))
+  (defun pkg/hydra/alternate-key (key alist)
+    (let ((value (alist-get key alist)))
+      (or (my/mapcar (lambda (x)
+                       (when (and (my/pairp x)
+                                  (pkg/package/enabled-p (car x)))
+                         (cdr x)))
+                     (if (atom (car value)) (list value) value))
+          key)))
   :if (pkg/package/enabled-p 'hydra)
   :config
   ;; 目前发现启用此项会导致，Hydra子窗口过小，无法完整地呈现提示文字
