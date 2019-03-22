@@ -1,0 +1,6 @@
+* Tasks
+** DONE terminate iphone recharging                                  :DAILY:
+SCHEDULED: <2019-03-21 Thu 13:00>
+CAPTURED: [2019-03-21 Thu 12:36]
+file:~/disk2/Projects/github/my/Emacs/my.org/clock.el
+* Notes

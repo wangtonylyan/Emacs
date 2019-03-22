@@ -1,0 +1,8 @@
+* Reading
+** Computer Science
+*** Computation
+**** Computability and Complexity
+***** TODO reading page 23-25                                        :CS:
+CAPTURED: [2019-03-21 Thu 14:10]
+***** TODO circuit complexity @ page 27                              :CS:
+CAPTURED: [2019-03-21 Thu 15:08]

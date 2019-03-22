@@ -95,7 +95,7 @@
     (pkg/company/add-backends `((,(pkg/company/backend-enabled-p 'yasnippet)
                                  ;; company-cmake ;; CMake
                                  ;; company-eclim ;; Eclipse
-                                 ;; company-xcode
+                                 ;; company-xcode ;; Xcode
                                  ,(when company-clang-executable
                                     (or (pkg/company/backend-enabled-p 'company-irony)
                                         (pkg/company/backend-enabled-p 'company-ycmd)
