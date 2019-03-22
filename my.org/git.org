@@ -1,7 +1,29 @@
 #+TITLE: Main
 * Network
-** concept
+
+** terminology
+
+*** address
+
++ address realm :: a network domain in which the network addresses are uniquely assigned to entities such that datagrams can be routed to them.
+
+**** categorized by layer
+
 + IP address :: an IP-layer identifier for an interface or a set of interfaces.
+
++ link-layer address :: a link-layer identifier for an interface.
+
+ Examples include IEEE 802 addresses for Ethernet links (e.g. EHA) and E.164 addresses for Integrated Services Digital Network (ISDN) links.
+
+ Typically, the link-layer address is an interface’s Media Access Control (MAC) address.
+
+**** categorized by realm
+
++ link-local address :: an address having link-only scope that can be used to reach neighboring nodes attached to the same link.
+
+ All interfaces have a link-local unicast address.
+
++ global address :: an address with unlimited scope.
 
 + unicast address :: an identifier for a single interface.
 
@@ -15,47 +37,43 @@
 
  A packet sent to an anycast address is delivered to one of the interfaces identified by that address (the "nearest" one, according to the routing protocol’s measure of distance).
 
-+ address realm :: a network domain in which the network addresses are uniquely assigned to entities such that datagrams can be routed to them.
-
-+ link-local address :: an address having link-only scope that can be used to reach neighboring nodes attached to the same link.
-
- All interfaces have a link-local unicast address.
-
-+ global address :: an address with unlimited scope.
-
-+ link-layer address :: a link-layer identifier for an interface.
-
- Examples include IEEE 802 addresses for Ethernet links (e.g. EHA) and E.164 addresses for Integrated Services Digital Network (ISDN) links.
+**** categorized by state
 
 + tentative address :: an address whose uniqueness on a link is being verified, prior to its assignment to an interface.
 
- A tentative address is not considered assigned to an interface in the usual sense. An interface discards received packets addressed to a tentative address, but accepts Neighbor Discovery packets related to Duplicate Address Detection for the tentative address.
+ A tentative address is not considered assigned to an interface in the usual sense.
+ An interface discards received packets addressed to a tentative address, but accepts Neighbor Discovery packets related to Duplicate Address Detection for the tentative address.
 
 + preferred address :: an address assigned to an interface whose use by upper-layer protocols is unrestricted.
 
  Preferred addresses may be used as the source (or destination) address of packets sent from (or to) the interface.
 
- - preferred lifetime :: the length of time that a valid address is preferred (i.e., the time until deprecation).
+  + preferred lifetime :: the length of time that a valid address is preferred (i.e. the time until deprecation)
 
-  When the preferred lifetime expires, the address becomes deprecated.
+   When the preferred lifetime expires, the address becomes deprecated.
 
 + deprecated address :: an address assigned to an interface whose use is discouraged, but not forbidden.
 
- A deprecated address should no longer be used as a source address in new communications, but packets sent from or to deprecated addresses are delivered as expected. A deprecated address may continue to be used as a source address in communications where switching to a preferred address causes hardship to a specific upper-layer activity (e.g., an existing TCP connection).
+ A deprecated address should no longer be used as a source address in new communications, but packets sent from or to deprecated addresses are delivered as expected.
+ A deprecated address may continue to be used as a source address in communications where switching to a preferred address causes hardship to a specific upper-layer activity (e.g., an existing TCP connection).
 
 + valid address :: a preferred or deprecated address.
 
  A valid address may appear as the source or destination address of a packet, and the Internet routing system is expected to deliver packets sent to a valid address to their intended recipients.
 
- - valid lifetime :: the length of time an address remains in the valid state (i.e., the time until invalidation).
+  + valid lifetime :: the length of time an address remains in the valid state (i.e. the time until invalidation)
 
-  The valid lifetime must be greater than or equal to the preferred lifetime. When the valid lifetime expires, the address becomes invalid.
+   The valid lifetime must be greater than or equal to the preferred lifetime.
+   When the valid lifetime expires, the address becomes invalid.
 
 + invalid address :: an address that is not assigned to any interface.
 
  A valid address becomes invalid when its valid lifetime expires.
 
- Invalid addresses should not appear as the destination or source address of a packet. In the former case, the Internet routing system will be unable to deliver the packet; in the latter case, the recipient of the packet will be unable to respond to it.
+ Invalid addresses should not appear as the destination or source address of a packet.
+ In the former case, the Internet routing system will be unable to deliver the packet; in the latter case, the recipient of the packet will be unable to respond to it.
+
+*** device
 
 + node :: a device that implements IPv6.
 
@@ -79,8 +97,33 @@
 
 + packet flow :: 其方向为单个packet的传输方向
 
+**** link layer
+
++ link :: A facility or medium over which nodes can communicate at the link layer.
+
++ switch ::
+
++ hub ::
+
++ repeater ::
+
++ bridge :: A node connected to two or more administratively indistinguishable but physically distinct subnets, that automatically forwards datagrams when necessary, but whose existence is not known to other hosts.
+
+ Also called a "software repeater".
+
+**** network layer
+
++ gateway :: A node connected to two or more administratively distinct networks and/or subnets, to which hosts send datagrams to be forwarded.
+
+  1. A gateway implements internet protocol to forward datagrams between networks.
+
+  2. A gateway also implements the Gateway to Gateway Protocol (GGP) to coordinate routing and other internet control information.
+
++ router ::
+
 * Git
 ** git submodule
+
 *** initialization
 + 在首先克隆一个仓库后，只会存在有子模块的文件夹，而不会下载其代码
 + 子模块作为一个独立的仓库，也需要进行初始化
@@ -107,13 +150,26 @@ git submodule update --remote
 
 
 * Org-Mode
+** misc
+*** tags
+expense, self, work, math, cs
+*** 新建一个标题行，可以在一个空行上输入一个星号，随后不要输入标题的内容，而是使用tab键切换标题行深度
+*** 在tag前面输入<return>并不会导致标签内容也同样换行
+
 ** general
+*** Ctrl-C Ctrl-C
++ tag :: 在headline上执行可以修改tag
++ timestamp :: normalize timestamp, fixing format
 *** help
 + "C-c C-x I" :: open a suitable section of the Org manual depending on the syntax at point
+
+** agenda
+*** basic
++ "/" :: filter by tag
++ "-" :: filter out by tag
+
 ** structure template
 *** create
-:PROPERTIES:
-:END:
 + "C-c C-," :: choose and insert templates
 
 ** source code block

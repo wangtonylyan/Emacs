@@ -13,5 +13,11 @@ if [ -f "$HOME/.emacs.d/my.config/bashrc.sh" ]; then
 fi
 
 $ ln -s ~/.emacs.d/my.config/zshrc.sh   ~/.zshrc
+
+$ ln -s ~/.emacs.d/my.config/tmux.conf  ~/.tmux.conf
+
 $ ln -s ~/.emacs.d/my.config/apt.conf   /etc/apt/apt.conf
+
+以下两者选其一即可
 $ ln -s ~/.emacs.d/my.config/gitconfig  ~/.gitconfig
+$ ln -s ~/.emacs.d/.private/gitconfig   ~/.gitconfig

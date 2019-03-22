@@ -1,3 +1,6 @@
+[user]
+	name = TonyLYan
+	email = wangtonylyan@outlook.com
 [alias]
 	st = status
 	br = branch
@@ -8,8 +11,8 @@
 	helper = store
 [http]
 	sslverify = false
-	proxy = http://CHT1HTSH3191:Alps1912@10.25.71.1:8080
+#	proxy = http://username:password@address:port
+[https]
+#	proxy = https://username:password@address:port
 [core]
 	autocrlf = input
-[https]
-	proxy = httpx://CHT1HTSH3191:Alps1912@10.25.71.1:8080

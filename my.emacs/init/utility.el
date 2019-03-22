@@ -59,10 +59,15 @@
   (use-package dired-avfs :disabled) ;; avfs
   (use-package dired-open :disabled)
   (use-package dired-rainbow :disabled)
-  (use-package dired-subtree :disabled)
   (use-package dired-ranger :disabled)
   (use-package dired-narrow :disabled)
   (use-package dired-list :disabled)
+  (use-package dired-subtree
+    :defer t
+    :if (pkg/package/enabled-p 'dired-subtree)
+    :config
+    (setq dired-subtree-cycle-depth 1
+          dired-subtree-line-prefix "    "))
   (use-package dired-collapse
     :defer t
     :if (pkg/package/enabled-p 'dired-collapse)

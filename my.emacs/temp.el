@@ -350,13 +350,6 @@ proxy = https://CHT1HTSH3191:Alps1911@10.25.71.1:8080
 
 
 (setq wocaotodo '(;; =============================================================================
-                  ;; [python] prog-py.el
-                  python ;; python-mode
-                  ;; elpy ;; ropemacs
-                  ;; py-autopep8
-                  ;; auto-virtualenvwrapper ;; virtualenvwrapper
-
-                  ;; =============================================================================
                   ;; [navigation] --> editing.el
                   bm
                   ;; [text.el]
@@ -368,9 +361,6 @@ proxy = https://CHT1HTSH3191:Alps1911@10.25.71.1:8080
                   ;; cmake-mode ;; cmake-ide, cmake-project
                   ;; cmake-font-lock
                   ;; cpputils-cmake
-                  ;; [haskell]
-
-
                   ;; [ml]
                   sml-mode
                   ;; [web]
@@ -454,7 +444,6 @@ workgroups2 - Session manager, saves all your opened buffers, their location and
 Eyebrowse - A simple-minded way of managing window configs in emacs.
 [File Manager]
 Dired+ - Functional & interface extensions for Dired.
-dired-hacks - Collection of useful Dired additions.
 dired-k - Highlight Dired buffer by file size, modified time, git status.
 Direx - directory tree explorer.
 ztree - Directory tree comparison mode.

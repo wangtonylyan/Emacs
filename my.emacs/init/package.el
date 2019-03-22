@@ -82,7 +82,7 @@
                       ;; yascroll
                       ;; sublimity, minimap
                       ;; whitespace
-                      fill-column-indicator
+                      ;; fill-column-indicator
                       visual-fill-column
                       rainbow-delimiters
                       ;; color-identifiers, rainbow-identifiers ;; 会覆盖配色主题所使用的字体颜色
@@ -120,7 +120,8 @@
                        ;; diredfl
                        ;; dired-single
                        (dired-hacks-utils
-                        dired-collapse))
+                        dired-subtree ;; dired-collapse
+                        ))
                       helm ;; ivy, smex, ido, icicles, icomplete
                       ediff ;; vdiff
                       ;; vdiff-magit
@@ -163,11 +164,13 @@
 (pkg/package/select '(haskell-mode
                       flycheck-haskell))
 ;; [Text]
-(pkg/package/select '((org org-bullets)))
+(pkg/package/select '((org
+                       org-bullets
+                       org-pomodoro)))
 (cond
  ((pkg/package/enabled-p 'helm)
   (pkg/package/select '(;; helm-bm
-                        helm-dash
+                        ;; helm-dash
                         helm-projectile
                         helm-flycheck
                         ;; helm-gtags

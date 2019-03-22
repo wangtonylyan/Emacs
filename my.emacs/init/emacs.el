@@ -121,16 +121,17 @@
 (use-package files
   :defer t
   :preface
-  (defun pkg/files/find-read-only ()
-    (let ((file (my/file-exists-p buffer-file-name))
-          (skiplist `(".*-autoloads.el$"
-                      ".*-loaddefs.el$"
-                      ,(my/set-user-emacs-file "\\..*/.*")
-                      ,(file-truename (my/set-user-emacs-file "\\..*/.*")))))
+  (defvar pkg/files/find-readonly-ignored '(".*-autoloads.el$"
+                                            ".*-loaddefs.el$"))
+  (defun pkg/files/ignore-readonly-path (path)
+    (add-to-list 'pkg/files/find-readonly-ignored path t)
+    (add-to-list 'pkg/files/find-readonly-ignored (file-truename path) t))
+  (defun pkg/files/find-readonly ()
+    (let ((file (my/file-exists-p buffer-file-name)))
       (unless (or (not file)
                   (my/map (lambda (regexp)
                             (string-match-p regexp file))
-                          skiplist))
+                          pkg/files/find-readonly-ignored))
         (read-only-mode 1))))
   :config
   (setq make-backup-files t
@@ -143,7 +144,9 @@
         delete-old-versions t
         dired-kept-versions 2
         require-final-newline t)
-  (add-hook 'find-file-hook 'pkg/files/find-read-only t))
+  (add-hook 'find-file-hook 'pkg/files/find-readonly t)
+  ;; ignore direct subdirectory named by dot prefix
+  (pkg/files/ignore-readonly-path (my/set-user-emacs-file "\\..*/.*")))
 
 (use-package recentf
   :config
@@ -243,6 +246,7 @@
   (delete-selection-mode 1))
 
 
+;; (add-to-list 'initial-frame-alist '(fullscreen . maximized))
 (toggle-frame-maximized)
 
 
