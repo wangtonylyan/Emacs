@@ -6,3 +6,18 @@
 CAPTURED: [2019-03-21 Thu 14:10]
 ***** TODO circuit complexity @ page 27                              :CS:
 CAPTURED: [2019-03-21 Thu 15:08]
+* Shopping
+** TODO 购买床头台灯                                              :SHOPPING:
+CAPTURED: [2019-03-24 Sun 13:37]
+** TODO 购买内存条                                                :SHOPPING:
+CAPTURED: [2019-03-24 Sun 13:37]
+** TODO 购买显示器，充分使用显卡                                  :SHOPPING:
+CAPTURED: [2019-03-24 Sun 13:38]
+** TODO 购买键盘，静电容、左右手分离式                            :SHOPPING:
+CAPTURED: [2019-03-24 Sun 13:38]
+** TODO 购买电动牙刷                                              :SHOPPING:
+CAPTURED: [2019-03-24 Sun 13:39]
+** TODO 购买平板电脑、手机支架                                    :SHOPPING:
+CAPTURED: [2019-03-24 Sun 13:39]
+** TODO 购买显示器、键盘支架                                      :SHOPPING:
+CAPTURED: [2019-03-24 Sun 13:45]
