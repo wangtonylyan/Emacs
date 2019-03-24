@@ -64,7 +64,11 @@
 (setq package-enable-at-startup nil) ;; 方式1) 随Emacs的启动而自动加载插件
 (package-initialize)                 ;; 方式2) 主动执行该函数以加载插件
 ;; 目前使用此全局变量来管理插件的启用/禁用，其中包括了ELPA更新源中所没有的插件
-(setq package-selected-packages '(use-package diminish bind-key all-the-icons))
+(setq package-selected-packages '(;; paradox
+                                  all-the-icons
+                                  use-package
+                                  diminish
+                                  bind-key))
 ;; [Interface]
 (pkg/package/select '(doom-themes
                       spacemacs-theme
@@ -197,6 +201,13 @@
   (diminish 'abbrev-mode)
   (diminish 'hi-lock-mode)
   (diminish 'font-lock-mode))
+
+(use-package paradox
+  :defer t
+  :if (pkg/package/enabled-p 'paradox)
+  :config
+  (setq paradox-github-token t)
+  (paradox-enable))
 
 (use-package all-the-icons
   :defer t

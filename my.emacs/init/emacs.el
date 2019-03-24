@@ -222,7 +222,7 @@
 (use-package display-line-numbers
   :defer t
   :init
-  (my/add-mode-hook "text" #'display-line-numbers-mode)
+  ;; (my/add-mode-hook "text" #'display-line-numbers-mode)
   :config
   (setq display-line-numbers-type 'relative
         display-line-numbers-grow-only nil

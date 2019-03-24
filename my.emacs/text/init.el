@@ -1,89 +1,11 @@
 ;; -*- coding: utf-8 -*-
 
+;; =ox-twbs=，使用框架，输出更为漂亮的html
+
 ;; org-mode存在bug，在refile的时候会报错
 ;; 解决方案如下，删除所有编译后的文件
 ;; $ cd ~/.emacs.d/elpa
 ;; $ find org*/*.elc -print0 | xargs -0 rm
-(use-package org
-  :defer t
-  :commands (org-store-link
-             org-capture
-             org-agenda)
-  :preface
-  (defun pkg/org/start ())
-  (defun pkg/org/get-file (file)
-    (let ((path (my/concat-directory-file org-directory file)))
-      (when path (pkg/files/ignore-readonly-path path))
-      path))
-  :if (pkg/package/enabled-p 'org)
-  :init
-  (setq org-use-extra-keys nil
-        org-replace-disputed-keys nil)
-  (my/add-mode-hook "org" #'pkg/org/start)
-  :config
-  (setq org-startup-indented t
-        org-startup-folded t
-        org-startup-truncated nil
-        org-startup-with-beamer-mode nil
-        org-startup-align-all-tables t
-        org-startup-shrink-all-tables t
-        org-startup-with-latex-preview t
-        org-startup-with-inline-images nil
-        org-hide-block-startup nil)
-  (setq org-adapt-indentation t
-        org-support-shift-select nil
-        org-M-RET-may-split-line '((default . nil))
-        org-insert-heading-respect-content nil
-        org-tab-follows-link nil
-        org-return-follows-link nil
-        org-use-speed-commands nil
-        org-speed-commands-user nil
-        org-enable-priority-commands nil)
-  (setq org-cycle-global-at-bob t
-        org-cycle-emulate-tab t
-        org-cycle-separator-lines 1
-        org-cycle-level-after-item/entry-creation t)
-  (use-package ob-core
-    :defer t
-    :config
-    (setq org-confirm-babel-evaluate nil
-          org-babel-no-eval-on-ctrl-c-ctrl-c nil
-          org-babel-uppercase-example-markers t))
-  (use-package org-src
-    :defer t
-    :config
-    ;; TODO: org-src-lang-modes
-    (setq org-src-window-setup 'split-window-below
-          org-src-ask-before-returning-to-edit-buffer nil
-          org-edit-src-persistent-message t
-          org-src-preserve-indentation t
-          org-src-tab-acts-natively t
-          org-edit-src-turn-on-auto-save nil
-          org-edit-src-auto-save-idle-delay 0))
-  ;; =====================================================================================
-  (setq org-directory (my/set-user-emacs-file "my.org/")
-        org-src-fontify-natively t
-        org-use-sub-superscripts t
-        org-indirect-buffer-display 'dedicated-frame)
-  (dolist (lang '((latex . t) (matlab . t)
-                  (lisp . t) (sh . t)
-                  (C . nil) (C++ . nil) (java . nil)
-                  (python . t) (js . nil) (haskell . nil)))
-    (add-to-list 'org-babel-load-languages lang))
-  ;; =====================================================================================
-  (diminish 'org-indent-mode)
-  (bind-keys :map org-mode-map
-             ("M-<tab>" . nil)
-             ("C-c [" . nil) ;; (org-agenda-file-to-front)
-             ("C-c ]" . nil) ;; (org-remove-file)
-             ("C-c ;" . nil) ;; (org-toggle-comment)
-             ("C-'" . nil) ("C-," . nil) ;; (org-cycle-agenda-files)
-             )
-  ;; =====================================================================================
-  (pkg/org/setup/time)
-  (pkg/org/setup/todo)
-  (pkg/org/setup/capture)
-  (pkg/org/setup/agenda))
 
 (defun pkg/org/setup/time ()
   (setq org-display-custom-times nil
@@ -95,7 +17,7 @@
     (org-clock-persistence-insinuate)
     :config
     (setq org-clock-idle-time 10
-          org-clock-persist t
+          org-clock-persist nil
           org-clock-persist-file (pkg/org/get-file "clock.el")
           org-clock-persist-query-save nil
           org-clock-persist-query-resume t))
@@ -139,39 +61,116 @@
           ("DONE" ("PENDING") ("CANCELLED")))))
 
 (defun pkg/org/setup/capture ()
-  (let ((default "default.org")
-        (calendar "calendar.org")
-        (journey "journey.org")
-        (gtd "gtd.org")
-        (future "future.org")
-        (note "note.org"))
-    (setq org-default-notes-file (pkg/org/get-file default))
-    (use-package org-capture
-      :defer t
-      :config
-      (setq org-capture-templates `(("t" "task" entry (file+headline "" "Tasks")
-                                     "* TODO %?\t%^G\nCAPTURED: %U\n%l\n%i\n" :clock-resume t)
-                                    ("n" "note" entry (file+headline "" "Notes")
-                                     "* %?\t%^G\nCAPTURED: %U\n%l\n%i\n" :clock-resume t)
-                                    ("c" "calendar" entry (file+datetree ,(pkg/org/get-file calendar))
-                                     "* %?\nDURING: %T--%T\nCAPTURED: %U\n%i\n" :clock-resume t)
-                                    ("j" "journey" entry (file+datetree ,(pkg/org/get-file journey))
-                                     "* %?\nCAPTURED: %U\n%i\n" :clock-resume t))
-            org-capture-bookmark t
-            org-capture-use-agenda-date nil))
-    (setq org-refile-use-outline-path t
-          org-outline-path-complete-in-steps nil
-          org-refile-allow-creating-parent-nodes 'confirm
-          org-refile-targets `((nil :maxlevel . 4)
-                               (,(pkg/org/get-file gtd) :maxlevel . 4)
-                               (,(pkg/org/get-file future) :maxlevel . 3)
-                               (,(pkg/org/get-file note) :maxlevel . 3)))))
+  (setq org-default-notes-file (pkg/org/get-file "default.org"))
+  (use-package org-capture
+    :defer t
+    :config
+    (setq org-capture-templates
+          `(("t" "task" entry (file+headline "" "Tasks")
+             "* TODO %?\t%^G\nCAPTURED: %U\n%l\n%i\n" :clock-resume t)
+            ("n" "note" entry (file+headline "" "Notes")
+             "* %?\t%^G\nCAPTURED: %U\n%l\n%i\n" :clock-resume t)
+            ("c" "calendar" entry (file+datetree ,(pkg/org/get-file "calendar.org"))
+             "* %?\nDURING: %T--%T\nCAPTURED: %U\n%i\n" :clock-resume t)
+            ("j" "journey" entry (file+datetree ,(pkg/org/get-file "journey.org"))
+             "* %?\nCAPTURED: %U\n%i\n" :clock-resume t))
+          org-capture-bookmark t
+          org-capture-use-agenda-date nil))
+  (setq org-refile-use-outline-path t
+        org-outline-path-complete-in-steps nil
+        org-refile-allow-creating-parent-nodes 'confirm
+        org-refile-targets `((nil :maxlevel . 4)
+                             (,(pkg/org/get-file "gtd.org") :maxlevel . 4)
+                             (,(pkg/org/get-file "future.org") :maxlevel . 3)
+                             (,(pkg/org/get-file "note.org") :maxlevel . 3))))
 
 (defun pkg/org/setup/agenda ()
   (setq org-agenda-files (list org-directory)
         org-agenda-text-search-extra-files nil
         org-agenda-skip-unavailable-files nil
         org-agenda-diary-file (pkg/org/get-file "journey.org")))
+
+(use-package org
+  :defer t
+  :commands (org-store-link
+             org-capture
+             org-agenda)
+  :preface
+  (defun pkg/org/start ())
+  (defun pkg/org/get-file (file)
+    (let ((path (my/concat-directory-file org-directory file)))
+      (when path (pkg/files/ignore-readonly-path path))
+      path))
+  :if (pkg/package/enabled-p 'org)
+  :init
+  (setq org-use-extra-keys nil
+        org-replace-disputed-keys nil)
+  (my/add-mode-hook "org" #'pkg/org/start)
+  :config
+  (setq org-startup-indented t
+        org-startup-folded t
+        org-startup-truncated nil
+        org-startup-with-beamer-mode nil
+        org-startup-align-all-tables nil
+        org-startup-shrink-all-tables t
+        org-startup-with-latex-preview t
+        org-startup-with-inline-images nil
+        org-hide-block-startup nil)
+  (setq org-adapt-indentation t
+        org-support-shift-select nil
+        org-M-RET-may-split-line '((default . nil))
+        org-insert-heading-respect-content nil
+        org-tab-follows-link nil
+        org-return-follows-link nil
+        org-use-speed-commands nil
+        org-speed-commands-user nil
+        org-enable-priority-commands nil)
+  (setq org-cycle-global-at-bob t
+        org-cycle-emulate-tab t
+        org-cycle-separator-lines 1
+        org-cycle-level-after-item/entry-creation t)
+  (use-package ob-core
+    :defer t
+    :config
+    (setq org-confirm-babel-evaluate nil
+          org-babel-no-eval-on-ctrl-c-ctrl-c nil
+          org-babel-uppercase-example-markers t))
+  (use-package org-src
+    :defer t
+    :config
+    ;; TODO: org-src-lang-modes
+    (setq org-src-window-setup 'split-window-below
+          org-src-ask-before-returning-to-edit-buffer nil
+          org-edit-src-persistent-message t
+          org-src-preserve-indentation t
+          org-src-tab-acts-natively t
+          org-edit-src-turn-on-auto-save nil
+          org-edit-src-auto-save-idle-delay 0))
+  ;; =====================================================================================
+  (setq org-directory (my/set-user-emacs-file "my.org/")
+        org-src-fontify-natively t
+        org-use-sub-superscripts t
+        org-indirect-buffer-display 'dedicated-frame
+        org-ellipsis "↷")
+  (dolist (lang '((latex . t) (matlab . t)
+                  (lisp . t) (sh . t)
+                  (C . nil) (C++ . nil) (java . nil)
+                  (python . t) (js . nil) (haskell . nil)))
+    (add-to-list 'org-babel-load-languages lang))
+  ;; =====================================================================================
+  (diminish 'org-indent-mode)
+  (bind-keys :map org-mode-map
+             ("M-<tab>" . nil)
+             ("C-c [" . nil) ;; (org-agenda-file-to-front)
+             ("C-c ]" . nil) ;; (org-remove-file)
+             ("C-c ;" . nil) ;; (org-toggle-comment)
+             ("C-'" . nil) ("C-," . nil) ;; (org-cycle-agenda-files)
+             )
+  ;; =====================================================================================
+  (pkg/org/setup/time)
+  (pkg/org/setup/todo)
+  (pkg/org/setup/capture)
+  (pkg/org/setup/agenda))
 
 (use-package org-bullets
   :after (org)
