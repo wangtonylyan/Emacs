@@ -66,6 +66,7 @@
 ;; 目前使用此全局变量来管理插件的启用/禁用，其中包括了ELPA更新源中所没有的插件
 (setq package-selected-packages '(;; paradox
                                   all-the-icons
+                                  ;; cnfonts
                                   use-package
                                   diminish
                                   bind-key))
@@ -90,7 +91,7 @@
                       visual-fill-column
                       rainbow-delimiters
                       ;; color-identifiers, rainbow-identifiers ;; 会覆盖配色主题所使用的字体颜色
-                      highlight-context-line
+                      highlight-context-line ;; scrollkeeper
                       highlight-numbers
                       highlight-parentheses
                       highlight-indent-guides ;; highlight-indentation
@@ -114,8 +115,9 @@
                       multiple-cursors
                       (flyspell flyspell-correct)
                       hydra
-                      which-key
+                      which-key ;; guide-key
                       ;; evil
+                      ;; (pyim pyim-basedict)
                       ))
 ;; [Utility]
 (pkg/package/select '(;; shell, term, ansi-term, eshell
@@ -134,8 +136,10 @@
 ;; [Programming]
 (pkg/package/select '(;; prog-mode
                       which-func
-                      flycheck ;; flymake
-                      ggtags   ;; helm-gtags, counsel-gtags, counsel-etags
+                      (flycheck
+                       flycheck-inline ;; flycheck-pos-tip
+                       )               ;; flymake
+                      ggtags           ;; helm-gtags, counsel-gtags, counsel-etags
                       ;; asn1-mode
                       reformatter ;; py-autopep8, py-yapf, yapfify, hindent
                       ))
@@ -170,7 +174,8 @@
 ;; [Text]
 (pkg/package/select '((org
                        org-bullets
-                       org-pomodoro)))
+                       org-pomodoro)
+                      pdf-tools))
 (cond
  ((pkg/package/enabled-p 'helm)
   (pkg/package/select '(;; helm-bm

@@ -101,6 +101,20 @@
       ;; 'flycheck-haskell-hlint-executable
       (pkg/flycheck/disable-checker 'haskell-stack-ghc)
       (pkg/flycheck/disable-checker 'haskell-ghc)))
+  (use-package flycheck-pos-tip
+    :if (pkg/package/enabled-p 'flycheck-pos-tip)
+    :config
+    (flycheck-pos-tip-mode 1))
+  (use-package flycheck-inline
+    :defer t
+    :preface
+    (defun pkg/flycheck-inline/start ()
+      (flycheck-inline-mode 1))
+    :if (pkg/package/enabled-p 'flycheck-inline)
+    :init
+    (my/add-mode-hook "flycheck" #'pkg/flycheck-inline/start)
+    :config
+    (setq flycheck-display-errors-delay 1.0))
   (use-package helm-flycheck
     :after (helm)
     :commands (helm-flycheck)
@@ -164,7 +178,7 @@
   :if (pkg/package/enabled-p 'reformatter)
   :config
   (when-let ((exec (my/locate-exec "uncrustify" "/usr/local/bin/"))
-             (cfg (my/get-user-emacs-file "my.config/uncrustify.c.cfg")))
+             (cfg (my/get-user-config-file "uncrustify.c.cfg" :prog)))
     (defconst pkg-reformatter-c-program exec)
     (defconst pkg-reformatter-c-args `("-l" "C" "-c" ,cfg "--no-backup"))
     (reformatter-define pkg-reformatter-c
@@ -172,7 +186,7 @@
       :args pkg-reformatter-c-args)
     (my/add-mode-hook "c" #'pkg-reformatter-c-on-save-mode))
   (when-let ((exec (my/locate-exec "autopep8")) ;; "yapf"
-             (cfg (my/get-user-emacs-file "my.config/pycodestyle.cfg")))
+             (cfg (my/get-user-config-file "pycodestyle.cfg" :prog)))
     (defconst pkg-reformatter-python-program exec)
     (defconst pkg-reformatter-python-args `(,(concat "--global-config=" cfg)
                                             ,(concat "--max-line-length="
@@ -183,7 +197,7 @@
       :args pkg-reformatter-python-args)
     (my/add-mode-hook "python" #'pkg-reformatter-python-on-save-mode))
   (when-let ((exec (my/locate-exec "stylish-haskell")) ;; hindent
-             (cfg (my/get-user-emacs-file "my.config/stylish-haskell.yaml")))
+             (cfg (my/get-user-config-file "stylish-haskell.yaml" :prog)))
     (defconst pkg-reformatter-haskell-program exec)
     (defconst pkg-reformatter-haskell-args `("-c" ,cfg "-"))
     (reformatter-define pkg-reformatter-haskell

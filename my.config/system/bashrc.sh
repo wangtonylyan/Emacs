@@ -7,6 +7,9 @@ else
 fi
 export no_proxy="127.0.0.1, localhost"
 
+# 解决Emacs中无法激活搜狗输入法的问题
+export LC_CTYPE=zh_CN.UTF-8
+
 CONDA_PATH="$HOME/miniconda3"
 if [ -d "$CONDA_PATH" ]; then
     # export PATH="$CONDA_PATH/bin:$PATH"

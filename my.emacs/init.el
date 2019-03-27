@@ -151,7 +151,7 @@
 (defun my/run-hook (dict mode)
   (run-hooks (my/get-hook dict mode)))
 
-(defmacro my/create-hook-interface (name dict)
+(defmacro my/create-hook-functions (name dict)
   (list 'progn
         (list 'defun (intern (concat "my/get-" name "-hook"))
               (list 'mode)
@@ -224,8 +224,8 @@
    '(("minibuffer/capf"   completion-at-point-functions)
      ("projectile/switch" pkg/projectile/switch-hook   ))))
 
-(my/create-hook-interface "mode" my/mode-hook-dict)
-(my/create-hook-interface "pkg" my/package-hook-dict)
+(my/create-hook-functions "mode" my/mode-hook-dict)
+(my/create-hook-functions "pkg" my/package-hook-dict)
 
 
 (cond ;; os-related
@@ -288,6 +288,14 @@
 (defun my/get-user-emacs-file (&optional file self)
   (my/exists-p (my/set-user-emacs-file file self)))
 
+(defun my/get-user-config-file (&optional file type)
+  (let* ((alist '((:system . "system")
+                  (:emacs . "emacs")
+                  (:prog . "program")))
+         (file (my/concat-directory-file (alist-get type alist) file))
+         (file (my/concat-directory-file "my.config" file)))
+    (my/get-user-emacs-file file)))
+
 
 (defconst my/private-emacs-directory
   (my/get-user-emacs-file ".private/"))
@@ -308,7 +316,7 @@
 
 (my/load-file (my/get-private-emacs-file "init.el"))
 ;; *********************************** sample code ***************************************
-;; 详见于(my/get-user-emacs-file "my.config/private.el")
+;; 详见于(my/get-user-config-file "private.el" :emacs)
 ;; ***************************************************************************************
 
 (defconst my/project/root-directories

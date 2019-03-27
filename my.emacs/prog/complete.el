@@ -122,9 +122,10 @@
     (my/add-mode-hook "company" #'pkg/company-box/start)
     :config
     (setq company-box-enable-icon nil
+          company-box-color-icon t
           company-box-show-single-candidate nil
           company-box-doc-enable t
-          company-box-doc-delay 0.5))
+          company-box-doc-delay 1.0))
   (use-package helm-company
     :defer t
     :if (pkg/package/enabled-p 'helm-company)

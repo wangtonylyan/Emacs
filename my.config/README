@@ -8,16 +8,16 @@
 $ ln -s ~/Projects/Emacs ~/.emacs.d
 
 # echo >> ~/.bashrc
-if [ -f "$HOME/.emacs.d/my.config/bashrc.sh" ]; then
-   source "$HOME/.emacs.d/my.config/bashrc.sh"
+if [ -f "$HOME/.emacs.d/my.config/system/bashrc.sh" ]; then
+   source "$HOME/.emacs.d/my.config/system/bashrc.sh"
 fi
 
-$ ln -s ~/.emacs.d/my.config/zshrc.sh   ~/.zshrc
+$ ln -s ~/.emacs.d/my.config/system/zshrc.sh  ~/.zshrc
 
-$ ln -s ~/.emacs.d/my.config/tmux.conf  ~/.tmux.conf
+$ ln -s ~/.emacs.d/my.config/system/tmux.conf ~/.tmux.conf
 
-$ ln -s ~/.emacs.d/my.config/apt.conf   /etc/apt/apt.conf
+$ ln -s ~/.emacs.d/my.config/system/apt.conf  /etc/apt/apt.conf
 
 以下两者选其一即可
-$ ln -s ~/.emacs.d/my.config/gitconfig  ~/.gitconfig
-$ ln -s ~/.emacs.d/.private/gitconfig   ~/.gitconfig
+$ ln -s ~/.emacs.d/my.config/system/gitconfig ~/.gitconfig
+$ ln -s ~/.emacs.d/.private/gitconfig         ~/.gitconfig

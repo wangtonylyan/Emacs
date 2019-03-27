@@ -122,17 +122,65 @@
 + router ::
 
 * Git
-** git submodule
-
-*** initialization
+** config
+*** basic
+**** local *vs.* global
+前者作为缺省值；这两个参数可以与以下各子命令结合使用
+#+begin_src sh
+git config --local   # "./.git/config"
+git config --global  # "~/.gitconfig"
+#+end_src
+**** list
+#+begin_src sh
+git config --list
+#+end_src
+**** unset
+#+begin_src sh
+git config --unset
+#+end_src
+*** account
+**** user info
+#+begin_src sh
+git config user.name "TonyLYan"
+git config user.email "wangtonylyan@outlook.com"
+#+end_src
+**** credential
+设置以下选项后的首次git push时所输入的用户名和Token密码，将被自动地以明文的方式，保存于~/.git-credentials文件中
+当启用Github账号登陆二次验证机制时，通过命令行执行push等操作时，要求输入的账号密码必须是由官网上手动生成的Personal Access Token，而非账号的登陆密码。此时，将密码自动保存于本地就是一个很好的举措
+#+begin_src sh
+git config credential.helper store
+#+end_src
+*** network
+**** proxy
+#+begin_src sh
+git config http.proxy "http://<username>:<password>@<server>:<port>"
+git config https.proxy "https://<username>:<password>@<server>:<port>"
+#+end_src
+**** ssl
+#+begin_src sh
+git config http.sslverify false  # 用于解决server certificate verification failed错误
+#+end_src
+*** alias
+#+begin_src sh
+git config alias.st status
+git config alias.br branch
+git config alias.co checkout
+git config alias.cm commit
+git config alias.rs reset
+#+end_src
+*** core
+**** newline
+#+begin_src sh
+git config core.autocrlf input  # 用于转换\r\n与\n，在Linux和Windows上的值分别应为input和true
+#+end_src
+** submodule
+*** initialize
 + 在首先克隆一个仓库后，只会存在有子模块的文件夹，而不会下载其代码
 + 子模块作为一个独立的仓库，也需要进行初始化
-
 **** 克隆仓库的同时，初始化子模块
 #+begin_src sh
 git clone --recurse-submodules
 #+end_src
-
 **** 克隆仓库后，初始化子模块
 #+begin_src sh
 git submodule init
@@ -147,7 +195,6 @@ git submodule update --init
 #+begin_src sh
 git submodule update --remote
 #+end_src
-
 
 * Org-Mode
 ** misc
