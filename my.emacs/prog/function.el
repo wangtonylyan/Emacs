@@ -7,7 +7,7 @@
   (setq sml-indent-level 2
         sml-program-name (or (my/locate-exec "sml")
                              (my/locate-exec "sml" "/usr/share/smlnj/bin"))
-        sml-config-file (my/get-user-emacs-file "my.config/smlconfig.sml")
+        sml-config-file (my/get-user-config-file "smlconfig.sml" :prog)
         sml-max-name-components 3))
 
 

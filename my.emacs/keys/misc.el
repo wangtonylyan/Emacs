@@ -1,5 +1,12 @@
 ;; -*- coding: utf-8 -*-
 
+(defun pkg/hydra/group/highlight-at-point ()
+  (interactive)
+  (cond
+   ((pkg/package/enabled-p 'symbol-overlay) (symbol-overlay-put))
+   ((pkg/package/enabled-p 'highlight-symbol) (undefined))
+   (t (highlight-symbol-at-point))))
+
 (defun pkg/hydra/group/highlight/body ()
   (interactive)
   (cond

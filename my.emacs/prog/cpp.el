@@ -408,8 +408,7 @@
   :config
   (setq ycmd-server-command (let ((path (my/directory-exists-p "~/Projects/ycmd/ycmd/")))
                               (when path (list my/bin/python-interpreter path)))
-        ycmd-global-config (my/get-user-emacs-file
-                            "my.config/ycm_extra_conf.py")
+        ycmd-global-config (my/get-user-config-file "ycm_extra_conf.py" :prog)
         ycmd-extra-conf-whitelist nil
         ycmd-extra-conf-handler 'load
         ycmd-force-semantic-completion t))

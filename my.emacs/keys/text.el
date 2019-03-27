@@ -92,37 +92,6 @@
   ;;  We only set them when really needed because otherwise the
   ;;  menus don't show the simple keys
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   (org-defkey org-mode-map (kbd "C-c C-x") (make-sparse-keymap))
 
 ;;;; TAB key with modifiers
@@ -167,6 +136,114 @@
   (org-defkey org-mode-map (kbd "C-S-<left>") #'org-shiftcontrolleft)
   (org-defkey org-mode-map (kbd "C-S-<up>") #'org-shiftcontrolup)
   (org-defkey org-mode-map (kbd "C-S-<down>") #'org-shiftcontroldown))
+
+
+(use-package image-mode
+  :defer t
+  :config
+  (bind-keys :map image-mode-map
+             ("SPC" . nil) ("S-SPC" . nil) ("DEL" . nil)
+             ("k" . nil) ("a" . nil) ("F" . nil)
+             ("C-c C-c" . nil) ("C-c C-x" . nil)
+             ("?" . pkg/hydra/group/image-mode-help/body))
+  (defhydra pkg/hydra/group/image-mode-help
+    (image-mode-map "" :timeout pkg/hydra/timeout-sec :exit t)
+    ("n"   image-scroll-up          "up        " :column "scroll")
+    ("p"   image-scroll-down        "down      "                 )
+    ("f"   image-forward-hscroll    "left      "                 )
+    ("b"   image-backward-hscroll   "right     "                 )
+    ("C-n" image-next-frame         "next frame" :column "browse")
+    ("C-p" image-previous-frame     "prev frame"                 )
+    ("M-n" image-next-file          "next file "                 )
+    ("M-p" image-previous-file      "prev file "                 )
+    ("j p" image-goto-frame         "page      " :column "jump  ")
+    ("v v" image-toggle-display     "toggle    " :column "view  ")
+    ("v x" image-toggle-hex-display "hex text  "                 )
+    ("q"   quit-window              "quit      " :column "buffer")
+    ("Q"   image-kill-buffer        "kill      "                 )))
+
+(use-package doc-view
+  :defer t
+  :config
+  (bind-keys :map doc-view-mode-map
+             ("SPC" . nil) ("S-SPC" . nil) ("DEL" . nil)
+             ("W" . nil) ("H" . nil) ("P" . nil) ("K" . nil)
+             ("=" . nil) ("0" . nil) ("s" . nil) ("r" . nil)
+             ("C-s" . nil) ("C-r" . nil) ("<find>" . nil) ("C-t" . nil)
+             ("C-c C-c" . nil) ("C-c C-t" . nil)
+             ("?" . pkg/hydra/group/doc-view-help/body))
+  (defhydra pkg/hydra/group/doc-view-help
+    (doc-view-mode-map "" :timeout pkg/hydra/timeout-sec :exit t)
+    ("n"   doc-view-next-line-or-next-page         "line up  " :column "scroll")
+    ("p"   doc-view-previous-line-or-previous-page "line down"                 )
+    ("C-n" doc-view-next-page                      "page up  "                 )
+    ("C-p" doc-view-previous-page                  "page down"                 )
+    ("j p" doc-view-goto-page                      "page     " :column "browse")
+    (": w" doc-view-fit-width-to-window            "width    " :column "fit   ")
+    (": h" doc-view-fit-height-to-window           "height   "                 )
+    (": p" doc-view-fit-page-to-window             "page     "                 )
+    ("+"   doc-view-enlarge                        "enlarge  " :column "zoom  ")
+    ("-"   doc-view-shrink                         "shrink   "                 )
+    ("="   doc-view-scale-reset                    "reset    "                 )
+    ("v v" doc-view-toggle-display                 "toggle   " :column "view  ")
+    ("v f" doc-view-open-text                      "raw text "                 )
+    ("g"   doc-view-revert-buffer                  "refresh  " :column "buffer")
+    ("q"   quit-window                             "quit     "                 )
+    ("Q"   doc-view-kill-proc                      "kill     "                 )))
+
+(use-package pdf-tools
+  :defer t
+  :config
+  (bind-keys :map pdf-view-mode-map
+             ("SPC" . nil) ("S-SPC" . nil) ("DEL" . nil)
+             ("W" . nil) ("H" . nil) ("P" . nil)
+             ("=" . nil) ("0" . nil) ("s" . nil) ("r" . nil)
+             ("m" . nil) ("'" . nil) ("M-g l" . nil)
+             ("C-c C-c" . nil) ("C-c C-d" . nil) ("C-c C-i" . nil)
+             ("C-c C-r m" . nil) ("C-c C-r p" . nil)
+             ("?" . pkg/hydra/group/pdf-tools-help/body))
+  (defhydra pkg/hydra/group/pdf-tools-help
+    (pdf-view-mode-map "" :timeout pkg/hydra/timeout-sec :exit t)
+    ("n"   pdf-view-next-line-or-next-page         "line up  " :column "scroll")
+    ("p"   pdf-view-previous-line-or-previous-page "line down"                 )
+    ("C-n" pdf-view-next-page-command              "page up  "                 )
+    ("C-p" pdf-view-previous-page-command          "page down"                 )
+    ("j p" pdf-view-goto-page                      "page     " :column "browse")
+    ("j l" pdf-view-goto-label                     "label    "                 )
+    ("j m" pdf-view-position-to-register           "register "                 )
+    ("j M" pdf-view-jump-to-register               "restore  "                 )
+    ("j o" pdf-outline                             "outline  "                 )
+    (": w" pdf-view-fit-width-to-window            "width    " :column "fit   ")
+    (": h" pdf-view-fit-height-to-window           "height   "                 )
+    (": p" pdf-view-fit-page-to-window             "page     "                 )
+    ("+"   pdf-view-enlarge                        "enlarge  " :column "zoom  ")
+    ("-"   pdf-view-shrink                         "shrink   "                 )
+    ("="   pdf-view-scale-reset                    "reset    "                 )
+    ("v v" doc-view-mode                           "toggle   " :column "view  ")
+    ("v e" pdf-view-extract-region-image           "extract  "                 )
+    ("g"   revert-buffer                           "refresh  " :column "buffer")
+    ("q"   quit-window                             "quit     "                 )
+    ("Q"   kill-this-buffer                        "kill     "                 ))
+  (use-package pdf-outline
+    :defer t
+    :config
+    (bind-keys :map pdf-outline-minor-mode-map
+               ("o" . nil)))
+  (use-package pdf-history
+    :defer t
+    :config
+    (bind-keys :map pdf-history-minor-mode-map
+               ("B" . nil) ("N" . nil)))
+  (use-package pdf-links
+    :defer t
+    :config
+    (bind-keys :map pdf-links-minor-mode-map
+               ("f" . nil) ("F" . nil)))
+  (use-package pdf-misc
+    :defer t
+    :config
+    (bind-keys :map pdf-misc-minor-mode-map
+               ("I" . nil) ("C-c C-p" . nil))))
 
 
 (provide 'my/keys/text)

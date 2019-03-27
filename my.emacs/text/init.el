@@ -122,7 +122,7 @@
         org-insert-heading-respect-content nil
         org-tab-follows-link nil
         org-return-follows-link nil
-        org-use-speed-commands nil
+        org-use-speed-commands t
         org-speed-commands-user nil
         org-enable-priority-commands nil)
   (setq org-cycle-global-at-bob t
@@ -375,13 +375,30 @@
         org-agenda-ignore-properties nil)
   (setq org-list-demote-modify-bullet '(("+" . "-") ("-" . "+") ("*" . "+"))))
 
+
 (use-package pdf-tools
   :defer t
   :if (pkg/package/enabled-p 'pdf-tools)
   :init
-  ;; (pdf-tools-install)
+  (pdf-loader-install) ;; (pdf-tools-install)
   :config
-  (setq pdf-view-continuous t))
+  (setq pdf-cache-image-limit 32
+        pdf-view-continuous t
+        pdf-view-use-imagemagick t
+        pdf-view-midnight-colors (cons (face-attribute 'default :foreground)
+                                       (face-attribute 'default :background)))
+  (setq pdf-tools-enabled-modes '(pdf-outline-minor-mode
+                                  pdf-history-minor-mode
+                                  pdf-links-minor-mode
+                                  pdf-misc-minor-mode
+                                  pdf-misc-size-indication-minor-mode
+                                  pdf-annot-minor-mode
+                                  pdf-sync-minor-mode
+                                  pdf-cache-prefetch-minor-mode
+                                  pdf-occur-global-minor-mode))
+  (when (my/theme/style-p 'dark)
+    (add-to-list 'pdf-tools-enabled-modes 'pdf-view-dark-minor-mode)
+    (add-to-list 'pdf-tools-enabled-modes 'pdf-view-midnight-minor-mode)))
 
 
 (provide 'my/text/init)

@@ -213,5 +213,30 @@
     (add-to-list 'which-key-replacement-alist replace))
   (which-key-mode 1))
 
+(use-package pyim ;; 暂时感觉体验不好，还是倾向于使用搜狗
+  :defer t
+  :if (pkg/package/enabled-p 'pyim)
+  :config
+  (setq default-input-method "pyim")
+  (setq pyim-default-scheme 'quanpin
+        pyim-translate-trigger-char "v"
+        pyim-page-tooltip (or (pkg/package/enabled-p 'posframe) 'popup)
+        pyim-page-length 5
+        pyim-auto-select nil
+        pyim-dcache-directory (my/set-user-emacs-file "my.pyim/"))
+  (setq-default pyim-english-input-switch-functions
+                '(pyim-probe-dynamic-english
+                  pyim-probe-isearch-mode
+                  pyim-probe-program-mode
+                  pyim-probe-org-structure-bind)
+                pyim-punctuation-half-width-functions
+                '(pyim-probe-punctuation-line-beginning
+                  pyim-probe-punctuation-after-punctuation))
+  ;; (pyim-isearch-mode 1)
+  (use-package pyim-basedict
+    :if (pkg/package/enabled-p 'pyim-basedict)
+    :config
+    (pyim-basedict-enable)))
+
 
 (provide 'my/init/edit)
