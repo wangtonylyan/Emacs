@@ -4,3 +4,6 @@
 CAPTURED: [2019-03-25 Mon 15:35]
 关于投票方案
 https://en.wikipedia.org/wiki/Spoiler_effect
+** 终端截屏软件                                                   :SOFTWARE:
+CAPTURED: [2019-03-27 Wed 13:37]
+https://asciinema.org/

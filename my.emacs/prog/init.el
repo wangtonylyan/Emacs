@@ -69,7 +69,7 @@
   (setq flycheck-check-syntax-automatically '(mode-enabled save idle-change)
         flycheck-checker-error-threshold 500
         flycheck-idle-change-delay 2.5
-        flycheck-indication-mode 'left-fringe)
+        flycheck-indication-mode 'nil)
   (flycheck-error-list-set-filter 'error)
   ;; (flycheck-list-errors)可以列出当前buffer中的所有error，优化显示窗口
   (add-to-list 'display-buffer-alist

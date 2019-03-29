@@ -1,0 +1,12 @@
+# Docker Upstart and SysVinit configuration file
+
+# Customize location of Docker binary (especially for development testing).
+# DOCKERD="/usr/local/bin/dockerd"
+
+# export DOCKER_TMPDIR="/mnt/bigdrive/docker-tmp"
+
+# export http_proxy="http://<username>:<password>@<address>:<port>"
+
+# "--dns 8.8.8.8 --dns 8.8.4.4"
+# "--registry-mirror=https://registry.docker-cn.com"
+DOCKER_OPTS="--registry-mirror=http://hub-mirror.c.163.com"

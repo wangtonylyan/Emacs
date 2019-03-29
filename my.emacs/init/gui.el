@@ -154,6 +154,18 @@
         nyan-wavy-trail nil)
   (nyan-mode 1))
 
+(use-package parrot
+  :if (pkg/package/enabled-p 'parrot)
+  :config
+  (setq parrot-animate-parrot t
+        parrot-num-rotations 5)
+  (dolist (rotation '())
+    (add-to-list 'parrot-rotate-dict rotation))
+  (add-hook 'parrot-click-hook #'flyspell-buffer)
+  (parrot-mode 1)
+  (when (pkg/package/enabled-p 'nyan-mode)
+    (parrot-set-parrot-type 'nyan)))
+
 (use-package powerline
   :defer t
   :config

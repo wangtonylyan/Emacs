@@ -145,6 +145,10 @@
         mc/edit-lines-empty-lines nil
         mc/max-cursors 100))
 
+(use-package ace-mc
+  :defer t
+  :if (pkg/package/enabled-p 'ace-mc))
+
 (use-package flyspell
   :diminish (flyspell-mode)
   :defer t

@@ -75,6 +75,7 @@
                       spacemacs-theme
                       dashboard
                       nyan-mode
+                      parrot
                       doom-modeline ;; spaceline, spaceline-all-the-icons, smart-mode-line
                       tabbar        ;; awesome-tab
                       ;; (treemacs treemacs-projectile treemacs-icons-dired)
@@ -113,6 +114,7 @@
                       lispy ;; paredit, parinfer
                       expand-region
                       multiple-cursors
+                      ace-mc
                       (flyspell flyspell-correct)
                       hydra
                       which-key ;; guide-key
@@ -129,10 +131,11 @@
                         dired-subtree ;; dired-collapse
                         ))
                       helm ;; ivy, smex, ido, icicles, icomplete
-                      ediff ;; vdiff
-                      ;; vdiff-magit
+                      ediff ;; (vdiff vdiff-magit)
                       projectile ;; find-file-in-project, eproject
-                      magit))
+                      magit
+                      diff-hl ;; git-gutter
+                      (docker dockerfile-mode)))
 ;; [Programming]
 (pkg/package/select '(;; prog-mode
                       which-func
