@@ -123,7 +123,6 @@
         org-tab-follows-link nil
         org-return-follows-link nil
         org-use-speed-commands t
-        org-speed-commands-user nil
         org-enable-priority-commands nil)
   (setq org-cycle-global-at-bob t
         org-cycle-emulate-tab t

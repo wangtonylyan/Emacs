@@ -8,6 +8,27 @@
   ("b" org-switchb    "switch file")
   ("t" pkg/hydra/group/org/timestamp/body "time"))
 
+
+(use-package org
+  :defer t
+  :config
+  (setq org-speed-commands-user '(("n" . (org-speed-move-safe #'org-forward-heading-same-level))
+                                  ("p" . (org-speed-move-safe #'org-backward-heading-same-level))
+                                  ("f" . (org-speed-move-safe #'org-next-visible-heading))
+                                  ("b" . (org-speed-move-safe #'org-previous-visible-heading))
+                                  ("U") ("P" . org-metaup)
+                                  ("D") ("N" . org-metadown)
+                                  ("r") ("R") ("F" . org-shiftmetaright)
+                                  ("l") ("L") ("B" . org-shiftmetaleft)
+                                  ("g") ("y" . (org-refile t)) ("Y" . org-refile)
+                                  ("k") ("w" . org-cut-subtree)
+                                  ("@") (" " . org-mark-subtree)
+                                  ("=" . org-display-outline-path)
+                                  ("/") ("v" . org-sparse-tree)
+                                  ("s") ("a" . org-toggle-narrow-to-subtree)
+                                  ("c") ("C") ("^")
+                                  (",") ("0") ("1") ("2") ("3"))))
+
 ;; =======================================================================================
 (defun wocaiio ()
   (defhydra todo ()

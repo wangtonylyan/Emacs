@@ -185,12 +185,17 @@
 
 (defhydra pkg/hydra/group/cursor/mark
   (:timeout pkg/hydra/timeout-sec :exit t)
-  ("C-SPC"       set-mark-command                      "continuous" :column "mark         "          )
-  ("C-S-SPC"     rectangle-mark-mode                   "rectangle "                                  )
-  ("a"           mark-whole-buffer                     "buffer    "                                  )
-  ("SPC"         er/expand-region                      "expand    " :column "syntax       " :exit nil)
-  ("<backspace>" er/contract-region                    "contract  "                         :exit nil)
-  ("<return>"    pkg/hydra/group/multiple-cursors/body "enter     " :column "multi cursors"          ))
+  ("C-SPC"       set-mark-command                      "continuous  " :column "mark   "          )
+  ("C-S-SPC"     rectangle-mark-mode                   "rectangle   "                            )
+  ("a"           mark-whole-buffer                     "whole buffer"                            )
+  ("SPC"         er/expand-region                      "expand      " :column "syntax " :exit nil)
+  ("<backspace>" er/contract-region                    "contract    "                   :exit nil)
+  ("<return>"    pkg/hydra/group/multiple-cursors/body "enter       " :column "cursors"          )
+  (":"           ace-mc-add-multiple-cursors           "jump others "                            )
+  (";"           ace-mc-add-single-cursor              "jump another"                            )
+  ("n"           parrot-rotate-next-word-at-point      "next"         :column "rotate " :exit nil)
+  ("p"           parrot-rotate-prev-word-at-point      "prev"                           :exit nil)
+  ("q" pkg/hydra/quit nil :exit t))
 
 (use-package multiple-cursors
   :defer t

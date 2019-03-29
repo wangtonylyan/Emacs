@@ -243,12 +243,40 @@
   :if (pkg/package/enabled-p '(vdiff magit vdiff-magit))
   :config
   (bind-keys :map magit-mode-map
-             ("e" . vdiff-magit-dwim)
-             ("E" . vdiff-magit-popup))
+             ([remap magit-ediff-dwim] . vdiff-magit-dwim)
+             ([remap magit-ediff] . vdiff-magit-popup))
   (setcdr (assoc ?e (plist-get magit-dispatch-popup :actions))
           '("vdiff dwim" #'vdiff-magit-dwim))
   (setcdr (assoc ?E (plist-get magit-dispatch-popup :actions))
           '("vdiff popup" #'vdiff-magit-popup)))
+
+(use-package diff-hl
+  :if (pkg/package/enabled-p 'diff-hl)
+  :config
+  (setq diff-hl-draw-borders nil
+        diff-hl-side 'right
+        diff-hl-fringe-bmp-function #'diff-hl-fringe-bmp-from-type)
+  (global-diff-hl-mode 1)
+  (diff-hl-flydiff-mode 1)
+  ;; (diff-hl-margin-mode 1)
+  (my/add-mode-hook "dired" #'diff-hl-dired-mode)
+  (bind-keys :map diff-hl-mode-map
+             (diff-hl-command-prefix . nil))
+  (use-package magit
+    :defer t
+    :config
+    (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh)))
+
+(use-package docker
+  :defer t
+  :if (pkg/package/enabled-p 'docker))
+
+(use-package dockerfile-mode
+  :defer t
+  :if (pkg/package/enabled-p 'dockerfile-mode)
+  :config
+  (setq dockerfile-use-sudo nil
+        dockerfile-mode-map (make-sparse-keymap)))
 
 
 (provide 'my/init/utility)

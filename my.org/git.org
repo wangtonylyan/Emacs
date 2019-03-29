@@ -121,6 +121,185 @@
 
 + router ::
 
+** Computer Networking: A Top-Down Approach
+
+*** Chapter 4. The Network Layer
+**** routing protocol
++ Internet’s intra-autonomous system routing protocols :: RIP, OSPF, and IS-IS
++ Internet's inter-autonomous system routing protocol :: BGP
+**** packet
+|-----------+----------|
+| layer     | packet   |
+|-----------+----------|
+| transport | segment  |
+| network   | datagram |
+| link      | frame    |
+**** forwarding =vs.= routing
+Forwarding refers to the router-local action of transferring a packet from an input link interface to the appropriate output link interface.
+Routing refers to the network-wide process that determines the end-to-end paths that packets take from source to destination.
+**** forwarding table
+路由器内部会维护一张forwarding table，从而实现forwarding功能
+**** network service model
+***** Internet
+best-effort service
+***** ATM
+provides multiple service models
++ constant bit rate (CBR) :: a dedicated fixed-bandwidth transmission link
++ available bit rate (ABR) :: slightly-better-than-best-effort service
+**** network-layer connection and connectionless service
+Although the connection and connectionless services at network layer have some parallels with those at transport layer, there are differences as follows,
+|--------------------------------------------------------+--------------------------------------------------------------------|
+| transport layer                                        | network layer                                                      |
+|--------------------------------------------------------+--------------------------------------------------------------------|
+| process-to-process                                     | host-to-host                                                       |
+| can provice both connection and connectionless service | virtual-circuit xor datagram                                       |
+| Connection service is implemented in end systems only. | Connection service is implemented in both routers and end systems. |
+**** virtual-circuit network
+1. A computer network that provides only a connection or connectionless service at the network layer is called a *virtual-circuit* network or *datagram* network, respectively.
+2. The network-layer connection is called *virtual circuit* (VC).
+3. The network's routers must maintain *connection state information* for the ongoing connections.
+ 对于VC而言，其连接的建立涉及到了整条路径上的每一台设备，所有中间路由都需要为每个连接维护单独的信息。
+
+
+* Docker
+** references
+[[http://goinbigdata.com/docker-run-vs-cmd-vs-entrypoint/][RUN vs. CMD vs. ENTRYPOINT]]
+
+** concept
+1. An *image* is an executable package that includes everything needed to run an application, including the code, a runtime, libraries, environment variables, and configuration files.
+2. A *container* is a runtime instance of an image, i.e. what the image becomes in memory when executed.
+ *Dockerfile*与container一一绑定
+3. docker engine = docker + dockerd
+ 服务器端是一个名为dockerd的daemon进程，客户端则是每次执行docker命令时所起的进程，两者之间通过REST API进行通信。
+ 由于镜像、容器等的维护都被执行于该daemon中，因此客户端也可以通过网络，远程控制另一台主机中的docker engine。
+ 目前dockerd还提供了分布式模型，多个daemon可以组成集群，用户可对负载、资源占用等进行配置。
+4. 构建镜像时需要指定目录，该被指定目录被称为是context，即被Docker认为是对于本次构建有用的信息，
+ 因而该目录下的所有文件都会在Docker客户端执行"docker build"命令时，被完整地传给dockerd进程。
+   + 可见，出于执行效率的考虑，每次构建镜像时，通常都需要新建一个空目录，仅将对本次构建真正有必要的文件置于其中；
+     此外，也可以在被指定的目录下新建.dockerignore文件，用于指定需要被忽略的内容。
+5. Dockerfile的语法规则可参见[[https://docs.docker.com/engine/reference/builder/][此网页]]
+6. layer
+ In an image, a layer is modification to the image, represented by an instruction in the Dockerfile.
+ Layers are applied in sequence to the base image to create the final image.
+** configuration
+*** config file
+1. /etc/default/docker，该文件不支持systemctl所管理的dockerd进程
+2. /etc/docker/daemon.json
+
+** install
+1. Docker的安装可直接参考[[https://docs.docker.com/install/linux/docker-ce/ubuntu/][官方文档]]
+2. 增加非root权限
+ #+begin_src sh
+sudo groupadd docker
+sudo usermod -aG docker $USER
+ #+end_src
+3. 开机启动
+ #+begin_src sh
+sudo systemctl enable docker
+ #+end_src
+** command
+*** CLI commands
+#+begin_src sh
+docker
+docker container --help
+#+end_src
+*** info
+#+begin_src sh
+docker --version
+docker version
+docker info
+#+end_src
+*** hub
+#+begin_src sh
+docker login                                      # Log in this CLI session using your Docker credentials
+docker tag <image> <username>/<repository>:<tag>  # Tag image for upload to registry
+docker push <username>/<repository>:<tag>         # Upload tagged image to registry
+docker pull <username>/<repository>:<tag>
+docker search <image>
+#+end_src
+*** image
+1. 在DockerHub中，一个镜像的完整标示符的格式是"<username>/<repository>:<tag>"，其中
+   + 没有username的镜像属于顶级命名空间，仅用于官方镜像
+
+#+begin_src sh
+docker image ls
+docker image ls -a                        # List all images on this machine
+docker image rm <image>                   # Remove specified image from this machine
+docker image rm $(docker image ls -a -q)  # Remove all images from this machine
+docker build -t <image> .                 # Create image using the Dockerfile in current directory
+#+end_src
+*** container
+#+begin_src sh
+docker ps  # docker container ls
+docker ps -a  # docker container ls -a
+
+docker stop <hash>  # docker container stop <hash>
+docker kill <hash>  # docker container kill <hash>
+
+docker rm <hash>  # docker container rm <hash>
+docker rm $(docker ps -a -q -f status=exited)  # Remove all exited containers
+#+end_src
+*** run -- the most mighty command
+#+begin_src sh
+docker run <image>
+docker run -p 4000:80 <image>             # Run image mapping port 4000 to 80，两者分别是主机和容器内的端口号
+docker run -d -p 4000:80 <image>          # Same thing, but in detached mode
+docker run <username>/<repository>:<tag>  # Run image from a registry
+docker run -it <image>                    # attach to an interactive tty in container
+#+end_src
+
+
+*** example
+#+begin_src sh
+docker pull busybox
+docker image ls
+docker run busybox
+docker container ls -a
+docker run -it busybox sh
+#+end_src
+
+* shell
+** color
+#+begin_src sh
+tput color
+#+end_src
+
+* tmux
+** commands
+*** session
+#+begin_src sh
+tmux new -s <session>  # tmux new-session -s <session>
+tmux ls  # tmux list-sessions
+tmux attach -t <session> # tmux attach-session -t <session>
+tmux kill-session -t <session>
+#+end_src
+*** configuration in tmux.conf file
+#+begin_src sh
+set-option  # set
+set-window-option  # setw
+#+end_src
+*** tmux command
+#+begin_src sh
+source-file ~/.tmux.conf
+#+end_src
+
+** key bindings
++ t :: clock
++ d :: detach current session
++ , :: (re)name window
++ [0-9] :: jump to window, "C-x b"
++ w :: visual menu of windows
++ f :: find a window
++ & :: kill a window
++ % :: "C-x 3"
++ " :: "C-x 2"
++ o :: "C-x o"
++ x :: close a pane
++ : :: command mode
++ ? :: key bindings
+
+
+
 * Git
 ** config
 *** basic

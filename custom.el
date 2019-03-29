@@ -28,4 +28,8 @@
  ;; '(rainbow-identifiers-identifier-1 ((t (:foreground "#CCCCCC")))) ;; dark
 
  '(aw-leading-char-face ((t (:foreground "red" :weight ultra-bold :height 2.0))))
+
+ '(diff-hl-insert ((t (:foreground "dark slate gray" :background "dark slate gray"))))
+ '(diff-hl-change ((t (:foreground "dark slate blue" :background "dark slate blue"))))
+ '(diff-hl-delete ((t (:foreground "dark red" :background "dark red"))))
  )

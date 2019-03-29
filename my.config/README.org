@@ -1,0 +1,40 @@
+* comment
+** rules
+1. 本目录下的配置文件中，起始行标示了如何使用该文件的部分信息
+2. bash和zsh的代理设置将根据当前登陆的用户名来决定
+   但目前其他软件的代理设置只能手动修改
+3. bashrc.sh将作为所有shell的默认配置文件，被各shell主动加载
+* commands
+** emacs
+#+begin_src sh
+ln -s ~/Projects/Emacs ~/.emacs.d
+#+end_src
+** bash
+#+begin_src sh
+# echo >> ~/.bashrc
+if [ -f "$HOME/.emacs.d/my.config/system/bashrc.sh" ]; then
+   source "$HOME/.emacs.d/my.config/system/bashrc.sh"
+fi
+#+end_src
+** zsh
+#+begin_src sh
+ln -s ~/.emacs.d/my.config/system/zshrc.sh  ~/.zshrc
+#+end_src
+** tmux
+#+begin_src sh
+ln -s ~/.emacs.d/my.config/system/tmux.conf ~/.tmux.conf
+#+end_src
+** apt
+#+begin_src sh
+ln -s ~/.emacs.d/my.config/system/apt.conf  /etc/apt/apt.conf
+ln -s ~/.emacs.d/my.config/system/apt.sources.list.tsinghua /etc/apt/sources.list
+#+end_src
+** git
+#+begin_src sh
+ln -s ~/.emacs.d/my.config/system/gitconfig ~/.gitconfig
+#+end_src
+** docker
+#+begin_src sh
+ln -s ~/.emacs.d/my.config/system/docker.default /etc/default/docker
+ln -s ~/.emacs.d/my.config/system/docker.daemon.json /etc/docker/daemon.json
+#+end_src
