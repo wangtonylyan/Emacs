@@ -26,6 +26,7 @@
 
   ("!" pkg/hydra/group/flymake&check/body "flymake, flycheck")
   ("." pkg/hydra/group/gtags/body         "ggtags, helm-gtags")
+  ("," pkg/hydra/group/program/body       "cedet, semantic")
 
   ("q" pkg/hydra/quit nil :exit t))
 
@@ -83,6 +84,17 @@
    ("M-." . xref-find-definitions)
    ("M-," . xref-pop-marker-stack)
    ("M-?" . nil) ("M-*" . xref-find-references)))
+
+(use-package simple
+  :defer t
+  :config
+  (bind-keys :map special-mode-map
+             ("SPC" . nil) ("n" . scroll-up-command)
+             ("S-SPC" . nil) ("DEL" . nil) ("p" . scroll-down-command)
+             ("<" . beginning-of-buffer) (">" . end-of-buffer)
+             ("h" . nil) ("?" . nil)
+             ("g" . revert-buffer)
+             ("q" . quit-window) ("Q" . kill-buffer)))
 
 (use-package package
   :defer t

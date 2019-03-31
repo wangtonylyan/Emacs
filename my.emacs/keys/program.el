@@ -170,7 +170,7 @@
     ("C-S-h"    company-show-location         "code       "                   )
     ("C-?"      company-diag                  "company    "                   )
     ("C-s"      pkg/company/search-candidates "search     " :column "search  ")
-    ("C-f"      company-filter-candidates     "filter     "                   )
+    ("C-S-f"    company-filter-candidates     "filter     "                   )
     ("C-g"      company-abort                 nil                             ))
   (defhydra pkg/hydra/group/company-search
     (company-search-map "" :timeout pkg/hydra/timeout-sec :exit t)
@@ -184,7 +184,24 @@
     ("C-g" company-search-abort            nil                           )))
 
 
-;; todo ","
+(defun pkg/hydra/group/program/body ()
+  (interactive)
+  (cond
+   ((derived-mode-p 'emacs-lisp-mode) (pkg/hydra/group/elisp/body))
+   ((derived-mode-p 'c-mode 'c++-mode) (pkg/hydra/group/cpp/body))
+   ((derived-mode-p 'python-mode) (pkg/hydra/group/python/body))))
+
+(defun pkg/hydra/group/elisp/body ()
+  (interactive))
+
+(defun pkg/hydra/group/cpp/body ()
+  (interactive)
+  (cond
+   (t (pkg/hydra/group/cedet/body))))
+
+(defun pkg/hydra/group/python/body ())
+
+
 (use-package cedet
   :defer t
   :config
