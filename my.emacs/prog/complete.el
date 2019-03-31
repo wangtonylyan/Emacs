@@ -112,6 +112,14 @@
     (setq company-quickhelp-delay 0.5
           company-quickhelp-use-propertized-text t)
     (company-quickhelp-mode 1))
+  (use-package company-childframe
+    :if (pkg/package/enabled-p 'company-childframe)
+    :config
+    (company-childframe-mode 1)
+    (use-package desktop
+      :defer t
+      :config
+      (add-to-list 'desktop-minor-mode-table '(company-childframe-mode nil))))
   (use-package company-box
     :defer t
     :preface

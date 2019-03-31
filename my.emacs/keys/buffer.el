@@ -90,6 +90,16 @@
   (bind-keys ("C-:" . ace-jump-char-mode)
              ("C-;" . ace-jump-mode-pop-mark))))
 
+(cond
+ ((pkg/package/enabled-p 'move-text)
+  (bind-keys ("M-n" . move-text-down)
+             ("M-p" . move-text-up)))
+ ((pkg/package/enabled-p 'move-dup)
+  (bind-keys ("M-n" . md/move-lines-down)
+             ("M-p" . md/move-lines-up)
+             ("C-M-n" . md/duplicate-up)
+             ("C-M-p" . md/duplicate-down))))
+
 (defhydra pkg/hydra/group/cursor
   (:timeout pkg/hydra/timeout-sec :exit t)
   ("C-    f,b"    nil "char          " :column "forward/backward")

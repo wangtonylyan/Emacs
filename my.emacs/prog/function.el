@@ -1,6 +1,22 @@
 ;; -*- coding: utf-8 -*-
 
-(use-package sml-mode
+(use-package slime ;; Common Lisp
+  :defer t
+  :if (pkg/package/enabled-p 'slime))
+
+(use-package sly ;; Common Lisp
+  :defer t
+  :if (pkg/package/enabled-p 'sly))
+
+(use-package geiser ;; Scheme
+  :defer t
+  :if (pkg/package/enabled-p 'geiser))
+
+(use-package cider ;; Clojure
+  :defer t
+  :if (pkg/package/enabled-p 'cider))
+
+(use-package sml-mode ;; Standard ML
   :defer t
   :if (pkg/package/enabled-p 'sml-mode)
   :config
@@ -9,7 +25,6 @@
                              (my/locate-exec "sml" "/usr/share/smlnj/bin"))
         sml-config-file (my/get-user-config-file "smlconfig.sml" :prog)
         sml-max-name-components 3))
-
 
 (use-package haskell-mode
   :defer t
