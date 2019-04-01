@@ -192,6 +192,19 @@
         org-pomodoro-play-sounds nil
         org-pomodoro-clock-break nil))
 
+(use-package idle-org-agenda
+  ;; :after (org-agenda)
+  :defer t
+  :commands (idle-org-agenda-mode)
+  :preface
+  (defun pkg/idle-org-agenda/start ()
+    (idle-org-agenda-mode 1))
+  :if (pkg/package/enabled-p 'idle-org-agenda)
+  :init
+  (my/add-mode-hook "init" #'pkg/idle-org-agenda/start)
+  :config
+  (setq idle-org-agenda-interval (* 60 10)))
+
 ;; =======================================================================================
 (defun jiw ()
   (org-clock-into-drawer t
@@ -375,6 +388,14 @@
   (setq org-list-demote-modify-bullet '(("+" . "-") ("-" . "+") ("*" . "+"))))
 
 
+(use-package deft
+  :if (pkg/package/enabled-p 'deft)
+  :config
+  (setq deft-directory (my/get-user-emacs-file)
+        deft-recursive t
+        deft-extensions '("txt" "md" "org")
+        deft-use-filename-as-title t))
+
 (use-package pdf-tools
   :defer t
   :if (pkg/package/enabled-p 'pdf-tools)
@@ -398,6 +419,17 @@
   (when (my/theme/style-p 'dark)
     (add-to-list 'pdf-tools-enabled-modes 'pdf-view-dark-minor-mode)
     (add-to-list 'pdf-tools-enabled-modes 'pdf-view-midnight-minor-mode)))
+
+;; $ sudo apt install djvulibre-bin djview
+(use-package djvu
+  :defer t
+  :commands (djvu-find-file)
+  :if (pkg/package/enabled-p 'djvu)
+  :config
+  (setq djvu-djview-command (my/locate-exec "djview")
+        djvu-djview-options nil
+        djvu-buffer-name-extensions '("" "-text*" "-outline*" "-bookmark*"
+                                      "-annotation*" "-shared*")))
 
 
 (provide 'my/text/init)

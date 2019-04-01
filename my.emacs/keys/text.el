@@ -163,7 +163,6 @@
   :defer t
   :config
   (bind-keys :map image-mode-map
-             ("SPC" . nil) ("S-SPC" . nil) ("DEL" . nil)
              ("k" . nil) ("a" . nil) ("F" . nil)
              ("C-c C-c" . nil) ("C-c C-x" . nil)
              ("?" . pkg/hydra/group/image-mode-help/body))
@@ -180,14 +179,12 @@
     ("j p" image-goto-frame         "page      " :column "jump  ")
     ("v v" image-toggle-display     "toggle    " :column "view  ")
     ("v x" image-toggle-hex-display "hex text  "                 )
-    ("q"   quit-window              "quit      " :column "buffer")
-    ("Q"   image-kill-buffer        "kill      "                 )))
+    ("Q"   image-kill-buffer        nil          :column "buffer")))
 
 (use-package doc-view
   :defer t
   :config
   (bind-keys :map doc-view-mode-map
-             ("SPC" . nil) ("S-SPC" . nil) ("DEL" . nil)
              ("W" . nil) ("H" . nil) ("P" . nil) ("K" . nil)
              ("=" . nil) ("0" . nil) ("s" . nil) ("r" . nil)
              ("C-s" . nil) ("C-r" . nil) ("<find>" . nil) ("C-t" . nil)
@@ -208,15 +205,13 @@
     ("="   doc-view-scale-reset                    "reset    "                 )
     ("v v" doc-view-toggle-display                 "toggle   " :column "view  ")
     ("v f" doc-view-open-text                      "raw text "                 )
-    ("g"   doc-view-revert-buffer                  "refresh  " :column "buffer")
-    ("q"   quit-window                             "quit     "                 )
-    ("Q"   doc-view-kill-proc                      "kill     "                 )))
+    ("g"   doc-view-revert-buffer                  nil         :column "buffer")
+    ("Q"   doc-view-kill-proc                      nil                         )))
 
 (use-package pdf-tools
   :defer t
   :config
   (bind-keys :map pdf-view-mode-map
-             ("SPC" . nil) ("S-SPC" . nil) ("DEL" . nil)
              ("W" . nil) ("H" . nil) ("P" . nil)
              ("=" . nil) ("0" . nil) ("s" . nil) ("r" . nil)
              ("m" . nil) ("'" . nil) ("M-g l" . nil)
@@ -241,10 +236,7 @@
     ("-"   pdf-view-shrink                         "shrink   "                 )
     ("="   pdf-view-scale-reset                    "reset    "                 )
     ("v v" doc-view-mode                           "toggle   " :column "view  ")
-    ("v e" pdf-view-extract-region-image           "extract  "                 )
-    ("g"   revert-buffer                           "refresh  " :column "buffer")
-    ("q"   quit-window                             "quit     "                 )
-    ("Q"   kill-this-buffer                        "kill     "                 ))
+    ("v e" pdf-view-extract-region-image           "extract  "                 ))
   (use-package pdf-outline
     :defer t
     :config
@@ -265,6 +257,30 @@
     :config
     (bind-keys :map pdf-misc-minor-mode-map
                ("I" . nil) ("C-c C-p" . nil))))
+
+(use-package djvu
+  :defer t
+  :config
+  (setq djvu-read-mode-map (make-sparse-keymap))
+  (defhydra pkg/hydra/group/djvu-help
+    (djvu-read-mode-map "" :timeout pkg/hydra/timeout-sec :exit t)
+    ("n"   scroll-up-command     "line up  " :column "scroll")
+    ("p"   scroll-down-command   "line down"                 )
+    ("C-n" djvu-next-page        "page up  "                 )
+    ("C-p" djvu-prev-page        "page down"                 )
+    ("j p" djvu-goto-page        "page     " :column "browse")
+    ("j b" djvu-history-backward "backward "                 )
+    ("j f" djvu-history-forward  "forward  "                 )
+    ("v v" djvu-image-toggle     "toggle   " :column "view  ")
+    ("v f" djvu-switch-text      "raw text "                 )
+    ("g"   djvu-revert-buffer    nil         :column "buffer")
+    ("q"   djvu-quit-window      nil                         )
+    ("Q"   djvu-kill-doc         nil                         ))
+  (bind-keys :map djvu-read-mode-map
+             ("C-x C-s" . djvu-save)
+             ("?" . pkg/hydra/group/djvu-help/body)
+             :map djvu-outline-mode-map
+             :map djvu-script-mode-map))
 
 
 (provide 'my/keys/text)
