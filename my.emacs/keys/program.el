@@ -189,7 +189,8 @@
   (cond
    ((derived-mode-p 'emacs-lisp-mode) (pkg/hydra/group/elisp/body))
    ((derived-mode-p 'c-mode 'c++-mode) (pkg/hydra/group/cpp/body))
-   ((derived-mode-p 'python-mode) (pkg/hydra/group/python/body))))
+   ((derived-mode-p 'python-mode) (pkg/hydra/group/python/body))
+   ((derived-mode-p 'haskell-mode) (pkg/hydra/group/haskell/body))))
 
 (defun pkg/hydra/group/elisp/body ()
   (interactive))
@@ -200,7 +201,6 @@
    (t (pkg/hydra/group/cedet/body))))
 
 (defun pkg/hydra/group/python/body ())
-
 
 (use-package cedet
   :defer t
@@ -238,6 +238,34 @@
              ("M-?" . nil)   ;; (anaconda-mode-show-doc)
              ("M-." . anaconda-mode-find-definitions)
              ("M-r" . nil) ("M-*" . anaconda-mode-find-references)))
+
+(use-package haskell-mode
+  :defer t
+  :config
+  (setq haskell-mode-map (make-sparse-keymap)
+        interactive-haskell-mode-map (make-sparse-keymap))
+  (defhydra pkg/hydra/group/haskell
+    (:timeout pkg/hydra/timeout-sec :exit t)
+    ("C-s" haskell-mode-toggle-scc-at-point "toggle scc")
+
+    ("i f" haskell-mode-format-imports      "format   " :column "import ")
+    ("i i" haskell-navigate-imports         "goto     "                  )
+    ("C-c" haskell-compile                  "compile  " :column "compile")
+    ("c x" haskell-process-cabal            "cabal    " :column "cabal  ")
+    ("c c" haskell-process-cabal-build      "build    "                  )
+    ("c v" haskell-cabal-visit-file         "visit    "                  )
+    ("C-b" haskell-interactive-switch       "switch   " :column "GHC    ")
+    ("C-f" haskell-process-load-file        "load     "                  )
+    ("C-r" haskell-process-reload           "reload   "                  )
+    ("C-q" haskell-process-restart          "restart  "                  )
+    ("C-l" haskell-process-clear            "clear    "                  )
+    ("C-L" haskell-interactive-mode-clear   "clean    "                  )
+    ("C-d" haskell-process-interrupt        "interrupt"                  ))
+  (bind-keys :map haskell-mode-map
+             ("M-." . haskell-mode-jump-to-def-or-tag) ;; (haskell-mode-tag-find)
+             ("<backtab>" . haskell-delete-indentation)
+             :map haskell-cabal-mode-map ;; .cabal file
+             :map highlight-uses-mode-map))
 
 
 (provide 'my/keys/program)
