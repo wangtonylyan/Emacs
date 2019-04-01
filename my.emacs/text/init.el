@@ -61,7 +61,7 @@
           ("DONE" ("PENDING") ("CANCELLED")))))
 
 (defun pkg/org/setup/capture ()
-  (setq org-default-notes-file (pkg/org/get-file "default.org"))
+  (setq org-default-notes-file (pkg/org/get-file "capture.org"))
   (use-package org-capture
     :defer t
     :config
