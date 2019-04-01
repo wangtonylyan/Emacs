@@ -86,7 +86,9 @@ source $ZSH/oh-my-zsh.sh
 # users are encouraged to define aliases within the ZSH_CUSTOM folder.
 # For a full list of active aliases, run `alias`.
 
-source "$HOME/.emacs.d/my.config/system/bashrc.sh"
+if [ -f "$HOME/.emacs.d/my.config/system/bashrc.sh" ]; then
+    source "$HOME/.emacs.d/my.config/system/bashrc.sh"
+fi
 
 # 在命令行直接输入以下后缀名的文件名，会自动解压
 alias -s gz='tar -xzvf'
