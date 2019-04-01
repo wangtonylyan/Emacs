@@ -1,4 +1,11 @@
 * Tasks
+** TODO 我的手机号充值                                             :DAILY:
+DEADLINE: <2019-04-01 Mon>
+CAPTURED: [2019-04-01 Mon 14:14]
+** TODO 填写捷克旅游签证表格                                         :DAILY:
+DEADLINE: <2019-04-01 Mon>
+CAPTURED: [2019-04-01 Mon 14:15]
+
 * Notes
 ** Spoiler Effect                                                     :DAILY:
 CAPTURED: [2019-03-25 Mon 15:35]

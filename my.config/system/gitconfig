@@ -11,8 +11,8 @@
 	helper = store
 [http]
 	sslverify = false
-#	proxy = http://username:password@address:port
+#	proxy = http://<username>:<password>@<server>:<port>
 [https]
-#	proxy = https://username:password@address:port
+#	proxy = https://<username>:<password>@<server>:<port>
 [core]
 	autocrlf = input
