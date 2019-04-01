@@ -34,8 +34,8 @@
 (setq package-archives
       (let ((mirror
              ;; 'origin
-             'china
-             ;; 'tsinghua
+             ;; 'china
+             'tsinghua
              ))
         (cond
          ((eq mirror 'origin)
@@ -112,10 +112,12 @@
                       undo-tree
                       smart-hungry-delete
                       lispy ;; paredit, parinfer
+                      move-dup ;; move-text
                       expand-region
                       multiple-cursors
                       ace-mc
                       (flyspell flyspell-correct)
+                      define-word
                       hydra
                       which-key ;; guide-key
                       ;; evil
@@ -151,7 +153,8 @@
                        yasnippet-snippets ;; yasnippet-classic-snippets
                        )
                       (company
-                       ;; company-quickhelp, company-box
+                       ;; company-quickhelp
+                       ;; company-childframe, company-box
                        ) ;; auto-complete
                       ))
 ;; [C, C++]
@@ -177,8 +180,11 @@
 ;; [Text]
 (pkg/package/select '((org
                        org-bullets
-                       org-pomodoro)
-                      pdf-tools))
+                       org-pomodoro
+                       idle-org-agenda)
+                      ;; deft
+                      pdf-tools
+                      djvu))
 (cond
  ((pkg/package/enabled-p 'helm)
   (pkg/package/select '(;; helm-bm

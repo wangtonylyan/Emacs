@@ -123,6 +123,20 @@
         parinfer-auto-switch-indent-mode-when-closing nil
         parinfer-delay-invoke-idle 1.0))
 
+(use-package move-text
+  :defer t
+  :if (pkg/package/enabled-p 'move-text)
+  :config
+  ;; (move-text-default-bindings)
+  )
+
+(use-package move-dup
+  :defer t
+  :if (pkg/package/enabled-p 'move-dup)
+  :config
+  ;; (global-move-dup-mode)
+  )
+
 (use-package expand-region
   :preface
   (defun pkg/expand-region/text-mode ()
@@ -178,6 +192,12 @@
     :if (pkg/package/enabled-p '(ivy flyspell-correct-ivy))
     :config
     (setq flyspell-correct-interface #'flyspell-correct-ivy)))
+
+(use-package define-word
+  :defer t
+  :commands (define-word
+              define-word-at-point)
+  :if (pkg/package/enabled-p 'define-word))
 
 (use-package hydra
   :defer t

@@ -63,6 +63,7 @@
                        ("c" pkg/company/c&c++-mode-hook)
                        ("c++" pkg/company/c&c++-mode-hook)
                        ("python" pkg/company/python-mode-hook)
+                       ("haskell" pkg/company/haskell-mode-hook)
                        ("org" pkg/company/org-mode-hook)))
   (my/prog/complete/add-hook #'global-company-mode)
   :config
@@ -90,6 +91,7 @@
                             company-dabbrev)))
   (defun pkg/company/elisp-mode-hook ()
     (pkg/company/add-backends `((,(pkg/company/backend-enabled-p 'yasnippet)
+                                 company-dabbrev-code
                                  company-elisp))))
   (defun pkg/company/c&c++-mode-hook ()
     (pkg/company/add-backends `((,(pkg/company/backend-enabled-p 'yasnippet)
@@ -104,6 +106,9 @@
     (pkg/company/add-backends `((,(pkg/company/backend-enabled-p 'yasnippet)
                                  ,(pkg/company/backend-enabled-p 'company-anaconda)
                                  ,(pkg/company/backend-enabled-p 'company-jedi)))))
+  (defun pkg/company/haskell-mode-hook ()
+    (pkg/company/add-backends `((company-dabbrev-code
+                                 company-capf))))
   (defun pkg/company/org-mode-hook ()
     (setq-local company-minimum-prefix-length 1))
   (use-package company-quickhelp
@@ -112,6 +117,14 @@
     (setq company-quickhelp-delay 0.5
           company-quickhelp-use-propertized-text t)
     (company-quickhelp-mode 1))
+  (use-package company-childframe
+    :if (pkg/package/enabled-p 'company-childframe)
+    :config
+    (company-childframe-mode 1)
+    (use-package desktop
+      :defer t
+      :config
+      (add-to-list 'desktop-minor-mode-table '(company-childframe-mode nil))))
   (use-package company-box
     :defer t
     :preface

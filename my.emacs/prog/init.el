@@ -114,7 +114,7 @@
     :init
     (my/add-mode-hook "flycheck" #'pkg/flycheck-inline/start)
     :config
-    (setq flycheck-display-errors-delay 1.0))
+    (setq flycheck-display-errors-delay 2.5))
   (use-package helm-flycheck
     :after (helm)
     :commands (helm-flycheck)

@@ -272,9 +272,7 @@
     :disabled)
   (use-package semantic
     :config
-    (semantic-mode 1)
-    (bind-keys :map semantic-mode-map
-               ("C-c ," . pkg/hydra/group/cedet/body)))
+    (semantic-mode 1))
 
 
   ;; todo: move into (pkg/semantic/setup)
