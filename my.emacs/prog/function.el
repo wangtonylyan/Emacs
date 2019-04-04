@@ -34,6 +34,8 @@
     (when (my/minor-mode-on-p highlight-thing-mode)
       ;; (highlight-uses-mode)
       (highlight-thing-mode -1))
+    (dolist (symbol pkg/prog-mode/prettify-symbols/haskell)
+      (add-to-list 'prettify-symbols-alist symbol))
     (setq haskell-indentation-electric-flag t
           haskell-compile-ignore-cabal t))
   :if (pkg/package/enabled-p 'haskell-mode)

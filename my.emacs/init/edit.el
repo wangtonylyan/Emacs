@@ -220,6 +220,10 @@
   ;; 此外，启用全局的zoom mode似乎也可以避免该问题
   (setq hydra-lv nil))
 
+(use-package pretty-hydra
+  :after (hydra)
+  :if (pkg/package/enabled-p 'pretty-hydra))
+
 (use-package which-key
   :diminish (which-key-mode)
   :if (pkg/package/enabled-p 'which-key)

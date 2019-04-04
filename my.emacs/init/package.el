@@ -70,7 +70,7 @@
                                   use-package
                                   diminish
                                   bind-key))
-;; [Interface]
+;; [GUI]
 (pkg/package/select '(doom-themes
                       spacemacs-theme
                       dashboard
@@ -102,7 +102,7 @@
                       zoom ;; dimmer
                       ;; typo
                       ))
-;; [Editting]
+;; [Editing]
 (pkg/package/select '(windmove
                       ace-window ;; switch-window
                       buffer-move
@@ -118,7 +118,7 @@
                       ace-mc
                       (flyspell flyspell-correct)
                       define-word
-                      hydra
+                      (hydra pretty-hydra)
                       which-key ;; guide-key
                       ;; evil
                       ;; (pyim pyim-basedict)
@@ -154,7 +154,7 @@
                        )
                       (company
                        ;; company-quickhelp
-                       ;; company-childframe, company-box
+                       ;; company-posframe, company-childframe, company-box
                        ) ;; auto-complete
                       ))
 ;; [C, C++]

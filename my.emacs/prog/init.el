@@ -23,15 +23,20 @@
 (use-package prog-mode
   :defer t
   :preface
+  (defconst pkg/prog-mode/prettify-symbols/haskell
+    '(("<-" . ?←) ("->" . ?→) ("=>" . ?⇒)
+      ("==" . ?≡) ("/=" . ?≢) ("<=" . ?≤) (">=" . ?≥)
+      ("||" . ?∨) ("&&" . ?∧) ("!!" . ?‼) (".." . ?…)))
   (defun pkg/prog-mode/start ()
     (setq indent-tabs-mode nil)
     (linum-mode -1)
-    (prettify-symbols-mode 1)
-    (add-to-list 'prettify-symbols-alist '("lambda" . ?λ)))
+    (dolist (symbol '(("lambda" . ?λ)))
+      (add-to-list 'prettify-symbols-alist symbol)))
   :init
   (my/prog/init/add-hook #'pkg/prog-mode/start)
   :config
-  (setq prettify-symbols-unprettify-at-point t))
+  (setq prettify-symbols-unprettify-at-point t)
+  (global-prettify-symbols-mode 1))
 
 (use-package flymake
   :defer t
@@ -199,7 +204,7 @@
   (when-let ((exec (my/locate-exec "stylish-haskell")) ;; hindent
              (cfg (my/get-user-config-file "stylish-haskell.yaml" :prog)))
     (defconst pkg-reformatter-haskell-program exec)
-    (defconst pkg-reformatter-haskell-args `("-c" ,cfg "-"))
+    (defconst pkg-reformatter-haskell-args `("-i" "-c" ,cfg))
     (reformatter-define pkg-reformatter-haskell
       :program pkg-reformatter-haskell-program
       :args pkg-reformatter-haskell-args)

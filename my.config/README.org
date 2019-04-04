@@ -1,10 +1,25 @@
 * rules
-1. bashrc.sh将作为所有shell的默认配置文件，须由各shell主动加载
+每次新系统安装完成后，依次执行以下步骤，即可完成最为基本的环境搭建
+1. 同步配置文件所在的Git仓库
+ #+begin_src sh
+cd ~/Projects/
+git pull http://github.com/wangtonylyan/Emacs.git
+ln -s ~/Projects/Emacs ~/.emacs.d
+ #+end_src
+2. profile.sh作为login shell的配置文件，仅在用户登录时执行一次
+ #+begin_src sh
+# echo >> ~/.profile
+MY_CFG_PRIVATE_ENABLED=false  # or "true" to use local config files
+if [ -f "$HOME/.emacs.d/my.config/system/profile.sh" ]; then
+    source "$HOME/.emacs.d/my.config/system/profile.sh"
+fi
+ #+end_src
+3. bashrc.sh作为所有shell的默认配置文件，须由各shell主动加载，将在每个(sub)shell启动时执行一次
  #+begin_src sh
 # echo >> ~/.bashrc
 if [ -f "$HOME/.emacs.d/my.config/system/bashrc.sh" ]; then
    source "$HOME/.emacs.d/my.config/system/bashrc.sh"
 fi
  #+end_src
-2. 系统中各种软件的配置文件通过软链接的方式，引用至Emacs项目中的my.config目录中
+4. 系统中各种软件的配置文件通过软链接的方式，引用至Emacs项目中的my.config目录中
    TODO 在每次启动一个shell时，都会重新创建一次上述所有的软链接文件

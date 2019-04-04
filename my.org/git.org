@@ -427,3 +427,5 @@ point must be at the beginning of a headline
 + "t" ::
 *** help
 + "?" :: describe key bindings
+
+* Haskell
