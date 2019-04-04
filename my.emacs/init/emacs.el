@@ -170,7 +170,7 @@
         '(".semanticdb"))
   (mapc (lambda (file)
           (add-to-list 'grep-find-ignored-files file))
-        '("*.zip" "*.rar"
+        '("*.zip" "*.rar" "*.tar"
           "*.bmp" "*.jpg" "*.jpeg" "*.png" "*.gif" "*.svg"
           "TAGS" "GTAGS" "GRTAGS" "GPATH"
           ".*")))

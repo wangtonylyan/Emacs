@@ -2280,7 +2280,6 @@ doing my weekly review on Tuesday since Monday was a holiday.
 
 #+begin_src org :exports src
 ,* NEXT Weekly Review [0/6]
-  SCHEDULED: <2009-05-18 Mon ++1w>
   :LOGBOOK:...
   :PROPERTIES:...
 
@@ -4562,15 +4561,7 @@ You can override the setting temporarily by changing the task with
 =C-u C-u C-u C-c C-t= but I never remember that.  I set a permanent
 property on the repeated tasks as follows:
 
-#+begin_src org :exports src
-,* TODO New Repeating Task
-  SCHEDULED: <2009-06-16 Tue +1w>
-  :PROPERTIES:
-  :NOBLOCKING: t
-  :END:
-  ...
-,** TODO Subtask
-#+end_src
+
 
 This prevents the =New Repeating Task= from being blocked if some of
 the items under it are not complete.

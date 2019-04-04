@@ -11,24 +11,28 @@
 ;; (global-set-key (kbd "C-S-SPC") 'set-mark-command)
 ;; (global-unset-key (kbd "C-SPC"))
 
-(defhydra pkg/hydra/group
-  (:timeout pkg/hydra/timeout-sec :exit t)
-  ("h" pkg/hydra/group/helm/body          "helm, ivy" :column "")
-  ("b" pkg/hydra/group/buffer/body        "window, windmove, winner, buffer-move, zoom, tabbar")
-  ("c" pkg/hydra/group/cursor/body        "cursor, paredit, lispy, multiple-cursors")
-  ("d" pkg/hydra/group/dired/body         "dired, treemacs, neotree")
+;; TODO: 使用pretty-hydra-define插件发现以下几点问题
+;; 1. 按键字符串会被当做正则表达式，导致声明诸如"^"之类的按键会导致错误
+;; 2. 同一列上的按键字符之间不会对齐于冒号
+;; 3. 既然"SPC"表示空格，那么"<return>"是否有必要简化为"RET"?
 
-  ("i" pkg/hydra/group/highlight/body     "highlight, highlight-thing")
-  ("m" pkg/hydra/group/bookmark/body      "bookmark, bm, helm-bm")
-  ("=" pkg/hydra/group/diff/body          "ediff, vdiff")
-  ("o" pkg/hydra/group/org/body           "org")
-  ("p" pkg/hydra/group/projectile/body    "projectile, helm-projectile")
-
-  ("!" pkg/hydra/group/flymake&check/body "flymake, flycheck")
-  ("." pkg/hydra/group/gtags/body         "ggtags, helm-gtags")
-  ("," pkg/hydra/group/program/body       "cedet, semantic")
-
-  ("q" pkg/hydra/quit nil :exit t))
+(pretty-hydra-define pkg/hydra/group
+  (:hint nil :exit t :quit-key "q")
+  ("general"
+   (("h" pkg/hydra/group/helm/body      "helm     ")
+    ("b" pkg/hydra/group/buffer/body    "buffer   ")
+    ("c" pkg/hydra/group/cursor/body    "cursor   ")
+    ("d" pkg/hydra/group/dired/body     "dired    "))
+   "editing"
+   (("i" pkg/hydra/group/highlight/body "highlight")
+    ("m" pkg/hydra/group/bookmark/body  "bookmark ")
+    ("=" pkg/hydra/group/diff/body      "diff     ")
+    ("o" pkg/hydra/group/org/body       "org      ")
+    ("p" pkg/hydra/group/project/body   "project  "))
+   "programming"
+   (("!" pkg/hydra/group/syntax/body    "syntax   ")
+    ("." pkg/hydra/group/tagging/body   "tagging  ")
+    ("," pkg/hydra/group/semantic/body  "semantic "))))
 
 ;; 以下部分是重复绑定，目的是便于查阅
 (bind-keys
@@ -129,42 +133,54 @@
              ("r" . nil) ("l" . nil) ("L" . nil)
              ("M-n" . nil) ("w" . nil) ("c" . nil)
              ("?" . pkg/hydra/group/info-help/body))
-  (defhydra pkg/hydra/group/info-help
-    (Info-mode-map "" :timeout pkg/hydra/timeout-sec :exit t)
-    ("n"        Info-next-reference      "next node" :column "buffer ")
-    ("p"        Info-prev-reference      "prev node"                  )
-    ("<"        beginning-of-buffer      "beginning"                  )
-    (">"        end-of-buffer            "end      "                  )
-    ("^"        Info-up                  "up       " :column "browse ")
-    ("."        Info-follow-nearest-node "follow   "                  )
-    ("<return>" Info-follow-nearest-node nil                          )
-    ("C-s"      Info-menu                "menu     "                  )
-    ("l"        Info-goto-node           "list all "                  )
-    ("f"        Info-history-forward     "forward  " :column "history")
-    ("b"        Info-history-back        "backward "                  )
-    (","        Info-history-back        nil                          )
-    ("/"        Info-history             "show     "                  )
-    ("h"        Info-help                "help     " :column "Info   ")))
+  (pretty-hydra-define pkg/hydra/group/info-help
+    (Info-mode-map "" :hint nil :exit t :quit-key "q")
+    ("buffer"
+     (("n"   Info-next-reference      "next node")
+      ("p"   Info-prev-reference      "prev node")
+      ("<"   beginning-of-buffer      "beginning")
+      (">"   end-of-buffer            "end      "))
+     "browse"
+     (("S-6" Info-up                  "parent   ")
+      ("."   Info-follow-nearest-node "follow   ")
+      ("RET" Info-follow-nearest-node nil        )
+      ("C-s" Info-menu                "menu     ")
+      ("l"   Info-goto-node           "list all "))
+     "history"
+     (("f"   Info-history-forward     "forward  ")
+      ("b"   Info-history-back        "backward ")
+      (","   Info-history-back        nil        )
+      ("/"   Info-history             "show     "))
+     "info"
+     (("h"   Info-help                "help     ")))))
 
-(defhydra pkg/hydra/group/helm
-  (global-map "" :timeout pkg/hydra/timeout-sec :exit t)
-  ("M-x"     helm-M-x               "M-x              " :column "emacs   ")
-  (""        helm-colors            "colors           "                   )
-  (""        helm-calcul-expression "calcul-expression"                   )
-  ("M-y"     helm-show-kill-ring    "show-kill-ring   " :column "ring    ")
-  ("C-h SPC" helm-all-mark-rings    "all-mark-rings   "                   )
-  ("C-x C-f" helm-find-files        "find-files       " :column "file    ")
-  ("C-x C-r" helm-recentf           "recentf          "                   )
-  ("C-x b"   helm-mini              "mini             " :column "buffer  ")
-  ("C-x C-b" helm-buffers-list      "buffers-list     "                   )
-  ("C-o"     helm-occur             "occur            " :column "symbol  ")
-  ("C-S-o"   helm-regexp            "regexp           "                   )
-  ("C-s"     helm-semantic-or-imenu "semantic-or-imenu"                   )
-  ("C-h f"   helm-apropos           "apropos          "                   )
-  ("C-h v"   helm-apropos           "apropos          "                   )
-  ("C-h h"   helm-man-woman         "man-woman        " :column "external")
-  (""        helm-locate            "locate           "                   )
-  (""        helm-find              "find             "                   ))
+(pretty-hydra-define pkg/hydra/group/helm
+  (global-map "" :hint nil :exit t :quit-key "q")
+  ("emacs"
+   (("M-x"     helm-M-x               "M-x              ")
+    ;; (""        helm-colors            "colors           ")
+    ;; (""        helm-calcul-expression "calcul-expression")
+    )
+   "ring"
+   (("M-y    " helm-show-kill-ring    "show-kill-ring   ")
+    ("C-h SPC" helm-all-mark-rings    "all-mark-rings   "))
+   "file"
+   (("C-x C-f" helm-find-files        "find-files       ")
+    ("C-x C-r" helm-recentf           "recentf          "))
+   "buffer"
+   (("C-x b  " helm-mini              "mini             ")
+    ("C-x C-b" helm-buffers-list      "buffers-list     "))
+   "symbol"
+   (("C-o  "   helm-occur             "occur            ")
+    ("C-S-o"   helm-regexp            "regexp           ")
+    ("C-s  "   helm-semantic-or-imenu "semantic-or-imenu")
+    ("C-h f"   helm-apropos           "apropos          ")
+    ("C-h v"   helm-apropos           "apropos          "))
+   "external"
+   (("C-h h"   helm-man-woman         "man-woman        ")
+    ;; (""        helm-locate            "locate           ")
+    ;; (""        helm-find              "find             ")
+    )))
 
 (use-package helm
   :defer t
@@ -207,7 +223,7 @@
              ("d" . undo-tree-visualizer-toggle-diff)
              ("t" . undo-tree-visualizer-toggle-timestamps)
              ("q" . undo-tree-visualizer-quit)
-             ("<return>" . undo-tree-visualizer-quit)
+             ("RET" . undo-tree-visualizer-quit)
              ("C-g" . undo-tree-visualizer-abort)
              ("C-q" . undo-tree-visualizer-abort)
              ("\M-{" . nil) ("M-p" . undo-tree-visualize-undo-to-x)

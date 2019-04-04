@@ -125,6 +125,14 @@
       :defer t
       :config
       (add-to-list 'desktop-minor-mode-table '(company-childframe-mode nil))))
+  (use-package company-posframe
+    :if (pkg/package/enabled-p 'company-posframe)
+    :config
+    (company-posframe-mode 1)
+    (use-package desktop
+      :defer t
+      :config
+      (add-to-list 'desktop-minor-mode-table '(company-posframe-mode nil))))
   (use-package company-box
     :defer t
     :preface

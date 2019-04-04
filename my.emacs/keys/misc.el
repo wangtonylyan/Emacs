@@ -101,6 +101,11 @@
              ("C-c d" . vdiff-mode-prefix-map)
              ("C-c d h" . vdiff-hydra/body)))
 
+(defun pkg/hydra/group/project/body ()
+  (interactive)
+  (cond
+   ((pkg/package/enabled-p 'projectile) (pkg/hydra/group/projectile/body))))
+
 (use-package projectile
   :defer t
   :commands (pkg/hydra/group/projectile/body)

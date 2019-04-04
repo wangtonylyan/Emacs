@@ -1,6 +1,6 @@
 ;; -*- coding: utf-8 -*-
 
-(defun pkg/hydra/group/flymake&check/body ()
+(defun pkg/hydra/group/syntax/body ()
   (interactive)
   (cond
    ((pkg/package/enabled-p 'flymake) (pkg/hydra/group/flymake/body))
@@ -46,7 +46,7 @@
     ("k" flycheck-clear                  "clear    "                            )
     ("q" pkg/hydra/quit nil :exit t)))
 
-(defun pkg/hydra/group/gtags/body ()
+(defun pkg/hydra/group/tagging/body ()
   (interactive)
   (cond
    ((pkg/package/enabled-p 'ggtags) (pkg/hydra/group/ggtags/body))
@@ -184,7 +184,7 @@
     ("C-g" company-search-abort            nil                           )))
 
 
-(defun pkg/hydra/group/program/body ()
+(defun pkg/hydra/group/semantic/body ()
   (interactive)
   (cond
    ((derived-mode-p 'emacs-lisp-mode) (pkg/hydra/group/elisp/body))

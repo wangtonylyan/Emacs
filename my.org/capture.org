@@ -1,13 +1,26 @@
 * Tasks
-** TODO 帮我妈的手机号充值                                          :DAILY:
+** DONE 帮我妈的手机号充值                                           :DAILY:
 DEADLINE: <2019-04-03 Wed>
 CAPTURED: [2019-03-30 Sat 16:24]
-** TODO 我的手机号充值                                             :DAILY:
-DEADLINE: <2019-04-01 Mon>
+** DONE 我的手机号充值                                               :DAILY:
+DEADLINE: <2019-04-03 Wed>
 CAPTURED: [2019-04-01 Mon 14:14]
-** TODO 填写捷克旅游签证表格                                         :DAILY:
-DEADLINE: <2019-04-01 Mon>
+** DONE 填写捷克旅游签证表格                                         :DAILY:
+DEADLINE: <2019-04-03 Wed>
 CAPTURED: [2019-04-01 Mon 14:15]
+** TODO 买康宁锅盖，最小尺寸                                      :SHOPPING:
+CAPTURED: [2019-04-02 Tue 19:26]
+** TODO 周末任务 [0/5]                                                  :CS:
+CAPTURED: [2019-04-04 Thu 16:42]
++ [ ] https://github.com/BartoszMilewski
++ [ ] https://bartoszmilewski.com/2014/10/28/category-theory-for-programmers-the-preface/
+ 阅读主要内容下方的评论
++ [ ] http://www.cs.ox.ac.uk/people/daniel.james/sorting.html
+ 阅读论文
++ [ ] http://cr.yp.to/papers.html
+ 查找有用的论文
++ [ ] http://ericniebler.com/2013/07/16/f-algebras-and-c/
+ 有用博客
 * Notes
 ** Spoiler Effect                                                     :DAILY:
 CAPTURED: [2019-03-25 Mon 15:35]
@@ -16,3 +29,6 @@ https://en.wikipedia.org/wiki/Spoiler_effect
 ** 终端截屏软件                                                   :SOFTWARE:
 CAPTURED: [2019-03-27 Wed 13:37]
 https://asciinema.org/
+** Emacs Unicode Character Search                                    :EMACS:
+CAPTURED: [2019-04-04 Thu 16:50]
+http://xahlee.info/comp/unicode_math_font.html
