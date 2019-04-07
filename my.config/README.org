@@ -22,4 +22,3 @@ if [ -f "$HOME/.emacs.d/my.config/system/bashrc.sh" ]; then
 fi
  #+end_src
 4. 系统中各种软件的配置文件通过软链接的方式，引用至Emacs项目中的my.config目录中
-   TODO 在每次启动一个shell时，都会重新创建一次上述所有的软链接文件

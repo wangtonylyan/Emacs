@@ -21,3 +21,5 @@ CAPTURED: [2019-03-24 Sun 13:39]
 CAPTURED: [2019-03-24 Sun 13:39]
 ** TODO 购买显示器、键盘支架                                      :SHOPPING:
 CAPTURED: [2019-03-24 Sun 13:45]
+** TODO 买康宁锅盖，最小尺寸                                      :SHOPPING:
+CAPTURED: [2019-04-02 Tue 19:26]

@@ -44,7 +44,8 @@
 
 (setq user-full-name "TonyLYan"
       user-mail-address "wangtonylyan@outlook.com"
-      inhibit-startup-message 1 ;; 取消启动界面
+      inhibit-startup-screen t
+      initial-scratch-message nil
       frame-title-format '(buffer-file-name "%f" ("%b")) ;; 设置标题栏显示为buffer名字
       uniquify-buffer-name-style 'post-forward-angle-brackets ;; 重名buffer的命名
       help-window-select t

@@ -8,8 +8,6 @@ CAPTURED: [2019-04-01 Mon 14:14]
 ** DONE 填写捷克旅游签证表格                                         :DAILY:
 DEADLINE: <2019-04-03 Wed>
 CAPTURED: [2019-04-01 Mon 14:15]
-** TODO 买康宁锅盖，最小尺寸                                      :SHOPPING:
-CAPTURED: [2019-04-02 Tue 19:26]
 ** TODO 周末任务 [0/5]                                                  :CS:
 CAPTURED: [2019-04-04 Thu 16:42]
 + [ ] https://github.com/BartoszMilewski
