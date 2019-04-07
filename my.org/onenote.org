@@ -58,6 +58,7 @@
 ***** Category Theory.Bodo Pareigis
 ***** Conceptual Mathematics: A First Introduction to Categories.2Ed
 ***** DRAFT：Category Theory for Computer Science
+http://pages.cpsc.ucalgary.ca/~robin/class/617/webnotes.html
 ***** Elements of Basic Category Theory
 *** Discrete
 *** Statistics
@@ -79,7 +80,7 @@
 ***** Categorical Programming with Inductive and Coinductive Types
 ***** Categories for Programmers
 ***** Category Theory for Programmers.Bartosz Milewski
-https://github.com/hmemcpy/milewski-ctfp-pdf
+https://github.com/hmemcpy/milewski-ctfp-pdf/
 ***** Computational Category Theory
 **** Logic
 ***** Elements of Finite Model Theory
@@ -146,7 +147,7 @@ https://github.com/hmemcpy/milewski-ctfp-pdf
 ***** Concepts, Techniques, and Models of Computer Programming
 ***** Essentials of Programming Languages.3Ed
 ***** Structure and Interpretation of Computer Programs.2Ed
-https://github.com/sarabander/sicp-pdf
+https://github.com/sarabander/sicp-pdf/
 ***** Teaching Programming with the Kernel Language Approach
 ***** Think Like a Programmer
 **** Procedural

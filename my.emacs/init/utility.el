@@ -20,7 +20,12 @@
 (use-package eshell ;; emacs shell
   :commands (eshell)
   :config
-  (setq eshell-directory-name (my/set-user-emacs-file ".eshell/")))
+  (setq eshell-directory-name (my/set-user-emacs-file ".eshell/")
+        eshell-cd-on-directory t
+        eshell-cd-shows-directory nil
+        eshell-list-files-after-cd t
+        eshell-ls-initial-args "-lh"
+        eshell-ls-dired-initial-args "-h"))
 
 (use-package dired
   :defer t
