@@ -157,6 +157,11 @@
 (use-package ivy
   :if (pkg/package/enabled-p 'ivy))
 
+(use-package diff-mode
+  :defer t
+  :config
+  (setq diff-default-read-only nil))
+
 (use-package ediff
   :after (winner)
   :commands (ediff-current-file
@@ -169,16 +174,18 @@
     ;; 可参考(ediff-setup-keymap)，或激活ediff后输入"?"
     ;; (bind-keys :map ediff-mode-map)
     )
+  (defun pkg/ediff/quit ()
+    (winner-undo))
   :if (pkg/package/enabled-p 'ediff)
   :config
-  (setq ediff-window-setup-function 'ediff-setup-windows-plain
-        ediff-split-window-function 'split-window-horizontally
+  ;; 使用多frame的优点是易于suspend或restore会话，只需利用系统中的"Alt+Tab"切换窗口即可
+  (setq ediff-window-setup-function #'ediff-setup-windows-default
+        ediff-split-window-function #'split-window-horizontally
+        ediff-merge-split-window-function #'split-window-horizontally
         ediff-make-buffers-readonly-at-startup nil
-        ;; ediff-diff-options "" ;; "-w" = "##", "-i" = "#c"
-        ;; ediff-forward-word-function 'forward-char ;; "@", "*"
         ediff-highlight-all-diffs nil)
   (add-hook 'ediff-keymap-setup-hook #'pkg/ediff/setup-keymap t)
-  (add-hook 'ediff-after-quit-hook-internal #'winner-undo t))
+  (add-hook 'ediff-after-quit-hook-internal #'pkg/ediff/quit t))
 
 (use-package vdiff
   :commands (vdiff-current-file
@@ -232,16 +239,31 @@
 (use-package magit
   :commands (magit-status)
   :if (and (pkg/package/enabled-p 'magit) my/bin/git-command)
+  :init
+  (use-package vc
+    :defer t
+    :config
+    (setq vc-handled-backends (delq 'Git vc-handled-backends)))
   :config
   (setq magit-auto-revert-mode t
         magit-auto-revert-immediately t
         magit-auto-revert-tracked-only t
-        ;; magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1
+        magit-display-buffer-function #'magit-display-buffer-fullcolumn-most-v1
         ;; 执行(magit-list-repositories)，可以打印出以下列表所指示的路径下搜索到的git项目
         magit-repository-directories (my/map (lambda (dir) (cons dir 1))
-                                             my/project/root-directories)
-        magit-ediff-dwim-show-on-hunks t
-        magit-diff-section-arguments '("--ignore-space-change")))
+                                             my/project/root-directories))
+  (use-package magit-diff
+    :defer t
+    :config
+    (setq magit-diff-highlight-hunk-body t
+          magit-diff-refine-hunk nil
+          magit-diff-paint-whitespace nil)
+    (add-hook 'magit-diff-highlight-hunk-region-functions
+              #'magit-diff-highlight-hunk-region-using-face t))
+  (use-package magit-ediff
+    :defer t
+    :config
+    (setq magit-ediff-dwim-show-on-hunks nil)))
 
 (use-package vdiff-magit
   :after (magit)

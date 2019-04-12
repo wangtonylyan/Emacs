@@ -9,8 +9,7 @@
         aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
         aw-ignore-current t
         aw-ignore-on t)
-  (dolist (buffer '(magit-status-mode
-                    neotree-mode))
+  (dolist (buffer '(neotree-mode))
     (add-to-list 'aw-ignored-buffers buffer)))
 
 (use-package buffer-move
@@ -214,11 +213,7 @@
                          (cdr x)))
                      (if (atom (car value)) (list value) value))
           key)))
-  :if (pkg/package/enabled-p 'hydra)
-  :config
-  ;; 目前发现启用此项会导致，Hydra子窗口过小，无法完整地呈现提示文字
-  ;; 此外，启用全局的zoom mode似乎也可以避免该问题
-  (setq hydra-lv nil))
+  :if (pkg/package/enabled-p 'hydra))
 
 (use-package pretty-hydra
   :after (hydra)

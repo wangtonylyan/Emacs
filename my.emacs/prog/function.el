@@ -70,6 +70,16 @@
   ;; (my/add-mode-hook "haskell" #'highlight-uses-mode)
   )
 
+(use-package intero
+  :after (haskell-mode flycheck company)
+  :defer t
+  :preface
+  (defun pkg/intero/start ()
+    (intero-mode 1))
+  :if (pkg/package/enabled-p '(intero flycheck company))
+  :init
+  (my/add-mode-hook "haskell" #'pkg/intero/start))
+
 (use-package flycheck-haskell
   :after (haskell-mode flycheck)
   :defer t

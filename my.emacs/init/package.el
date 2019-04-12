@@ -176,6 +176,7 @@
                       ))
 ;; [Haskell]
 (pkg/package/select '(haskell-mode
+                      intero
                       flycheck-haskell))
 ;; [Text]
 (pkg/package/select '((org

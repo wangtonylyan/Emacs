@@ -301,6 +301,12 @@ source-file ~/.tmux.conf
 
 
 * Git
+** Magit
+*** merge
+合并时若存在冲突，在存在冲突的文件名所在行，执行"Ediff (dwim)"命令即可使用Ediff工具对冲突的内容进行比较呈现。
+此时通常会呈现出三个不同子窗口，编号为"a"和"b"的两个窗口是两个不同版本的内容，编号为"c"的窗口则是合并执行后的结果。
+处理完成后，执行"q"退出ediff会话时，会提示是否保存合并后的结果。
+
 ** config
 *** basic
 **** local *vs.* global
@@ -429,3 +435,93 @@ point must be at the beginning of a headline
 + "?" :: describe key bindings
 
 * Haskell
+** concept
+*** functor
+具有类型变量的type constructor仅描述了函子中关于对象的映射关系。
+只有当其成为Functor的实例后，才真正成为了一个函子。
+#+begin_src haskell
+data Type a = Type a
+
+instance Functor Type where
+  -- fmap :: (a -> b) -> Type a -> Type b
+  fmap f (Type x) = Type $ f x
+#+end_src
+**** example
+***** Const
+#+begin_src haskell
+data Const a b = Const { getConst :: a }
+
+instance Functor (Const a) where
+  fmap _ (Const x) = Const x
+#+end_src
+***** Container
+#+begin_src haskell
+instance Functor [] where
+  fmap :: (a -> b) -> [a] -> [b]
+  fmap _ []     = []
+  fmap f (x:xs) = f x : fmap f xs
+#+end_src
+*** natural transformation
+**** 以下是最基本的自然变换
+#+begin_src haskell
+naturalTransform :: (Functor F, Functor G) => F a -> G a
+
+head :: [a] -> (Maybe a)
+head []     = Nothing
+head (x:xs) = Just x
+#+end_src
+**** 除此之外，还有一种比较隐式的自然变换
+#+begin_src haskell
+length :: [a] -> Int
+length []     = 0
+length (x:xs) = 1 + length xs
+#+end_src
+其实际上等价于以下形式
+#+begin_src haskell
+length :: [a] -> Const Int a
+length []     = Const 0
+length (x:xs) = Const (1 + getConst (length xs))
+#+end_src
+
+* Compilation
+** *static library* vs. *dynamic library*
+*** static linking
++ 链接库集成于可执行文件中，导致可执行文件独立但较大
+ 但如果一个链接库代码量过小，则将其作为动态链接库反而可能浪费内存。
+ 因为系统对于每个链接库元信息的维护，以及将其加载后进行的内存对齐操作，就可能导致"得不偿失"。
++ 在每次编译后都需要对链接库进行重新链接
+*** dynamic linking
++ 需要系统级支持
+ 通常在编译器生成可执行文件时，就会向系统注册相应的链接库信息。
+ 当运行可执行文件时，系统的进程管理模块，会首先将所需链接库加载至内存中，随后才会加载该可执行文件。
+*** runtime loading
+由可执行文件主动调用dlopen()函数，以动态地触发对应链接库的加载
+
+* QNX
+** concept
++ QNX Neutrino RTOS :: 操作系统，也被称为target system。
++ QNX Software Development Platform (SDP) :: 提供了一套交叉开发和编译环境，编译后的软件将最终部署至target system上执行。
+     其部署的主机被称为development host。
++ QNX Momentics Tool Suite :: QNX Momentics IDE，包括于SDP中。
+** install
+*** 安装所需系统库
+#+begin_src sh
+sudo dpkg --add-architecture i386
+sudo apt update
+sudo apt install libgtk2.0-0:i386
+sudo apt install libxtst6:i386 libxtst-dev:i386
+sudo apt install libcanberra-gtk-module:i386
+sudo apt install gtk2-engines-murrine:i386
+sudo apt install libdbus-glib-1-2:i386
+#+end_src
+*** 安装后还需要运行以下脚本设置环境变量
+#+begin_src sh
+# echo >> ~/.profile
+if [ -f "$HOME/qnx660/qnx660-env.sh" ]; then
+    . "$HOME/qnx660/qnx660-env.sh"
+fi
+#+end_src
+*** 执行以下命令验证安装
+#+begin_src sh
+qconfig
+#+end_src
