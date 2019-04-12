@@ -112,7 +112,7 @@
         org-startup-truncated nil
         org-startup-with-beamer-mode nil
         org-startup-align-all-tables nil
-        org-startup-shrink-all-tables t
+        org-startup-shrink-all-tables nil
         org-startup-with-latex-preview t
         org-startup-with-inline-images nil
         org-hide-block-startup nil)
@@ -157,7 +157,9 @@
                   (python . t) (js . nil) (haskell . nil)))
     (add-to-list 'org-babel-load-languages lang))
   ;; =====================================================================================
-  (diminish 'org-indent-mode)
+  (use-package org-indent
+    :diminish (org-indent-mode)
+    :defer t)
   (bind-keys :map org-mode-map
              ("M-<tab>" . nil)
              ("C-c [" . nil) ;; (org-agenda-file-to-front)

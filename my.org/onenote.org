@@ -161,6 +161,17 @@ https://github.com/sarabander/sicp-pdf/
 ***** Clojure
 ***** Lisp, Scheme
 ***** ML, Haskell
+****** A Gentle Introduction to Haskell 98
+****** Haskell - The Craft of Functional Programming.2Ed
+****** Haskell 2010 Language Report
+****** Parallel and Concurrent Programming in Haskell
+****** Programming in Haskell
+****** The Haskell Road to Logic, Math and Programming
+****** The Haskell School of Music
+****** What I Wish I Knew When Learning Haskell
+https://github.com/sdiehl/wiwinwlh
+****** Write You a Haskell
+https://github.com/sdiehl/write-you-a-haskell
 **** Domain Specific
 **** Compiler
 ***** Advanced Compiler Design and Implementation

@@ -123,7 +123,8 @@
   :defer t
   :preface
   (defvar pkg/files/find-readonly-ignored '(".*-autoloads.el$"
-                                            ".*-loaddefs.el$"))
+                                            ".*-loaddefs.el$"
+                                            ".*/.git/COMMIT_EDITMSG$"))
   (defun pkg/files/ignore-readonly-path (path)
     (add-to-list 'pkg/files/find-readonly-ignored path t)
     (add-to-list 'pkg/files/find-readonly-ignored (file-truename path) t))
