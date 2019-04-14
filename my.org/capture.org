@@ -30,3 +30,6 @@ https://asciinema.org/
 ** Emacs Unicode Character Search                                    :EMACS:
 CAPTURED: [2019-04-04 Thu 16:50]
 http://xahlee.info/comp/unicode_math_font.html
+** 维基解密，阿桑奇                                                   :NEWS:
+CAPTURED: [2019-04-13 Sat 10:30]
+阿桑奇是一个在泳池边举着“里边有尿”牌子的人，泳池老板想弄死他，顾客觉得他说出了本来就知道但是又不愿意相信的事情，救生员则坐在高处看热闹。
