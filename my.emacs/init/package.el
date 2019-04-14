@@ -145,8 +145,9 @@
                        flycheck-inline ;; flycheck-pos-tip
                        )               ;; flymake
                       ggtags           ;; helm-gtags, counsel-gtags, counsel-etags
-                      ;; asn1-mode
+                      dumb-jump
                       reformatter ;; py-autopep8, py-yapf, yapfify, hindent
+                      ;; asn1-mode
                       ))
 ;; [Completion]
 (pkg/package/select '((yasnippet

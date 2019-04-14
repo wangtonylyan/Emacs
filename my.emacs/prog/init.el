@@ -175,9 +175,9 @@
         ;; 例如将(helm-gtags-dwim)绑定于"M-."
         helm-gtags-suggested-key-mapping nil))
 
-(use-package asn1-mode
+(use-package dumb-jump
   :defer t
-  :if (pkg/package/enabled-p 'asn1-mode))
+  :if (pkg/package/enabled-p 'dumb-jump))
 
 (use-package reformatter
   :if (pkg/package/enabled-p 'reformatter)
@@ -209,6 +209,10 @@
       :program pkg-reformatter-haskell-program
       :args pkg-reformatter-haskell-args)
     (my/add-mode-hook "haskell" #'pkg-reformatter-haskell-on-save-mode)))
+
+(use-package asn1-mode
+  :defer t
+  :if (pkg/package/enabled-p 'asn1-mode))
 
 (defun my/reformat-current-file ()
   (interactive)
