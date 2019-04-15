@@ -199,7 +199,8 @@
  ((pkg/package/enabled-p 'ivy)
   (pkg/package/select '(counsel
                         counsel-projectile
-                        ;; counsel-gtags, counsel-etags
+                        ;; counsel-gtags, counsel-etags, ivy-rtags
+                        ivy-rich
                         flyspell-correct-ivy))))
 (when (not package-archive-contents)
   (package-refresh-contents))

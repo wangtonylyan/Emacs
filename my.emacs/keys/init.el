@@ -14,7 +14,7 @@
 ;; TODO: 使用pretty-hydra-define插件发现以下几点问题
 ;; 1. 按键字符串会被当做正则表达式，导致声明诸如"^"之类的按键会导致错误
 ;; 2. 同一列上的按键字符之间不会对齐于冒号
-;; 3. 既然"SPC"表示空格，那么"<return>"是否有必要简化为"RET"?
+;; 3. 既然"SPC"表示空格，那么"<return>"是否有必要简化为"RET" or "C-m"?
 
 (pretty-hydra-define pkg/hydra/group
   (:hint nil :exit t :quit-key "q")
@@ -143,7 +143,7 @@
      "browse"
      (("S-6" Info-up                  "parent   ")
       ("."   Info-follow-nearest-node "follow   ")
-      ("RET" Info-follow-nearest-node nil        )
+      ("C-m" Info-follow-nearest-node nil        )
       ("C-s" Info-menu                "menu     ")
       ("l"   Info-goto-node           "list all "))
      "history"
@@ -154,60 +154,99 @@
      "info"
      (("h"   Info-help                "help     ")))))
 
-(pretty-hydra-define pkg/hydra/group/helm
-  (global-map "" :hint nil :exit t :quit-key "q")
-  ("emacs"
-   (("M-x"     helm-M-x               "M-x              ")
-    ;; (""        helm-colors            "colors           ")
-    ;; (""        helm-calcul-expression "calcul-expression")
-    )
-   "ring"
-   (("M-y    " helm-show-kill-ring    "show-kill-ring   ")
-    ("C-h SPC" helm-all-mark-rings    "all-mark-rings   "))
-   "file"
-   (("C-x C-f" helm-find-files        "find-files       ")
-    ("C-x C-r" helm-recentf           "recentf          "))
-   "buffer"
-   (("C-x b  " helm-mini              "mini             ")
-    ("C-x C-b" helm-buffers-list      "buffers-list     "))
-   "symbol"
-   (("C-o  "   helm-occur             "occur            ")
-    ("C-S-o"   helm-regexp            "regexp           ")
-    ("C-s  "   helm-semantic-or-imenu "semantic-or-imenu")
-    ("C-h f"   helm-apropos           "apropos          ")
-    ("C-h v"   helm-apropos           "apropos          "))
-   "external"
-   (("C-h h"   helm-man-woman         "man-woman        ")
-    ;; (""        helm-locate            "locate           ")
-    ;; (""        helm-find              "find             ")
-    )))
+(when (pkg/package/enabled-p 'helm)
+  (pretty-hydra-define pkg/hydra/group/helm
+    (global-map "" :hint nil :exit t :quit-key "q")
+    ("emacs"
+     (("M-x"     helm-M-x               "M-x              ")
+      ;; (""        helm-colors            "colors           ")
+      ;; (""        helm-calcul-expression "calcul-expression")
+      )
+     "ring"
+     (("M-y    " helm-show-kill-ring    "kill ring        ")
+      ("C-h SPC" helm-all-mark-rings    "mark ring        "))
+     "file"
+     (("C-x C-f" helm-find-files        "find-files       ")
+      ("C-x C-r" helm-recentf           "recentf          "))
+     "buffer"
+     (("C-x b  " helm-mini              "mini             ")
+      ("C-x C-b" helm-buffers-list      "buffers-list     "))
+     "symbol"
+     (("C-o  "   helm-occur             "occur            ")
+      ("C-S-o"   helm-regexp            "regexp           ")
+      ("C-s  "   helm-semantic-or-imenu "semantic-or-imenu")
+      ("C-h f"   helm-apropos           "apropos          ")
+      ("C-h v"   helm-apropos           "apropos          "))
+     "external"
+     (("C-h h"   helm-man-woman         "man-woman        ")
+      ;; (""        helm-locate            "locate           ")
+      ;; (""        helm-find              "find             ")
+      )))
+  (use-package helm
+    :defer t
+    :config
+    (bind-keys (helm-command-prefix-key . nil)
+               :map minibuffer-local-map
+               ("C-c C-l" . helm-minibuffer-history)
+               :map helm-map
+               ("C-z" . nil)
+               ("C-j" . helm-execute-persistent-action)
+               ("<tab>" . helm-execute-persistent-action)
+               ("C-i" . helm-select-action)
+               ("M-x" . helm-select-action)
+               ("C-c C-f" . helm-follow-mode)
+               ("C-o" . helm-next-source))
+    (use-package helm-files
+      :defer t
+      :config
+      (bind-keys :map helm-find-files-map
+                 ("C-l" . helm-find-files-up-one-level)
+                 ("C-r" . helm-find-files-down-last-level)
+                 ("C-s" . helm-ff-run-grep)))
+    (use-package helm-buffers
+      :defer t
+      :config
+      (bind-keys :map helm-buffer-map
+                 ("M-a" . helm-mark-all)))))
 
-(use-package helm
-  :defer t
-  :config
-  (bind-keys (helm-command-prefix-key . nil)
-             :map minibuffer-local-map
-             ("C-c C-l" . helm-minibuffer-history)
-             :map helm-map
-             ("C-z" . nil)
-             ("C-j" . helm-execute-persistent-action)
-             ("<tab>" . helm-execute-persistent-action)
-             ("C-i" . helm-select-action)
-             ("M-x" . helm-select-action)
-             ("C-c C-f" . helm-follow-mode)
-             ("C-o" . helm-next-source))
-  (use-package helm-files
+(when (pkg/package/enabled-p 'ivy)
+  (pretty-hydra-define pkg/hydra/group/ivy
+    (global-map "" :hint nil :exit t :quit-key "q")
+    ("emacs"
+     (("M-x"     counsel-M-x               "M-x              "))
+     "ring"
+     (("M-y    " counsel-yank-pop          "kill             ")
+      ("C-h SPC" counsel-mark-ring         "mark             "))
+     "file"
+     (("C-x C-f" counsel-find-file         "find-files       ")
+      ("C-h p"   counsel-find-library      "package          "))
+     "symbol"
+     (("C-o  "   swiper                    "occur            ")
+      ("C-h f"   counsel-describe-function "function         ")
+      ("C-h v"   counsel-describe-variable "variable         ")
+      ("C-h a"   counsel-apropos           "apropos          "))))
+  (use-package ivy
     :defer t
     :config
-    (bind-keys :map helm-find-files-map
-               ("C-l" . helm-find-files-up-one-level)
-               ("C-r" . helm-find-files-down-last-level)
-               ("C-s" . helm-ff-run-grep)))
-  (use-package helm-buffers
+    (bind-keys :map ivy-minibuffer-map
+               ;; 以下几个(-done)和(-call)函数完全没有理清头绪，似乎与helm差异过大
+               ("M-o" . nil) ("M-x" . ivy-dispatching-done)
+               ("C-M-o" . nil) ("C-M-x" . ivy-dispatching-call)
+               ("C-j" . nil)   ;; (ivy-alt-done)
+               ("C-'" . nil)   ;; (ivy-avy)
+               ("C-M-n" . nil) ;; (ivy-next-line-and-call)
+               ("C-M-p" . nil) ;; (ivy-previous-line-and-call)
+               ("TAB" . nil)   ;; (ivy-partial-or-done)
+               ("C-M-m" . nil) ;; (ivy-call)
+               ("C-M-j" . nil) ;; (ivy-immediate-done)
+               ("C-s" . nil)   ;; (ivy-next-line-or-history)
+               ("C-r" . nil)   ;; (ivy-reverse-i-search)
+               ))
+  (use-package counsel
     :defer t
     :config
-    (bind-keys :map helm-buffer-map
-               ("M-a" . helm-mark-all))))
+    (bind-keys :map counsel-find-file-map
+               ("C-l" . counsel-up-directory))))
 
 (use-package undo-tree
   :defer t
@@ -223,7 +262,7 @@
              ("d" . undo-tree-visualizer-toggle-diff)
              ("t" . undo-tree-visualizer-toggle-timestamps)
              ("q" . undo-tree-visualizer-quit)
-             ("RET" . undo-tree-visualizer-quit)
+             ("C-m" . undo-tree-visualizer-quit)
              ("C-g" . undo-tree-visualizer-abort)
              ("C-q" . undo-tree-visualizer-abort)
              ("\M-{" . nil) ("M-p" . undo-tree-visualize-undo-to-x)
