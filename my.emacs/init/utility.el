@@ -155,7 +155,21 @@
   (helm-mode 1))
 
 (use-package ivy
-  :if (pkg/package/enabled-p 'ivy))
+  :defer t
+  :if (pkg/package/enabled-p 'ivy)
+  :config
+  (ivy-mode 1)
+  (setq ivy-use-virtual-buffers t
+        ivy-count-format "(%d/%d) "
+        ivy-wrap t)
+  (use-package ivy-rich
+    :if (pkg/package/enabled-p 'ivy-rich)
+    :config
+    (ivy-rich-mode 1)))
+
+(use-package counsel
+  :defer t
+  :if (pkg/package/enabled-p 'counsel))
 
 (use-package diff-mode
   :defer t
