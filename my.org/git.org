@@ -438,12 +438,12 @@ point must be at the beginning of a headline
 ** concept
 *** functor
 具有类型变量的type constructor仅描述了函子中关于对象的映射关系。
-只有当其成为Functor的实例后，才真正成为了一个函子。
+只有当其成为Functor的实例后，才能真正成为了一个函子。
 #+begin_src haskell
 data Type a = Type a
 
 instance Functor Type where
-  -- fmap :: (a -> b) -> Type a -> Type b
+  fmap :: (a -> b) -> Type a -> Type b
   fmap f (Type x) = Type $ f x
 #+end_src
 **** example
@@ -462,10 +462,12 @@ instance Functor [] where
   fmap f (x:xs) = f x : fmap f xs
 #+end_src
 *** natural transformation
-**** 以下是最基本的自然变换
+形如以下形式的函数都可被认为是自然变换
 #+begin_src haskell
-naturalTransform :: (Functor F, Functor G) => F a -> G a
-
+naturalTransform :: (Functor f, Functor g) => f a -> g a
+#+end_src
+**** 以下是一些基本的实例
+#+begin_src haskell
 head :: [a] -> (Maybe a)
 head []     = Nothing
 head (x:xs) = Just x
@@ -476,12 +478,30 @@ length :: [a] -> Int
 length []     = 0
 length (x:xs) = 1 + length xs
 #+end_src
-其实际上等价于以下形式
+其可被等价地转换为以下形式
 #+begin_src haskell
 length :: [a] -> Const Int a
 length []     = Const 0
-length (x:xs) = Const (1 + getConst (length xs))
+length (x:xs) = Const $ 1 + getConst (length xs)
 #+end_src
+*** Monad
+
+** functional
+*** implementation
+***** Partiality: computations that may not terminate
++ 使用一个bottom值来代表函数永不停机，由于结合了lazy evaluation机制，
+ 除非真正地使用到了不停机函数的返回值，否则就以bottom值作为该函数的返回值，进而使得整个程序可以继续执行。
++ 事实上，相比于Set范畴而言，虽然Hask中的每个类型都增加了一个bottom值作为成员，但Hask本身仍构成了一个范畴。
+***** Nondeterminism: computations that may return many results
++ 若一个函数需要返回非固定数量的值时，通常会使用容器作为其返回值的类型。
+***** Side effects: computations that access/modify state
+****** Read-only state, i.e. environment
+****** Write-only state, i.e. logging
+****** Read/write state
+***** Exceptions: partial functions that may fail
+***** Continuations: ability to save state of the program and then restore it on demand
+***** Interactive Input
+***** Interactive Output
 
 * Compilation
 ** *static library* vs. *dynamic library*
