@@ -36,6 +36,7 @@
              ;; 'origin
              ;; 'china
              'tsinghua
+             ;; 'netease
              ))
         (cond
          ((eq mirror 'origin)
@@ -55,6 +56,12 @@
             ;; ("melpa-stable" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa-stable/")
             ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
             ;; ("org" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/")
+            ))
+         ((eq mirror 'netease)
+          '(("gnu" . "https://mirrors.163.com/elpa/gnu/")
+            ;; ("melpa-stable" . "https://mirrors.163.com/elpa/melpa-stable/")
+            ("melpa" . "https://mirrors.163.com/elpa/melpa/")
+            ;; ("org" . "https://mirrors.163.com/elpa/org/")
             )))))
 ;; 以下列表用于设置被允许加载的插件，因此无论是在安装还是使用插件的过程中
 ;; 都必须提前详细地列举出所有的插件，且要根据插件之间的依赖关系进行先后地声明

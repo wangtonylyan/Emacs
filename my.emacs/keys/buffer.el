@@ -49,10 +49,10 @@
   ("M-n"     scroll-other-window         "down      "                       )
   ("u"       winner-undo                 "undo      " :column "layout      ")
   ("r"       winner-redo                 "redo      "                       )
-  ("<left>"  enlarge-window-horizontally "++ <>     " :column "size        ")
-  ("<right>" shrink-window-horizontally  "-- <>     "                       )
-  ("<up>"    enlarge-window              "++ ^v     "                       )
-  ("<down>"  shrink-window               "-- ^v     "                       )
+  ("<left>"  enlarge-window-horizontally "↔ ++      " :column "size        ")
+  ("<right>" shrink-window-horizontally  "↔ --      "                       )
+  ("<up>"    enlarge-window              "↕ ++      "                       )
+  ("<down>"  shrink-window               "↕ --      "                       )
   ("+"       text-scale-increase         "++        " :column "text scale  ")
   ("_"       text-scale-decrease         "--        "                       )
   ("q" pkg/hydra/quit nil :exit t))
@@ -97,8 +97,12 @@
  ((pkg/package/enabled-p 'move-dup)
   (bind-keys ("M-n" . md-move-lines-down)
              ("M-p" . md-move-lines-up)
-             ("C-M-n" . md-duplicate-up)
-             ("C-M-p" . md-duplicate-down))))
+             ("M-S-n" . md-duplicate-up)
+             ("M-S-p" . md-duplicate-down))))
+
+(when (pkg/package/enabled-p 'multiple-cursors)
+  (bind-keys ("C-S-n" . mc/mark-next-like-this)
+             ("C-S-p" . mc/mark-previous-like-this)))
 
 (defhydra pkg/hydra/group/cursor
   (:timeout pkg/hydra/timeout-sec :exit t)
@@ -195,39 +199,27 @@
 
 (defhydra pkg/hydra/group/cursor/mark
   (:timeout pkg/hydra/timeout-sec :exit t)
-  ("C-SPC"       set-mark-command                      "continuous  " :column "mark   "          )
-  ("C-S-SPC"     rectangle-mark-mode                   "rectangle   "                            )
-  ("a"           mark-whole-buffer                     "whole buffer"                            )
-  ("SPC"         er/expand-region                      "expand      " :column "syntax " :exit nil)
-  ("<backspace>" er/contract-region                    "contract    "                   :exit nil)
-  ("<return>"    pkg/hydra/group/multiple-cursors/body "enter       " :column "cursors"          )
-  (":"           ace-mc-add-multiple-cursors           "jump others "                            )
-  (";"           ace-mc-add-single-cursor              "jump another"                            )
-  ("n"           parrot-rotate-next-word-at-point      "next"         :column "rotate " :exit nil)
-  ("p"           parrot-rotate-prev-word-at-point      "prev"                           :exit nil)
+  ("C-SPC"       set-mark-command                 "continuous  " :column "mark   "          )
+  ("C-S-SPC"     rectangle-mark-mode              "rectangle   "                            )
+  ("a"           mark-whole-buffer                "whole buffer"                            )
+  ("SPC"         er/expand-region                 "expand      " :column "syntax " :exit nil)
+  ("<backspace>" er/contract-region               "contract    "                   :exit nil)
+  (":"           ace-mc-add-multiple-cursors      "jump others " :column "cursors"          )
+  (";"           ace-mc-add-single-cursor         "jump another"                            )
+  ("n"           parrot-rotate-next-word-at-point "next"         :column "rotate " :exit nil)
+  ("p"           parrot-rotate-prev-word-at-point "prev"                           :exit nil)
   ("q" pkg/hydra/quit nil :exit t))
 
 (use-package multiple-cursors
   :defer t
   :config
-  ;; this 'hydra should not be redefined
-  ;; otherwise, the following 'mc key-bindings won't work
-  (defhydra pkg/hydra/group/multiple-cursors
-    (:timeout pkg/hydra/timeout-sec :exit t)
-    ("M- m"   nil "each line   " :column "marked -> cursors")
-    ("C- g"   nil "each similar"                            )
-    ("M- j,k" nil "mark        " :column "mark similar     ")
-    ("M- h,l" nil "skip        "                            )
-    ("M- n,p" nil "unmark      "                            )
-    ("q" pkg/hydra/quit nil :exit t))
-  (bind-keys :map pkg/hydra/group/multiple-cursors/keymap
-             ("M-m" . mc/edit-lines)
-             ("M-j" . mc/mark-next-like-this)
-             ("M-k" . mc/mark-previous-like-this)
-             ("M-h" . mc/skip-to-next-like-this)
-             ("M-l" . mc/skip-to-previous-like-this)
-             ("M-p" . mc/unmark-next-like-this)
-             ("M-n" . mc/unmark-previous-like-this)))
+  (bind-keys :map mc/keymap
+             ("<return>" . nil)
+             ("C-v" . nil) ("M-n" . mc/cycle-forward)
+             ("M-v" . nil) ("M-p" . mc/cycle-backward)
+             ("C-'" . nil) ("C-q" . mc-hide-unmatched-lines-mode)
+             :map rectangle-mark-mode-map
+             ("<return>" . mc/edit-lines)))
 
 
 (provide 'my/keys/buffer)

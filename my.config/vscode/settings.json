@@ -1,0 +1,58 @@
+{
+    "C_Cpp.default.cStandard": "c99",
+    "C_Cpp.default.intelliSenseMode": "gcc-x64",
+    "C_Cpp.updateChannel": "Insiders",
+    "editor.autoClosingBrackets": "always",
+    "editor.dragAndDrop": false,
+    "editor.fontFamily": "'Fira Mono', 'Source Han Sans SC', Consolas, monospace",
+    "editor.fontLigatures": true,
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "editor.matchBrackets": false,
+    "editor.mouseWheelZoom": true,
+    "editor.parameterHints.cycle": true,
+    "editor.wordWrapColumn": 100,
+    "explorer.enableDragAndDrop": false,
+    "extensions.autoUpdate": false,
+    "extensions.ignoreRecommendations": true,
+    "files.trimTrailingWhitespace": true,
+    "hungryDelete.keepOneSpace": true,
+    "json.format.enable": false,
+    "macros": {
+        "emacs-C-w": [
+            "emacs.C-w",
+            "emacs.exitMarkMode"
+        ],
+        "emacs-C-y": [
+            "emacs.C-y",
+            "emacs.exitMarkMode"
+        ],
+        "emacs-M-w": [
+            "emacs.M-w",
+            "emacs.exitMarkMode"
+        ]
+    },
+    "markdown.preview.fontFamily": "'Fira Mono', 'Source Han Sans SC', Consolas, monospace",
+    "markdown.preview.fontSize": 16,
+    "markdown.preview.lineHeight": 1.5,
+    "search.smartCase": true,
+    "sync.autoUpload": true,
+    "sync.gist": "80a2e25aaa161904704503897ec992ed",
+    "sync.quietSync": true,
+    "telemetry.enableCrashReporter": false,
+    "telemetry.enableTelemetry": false,
+    "window.zoomLevel": 0,
+    "workbench.colorCustomizations": {
+        "editor.selectionHighlightBackground": "#515a6b",
+        "editor.selectionHighlightBorder": "#515a6b",
+        "editorBracketMatch.background": "#282c34",
+        "editorBracketMatch.border": "#282c34"
+    },
+    "workbench.colorTheme": "One Dark Pro Bold",
+    "workbench.editor.highlightModifiedTabs": true,
+    "workbench.editor.showTabs": true,
+    "workbench.editor.tabCloseButton": "off",
+    "workbench.iconTheme": "vscode-great-icons",
+    "workbench.statusBar.feedback.visible": false,
+    "yaml.format.enable": true
+}

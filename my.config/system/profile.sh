@@ -21,8 +21,9 @@ else
     MY_CFG_APT_CONF="$MY_CFG_DIR_ROOT/system/apt.conf"
     MY_CFG_GIT_CONF="$MY_CFG_DIR_ROOT/system/gitconfig"
 fi
-MY_CFG_APT_SOURCES="$MY_CFG_DIR_ROOT/system/apt.sources.list.china"
+# MY_CFG_APT_SOURCES="$MY_CFG_DIR_ROOT/system/apt.sources.list.china"
 # MY_CFG_APT_SOURCES="$MY_CFG_DIR_ROOT/system/apt.sources.list.tsinghua"
+MY_CFG_APT_SOURCES="$MY_CFG_DIR_ROOT/system/apt.sources.list.aliyun"
 MY_CFG_DOCKER_DEFAULT="$MY_CFG_DIR_ROOT/system/docker.default"
 MY_CFG_DOCKER_DAEMON="$MY_CFG_DIR_ROOT/system/docker.daemon.json"
 MY_CFG_ZSHRC="$MY_CFG_DIR_ROOT/system/zshrc.sh"

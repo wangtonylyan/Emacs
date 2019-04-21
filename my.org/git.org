@@ -434,75 +434,6 @@ point must be at the beginning of a headline
 *** help
 + "?" :: describe key bindings
 
-* Haskell
-** concept
-*** functor
-具有类型变量的type constructor仅描述了函子中关于对象的映射关系。
-只有当其成为Functor的实例后，才能真正成为了一个函子。
-#+begin_src haskell
-data Type a = Type a
-
-instance Functor Type where
-  fmap :: (a -> b) -> Type a -> Type b
-  fmap f (Type x) = Type $ f x
-#+end_src
-**** example
-***** Const
-#+begin_src haskell
-data Const a b = Const { getConst :: a }
-
-instance Functor (Const a) where
-  fmap _ (Const x) = Const x
-#+end_src
-***** Container
-#+begin_src haskell
-instance Functor [] where
-  fmap :: (a -> b) -> [a] -> [b]
-  fmap _ []     = []
-  fmap f (x:xs) = f x : fmap f xs
-#+end_src
-*** natural transformation
-形如以下形式的函数都可被认为是自然变换
-#+begin_src haskell
-naturalTransform :: (Functor f, Functor g) => f a -> g a
-#+end_src
-**** 以下是一些基本的实例
-#+begin_src haskell
-head :: [a] -> (Maybe a)
-head []     = Nothing
-head (x:xs) = Just x
-#+end_src
-**** 除此之外，还有一种比较隐式的自然变换
-#+begin_src haskell
-length :: [a] -> Int
-length []     = 0
-length (x:xs) = 1 + length xs
-#+end_src
-其可被等价地转换为以下形式
-#+begin_src haskell
-length :: [a] -> Const Int a
-length []     = Const 0
-length (x:xs) = Const $ 1 + getConst (length xs)
-#+end_src
-*** Monad
-
-** functional
-*** implementation
-***** Partiality: computations that may not terminate
-+ 使用一个bottom值来代表函数永不停机，由于结合了lazy evaluation机制，
- 除非真正地使用到了不停机函数的返回值，否则就以bottom值作为该函数的返回值，进而使得整个程序可以继续执行。
-+ 事实上，相比于Set范畴而言，虽然Hask中的每个类型都增加了一个bottom值作为成员，但Hask本身仍构成了一个范畴。
-***** Nondeterminism: computations that may return many results
-+ 若一个函数需要返回非固定数量的值时，通常会使用容器作为其返回值的类型。
-***** Side effects: computations that access/modify state
-****** Read-only state, i.e. environment
-****** Write-only state, i.e. logging
-****** Read/write state
-***** Exceptions: partial functions that may fail
-***** Continuations: ability to save state of the program and then restore it on demand
-***** Interactive Input
-***** Interactive Output
-
 * Compilation
 ** *static library* vs. *dynamic library*
 *** static linking
@@ -521,7 +452,7 @@ length (x:xs) = Const $ 1 + getConst (length xs)
 ** install
 *** 注意事项
 + 目前发现，Emacs安装包解压缩后不能放置于VMware的共享目录下，在make阶段会存在权限问题而报错。
-*** install essential build tools
+*** essential build tools
 #+begin_src sh
 sudo apt install build-essential
 sudo apt build-dep emacs
@@ -531,19 +462,19 @@ sudo apt install libxpm-dev libjpeg-dev libpng-dev libgif-dev libtiff-dev  # pic
 sudo apt install libmagickcore-dev libmagick++-dev  # magick
 sudo apt install libwebkit2gtk-4.0-dev  # xwidgets
 #+end_src
-*** install emacs
+*** emacs
 #+begin_src sh
 ./configure --disable-largefile --without-sound --with-modules --with-xwidgets
 make
 sudo make install
 #+end_src
-*** enable personal configurations
+*** personal configurations
 #+begin_src sh
 cd ~/Projects
 git clone http://github.com/wangtonylyan/Emacs.git
 ln -s ~/Projects/Emacs ~/.emacs.d
 #+end_src
-*** install fonts
+*** fonts
 **** [[https://github.com/domtronn/all-the-icons.el][all the icons]]
 **** [[https://github.com/adobe-fonts/source-code-pro/][source code pro]]
  #+begin_src sh
@@ -553,8 +484,8 @@ ln -s ~/Projects/source-code-pro ~/.local/share/fonts/source-code-pro
 cd ~/.local/share/fonts  # 该文件夹下的子目录也是有效的，字体文件未必一定要直接位于该目录下
 sudo fc-cache -f -v
  #+end_src
-**** https://github.com/wangtonylyan/Fonts, for FiraMono
-*** install plugins
+**** [[https://github.com/wangtonylyan/Fonts][my github fonts repo]], use "Fira Mono"
+*** plugins
 启动Emacs在线安装插件
 
 * QNX
