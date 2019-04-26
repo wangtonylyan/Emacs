@@ -12,10 +12,10 @@
 (use-package org
   :defer t
   :config
-  (setq org-speed-commands-user '(("n" . (org-speed-move-safe #'org-forward-heading-same-level))
-                                  ("p" . (org-speed-move-safe #'org-backward-heading-same-level))
-                                  ("f" . (org-speed-move-safe #'org-next-visible-heading))
-                                  ("b" . (org-speed-move-safe #'org-previous-visible-heading))
+  (setq org-speed-commands-user '(("f" . (org-speed-move-safe #'org-forward-heading-same-level))
+                                  ("b" . (org-speed-move-safe #'org-backward-heading-same-level))
+                                  ("n" . (org-speed-move-safe #'org-next-visible-heading))
+                                  ("p" . (org-speed-move-safe #'org-previous-visible-heading))
                                   ("U") ("P" . org-metaup)
                                   ("D") ("N" . org-metadown)
                                   ("r") ("R") ("F" . org-shiftmetaright)

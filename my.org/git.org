@@ -437,16 +437,18 @@ point must be at the beginning of a headline
 * Compilation
 ** *static library* vs. *dynamic library*
 *** static linking
-+ 链接库集成于可执行文件中，导致可执行文件独立但较大
++ 链接库集成于可执行文件中，导致可执行文件独立且较大
  但如果一个链接库代码量过小，则将其作为动态链接库反而可能浪费内存。
- 因为系统对于每个链接库元信息的维护，以及将其加载后进行的内存对齐操作，就可能导致"得不偿失"。
-+ 在每次编译后都需要对链接库进行重新链接
+ 因为系统对于每个链接库元信息的维护，以及将其加载后进行的内存对齐操作，都可能导致"得不偿失"。
++ 在每次编译后都需要对链接库进行重新链接，从而增加了编译所需的时间开销
 *** dynamic linking
++ 可执行文件与链接库的编译过程相互独立
 + 需要系统级支持
  通常在编译器生成可执行文件时，就会向系统注册相应的链接库信息。
  当运行可执行文件时，系统的进程管理模块，会首先将所需链接库加载至内存中，随后才会加载该可执行文件。
-*** runtime loading
-由可执行文件主动调用dlopen()函数，以动态地触发对应链接库的加载
+  - runtime loading
+   动态链接的变种
+   由可执行文件主动调用系统提供的dlopen()函数，在运行时动态地触发对应链接库的加载
 
 * Emacs
 ** install
@@ -484,18 +486,42 @@ ln -s ~/Projects/source-code-pro ~/.local/share/fonts/source-code-pro
 cd ~/.local/share/fonts  # 该文件夹下的子目录也是有效的，字体文件未必一定要直接位于该目录下
 sudo fc-cache -f -v
  #+end_src
-**** [[https://github.com/wangtonylyan/Fonts][my github fonts repo]], use "Fira Mono"
+**** [[https://github.com/wangtonylyan/Fonts][my fonts repo on github]], use "Fira Mono"
 *** plugins
 启动Emacs在线安装插件
 
 * QNX
+** resources
+*** account
++ registered products :: https://www.qnx.com/account/index.html
++ SDP 6.6 download :: https://www.qnx.com/account/expindex.html
+*** license
++ license guild :: http://licensing.qnx.com/document-archive/
+*** development
++ online doc :: http://www.qnx.com/developers/docs/7.0.0/index.html#com.qnx.doc.qnxsdp.nav/topic/bookset.html
+*** BSP
++ BSP directory :: http://community.qnx.com/sf/wiki/do/viewPage/projects.bsp/wiki/BSPAndDrivers
++ BSP release version :: http://community.qnx.com/sf/go/projects.bsp/frs
 ** concept
-+ QNX Neutrino RTOS :: 操作系统，也被称为target system。
-+ QNX Software Development Platform (SDP) :: 提供了一套交叉开发和编译环境，编译后的软件将最终部署至target system上执行。
-     其部署的主机被称为development host。
-+ QNX Momentics Tool Suite :: QNX Momentics IDE，包括于SDP中。
-** install
-*** 安装所需系统库
++ Neutrino RTOS :: 操作系统，也被称为target system。
++ Software Development Platform (SDP) :: 提供了一套交叉开发和编译环境，编译后的软件将最终部署至target system上执行。
+ 其部署的主机被称为development host。
+ 主要包括了以下内容
+  - QNX Neutrino RTOS components ::
+  - Momentics Tool Suite :: Momentics IDE，包括于SDP中。
+   includes compilers, debuggers, libraries, header files, utilities, sample source code, test suites, performance optimization tools, etc., within an integrated development environment based on the open Eclipse IDE framework.
++ Board Support Package (BSP) :: 目标开发板相关的开发工具，包括了驱动。
++ armle :: ARM chip with little-endian
++ IPL :: QNX initial program loader
++ image :: 分为bootable和nonbootable
+ 主要涉及了以下几种不同含义的镜像
+  - OS image :: IFS (image file system)，描述了OS所需文件在文件系统中的存储布局
+   OS镜像的具体细节，通常会由一个build文件进行描述
+  - flash file system image :: EFS (embedded file system)，可供OS访问的嵌入式文件系统
+  - startup/boot image :: 将IPL和OS镜像打包在一起的bootable镜像
+** SDP
+*** install
+**** 安装所需系统库
 #+begin_src sh
 sudo dpkg --add-architecture i386
 sudo apt update
@@ -505,14 +531,116 @@ sudo apt install libcanberra-gtk-module:i386
 sudo apt install gtk2-engines-murrine:i386
 sudo apt install libdbus-glib-1-2:i386
 #+end_src
-*** 安装后还需要运行以下脚本设置环境变量
+**** 安装后还需要运行以下脚本，以初始化环境变量
 #+begin_src sh
 # echo >> ~/.profile
 if [ -f "$HOME/qnx660/qnx660-env.sh" ]; then
     . "$HOME/qnx660/qnx660-env.sh"
 fi
 #+end_src
-*** 执行以下命令验证安装
+***** 涉及到的环境变量有
++ 将"/home/wm/qnx660/host/linux/x86/usr/bin"将入PATH，该目录下有编译项目、构建镜像等开发工具
++ 新增环境变量"$QNX_HOST"、"$QNX_TARGET"等
+**** 执行以下命令验证安装
 #+begin_src sh
 qconfig
 #+end_src
+*** host environment
+**** development tools
++ mkifs, mkefs :: make image/embedded file system
++ dumpifs, dumpefs :: dump image/embedded file system information
++ mkimage :: combine multiple image files into a single one
++ mkrec :: takes a binary image file and converts it to certain format
++ objcopy ::
++ qcc :: 交叉编译器
+** Freescale BSP
+*** build image
+注意，以下解压缩后的目录不要位于VMware的共享目录下，否则执行make等命令会导致异常。
+**** 解压缩，并打补丁
+#+begin_src sh
+unzip BSP_freescale-imx6q-sabresmart_br-660_be-660_SVN850002_JBN1126.zip -d ./bsp
+unzip BSP_freescale-imx6q-sabresmart_br-660_be-660_PATCHES_JBN1126.zip   -d ./patch
+cp -r ./patch/patches/* ./bsp/prebuilt
+#+end_src
+**** 编译并生成OS镜像文件
+#+begin_src sh
+cd ./bsp
+make
+#+end_src
+***** 上述make过程具体而言就包括了以下几个步骤
++ 利用$QNX_TARGET所指定的目标系统环境，编译OS源代码
++ 执行./images/smart-device.build脚本，生成./images/ifs-mx6q-sabresmart.raw
+**** 生成用于SD卡中、可被引导的启动镜像文件
+#+begin_src sh
+cd ./images
+./mkflashimage  # generate ./ipl-mx6q-sabresmart.bin
+cp ifs-mx6q-sabresmart.raw QNX-IFS  # IPL默认引导名为"QNX-IFS"的OS镜像
+#+end_src
+*** partition SD card
+**** 启动fdisk工具
+#+begin_src sh
+sudo fdisk /dev/sdb
+#+end_src
+**** 使用fdisk工具格式化整个SD卡，并创建一个新的FAT分区
+#+begin_src fdisk
+p  # 查询SD卡当前格式化信息
+u  # change default unit to cylinders
+o  # create a new DOS partition table
+d  # delete existing partitions
+n  # add a new partition
+a  # set the active partition
+t  # set the partition type
+w  # write all settings from memory to SD card
+#+end_src
+**** 格式化SD卡上的分区
+#+begin_src sh
+sudo mkfs.vfat -F32 dev/sdb1
+#+end_src
+**** 查看SD卡上的第一个分区是否已被挂在
+#+begin_src sh
+mount  # find the mount point of /dev/sdb1 partition, e.g. /media/wm/0D80-7256
+#+end_src
+若没有挂载，则可重新插拔一下SD卡
+*** download image into SD card
+**** 将IPL程序写入SD卡中，以便于在硬件Reset后启动，并引导IFS镜像
+注意，其写入的位置是固定的，不能指定分区号。
+#+begin_src sh
+sudo dd if=ipl-mx6q-sabresmart.bin of=/dev/sdb bs=512 seek=2 skip=2
+sync
+#+end_src
+**** 通过以下方式写入的OS镜像于第一个分区中
+#+begin_src sh
+copy ./QNX-IFS /media/wm/0D80-7256
+sync
+#+end_src
+*** folder structure
+**** prebuilt
+**** install
+***** armle
+****** boot
+******* build
++ smart-device.build :: OS image build file
+******* sys
++ ipl-mx6q-sabresmart :: IPL program
++ startup-imx6x-smart-device :: startup program
+**** images
++ ifs-mx6q-sabresmart.raw :: OS image file
++ ipl-mx6q-sabresmart.bin :: IPL program file, stored in target format
+** license
+*** development seat
+1. development seat = SDP + licensed products
+2. one computer used only by one individual developer to perform software development for target systems
+
+*** named-user *vs.* floating-license
+前者只能将SDP安装于一台电脑上，后者可以将SDP安装于同一组织下的多台电脑上，但同一时间只能有一台执行开发工作。
+*** perpetual (paid-up license) *vs.* time limited (subscription)
+
+
+*** concept
++ QNX Middleware, Runtime Component :: QNX系统由于是微内核，因此诸如内存管理、文件系统等都将作为内核之外的单独模块，
+ 此类模块也被称为middleware
+  + 以下模块需要有独立的授权
+    + QNX SDK for Apps and Media
+    + QNX CAR (TM) Platform for Infotainment and QNX Acoustics Product
++ QNX Tool :: QNX Middleware Tool + QNX Momentics Tool Suite
++ QNX Product Portfolio :: Runtime Components + QNX Tools，前者是系统运行的必要组件，后者是相关的开发工具
