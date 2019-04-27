@@ -97,9 +97,9 @@
 (use-package vdiff
   :defer t
   :config
-  (bind-keys :map vdiff-mode-map
-             ("C-c d" . vdiff-mode-prefix-map)
-             ("C-c d h" . vdiff-hydra/body)))
+  ;; "C-c h" for hydra
+  (define-key vdiff-mode-map (kbd "C-c") vdiff-mode-prefix-map)
+  (define-key vdiff-3way-mode-map (kbd "C-c") vdiff-mode-prefix-map))
 
 (defun pkg/hydra/group/project/body ()
   (interactive)

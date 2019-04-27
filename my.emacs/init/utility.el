@@ -178,11 +178,7 @@
 
 (use-package ediff
   :after (winner)
-  :commands (ediff-current-file
-             ediff-files
-             ediff-files3
-             ediff-buffers
-             ediff-buffers3)
+  :defer t
   :preface
   (defun pkg/ediff/setup-keymap ()
     ;; 可参考(ediff-setup-keymap)，或激活ediff后输入"?"
@@ -202,25 +198,20 @@
   (add-hook 'ediff-after-quit-hook-internal #'pkg/ediff/quit t))
 
 (use-package vdiff
-  :commands (vdiff-current-file
-             vdiff-files
-             vdiff-files3
-             vdiff-buffers
-             vdiff-buffers3)
+  :defer t
   :if (pkg/package/enabled-p 'vdiff)
   :config
   (setq vdiff-diff-algorithm (if my/bin/git-command 'git-diff 'diff-u)
         vdiff-diff3-command '("diff3")
         vdiff-lock-scrolling t
-        vdiff-default-refinement-syntax-code "w"
-        vdiff-auto-refine nil
-        vdiff-subtraction-style 'full
-        vdiff-subtraction-fill-char ?\s
         vdiff-disable-folding nil
-        vdiff-may-close-fold-on-point nil
-        vdiff-min-fold-size 4
         vdiff-fold-padding 6
-        vdiff-fold-string-function 'vdiff-fold-string-default))
+        vdiff-min-fold-size 4
+        vdiff-may-close-fold-on-point nil
+        vdiff-auto-refine nil
+        vdiff-default-refinement-syntax-code "w"
+        vdiff-subtraction-style 'full
+        vdiff-subtraction-fill-char ?\s))
 
 (use-package projectile
   :diminish (projectile-mode)
@@ -283,13 +274,14 @@
   :after (magit)
   :if (pkg/package/enabled-p '(vdiff magit vdiff-magit))
   :config
+  (setq vdiff-magit-stage-is-2way t)
   (bind-keys :map magit-mode-map
              ([remap magit-ediff-dwim] . vdiff-magit-dwim)
-             ([remap magit-ediff] . vdiff-magit-popup))
-  (setcdr (assoc ?e (plist-get magit-dispatch-popup :actions))
-          '("vdiff dwim" #'vdiff-magit-dwim))
-  (setcdr (assoc ?E (plist-get magit-dispatch-popup :actions))
-          '("vdiff popup" #'vdiff-magit-popup)))
+             ([remap magit-ediff] . vdiff-magit))
+  (transient-suffix-put 'magit-dispatch "e" :description "vdiff (dwim)")
+  (transient-suffix-put 'magit-dispatch "e" :command 'vdiff-magit-dwim)
+  (transient-suffix-put 'magit-dispatch "E" :description "vdiff")
+  (transient-suffix-put 'magit-dispatch "E" :command 'vdiff-magit))
 
 (use-package diff-hl
   :if (pkg/package/enabled-p 'diff-hl)
