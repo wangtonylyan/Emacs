@@ -1,12 +1,3 @@
-# http_proxy=http://CHT1HTSH3191:Alps1911@10.25.71.1:8080
-# https_proxy=https://CHT1HTSH3191:Alps1911@10.25.71.1:8080
-
-[http]
-proxy = http://CHT1HTSH3191:Alps1911@10.25.71.1:8080
-sslverify = false
-[https]
-proxy = https://CHT1HTSH3191:Alps1911@10.25.71.1:8080
-
 ;; 重构
 ;; 1. 检查包含以下字符串的符号名
 ;;    my-, plugin

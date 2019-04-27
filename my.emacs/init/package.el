@@ -140,7 +140,7 @@
                         dired-subtree ;; dired-collapse
                         ))
                       helm ;; ivy, smex, ido, icicles, icomplete
-                      ediff ;; (vdiff vdiff-magit)
+                      (vdiff vdiff-magit) ;; ediff
                       projectile ;; find-file-in-project, eproject
                       magit
                       diff-hl ;; git-gutter
