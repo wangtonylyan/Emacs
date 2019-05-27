@@ -187,5 +187,18 @@
   :config
   (setq zoom-minibuffer-preserve-layout nil))
 
+(use-package window-purpose
+  :disabled
+  :if (pkg/package/enabled-p 'window-purpose)
+  :config
+  (purpose-mode 1))
+
+(use-package eide
+  :if (pkg/package/enabled-p 'eide)
+  :config
+  (setq eide-custom-override-emacs-settings nil)
+  ;; (eide-start)
+  )
+
 
 (provide 'my/init/visual)

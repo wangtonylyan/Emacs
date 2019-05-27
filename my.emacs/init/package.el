@@ -107,7 +107,7 @@
                       symbol-overlay ;; highlight-symbol
                       ;; highlight-thing
                       zoom ;; dimmer
-                      ;; typo
+                      window-purpose ;; eide
                       ))
 ;; [Editing]
 (pkg/package/select '(windmove

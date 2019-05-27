@@ -28,6 +28,8 @@ MY_CFG_DOCKER_DEFAULT="$MY_CFG_DIR_ROOT/system/docker.default"
 MY_CFG_DOCKER_DAEMON="$MY_CFG_DIR_ROOT/system/docker.daemon.json"
 MY_CFG_ZSHRC="$MY_CFG_DIR_ROOT/system/zshrc.sh"
 MY_CFG_TMUX_CONF="$MY_CFG_DIR_ROOT/system/tmux.conf"
+MY_CFG_VSCODE_SETTINGS="$MY_CFG_DIR_ROOT/vscode/settings.json"
+MY_CFG_VSCODE_KEYBINDINGS="$MY_CFG_DIR_ROOT/vscode/keybindings.json"
 
 
 if [ -d "$HOME/Projects/Emacs" ] && [ ! -e "$MY_CFG_EMACS_DIR" ]; then
@@ -66,4 +68,14 @@ fi
 if [ -e "$MY_CFG_TMUX_CONF" ]; then
     rm -f "$HOME/.tmux.conf"
     ln -s "$MY_CFG_TMUX_CONF" "$HOME/.tmux.conf"
+fi
+
+if [ -e "$MY_CFG_VSCODE_SETTINGS" ]; then
+    rm -f "$HOME/.config/Code/User/settings.json"
+    ln -s "$MY_CFG_VSCODE_SETTINGS" "$HOME/.config/Code/User/settings.json"
+fi
+
+if [ -e "$MY_CFG_VSCODE_KEYBINDINGS" ]; then
+    rm -f "$HOME/.config/Code/User/keybindings.json"
+    ln -s "$MY_CFG_VSCODE_KEYBINDINGS" "$HOME/.config/Code/User/keybindings.json"
 fi
