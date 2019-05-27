@@ -128,6 +128,12 @@
         org-cycle-emulate-tab t
         org-cycle-separator-lines 1
         org-cycle-level-after-item/entry-creation t)
+  (use-package org-faces
+    :defer t
+    :config
+    (set-face-foreground 'org-level-1 (doom-color 'fg))
+    (set-face-foreground 'org-level-2 (doom-color 'fg))
+    (set-face-foreground 'org-level-3 (doom-color 'fg)))
   (use-package ob-core
     :defer t
     :config
@@ -205,7 +211,7 @@
   :init
   (my/add-mode-hook "init" #'pkg/idle-org-agenda/start)
   :config
-  (setq idle-org-agenda-interval (* 60 10)))
+  (setq idle-org-agenda-interval (* 60 30)))
 
 ;; =======================================================================================
 (defun jiw ()

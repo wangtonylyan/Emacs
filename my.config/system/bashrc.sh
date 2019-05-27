@@ -1,10 +1,3 @@
-CONDA_PATH="$HOME/miniconda3"
-if [ -d "$CONDA_PATH" ]; then
-    # export PATH="$CONDA_PATH/bin:$PATH"
-    source "$CONDA_PATH/etc/profile.d/conda.sh"
-fi
-
-
 alias ls='ls -l --color=tty'
 alias la='ls -al'
 alias cl='clear'

@@ -6,6 +6,11 @@
 CAPTURED: [2019-03-21 Thu 14:10]
 ***** TODO circuit complexity @ page 27                              :CS:
 CAPTURED: [2019-03-21 Thu 15:08]
+** Mathematics
+*** Algebra
+**** Algebra：Chapter 0
+***** TODO chapter 2.8 unread                                      :MATH:
+CAPTURED: [2019-04-28 Sun 11:13]
 * Shopping
 ** TODO 购买床头台灯                                              :SHOPPING:
 CAPTURED: [2019-03-24 Sun 13:37]
