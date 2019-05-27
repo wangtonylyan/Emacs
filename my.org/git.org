@@ -435,13 +435,32 @@ point must be at the beginning of a headline
 + "?" :: describe key bindings
 
 * Compilation
+** linker
++ ld :: link editor
+ 以relocatable object为输入，输出为以下四种
+ + relocatable object :: a concatenation of input relocatable objects that can be used in subsequent link phases
+ + static executable :: all symbolic references resolved
+ + dynamic executable :: depend on shared objects
+ + shared object ::
+
++ ld.so :: runtime linker
++ .so :: shared object
++ nil :: object file, ELF
+
+
 ** *static library* vs. *dynamic library*
 *** static linking
-+ 链接库集成于可执行文件中，导致可执行文件独立且较大
- 但如果一个链接库代码量过小，则将其作为动态链接库反而可能浪费内存。
++ .a :: archive
++ 链接库集成于可执行文件中，导致可执行文件独立但较大
+ 而如果一个链接库代码量过小，则将其作为动态链接库反而可能浪费内存。
  因为系统对于每个链接库元信息的维护，以及将其加载后进行的内存对齐操作，都可能导致"得不偿失"。
 + 在每次编译后都需要对链接库进行重新链接，从而增加了编译所需的时间开销
 *** dynamic linking
++ .so :: shared object
++ 编译生成一个动态链接库时
+  - 不能直接链接普通的静态链接库，而是要链接名字中以"S.a"结尾的静态链接库，
+    后者的存在与其自身所在文件路径无关
+  - 推荐尽量链接动态链接库
 + 可执行文件与链接库的编译过程相互独立
 + 需要系统级支持
  通常在编译器生成可执行文件时，就会向系统注册相应的链接库信息。
@@ -449,6 +468,19 @@ point must be at the beginning of a headline
   - runtime loading
    动态链接的变种
    由可执行文件主动调用系统提供的dlopen()函数，在运行时动态地触发对应链接库的加载
+** gcc
++ -D :: feature-test macros
++ -l :: link static/dynamic library
+
+
+** make
+*** Makefile
++ Makefile也有默认的的include目录，在QNX环境下其位于$QNX_TARGET/usr/include/mk。
++ Makefile.am :: Automake文件
++ Makefile.dnm :: Do Not Make
+
+
+
 
 * Emacs
 ** install
@@ -491,6 +523,12 @@ sudo fc-cache -f -v
 启动Emacs在线安装插件
 
 * QNX
+** cross compilation
+qcc -V gcc_ntoarmv7le  # 指定目标系统环境
+qcc -Bdynamic -l1 -l2 -Bstatic -l3 -l4 -Bdynamic -l5  # 静/动态链接外部库
+# "-znow" or "-zlazy", resolve function symbols at load time or when it is first called
+qcc -Wl,-znow  # "-Wl" pass option to ld
+
 ** resources
 *** account
 + registered products :: https://www.qnx.com/account/index.html
@@ -505,7 +543,7 @@ sudo fc-cache -f -v
 ** concept
 + Neutrino RTOS :: 操作系统，也被称为target system。
 + Software Development Platform (SDP) :: 提供了一套交叉开发和编译环境，编译后的软件将最终部署至target system上执行。
- 其部署的主机被称为development host。
+ SDP所部署的主机被称为development host。
  主要包括了以下内容
   - QNX Neutrino RTOS components ::
   - Momentics Tool Suite :: Momentics IDE，包括于SDP中。
@@ -569,7 +607,7 @@ make
 #+end_src
 ***** 上述make过程具体而言就包括了以下几个步骤
 + 利用$QNX_TARGET所指定的目标系统环境，编译OS源代码
-+ 执行./images/smart-device.build脚本，生成./images/ifs-mx6q-sabresmart.raw
++ 执行mkifs命令，根据./images/smart-device.build脚本，生成./images/ifs-mx6q-sabresmart.raw
 **** 生成用于SD卡中、可被引导的启动镜像文件
 #+begin_src sh
 cd ./images
@@ -630,12 +668,9 @@ sync
 *** development seat
 1. development seat = SDP + licensed products
 2. one computer used only by one individual developer to perform software development for target systems
-
 *** named-user *vs.* floating-license
 前者只能将SDP安装于一台电脑上，后者可以将SDP安装于同一组织下的多台电脑上，但同一时间只能有一台执行开发工作。
 *** perpetual (paid-up license) *vs.* time limited (subscription)
-
-
 *** concept
 + QNX Middleware, Runtime Component :: QNX系统由于是微内核，因此诸如内存管理、文件系统等都将作为内核之外的单独模块，
  此类模块也被称为middleware

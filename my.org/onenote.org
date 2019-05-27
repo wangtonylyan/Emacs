@@ -36,6 +36,17 @@
 ***** Semantics with Applications：A Formal Introduction
 *** Algebra
 **** Abstract
+***** A First Course in Abstract Algebra.3Ed
+***** Abstract Algebra.3Ed
+***** Abstract Algebra: Structure and Application
+***** Abstract Algebra: The Basic Graduate Year
+***** Abstract Algebra: Theory and Applications
+***** Algebra.1Ed
+***** Algebra.2Ed
+***** Algebra：Chapter 0
+1. 全书尽可能广泛地采用了范畴论来介绍抽象代数的相关概念
+***** An Elementary Introduction to Groups and Representations
+***** Visual Group Theory
 **** Linear
 **** Commutative
 **** Universal
