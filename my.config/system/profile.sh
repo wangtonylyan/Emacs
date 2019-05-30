@@ -28,6 +28,8 @@ MY_CFG_DOCKER_DEFAULT="$MY_CFG_DIR_ROOT/system/docker.default"
 MY_CFG_DOCKER_DAEMON="$MY_CFG_DIR_ROOT/system/docker.daemon.json"
 MY_CFG_ZSHRC="$MY_CFG_DIR_ROOT/system/zshrc.sh"
 MY_CFG_TMUX_CONF="$MY_CFG_DIR_ROOT/system/tmux.conf"
+MY_CFG_SSH_CONFIG="$MY_CFG_DIR_ROOT/system/ssh_config"
+MY_CFG_SSHD_CONFIG="$MY_CFG_DIR_ROOT/system/sshd_config"
 MY_CFG_VSCODE_SETTINGS="$MY_CFG_DIR_ROOT/vscode/settings.json"
 MY_CFG_VSCODE_KEYBINDINGS="$MY_CFG_DIR_ROOT/vscode/keybindings.json"
 
@@ -40,19 +42,20 @@ if [ -e "$MY_CFG_BASHRC" ]; then
     source "$MY_CFG_BASHRC"
 fi
 
-if [ -e "$MY_CFG_APT_CONF" ]; then
+if [ -d "/etc/apt" ] && [ -e "$MY_CFG_APT_CONF" ]; then
     Sudo rm -f '/etc/apt/apt.conf'
     Sudo ln -s "$MY_CFG_APT_CONF" '/etc/apt/apt.conf'
 fi
-if [ -e "$MY_CFG_APT_SOURCES" ]; then
+if [ -d "/etc/apt" ] && [ -e "$MY_CFG_APT_SOURCES" ]; then
     Sudo rm -f '/etc/apt/sources.list'
     Sudo ln -s "$MY_CFG_APT_SOURCES" '/etc/apt/sources.list'
 fi
-if [ -e "$MY_CFG_DOCKER_DEFAULT" ]; then
+
+if [ -d "/etc/default" ] && [ -e "$MY_CFG_DOCKER_DEFAULT" ]; then
     Sudo rm -f '/etc/default/docker'
     Sudo ln -s "$MY_CFG_DOCKER_DEFAULT" '/etc/default/docker'
 fi
-if [ -e "$MY_CFG_DOCKER_DAEMON" ]; then
+if [ -d "/etc/docker" ] && [ -e "$MY_CFG_DOCKER_DAEMON" ]; then
     Sudo rm -f '/etc/docker/daemon.json'
     Sudo ln -s "$MY_CFG_DOCKER_DEFAULT" '/etc/docker/daemon.json'
 fi
@@ -70,12 +73,20 @@ if [ -e "$MY_CFG_TMUX_CONF" ]; then
     ln -s "$MY_CFG_TMUX_CONF" "$HOME/.tmux.conf"
 fi
 
-if [ -e "$MY_CFG_VSCODE_SETTINGS" ]; then
+if [ -d "/etc/ssh" ] && [ -e "$MY_CFG_SSH_CONFIG" ]; then
+    Sudo rm -f "/etc/ssh/ssh_config"
+    Sudo ln -s "$MY_CFG_SSH_CONFIG" "/etc/ssh/ssh_config"
+fi
+if [ -d "/etc/ssh" ] && [ -e "$MY_CFG_SSHD_CONFIG" ]; then
+    Sudo rm -f "/etc/ssh/sshd_config"
+    Sudo ln -s "$MY_CFG_SSHD_CONFIG" "/etc/ssh/sshd_config"
+fi
+
+if [ -d "$HOME/.config/Code/User" ] && [ -e "$MY_CFG_VSCODE_SETTINGS" ]; then
     rm -f "$HOME/.config/Code/User/settings.json"
     ln -s "$MY_CFG_VSCODE_SETTINGS" "$HOME/.config/Code/User/settings.json"
 fi
-
-if [ -e "$MY_CFG_VSCODE_KEYBINDINGS" ]; then
+if [ -d "$HOME/.config/Code/User" ] && [ -e "$MY_CFG_VSCODE_KEYBINDINGS" ]; then
     rm -f "$HOME/.config/Code/User/keybindings.json"
     ln -s "$MY_CFG_VSCODE_KEYBINDINGS" "$HOME/.config/Code/User/keybindings.json"
 fi
