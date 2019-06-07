@@ -34,7 +34,7 @@
         ]
     },
     "markdown.preview.fontFamily": "'Fira Mono', 'Source Han Sans SC', Consolas, monospace",
-    "markdown.preview.fontSize": 16,
+    "markdown.preview.fontSize": 12,
     "markdown.preview.lineHeight": 1.5,
     "partialDiff.enableTelemetry": false,
     "search.smartCase": true,
@@ -53,7 +53,7 @@
         "titleBar.activeBackground": "#19423B",
         "titleBar.activeForeground": "#F6FBFB"
     },
-    "workbench.colorTheme": "One Dark Pro Bold",
+    "workbench.colorTheme": "One Dark Pro",
     "workbench.editor.highlightModifiedTabs": true,
     "workbench.editor.showTabs": true,
     "workbench.editor.tabCloseButton": "off",
