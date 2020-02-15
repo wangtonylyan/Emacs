@@ -21,17 +21,25 @@ else
     MY_CFG_APT_CONF="$MY_CFG_DIR_ROOT/system/apt.conf"
     MY_CFG_GIT_CONF="$MY_CFG_DIR_ROOT/system/gitconfig"
 fi
+
 # MY_CFG_APT_SOURCES="$MY_CFG_DIR_ROOT/system/apt.sources.list.china"
 # MY_CFG_APT_SOURCES="$MY_CFG_DIR_ROOT/system/apt.sources.list.tsinghua"
 MY_CFG_APT_SOURCES="$MY_CFG_DIR_ROOT/system/apt.sources.list.aliyun"
+
 MY_CFG_DOCKER_DEFAULT="$MY_CFG_DIR_ROOT/system/docker.default"
 MY_CFG_DOCKER_DAEMON="$MY_CFG_DIR_ROOT/system/docker.daemon.json"
+
 MY_CFG_ZSHRC="$MY_CFG_DIR_ROOT/system/zshrc.sh"
 MY_CFG_TMUX_CONF="$MY_CFG_DIR_ROOT/system/tmux.conf"
 MY_CFG_SSH_CONFIG="$MY_CFG_DIR_ROOT/system/ssh_config"
 MY_CFG_SSHD_CONFIG="$MY_CFG_DIR_ROOT/system/sshd_config"
+
 MY_CFG_VSCODE_SETTINGS="$MY_CFG_DIR_ROOT/vscode/settings.json"
 MY_CFG_VSCODE_KEYBINDINGS="$MY_CFG_DIR_ROOT/vscode/keybindings.json"
+
+MY_CFG_NODEJS_VERSION="v12.13.0"
+MY_CFG_NODEJS_DISTRO="linux-x64"
+MY_CFG_NODEJS_INSTALL_DIR="/usr/local/lib/nodejs/node-$MY_CFG_NODEJS_VERSION-$MY_CFG_NODEJS_DISTRO"
 
 
 if [ -d "$HOME/Projects/Emacs" ] && [ ! -e "$MY_CFG_EMACS_DIR" ]; then
@@ -89,4 +97,11 @@ fi
 if [ -d "$HOME/.config/Code/User" ] && [ -e "$MY_CFG_VSCODE_KEYBINDINGS" ]; then
     rm -f "$HOME/.config/Code/User/keybindings.json"
     ln -s "$MY_CFG_VSCODE_KEYBINDINGS" "$HOME/.config/Code/User/keybindings.json"
+fi
+
+if [ -d "$MY_CFG_NODEJS_INSTALL_DIR/bin" ]; then
+    export PATH="$MY_CFG_NODEJS_INSTALL_DIR/bin":$PATH
+    Sudo ln -s "$MY_CFG_NODEJS_INSTALL_DIR/bin/node" "/usr/local/bin/node"
+    Sudo ln -s "$MY_CFG_NODEJS_INSTALL_DIR/bin/npm"  "/usr/local/bin/npm"
+    Sudo ln -s "$MY_CFG_NODEJS_INSTALL_DIR/bin/npx"  "/usr/local/bin/npx"
 fi

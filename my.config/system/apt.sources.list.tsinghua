@@ -7,5 +7,11 @@ deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-updates main restric
 deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-security main restricted universe multiverse
 deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-security main restricted universe multiverse
 
-deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable
+
+# deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable
 # deb-src [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable
+
+
+deb http://ppa.launchpad.net/hvr/ghc/ubuntu bionic main
+deb-src http://ppa.launchpad.net/hvr/ghc/ubuntu bionic main
+# sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 063DAB2BDC0B3F9FCEBC378BFF3AEACEF6F88286
