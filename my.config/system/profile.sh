@@ -105,3 +105,7 @@ if [ -d "$MY_CFG_NODEJS_INSTALL_DIR/bin" ]; then
     Sudo ln -s "$MY_CFG_NODEJS_INSTALL_DIR/bin/npm"  "/usr/local/bin/npm"
     Sudo ln -s "$MY_CFG_NODEJS_INSTALL_DIR/bin/npx"  "/usr/local/bin/npx"
 fi
+
+if [ -d "/opt/ghc/bin" ]; then
+    export PATH="/opt/ghc/bin":$PATH
+fi
