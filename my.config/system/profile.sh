@@ -6,8 +6,14 @@ export http_proxy=   # "http://<username>:<password>@<server>:<port>"
 export https_proxy=  # "https://<username>:<password>@<server>:<port>"
 export no_proxy=     # "127.0.0.1, localhost"
 
-# 解决Emacs中无法激活搜狗输入法的问题
-export LC_CTYPE=zh_CN.UTF-8
+# v2rayN proxy
+export http_proxy="http://127.0.0.1:10809"
+export https_proxy="http://127.0.0.1:10809"
+export all_proxy="socks5://127.0.0.1:10808"
+
+
+export LC_ALL=en_US.UTF-8   # WSL error
+export LC_CTYPE=zh_CN.UTF-8 # use Sougou Input in Emacs
 
 
 MY_CFG_EMACS_DIR="$HOME/.emacs.d"
@@ -68,15 +74,15 @@ if [ -d "/etc/docker" ] && [ -e "$MY_CFG_DOCKER_DAEMON" ]; then
     Sudo ln -s "$MY_CFG_DOCKER_DEFAULT" '/etc/docker/daemon.json'
 fi
 
-if [ -e "$MY_CFG_GIT_CONF" ]; then
+if [ -e "$HOME/.gitconfig" ] && [ -e "$MY_CFG_GIT_CONF" ]; then
     rm -f "$HOME/.gitconfig"
     ln -s "$MY_CFG_GIT_CONF" "$HOME/.gitconfig"
 fi
-if [ -e "$MY_CFG_ZSHRC" ]; then
+if [ -e "$HOME/.zshrc" ] && [ -e "$MY_CFG_ZSHRC" ]; then
     rm -f "$HOME/.zshrc"
     ln -s "$MY_CFG_ZSHRC" "$HOME/.zshrc"
 fi
-if [ -e "$MY_CFG_TMUX_CONF" ]; then
+if [ -e "$HOME/.tmux.conf" ] && [ -e "$MY_CFG_TMUX_CONF" ]; then
     rm -f "$HOME/.tmux.conf"
     ln -s "$MY_CFG_TMUX_CONF" "$HOME/.tmux.conf"
 fi
@@ -106,6 +112,9 @@ if [ -d "$MY_CFG_NODEJS_INSTALL_DIR/bin" ]; then
     Sudo ln -s "$MY_CFG_NODEJS_INSTALL_DIR/bin/npx"  "/usr/local/bin/npx"
 fi
 
+if [ -d "$HOME/.local/bin" ]; then
+    export PATH="$HOME/.local/bin":$PATH
+fi
 if [ -d "/opt/ghc/bin" ]; then
     export PATH="/opt/ghc/bin":$PATH
 fi
