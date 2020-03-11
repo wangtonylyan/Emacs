@@ -102,15 +102,6 @@ LinkExists "$HOME"                   "$HOME/.tmux.conf"                         
 LinkExists "$HOME/.config/Code/User" "$HOME/.config/Code/User/settings.json"    "$MY_CFG_DIR_ROOT/vscode/settings.json"
 LinkExists "$HOME/.config/Code/User" "$HOME/.config/Code/User/keybindings.json" "$MY_CFG_DIR_ROOT/vscode/keybindings.json"
 
-## Node.js
-MY_CFG_NODEJS_VERSION="v12.13.0"
-MY_CFG_NODEJS_DISTRO="linux-x64"
-MY_CFG_NODEJS_BIN_DIR="/usr/local/lib/nodejs/node-$MY_CFG_NODEJS_VERSION-$MY_CFG_NODEJS_DISTRO/bin"
-# AddToPath "$MY_CFG_NODEJS_BIN_DIR"
-LinkAlways "$MY_CFG_NODEJS_BIN_DIR" "/usr/local/bin/node" "$MY_CFG_NODEJS_BIN_DIR/node"
-LinkAlways "$MY_CFG_NODEJS_BIN_DIR" "/usr/local/bin/npm"  "$MY_CFG_NODEJS_BIN_DIR/npm"
-LinkAlways "$MY_CFG_NODEJS_BIN_DIR" "/usr/local/bin/npx"  "$MY_CFG_NODEJS_BIN_DIR/npx"
-
 ## Haskell
 AddToPath "$HOME/.local/bin"
 AddToPath "/opt/ghc/bin"
