@@ -102,10 +102,13 @@ LinkExists "$HOME"                   "$HOME/.tmux.conf"                         
 LinkExists "$HOME/.config/Code/User" "$HOME/.config/Code/User/settings.json"    "$MY_CFG_DIR_ROOT/vscode/settings.json"
 LinkExists "$HOME/.config/Code/User" "$HOME/.config/Code/User/keybindings.json" "$MY_CFG_DIR_ROOT/vscode/keybindings.json"
 
+## Python
+LinkExists "$HOME/.config"           "$HOME/.config/pycodestyle"                "$MY_CFG_DIR_ROOT/program/pycodestyle.cfg"
+
 ## Haskell
 AddToPath "$HOME/.local/bin"
 AddToPath "/opt/ghc/bin"
-LinkExists "$HOME/.config/brittany" "$HOME/.config/brittany/config.yaml" "$MY_CFG_DIR_ROOT/program/brittany.yaml"
+LinkExists "$HOME/.config/brittany"  "$HOME/.config/brittany/config.yaml"       "$MY_CFG_DIR_ROOT/program/brittany.yaml"
 
 
 ###############################################################################
