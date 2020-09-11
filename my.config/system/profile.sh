@@ -105,6 +105,9 @@ LinkExists "$HOME/.config/Code/User" "$HOME/.config/Code/User/keybindings.json" 
 ## Python
 LinkExists "$HOME/.config"           "$HOME/.config/pycodestyle"                "$MY_CFG_DIR_ROOT/program/pycodestyle.cfg"
 
+## Go
+AddToPath "$HOME/Project/go/bin"
+
 ## Haskell
 AddToPath "$HOME/.local/bin"
 AddToPath "/opt/ghc/bin"
@@ -114,3 +117,5 @@ LinkExists "$HOME/.config/brittany"  "$HOME/.config/brittany/config.yaml"       
 ###############################################################################
 
 unset -f Sudo Link LinkAlways LinkExists AddToPath
+
+echo "my profile.sh loaded"
