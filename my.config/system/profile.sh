@@ -1,5 +1,6 @@
-export LC_ALL=en_US.UTF-8   # fix WSL error
-export LC_CTYPE=zh_CN.UTF-8 # use Sougou Input in Emacs
+## 所有环境变量的设置，也可写入/etc/environment文件
+export LC_ALL=en_US.UTF-8    # fix WSL error
+export LC_CTYPE=zh_CN.UTF-8  # use Sougou Input in Emacs
 
 
 ###############################################################################
@@ -76,7 +77,7 @@ LinkAlways "/etc/docker"  "/etc/docker/daemon.json" "$MY_CFG_DIR_ROOT/system/doc
 LinkAlways "/etc/ssh"     "/etc/ssh/ssh_config"     "$MY_CFG_DIR_ROOT/system/ssh_config"
 LinkAlways "/etc/ssh"     "/etc/ssh/sshd_config"    "$MY_CFG_DIR_ROOT/system/sshd_config"
 
-# Git, Zsh, Tmux, VSCode
+## Git, Zsh, Tmux, VSCode
 if $MY_CFG_PRIVATE_ENABLED; then
     MY_CFG_GIT_CONF="$MY_CFG_EMACS_DIR/.private/gitconfig"
 else
@@ -102,32 +103,37 @@ LinkExists "$HOME/.config/brittany"  "$HOME/.config/brittany/config.yaml"       
 
 ###############################################################################
 
-## ("$1", "$2")       => all="$1://$2" && apt="http://$2"
-## ("$1", "$2", "$3") => all="$1://$2" && apt="http://$3"
-SetProxy () {
-    ## 据说$ALL_PROXY可用于应对一些不由$all_proxy控制的软件
-    ## 例如，git、npm、yarn等，因此建议同时设置两者
-    ## 此外，无论如何，apt的代理都需由apt.conf文件来控制
-    export ALL_PROXY="$1://$2"
-    export all_proxy="$1://$2"
+SetProxy () {  # all_protocol, all_port, http_protocol, http_port
+    proxy='localhost'
 
+    ## if in WSL environment
+    proxy=`ip route | grep default | awk '{print $3}'`
+    # proxy=`cat /etc/resolv.conf | grep nameserver | awk '{ print $2 }'`
+
+    ## 常用的协议为http(s)和socks5，URL格式皆为<username>:<password>@<server>:<port>
+    ## 需要同时设置以下所有的相关变量，以使更多的软件生效，因为部分软件在实现上，仅读取其中的指定变量
+    ALL_PROXY="$1://$proxy:$2"  # e.g. "socks5://127.0.0.1:34561"
+    all_proxy="$ALL_PROXY"      # e.g. "http://127.0.0.1:34560"
+    http_proxy="$ALL_PROXY"
+    https_proxy="$ALL_PROXY"
+    no_proxy="localhost"
+    if [ ! -z "$3" ] && [ ! -z "$4" ]; then
+        http_proxy="$3://$proxy:$4"
+        https_proxy="$http_proxy"
+    fi
+    export ALL_PROXY all_proxy http_proxy https_proxy no_proxy
+
+    ## 但无论如何，以下软件的代理，都必须由其配置文件来设置
     if [ -e "/etc/apt/apt.conf" ]; then
-        if [ ! -z "$3" ]; then apt=$3; else apt=$2; fi
-        Sudo sh -c "echo \"Acquire::http::Proxy  \\\"http://$apt\\\";\" >> /etc/apt/apt.conf"
-        Sudo sh -c "echo \"Acquire::https::Proxy \\\"http://$apt\\\";\" >> /etc/apt/apt.conf"
+        Sudo sh -c "echo \"Acquire::http::Proxy  \\\"$http_proxy\\\";\"  >> /etc/apt/apt.conf"
+        Sudo sh -c "echo \"Acquire::https::Proxy \\\"$https_proxy\\\";\" >> /etc/apt/apt.conf"
     fi
 
-    curl https://ip.gs  # 检测代理设置
+    # curl -v https://ip.gs  # 检测网络访问
 }
 
 UnsetProxy () {
-    ## 以下这些变量的设置，也可写入/etc/environment文件
-    ## 常用的协议为http(s)和sock5，URL格式则为<username>:<password>@<server>:<port>
-    unset ALL_PROXY    # "sock5://127.0.0.1:34561"
-    unset all_proxy    # "sock5://127.0.0.1:34561"
-    unset http_proxy   # "http://127.0.0.1:34560"
-    unset https_proxy  # "http://127.0.0.1:34560"
-    unset no_proxy     # "127.0.0.1, localhost"
+    unset ALL_PROXY all_proxy http_proxy https_proxy no_proxy
 
     if [ -e "/etc/apt/apt.conf" ]; then
         ## 删除所有以指定字符串开始的行
@@ -137,7 +143,7 @@ UnsetProxy () {
 }
 
 UnsetProxy
-# SetProxy "http" "localhost:34560"
+# SetProxy 'socks5' '34561' 'http' '34560'
 
 
 ###############################################################################
