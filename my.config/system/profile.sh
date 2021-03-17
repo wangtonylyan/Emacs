@@ -5,7 +5,7 @@ function AddToPath() {
     local path=$1
 
     if [ -d "$path" ]; then
-        export PATH="$path":$PATH
+        export PATH="$path:$PATH"
     fi
 }
 
@@ -183,11 +183,10 @@ function Others () {
     LinkExists "$HOME/.config/Code/User" "$HOME/.config/Code/User/settings.json"    "$config_dir/vscode/settings.json"      # VSCode
     LinkExists "$HOME/.config/Code/User" "$HOME/.config/Code/User/keybindings.json" "$config_dir/vscode/keybindings.json"
     LinkExists "$HOME/.config"           "$HOME/.config/pycodestyle"                "$config_dir/program/pycodestyle.cfg"   # Python
-    AddToPath "$HOME/Projects/go/bin"                                                                                       # Go
+    AddToPath "$HOME/lib/go/bin"                                                                                            # Go
     LinkExists "$HOME/.cabal"            "$HOME/.cabal/config"                      "$config_dir/program/cabal.config"      # Haskell
     LinkExists "$HOME/.stack"            "$HOME/.stack/config.yaml"                 "$config_dir/program/stack-config.yaml"
     LinkExists "$HOME/.config/brittany"  "$HOME/.config/brittany/config.yaml"       "$config_dir/program/brittany.yaml"
-    AddToPath "$HOME/.local/bin"
     AddToPath "/opt/ghc/bin"
 }
 
