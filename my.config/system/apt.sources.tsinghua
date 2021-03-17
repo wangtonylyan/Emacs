@@ -6,12 +6,3 @@ deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ <codename>-updates main res
 
 deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ <codename>-security main restricted universe multiverse
 deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ <codename>-security main restricted universe multiverse
-
-
-# deb [arch=amd64] https://download.docker.com/linux/ubuntu/ <codename> stable
-# deb-src [arch=amd64] https://download.docker.com/linux/ubuntu/ <codename> stable
-
-
-deb http://ppa.launchpad.net/hvr/ghc/ubuntu/ <codename> main
-deb-src http://ppa.launchpad.net/hvr/ghc/ubuntu/ <codename> main
-# sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 063DAB2BDC0B3F9FCEBC378BFF3AEACEF6F88286
