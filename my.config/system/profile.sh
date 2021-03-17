@@ -85,14 +85,14 @@ Setup() {
 
     ## Emacs
     local dirs="project projects Project Projects"
-    for d in "$dirs"; do
+    for d in $dirs; do
         if [ -d "$HOME/$d/Emacs" ]; then
             projects_dir="$HOME/$d"
             break
         fi
     done
     if [ -z "$projects_dir" ]; then
-        echo 'Please clone "https://github.com/wangtonylyan/Emacs.git" first.'
+        echo '[WARN] Please clone "https://github.com/wangtonylyan/Emacs.git" first!'
         exit 1
     fi
 
