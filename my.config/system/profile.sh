@@ -1,38 +1,3 @@
-## 所有环境变量的设置，也可写入/etc/environment文件
-export LC_ALL=en_US.UTF-8    # fix WSL error
-export LC_CTYPE=zh_CN.UTF-8  # use Sougou Input in Emacs
-
-## @param: all_protocol, all_port, http_protocol, http_port
-Proxy () {
-    local proxy='localhost'
-
-    ## if in WSL environment
-    local proxy=`ip route | grep default | awk '{print $3}'`
-    # proxy=`cat /etc/resolv.conf | grep nameserver | awk '{ print $2 }'`
-
-    ## 常用的协议为http(s)和socks5，URL格式皆为<username>:<password>@<server>:<port>
-    ## 需要同时设置以下所有的相关变量，以使更多的软件生效，因为部分软件在实现上，仅读取其中的指定变量
-    ALL_PROXY="$1://$proxy:$2"  # e.g. "socks5://127.0.0.1:34561"
-    all_proxy="$ALL_PROXY"      # e.g. "http://127.0.0.1:34560"
-    http_proxy="$ALL_PROXY"
-    https_proxy="$ALL_PROXY"
-    no_proxy="localhost"
-    if [ ! -z "$3" ] && [ ! -z "$4" ]; then
-        http_proxy="$3://$proxy:$4"
-        https_proxy="$http_proxy"
-    fi
-    export ALL_PROXY all_proxy http_proxy https_proxy no_proxy
-
-    ## 但无论如何，以下软件的代理，都必须由其配置文件来设置
-    ## e.g. apt
-
-    ## 检测网络访问
-    # curl -v https://ip.gs
-    # curl ipinfo.io
-    # curl cip.cc
-}
-unset ALL_PROXY all_proxy http_proxy https_proxy no_proxy
-# Proxy 'socks5' '34561' 'http' '34560'
 
 
 ###############################################################################
@@ -79,38 +44,72 @@ AddToPath() {
     fi
 }
 
+## @param: all_protocol, all_port, http_protocol, http_port
+Proxy () {
+    local proxy='localhost'
 
-###############################################################################
+    ## if in WSL environment
+    local proxy=`ip route | grep default | awk '{print $3}'`
+    # local proxy=`cat /etc/resolv.conf | grep nameserver | awk '{ print $2 }'`
 
-## Emacs
-MY_CFG_EMACS_DIR="$HOME/.emacs.d"
-MY_CFG_DIR_ROOT="$MY_CFG_EMACS_DIR/my.config"
-if [ -d "$HOME/Projects/Emacs" ] && [ ! -e "$MY_CFG_EMACS_DIR" ]; then
-    Link "$MY_CFG_EMACS_DIR" "$HOME/Projects/Emacs"
-fi
-
-## Bash
-if $MY_CFG_PRIVATE_ENABLED; then
-    MY_CFG_BASHRC="$MY_CFG_EMACS_DIR/.private/bashrc.sh"
-    if [ -e "$MY_CFG_BASHRC" ]; then
-        source "$MY_CFG_BASHRC"
+    ## 常用的协议为http(s)和socks5，URL格式皆为<username>:<password>@<server>:<port>
+    ## 需要同时设置以下所有的相关变量，以使更多的软件生效，因为部分软件在实现上，仅读取其中的指定变量
+    ALL_PROXY="$1://$proxy:$2"  # e.g. "socks5://127.0.0.1:34561"
+    all_proxy="$ALL_PROXY"      # e.g. "http://127.0.0.1:34560"
+    http_proxy="$ALL_PROXY"
+    https_proxy="$ALL_PROXY"
+    no_proxy="localhost"
+    if [ ! -z "$3" ] && [ ! -z "$4" ]; then
+        http_proxy="$3://$proxy:$4"
+        https_proxy="$http_proxy"
     fi
-fi
+    export ALL_PROXY all_proxy http_proxy https_proxy no_proxy
 
-## Apt
-AptCopyAlways() {
+    ## 但无论如何，以下软件的代理，都必须由其配置文件来设置
+    ## e.g. Apt
+
+    ## 检测网络访问
+    # curl -v https://ip.gs
+    # curl ipinfo.io
+    # curl cip.cc
+}
+
+## @return: projects_dir, config_dir
+Setup() {
+    ## 所有环境变量的设置，也可写入/etc/environment文件
+    export LC_ALL=en_US.UTF-8    # fix WSL error
+    export LC_CTYPE=zh_CN.UTF-8  # use Sougou Input in Emacs
+
+    unset ALL_PROXY all_proxy http_proxy https_proxy no_proxy
+    # Proxy 'socks5' '34561' 'http' '34560'
+
+    ## Emacs
+    local dirs="project projects Project Projects"
+    for d in "$dirs"; do
+        if [ -d "$HOME/$d/Emacs" ]; then
+            projects_dir="$HOME/$d"
+            break
+        fi
+    done
+    if [ -z "$projects_dir" ]; then
+        echo 'Please clone "https://github.com/wangtonylyan/Emacs.git" first.'
+        exit 1
+    fi
+
+    if [ ! -e "$HOME/.emacs.d" ]; then
+        Link "$HOME/.emacs.d" "$projects_dir/Emacs"
+    fi
+    config_dir="$HOME/.emacs.d/my.config"
+
+    ## Apt
     local apt_dir="/etc/apt"
     local apt_cfg="$apt_dir/apt.conf"
     local apt_src="$apt_dir/sources.list"
 
-    if $MY_CFG_PRIVATE_ENABLED; then
-        local config="$MY_CFG_EMACS_DIR/.private/apt.conf"
-    else
-        local config="$MY_CFG_DIR_ROOT/system/apt.conf"
-    fi
-    local source="$MY_CFG_DIR_ROOT/system/apt.sources.aliyun"
-    # local source="$MY_CFG_DIR_ROOT/system/apt.sources.china"
-    # local source="$MY_CFG_DIR_ROOT/system/apt.sources.tsinghua"
+    local config="$config_dir/system/apt.conf"
+    local source="$config_dir/system/apt.sources.aliyun"
+    # local source="$config_dir/system/apt.sources.china"
+    # local source="$config_dir/system/apt.sources.tsinghua"
 
     if [ -d "$apt_dir" ] && [ -e "$config" ]; then
         Sudo rm -f "$apt_cfg"
@@ -128,28 +127,24 @@ AptCopyAlways() {
         Sudo sh -c "sed \"s/<codename>/${codename}/g\" $source > $apt_src"
     fi
 }
-AptCopyAlways
+Setup
+
 
 ## Docker, SSH
-# LinkAlways "/etc/default" "/etc/default/docker"     "$MY_CFG_DIR_ROOT/system/docker.default"
-# LinkAlways "/etc/docker"  "/etc/docker/daemon.json" "$MY_CFG_DIR_ROOT/system/docker.daemon.json"
-# LinkAlways "/etc/ssh"     "/etc/ssh/ssh_config"     "$MY_CFG_DIR_ROOT/system/ssh_config"
-# LinkAlways "/etc/ssh"     "/etc/ssh/sshd_config"    "$MY_CFG_DIR_ROOT/system/sshd_config"
+# LinkAlways "/etc/default" "/etc/default/docker"     "$config_dir/system/docker.default"
+# LinkAlways "/etc/docker"  "/etc/docker/daemon.json" "$config_dir/system/docker.daemon.json"
+# LinkAlways "/etc/ssh"     "/etc/ssh/ssh_config"     "$config_dir/system/ssh_config"
+# LinkAlways "/etc/ssh"     "/etc/ssh/sshd_config"    "$config_dir/system/sshd_config"
 
 ## Git, Zsh, Tmux, VSCode
-if $MY_CFG_PRIVATE_ENABLED; then
-    MY_CFG_GIT_CONF="$MY_CFG_EMACS_DIR/.private/gitconfig"
-else
-    MY_CFG_GIT_CONF="$MY_CFG_DIR_ROOT/system/gitconfig"
-fi
-LinkExists "$HOME"                   "$HOME/.gitconfig"                         "$MY_CFG_GIT_CONF"
-LinkExists "$HOME"                   "$HOME/.zshrc"                             "$MY_CFG_DIR_ROOT/system/zshrc.sh"
-LinkExists "$HOME"                   "$HOME/.tmux.conf"                         "$MY_CFG_DIR_ROOT/system/tmux.conf"
-LinkExists "$HOME/.config/Code/User" "$HOME/.config/Code/User/settings.json"    "$MY_CFG_DIR_ROOT/vscode/settings.json"
-LinkExists "$HOME/.config/Code/User" "$HOME/.config/Code/User/keybindings.json" "$MY_CFG_DIR_ROOT/vscode/keybindings.json"
+LinkExists "$HOME"                   "$HOME/.gitconfig"                         "$config_dir/system/gitconfig"
+LinkExists "$HOME"                   "$HOME/.zshrc"                             "$config_dir/system/zshrc.sh"
+LinkExists "$HOME"                   "$HOME/.tmux.conf"                         "$config_dir/system/tmux.conf"
+LinkExists "$HOME/.config/Code/User" "$HOME/.config/Code/User/settings.json"    "$config_dir/vscode/settings.json"
+LinkExists "$HOME/.config/Code/User" "$HOME/.config/Code/User/keybindings.json" "$config_dir/vscode/keybindings.json"
 
 ## Python
-LinkExists "$HOME/.config"           "$HOME/.config/pycodestyle"                "$MY_CFG_DIR_ROOT/program/pycodestyle.cfg"
+LinkExists "$HOME/.config"           "$HOME/.config/pycodestyle"                "$config_dir/program/pycodestyle.cfg"
 
 ## Go
 AddToPath "$HOME/Projects/go/bin"
@@ -157,13 +152,11 @@ AddToPath "$HOME/Projects/go/bin"
 ## Haskell
 AddToPath "$HOME/.local/bin"
 AddToPath "/opt/ghc/bin"
-LinkExists "$HOME/.cabal"            "$HOME/.cabal/config"                      "$MY_CFG_DIR_ROOT/program/cabal.config"
-LinkExists "$HOME/.stack"            "$HOME/.stack/config.yaml"                 "$MY_CFG_DIR_ROOT/program/stack-config.yaml"
-LinkExists "$HOME/.config/brittany"  "$HOME/.config/brittany/config.yaml"       "$MY_CFG_DIR_ROOT/program/brittany.yaml"
+LinkExists "$HOME/.cabal"            "$HOME/.cabal/config"                      "$config_dir/program/cabal.config"
+LinkExists "$HOME/.stack"            "$HOME/.stack/config.yaml"                 "$config_dir/program/stack-config.yaml"
+LinkExists "$HOME/.config/brittany"  "$HOME/.config/brittany/config.yaml"       "$config_dir/program/brittany.yaml"
 
 
 ###############################################################################
-
-unset -f Sudo Proxy Link LinkAlways LinkExists AddToPath AptCopyAlways
 
 echo "my profile.sh loaded"
