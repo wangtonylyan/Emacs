@@ -193,8 +193,6 @@ function Others () {
 
 ###############################################################################
 
-Setup || exit 1
+Setup && echo "my profile.sh loaded" || echo "my profile.sh failed"
 
 unset Sudo AddToPath Link LinkAlways LinkExists Setup Proxy Apt Others
-
-echo "my profile.sh loaded"
