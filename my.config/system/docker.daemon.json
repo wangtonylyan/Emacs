@@ -1,3 +1,20 @@
 {
-  "registry-mirrors": ["https://registry.docker-cn.com"]
+    "registry-mirrors": [
+        // 选用国内的镜像源，亦或镜像加速器
+        // 清华镜像源，只提供了Docker的安装软件包，而非DockerHub
+        "https://hub-mirror.c.163.com/",
+        "https://mirror.baidubce.com/",
+        "https://registry.hub.docker.com/",
+        "https://docker.io/"
+    ],
+    "insecure-registries": [],
+    "dns": [
+        "8.8.8.8",
+        "8.8.4.4"
+    ],
+    "debug": false,
+    "experimental": false,
+    "features": {
+        "buildkit": true
+    }
 }

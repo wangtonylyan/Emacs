@@ -1,40 +1,36 @@
-## 这里利用了账户名与密码相同的特点
-function Sudo () { echo "$USER" | sudo -S -k "$@" > /dev/null 2>&1 ; }
+function Sudo () {
+    local cmd="$@"
 
-function AddToPath() {
-    local path=$1
-
-    if [ -d "$path" ]; then
-        export PATH="$path:$PATH"
+    sh -c "$cmd" > /dev/null 2>&1
+    if [ "$?" -ne 0 ]; then
+        ## 这里利用了账户名与密码相同的特点
+        echo "$USER" | sudo -S -k sh -c "$cmd" > /dev/null 2>&1
     fi
 }
 
-function Link() {
-    local link=$1
-    local target=$2
-
-    Sudo rm -f "$link"
-    ln -s "$target" "$link" > /dev/null 2>&1
-    if [ "$?" -ne "0" ]; then
-        Sudo ln -s "$target" "$link"
+function AddToPath () {
+    if [ -d "$1" ]; then
+        export PATH="$1:$PATH"
     fi
 }
-function LinkAlways() {
-    local dir=$1
-    local link=$2
-    local target=$3
-
-    if [ -d "$dir" ] && [ -e "$target" ]; then
-        Link "$link" "$target"
+function LinkAlways () {
+    if [ -d `basename "$1"` ] && [ -e "$2" ]; then
+        Sudo ln -sf "$2" "$1"
     fi
 }
-function LinkExists() {
-    local dir=$1
-    local link=$2
-    local target=$3
-
-    if [ -d "$dir" ] && [ -e "$link" ] && [ -e "$target" ]; then
-        Link "$link" "$target"
+function LinkExists () {
+    if [ -e "$1" ] && [ -e "$2" ]; then
+        Sudo ln -sf "$2" "$1"
+    fi
+}
+function CopyAlways () {
+    if [ -d `basename "$1"` ] && [ -e "$2" ]; then
+        Sudo cp -f "$2" "$1"
+    fi
+}
+function CopyExists () {
+    if [ -e "$1" ] && [ -e "$2" ]; then
+        Sudo cp -f "$2" "$1"
     fi
 }
 
@@ -48,12 +44,14 @@ function Setup () {
     # local sys_proxy=`ip route | grep default | awk '{print $3}'`  # for WSL environment
     # local sys_proxy=`cat /etc/resolv.conf | grep nameserver | awk '{ print $2 }'`
 
-    # local sys_proxy_all='http://%s:34560'
-    local sys_proxy_all='socks5://%s:34561'
-    local sys_proxy_http='http://%s:34560'
+    # local sys_proxy_all='http://%s:34560/'
+    local sys_proxy_all='socks5://%s:34561/'
+    local sys_proxy_http='http://%s:34560/'
 
-    local apt_source="tsinghua"
-    # local apt_source="aliyun"
+    if [ -z "$sys_proxy" ]; then  # domestic mirror only if no proxy
+        local apt_source="tsinghua"
+        # local apt_source="aliyun"
+    fi
     ###########################################################################
     ###########################################################################
 
@@ -64,9 +62,10 @@ function Setup () {
     Proxy || return 1
 
     ## Emacs
-    for d in "project" "projects" "Project" "Projects"; do
-        if [ -d "$HOME/$d/Emacs" ]; then
-            local projects_dir="$HOME/$d"
+    local dir=
+    for dir in "project" "projects" "Project" "Projects"; do
+        if [ -d "$HOME/$dir/Emacs" ]; then
+            local projects_dir="$HOME/$dir"
             break
         fi
     done
@@ -86,7 +85,8 @@ function Setup () {
 }
 
 function Proxy () {
-    unset ALL_PROXY all_proxy http_proxy https_proxy no_proxy
+    unset ALL_PROXY HTTP_PROXY HTTPS_PROXY NO_PROXY
+    unset all_proxy http_proxy https_proxy no_proxy
 
     if [ -z "$sys_proxy" ]; then  # no proxy
         return 0
@@ -97,27 +97,32 @@ function Proxy () {
     fi
 
     ## 常用的协议为http(s)和socks5，URL格式皆为<username>:<password>@<server>:<port>
-    ## 需要同时设置以下所有的相关变量，以使更多的软件生效，因为部分软件在实现上，仅读取其中的指定变量
+    ## 需要同时设置所有大小写同名的变量，以使更多的软件生效，因为部分软件仅读取指定的变量
     ALL_PROXY=`printf "$sys_proxy_all" "$sys_proxy"`
-    all_proxy="$ALL_PROXY"
 
     if [ -z "$sys_proxy_http" ]; then
-        http_proxy="$ALL_PROXY"
+        HTTP_PROXY="$ALL_PROXY"
     else
-        http_proxy=`printf "$sys_proxy_http" "$sys_proxy"`
+        HTTP_PROXY=`printf "$sys_proxy_http" "$sys_proxy"`
     fi
-    https_proxy="$http_proxy"
+    HTTPS_PROXY="$HTTP_PROXY"
 
     local eth0=`ifconfig eth0 | grep "inet " | awk '{print $2}'`
-    no_proxy="localhost, $eth0"
+    NO_PROXY="localhost, $eth0"
 
-    export ALL_PROXY all_proxy http_proxy https_proxy no_proxy
+    all_proxy="$ALL_PROXY"
+    http_proxy="$HTTP_PROXY"
+    https_proxy="$HTTPS_PROXY"
+    no_proxy="$NO_PROXY"
+
+    export ALL_PROXY HTTP_PROXY HTTPS_PROXY NO_PROXY
+    export all_proxy http_proxy https_proxy no_proxy
 
     ## 但无论如何，以下软件的代理，都必须由其配置文件来设置
     ## e.g. Apt
 
-    ## 检测网络访问
-    # curl -v https://ip.gs
+    ## 检测网络访问，还可以启用curl -v选项
+    # curl https://ip.gs
     # curl ipinfo.io
     # curl cip.cc
 }
@@ -142,27 +147,39 @@ function Apt () {
         Sudo rm -f "$apt_cfg"
         Sudo cp -f "$config" "$apt_cfg"  # copy instead of link
 
-        Sudo sed -i -e "/^\s*Acquire::http::Proxy/d"  "$apt_cfg"
-        Sudo sed -i -e "/^\s*Acquire::https::Proxy/d" "$apt_cfg"
+        Sudo sed -i "/^\s*Acquire::http::Proxy/d"  "$apt_cfg"
+        Sudo sed -i "/^\s*Acquire::https::Proxy/d" "$apt_cfg"
 
-        if [ ! -z "$http_proxy" ] && [ ! -z "$https_proxy" ]; then
-            Sudo sh -c "echo \"Acquire::http::Proxy  \\\"$http_proxy\\\";\"  >> $apt_cfg"
-            Sudo sh -c "echo \"Acquire::https::Proxy \\\"$https_proxy\\\";\" >> $apt_cfg"
+        if [ ! -z "$HTTP_PROXY" ] && [ ! -z "$HTTPS_PROXY" ]; then
+            Sudo "echo \"Acquire::http::Proxy  \\\"$HTTP_PROXY\\\";\"  >> $apt_cfg"
+            Sudo "echo \"Acquire::https::Proxy \\\"$HTTPS_PROXY\\\";\" >> $apt_cfg"
         fi
     fi
 
     if [ -d "$apt_dir" ] && [ -e "$source" ]; then
         local codename=`lsb_release --codename | cut -f2`
-        Sudo sh -c "sed \"s/<codename>/${codename}/g\" $source > $apt_src"
+        Sudo "sed \"s/<codename>/${codename}/g\" $source > $apt_src"
 
-        Sudo sh -c "echo '' >> $apt_src"
-        Sudo sh -c "echo '# deb [arch=amd64] https://download.docker.com/linux/ubuntu/ $codename stable' >> $apt_src"
-        Sudo sh -c "echo '# deb-src [arch=amd64] https://download.docker.com/linux/ubuntu/ $codename stable' >> $apt_src"
+        Sudo "echo '' >> $apt_src"
+        Sudo "echo '# deb [arch=amd64] https://download.docker.com/linux/ubuntu/ $codename stable' >> $apt_src"
+        Sudo "echo '# deb-src [arch=amd64] https://download.docker.com/linux/ubuntu/ $codename stable' >> $apt_src"
 
-        Sudo sh -c "echo '' >> $apt_src"
-        Sudo sh -c "echo '# deb https://ppa.launchpad.net/hvr/ghc/ubuntu/ $codename main' >> $apt_src"
-        Sudo sh -c "echo '# deb-src https://ppa.launchpad.net/hvr/ghc/ubuntu/ $codename main' >> $apt_src"
-        Sudo sh -c "echo '# sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 063DAB2BDC0B3F9FCEBC378BFF3AEACEF6F88286' >> $apt_src"
+        Sudo "echo '' >> $apt_src"
+        Sudo "echo '# deb https://ppa.launchpad.net/hvr/ghc/ubuntu/ $codename main' >> $apt_src"
+        Sudo "echo '# deb-src https://ppa.launchpad.net/hvr/ghc/ubuntu/ $codename main' >> $apt_src"
+        Sudo "echo '# sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 063DAB2BDC0B3F9FCEBC378BFF3AEACEF6F88286' >> $apt_src"
+    fi
+
+    if [ -z "$MY_CFG_PRIVATE_ENABLED" ] ; then  # if first time loading
+        echo "$USER" | sudo -S -k apt update &&
+        echo "$USER" | sudo -S -k apt -y dist-upgrade &&
+        echo "$USER" | sudo -S -k apt -y autoremove && {
+            local pkg=
+            for pkg in "net-tools" "jq"; do
+                dpkg -s "$pkg" > /dev/null 2>&1 ||
+                echo "$USER" | sudo -S -k apt install -y "$pkg"
+            done
+        }
     fi
 }
 
@@ -172,21 +189,28 @@ function Others () {
         return 1
     fi
 
-    # LinkAlways "/etc/default"            "/etc/default/docker"                      "$config_dir/system/docker.default"     # Docker
-    # LinkAlways "/etc/docker"             "/etc/docker/daemon.json"                  "$config_dir/system/docker.daemon.json"
-    # LinkAlways "/etc/ssh"                "/etc/ssh/ssh_config"                      "$config_dir/system/ssh_config"         # SSH
-    # LinkAlways "/etc/ssh"                "/etc/ssh/sshd_config"                     "$config_dir/system/sshd_config"
+    ## Docker
+    # CopyExists "/etc/default/docker"       "$config_dir/system/docker.default"      # for init or upstart
+    # "/etc/docker/daemon.json"   "$config_dir/system/docker.daemon.json"  # for systemd
+    # "$HOME/.docker/config.json" "$config_dir/system/docker.config.json"
+    ## 对于json文件建议使用jq命令，代替sed
+    ## 根据源json文件中的键值对，加入或替换目标文件中的键值对
+    # if [ ! -z "$HTTP_PROXY" ] && [ ! -z "$HTTPS_PROXY" ]; then; fi
 
-    LinkExists "$HOME"                   "$HOME/.zshrc"                             "$config_dir/system/zshrc.sh"           # Zsh
-    LinkExists "$HOME"                   "$HOME/.tmux.conf"                         "$config_dir/system/tmux.conf"          # Tmux
-    LinkExists "$HOME"                   "$HOME/.gitconfig"                         "$config_dir/system/gitconfig"          # Git
-    LinkExists "$HOME/.config/Code/User" "$HOME/.config/Code/User/settings.json"    "$config_dir/vscode/settings.json"      # VSCode
-    LinkExists "$HOME/.config/Code/User" "$HOME/.config/Code/User/keybindings.json" "$config_dir/vscode/keybindings.json"
-    LinkExists "$HOME/.config"           "$HOME/.config/pycodestyle"                "$config_dir/program/pycodestyle.cfg"   # Python
-    AddToPath "$HOME/lib/go/bin"                                                                                            # Go
-    LinkExists "$HOME/.cabal"            "$HOME/.cabal/config"                      "$config_dir/program/cabal.config"      # Haskell
-    LinkExists "$HOME/.stack"            "$HOME/.stack/config.yaml"                 "$config_dir/program/stack-config.yaml"
-    LinkExists "$HOME/.config/brittany"  "$HOME/.config/brittany/config.yaml"       "$config_dir/program/brittany.yaml"
+    ## SSH
+    # LinkAlways "/etc/ssh/ssh_config"  "$config_dir/system/ssh_config"
+    # LinkAlways "/etc/ssh/sshd_config" "$config_dir/system/sshd_config"
+
+    LinkExists "$HOME/.zshrc"                             "$config_dir/system/zshrc.sh"           # Zsh
+    LinkExists "$HOME/.tmux.conf"                         "$config_dir/system/tmux.conf"          # Tmux
+    LinkExists "$HOME/.gitconfig"                         "$config_dir/system/gitconfig"          # Git
+    LinkExists "$HOME/.config/Code/User/settings.json"    "$config_dir/vscode/settings.json"      # VSCode
+    LinkExists "$HOME/.config/Code/User/keybindings.json" "$config_dir/vscode/keybindings.json"
+    LinkExists "$HOME/.config/pycodestyle"                "$config_dir/program/pycodestyle.cfg"   # Python
+    AddToPath "$HOME/lib/go/bin"                                                                  # Go
+    LinkExists "$HOME/.cabal/config"                      "$config_dir/program/cabal.config"      # Haskell
+    LinkExists "$HOME/.stack/config.yaml"                 "$config_dir/program/stack-config.yaml"
+    LinkExists "$HOME/.config/brittany/config.yaml"       "$config_dir/program/brittany.yaml"
     AddToPath "/opt/ghc/bin"
 }
 
@@ -194,4 +218,4 @@ function Others () {
 
 Setup && echo "my profile.sh loaded" || echo "my profile.sh failed"
 
-unset Sudo AddToPath Link LinkAlways LinkExists Setup Proxy Apt Others
+unset Sudo AddToPath LinkAlways LinkExists CopyAlways CopyExists Setup Proxy Apt Others

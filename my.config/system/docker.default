@@ -5,8 +5,5 @@
 
 # export DOCKER_TMPDIR="/mnt/bigdrive/docker-tmp"
 
-# export http_proxy="http://<username>:<password>@<server>:<port>"
-
+DOCKER_OPTS="--registry-mirror=https://hub-mirror.c.163.com"
 # "--dns 8.8.8.8 --dns 8.8.4.4"
-# "--registry-mirror=https://registry.docker-cn.com"
-DOCKER_OPTS="--registry-mirror=http://hub-mirror.c.163.com"
