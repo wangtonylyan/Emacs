@@ -2,11 +2,7 @@ alias ls='ls -l --color=tty'
 alias la='ls -al'
 alias cl='clear'
 cdl() { cd "$@" && pwd ; ls -alF ; }
-<<<<<<< HEAD
-alias .='cdl .'
-=======
-# alias .='cdl .'
->>>>>>> update profile.sh
+# alias .='cdl .'  # 有些脚本中会使用句号作为source命令
 alias ..='cdl ..'
 
 ## Emacs
