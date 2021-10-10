@@ -2,7 +2,11 @@ alias ls='ls -l --color=tty'
 alias la='ls -al'
 alias cl='clear'
 cdl() { cd "$@" && pwd ; ls -alF ; }
+<<<<<<< HEAD
 alias .='cdl .'
+=======
+# alias .='cdl .'
+>>>>>>> update profile.sh
 alias ..='cdl ..'
 
 ## Emacs

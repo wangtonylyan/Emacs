@@ -1,11 +1,19 @@
 function Sudo () {
     local cmd="$@"
 
+<<<<<<< HEAD
     sh -c "$cmd" > /dev/null 2>&1
     if [ "$?" -ne 0 ]; then
         ## 这里利用了账户名与密码相同的特点
         echo "$USER" | sudo -S -k sh -c "$cmd" > /dev/null 2>&1
     fi
+=======
+    sh -c "$cmd" > /dev/null 2>&1 ||
+    echo "$USER" | sudo -S -k sh -c "$cmd"  # 利用账户名与密码相同的特点
+}
+function SudoQ () {  # quietly
+    Sudo "$@" > /dev/null 2>&1
+>>>>>>> update profile.sh
 }
 
 function AddToPath () {
@@ -14,32 +22,59 @@ function AddToPath () {
     fi
 }
 function LinkAlways () {
+<<<<<<< HEAD
     if [ -d `basename "$1"` ] && [ -e "$2" ]; then
         Sudo ln -sf "$2" "$1"
+=======
+    if [ -d `dirname "$1"` ] && [ -e "$2" ]; then
+        SudoQ ln -sf "$2" "$1"
+>>>>>>> update profile.sh
     fi
 }
 function LinkExists () {
     if [ -e "$1" ] && [ -e "$2" ]; then
+<<<<<<< HEAD
         Sudo ln -sf "$2" "$1"
     fi
 }
 function CopyAlways () {
     if [ -d `basename "$1"` ] && [ -e "$2" ]; then
         Sudo cp -f "$2" "$1"
+=======
+        SudoQ ln -sf "$2" "$1"
+    fi
+}
+function CopyAlways () {
+    if [ -d `dirname "$1"` ] && [ -e "$2" ]; then
+        SudoQ cp -f "$2" "$1"
+>>>>>>> update profile.sh
     fi
 }
 function CopyExists () {
     if [ -e "$1" ] && [ -e "$2" ]; then
+<<<<<<< HEAD
         Sudo cp -f "$2" "$1"
     fi
 }
 
+=======
+        SudoQ cp -f "$2" "$1"
+    fi
+}
+
+function ErrorReturn () {
+    echo "[WARN] error return from $1 !!!"
+    [ -n "$2" ] && echo "$2"
+}
+
+>>>>>>> update profile.sh
 ###############################################################################
 
 function Setup () {
     ###########################################################################
     ############################## configuration ##############################
     ###########################################################################
+<<<<<<< HEAD
     # local sys_proxy='localhost'
     # local sys_proxy=`ip route | grep default | awk '{print $3}'`  # for WSL environment
     # local sys_proxy=`cat /etc/resolv.conf | grep nameserver | awk '{ print $2 }'`
@@ -51,6 +86,38 @@ function Setup () {
     if [ -z "$sys_proxy" ]; then  # domestic mirror only if no proxy
         local apt_source="tsinghua"
         # local apt_source="aliyun"
+=======
+    if [ -z "$MY_CFG_PRIVATE_ENABLED" ]; then  # which should be declared in .profile
+        local init_load=true
+        echo "this is an initial loading ..."
+    else
+        local init_load=false
+    fi
+
+    if [ -n "$IS_WSL" ] || [ -n "$WSL_DISTRO_NAME" ]; then
+        local env_wsl=true
+    else
+        local env_wsl=false
+    fi
+
+    if [ "$env_wsl" = true ]; then
+        # local sys_proxy=`ip route | grep default | awk '{print $3}'`
+        # local sys_proxy=`cat /etc/resolv.conf | grep nameserver | awk '{ print $2 }'`
+        :
+    else
+        # local sys_proxy='localhost'
+        :
+    fi
+
+    if [ -n "$sys_proxy" ]; then
+        local sys_proxy_all='http://%s:34560/'
+        # local sys_proxy_all='socks5://%s:34561/'
+        # local sys_proxy_http='http://%s:34560/'
+    else
+        local apt_source="tsinghua"
+        # local apt_source="aliyun"
+        :
+>>>>>>> update profile.sh
     fi
     ###########################################################################
     ###########################################################################
@@ -70,17 +137,33 @@ function Setup () {
         fi
     done
     if [ -z "$projects_dir" ]; then
+<<<<<<< HEAD
         echo '[WARN] Please clone "https://github.com/wangtonylyan/Emacs.git" first!'
+=======
+        ErrorReturn "Setup[0]" "Please clone https://github.com/wangtonylyan/Emacs.git first."
+>>>>>>> update profile.sh
         return 1
     fi
 
     if [ ! -d "$HOME/.emacs.d" ]; then
+<<<<<<< HEAD
         Link "$HOME/.emacs.d" "$projects_dir/Emacs"
     fi
     local config_dir="$HOME/.emacs.d/my.config"
 
     ## applications
     Apt || return 1
+=======
+        LinkAlways "$HOME/.emacs.d" "$projects_dir/Emacs"
+    fi
+
+    local config_dir="$HOME/.emacs.d/my.config"
+
+    ## Applications
+    # AddToPath "$HOME/.local/bin"  # already added by .profile
+    Apt || return 1
+    Docker || return 1
+>>>>>>> update profile.sh
     Others || return 1
 }
 
@@ -88,11 +171,19 @@ function Proxy () {
     unset ALL_PROXY HTTP_PROXY HTTPS_PROXY NO_PROXY
     unset all_proxy http_proxy https_proxy no_proxy
 
+<<<<<<< HEAD
     if [ -z "$sys_proxy" ]; then  # no proxy
         return 0
     fi
     if [ -z "$sys_proxy_all" ]; then
         echo "[WARN] error return from Proxy()!"
+=======
+    if [ -z "$sys_proxy" ]; then
+        return 0
+    fi
+    if [ -z "$sys_proxy_all" ]; then
+        ErrorReturn "Proxy[0]"
+>>>>>>> update profile.sh
         return 1
     fi
 
@@ -131,9 +222,16 @@ function Apt () {
     local apt_dir="/etc/apt"
     local apt_cfg="$apt_dir/apt.conf"
     local apt_src="$apt_dir/sources.list"
+<<<<<<< HEAD
 
     if [ ! -d "$config_dir" ]; then
         echo "[WARN] error return from Apt()!"
+=======
+    local codename=`lsb_release -cs`
+
+    if [ ! -d "$config_dir" ]; then
+        ErrorReturn "Apt[0]"
+>>>>>>> update profile.sh
         return 1
     fi
     if [ -z "$apt_source" ]; then
@@ -144,6 +242,7 @@ function Apt () {
     local source=`printf "$config_dir/system/apt.sources.%s" "$apt_source"`
 
     if [ -d "$apt_dir" ] && [ -e "$config" ]; then
+<<<<<<< HEAD
         Sudo rm -f "$apt_cfg"
         Sudo cp -f "$config" "$apt_cfg"  # copy instead of link
 
@@ -153,10 +252,22 @@ function Apt () {
         if [ ! -z "$HTTP_PROXY" ] && [ ! -z "$HTTPS_PROXY" ]; then
             Sudo "echo \"Acquire::http::Proxy  \\\"$HTTP_PROXY\\\";\"  >> $apt_cfg"
             Sudo "echo \"Acquire::https::Proxy \\\"$HTTPS_PROXY\\\";\" >> $apt_cfg"
+=======
+        SudoQ rm -f "$apt_cfg"
+        SudoQ cp -f "$config" "$apt_cfg"
+
+        SudoQ sed -i "/^\s*Acquire::http::Proxy/d"  "$apt_cfg"
+        SudoQ sed -i "/^\s*Acquire::https::Proxy/d" "$apt_cfg"
+
+        if [ -n "$HTTP_PROXY" ] && [ -n "$HTTPS_PROXY" ]; then
+            SudoQ "echo \"Acquire::http::Proxy  \\\"$HTTP_PROXY\\\";\"  >> $apt_cfg"
+            SudoQ "echo \"Acquire::https::Proxy \\\"$HTTPS_PROXY\\\";\" >> $apt_cfg"
+>>>>>>> update profile.sh
         fi
     fi
 
     if [ -d "$apt_dir" ] && [ -e "$source" ]; then
+<<<<<<< HEAD
         local codename=`lsb_release --codename | cut -f2`
         Sudo "sed \"s/<codename>/${codename}/g\" $source > $apt_src"
 
@@ -178,11 +289,22 @@ function Apt () {
             for pkg in "net-tools" "jq"; do
                 dpkg -s "$pkg" > /dev/null 2>&1 ||
                 echo "$USER" | sudo -S -k apt install -y "$pkg"
+=======
+        SudoQ "sed \"s/<codename>/${codename}/g\" $source > $apt_src"
+    fi
+
+    if [ "$init_load" = true ]; then
+        Sudo apt update && Sudo apt -y dist-upgrade && Sudo apt -y autoremove && {
+            local pkg=
+            for pkg in "net-tools" "jq"; do
+                dpkg -s "$pkg" > /dev/null 2>&1 || Sudo apt install -y "$pkg"
+>>>>>>> update profile.sh
             done
         }
     fi
 }
 
+<<<<<<< HEAD
 function Others () {
     if [ ! -d "$config_dir" ]; then
         echo "[WARN] error return from Others()!"
@@ -196,6 +318,63 @@ function Others () {
     ## 对于json文件建议使用jq命令，代替sed
     ## 根据源json文件中的键值对，加入或替换目标文件中的键值对
     # if [ ! -z "$HTTP_PROXY" ] && [ ! -z "$HTTPS_PROXY" ]; then; fi
+=======
+function Docker () {
+    local apt_dir="/etc/apt"
+    local apt_cfg="$apt_dir/apt.conf"
+    local apt_src="$apt_dir/sources.list"
+    local codename=`lsb_release -cs`
+
+    if [ "$env_wsl" = true ]; then
+        return 0
+    fi
+    if [ ! -e "$apt_cfg" ] || [ ! -e "$apt_src" ]; then
+        ErrorReturn "Docker[0]"
+        return 1
+    fi
+
+    ## https://docs.docker.com/engine/install/ubuntu/
+    if [ "$init_load" = true ]; then
+        Sudo "curl -vfsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -" || {
+            ErrorReturn "Docker[1]"
+            return 1
+        }
+    fi
+
+    SudoQ "echo '' >> $apt_src"
+    SudoQ "echo '## Docker' >> $apt_src"
+    if grep -q -e "^\s*Acquire::http::Proxy" -e "^\s*Acquire::https::Proxy" "$apt_cfg"; then
+        # Sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $codename stable"
+        SudoQ "echo 'deb [arch=amd64] https://download.docker.com/linux/ubuntu $codename stable' >> $apt_src"
+        SudoQ "echo 'deb-src [arch=amd64] https://download.docker.com/linux/ubuntu $codename stable' >> $apt_src"
+    else
+        ## https://mirrors.tuna.tsinghua.edu.cn/help/docker-ce/
+        # Sudo add-apt-repository "deb [arch=amd64] https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/ubuntu $codename stable"
+        SudoQ "echo 'deb [arch=amd64] https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/ubuntu $codename stable' >> $apt_src"
+        SudoQ "echo 'deb-src [arch=amd64] https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/ubuntu $codename stable' >> $apt_src"
+    fi
+
+    if [ "$init_load" = true ]; then
+        Sudo apt update &&
+        Sudo apt install -y docker-ce docker-ce-cli containerd.io || {
+            ErrorReturn "Docker[2]"
+            return 1
+        }
+    fi
+}
+
+function Others () {
+    if [ ! -d "$config_dir" ]; then
+        ErrorReturn "Others[0]"
+        return 1
+    fi
+
+    ## Docker Daemon
+    # CopyExists "/etc/default/docker"       "$config_dir/system/docker.default"      # for init or upstart
+    # CopyExists "/etc/docker/daemon.json"   "$config_dir/system/docker.daemon.json"  # for systemd
+    ## Docker Container
+    # "$HOME/.docker/config.json" "$config_dir/system/docker.config.json"
+>>>>>>> update profile.sh
 
     ## SSH
     # LinkAlways "/etc/ssh/ssh_config"  "$config_dir/system/ssh_config"
@@ -207,15 +386,30 @@ function Others () {
     LinkExists "$HOME/.config/Code/User/settings.json"    "$config_dir/vscode/settings.json"      # VSCode
     LinkExists "$HOME/.config/Code/User/keybindings.json" "$config_dir/vscode/keybindings.json"
     LinkExists "$HOME/.config/pycodestyle"                "$config_dir/program/pycodestyle.cfg"   # Python
+<<<<<<< HEAD
     AddToPath "$HOME/lib/go/bin"                                                                  # Go
     LinkExists "$HOME/.cabal/config"                      "$config_dir/program/cabal.config"      # Haskell
     LinkExists "$HOME/.stack/config.yaml"                 "$config_dir/program/stack-config.yaml"
     LinkExists "$HOME/.config/brittany/config.yaml"       "$config_dir/program/brittany.yaml"
     AddToPath "/opt/ghc/bin"
+=======
+    AddToPath  "$HOME/lib/go/bin"                                                                 # Go
+    LinkExists "$HOME/.cabal/config"                      "$config_dir/program/cabal.config"      # Haskell
+    LinkExists "$HOME/.stack/config.yaml"                 "$config_dir/program/stack-config.yaml"
+    LinkExists "$HOME/.config/brittany/config.yaml"       "$config_dir/program/brittany.yaml"
+    AddToPath  "/opt/ghc/bin"
+    AddToPath  "$HOME/.cargo/bin"                                                                 # Rust
+    AddToPath  "$HOME/lib/nodejs/node-v14.17.5-linux-x64/bin"                                     # Node.js
+>>>>>>> update profile.sh
 }
 
 ###############################################################################
 
 Setup && echo "my profile.sh loaded" || echo "my profile.sh failed"
 
+<<<<<<< HEAD
 unset Sudo AddToPath LinkAlways LinkExists CopyAlways CopyExists Setup Proxy Apt Others
+=======
+unset Sudo SudoQ AddToPath LinkAlways LinkExists CopyAlways CopyExists ErrorReturn
+unset Setup Proxy Apt Docker Others
+>>>>>>> update profile.sh
