@@ -33,6 +33,12 @@ function CopyExists () {
         SudoQ cp -f "$2" "$1"
     fi
 }
+function CopyExistsWindows() {
+    if [ -e "$1" ] && [ -e "$2" ]; then
+        # cmd.exe /c copy `wslpath -m "$2"` `wslpath -m "$1"`  # CMD does not support UNC paths
+        powershell.exe -command Copy-Item `wslpath -m "$2"` -Destination `wslpath -m "$1"`
+    fi
+}
 
 function ErrorReturn () {
     echo "[WARN] error return from $1 !!!"
@@ -59,6 +65,11 @@ function Setup () {
     fi
 
     if [ "$env_wsl" = true ]; then
+        ## for WSL1
+        # local sys_proxy=`ifconfig eth0 | grep "inet " | awk '{ print $2 }'`
+        # local sys_proxy=`ifconfig wifi0 | grep "inet " | awk '{ print $2 }'`
+
+        ## for WSL2
         # local sys_proxy=`ip route | grep default | awk '{print $3}'`
         # local sys_proxy=`cat /etc/resolv.conf | grep nameserver | awk '{ print $2 }'`
         :
@@ -133,9 +144,7 @@ function Proxy () {
         HTTP_PROXY=`printf "$sys_proxy_http" "$sys_proxy"`
     fi
     HTTPS_PROXY="$HTTP_PROXY"
-
-    local eth0=`ifconfig eth0 | grep "inet " | awk '{print $2}'`
-    NO_PROXY="localhost, $eth0"
+    NO_PROXY="localhost"
 
     all_proxy="$ALL_PROXY"
     http_proxy="$HTTP_PROXY"
@@ -258,19 +267,37 @@ function Others () {
     # LinkAlways "/etc/ssh/ssh_config"  "$config_dir/system/ssh_config"
     # LinkAlways "/etc/ssh/sshd_config" "$config_dir/system/sshd_config"
 
-    LinkExists "$HOME/.zshrc"                             "$config_dir/system/zshrc.sh"           # Zsh
-    LinkExists "$HOME/.tmux.conf"                         "$config_dir/system/tmux.conf"          # Tmux
-    LinkExists "$HOME/.gitconfig"                         "$config_dir/system/gitconfig"          # Git
-    LinkExists "$HOME/.config/Code/User/settings.json"    "$config_dir/vscode/settings.json"      # VSCode
-    LinkExists "$HOME/.config/Code/User/keybindings.json" "$config_dir/vscode/keybindings.json"
-    LinkExists "$HOME/.config/pycodestyle"                "$config_dir/program/pycodestyle.cfg"   # Python
-    AddToPath  "$HOME/lib/go/bin"                                                                 # Go
-    LinkExists "$HOME/.cabal/config"                      "$config_dir/program/cabal.config"      # Haskell
+    ## Zsh
+    LinkExists "$HOME/.zshrc"                             "$config_dir/system/zshrc.sh"
+    ## Tmux
+    LinkExists "$HOME/.tmux.conf"                         "$config_dir/system/tmux.conf"
+    ## Git
+    LinkExists "$HOME/.gitconfig"                         "$config_dir/system/gitconfig"
+
+    ## VSCode
+    if [ "$env_wsl" = true ]; then
+        local vscode_dir="`wslupath --appdata`/Code/User"
+        CopyExistsWindows "$vscode_dir/settings.json"     "$config_dir/vscode/settings.json"
+        CopyExistsWindows "$vscode_dir/keybindings.json"  "$config_dir/vscode/keybindings.json"
+    else
+        local vscode_dir="$HOME/.config/Code/User"
+        CopyExists "$vscode_dir/settings.json"            "$config_dir/vscode/settings.json"
+        CopyExists "$vscode_dir/keybindings.json"         "$config_dir/vscode/keybindings.json"
+    fi
+
+    ## Go
+    AddToPath  "$HOME/lib/go/bin"
+    ## Rust
+    AddToPath  "$HOME/.cargo/bin"
+    ## Python
+    LinkExists "$HOME/.config/pycodestyle"                "$config_dir/program/pycodestyle.cfg"
+    ## Node.js
+    AddToPath  "$HOME/lib/nodejs/node-v14.17.5-linux-x64/bin"
+    ## Haskell
+    LinkExists "$HOME/.cabal/config"                      "$config_dir/program/cabal.config"
     LinkExists "$HOME/.stack/config.yaml"                 "$config_dir/program/stack-config.yaml"
     LinkExists "$HOME/.config/brittany/config.yaml"       "$config_dir/program/brittany.yaml"
     AddToPath  "/opt/ghc/bin"
-    AddToPath  "$HOME/.cargo/bin"                                                                 # Rust
-    AddToPath  "$HOME/lib/nodejs/node-v14.17.5-linux-x64/bin"                                     # Node.js
 }
 
 ###############################################################################
