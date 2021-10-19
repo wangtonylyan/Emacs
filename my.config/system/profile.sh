@@ -302,7 +302,8 @@ function Others () {
 
 ###############################################################################
 
-Setup && echo "my profile.sh loaded" || echo "my profile.sh failed"
+echo "my profile.sh loading ..."
+Setup && echo "my profile.sh loaded" && export | grep "proxy" || echo "my profile.sh failed"
 
 unset Sudo SudoQ AddToPath LinkAlways LinkExists CopyAlways CopyExists ErrorReturn
 unset Setup Proxy Apt Docker Others

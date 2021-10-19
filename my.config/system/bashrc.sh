@@ -1,3 +1,7 @@
+echo "my bashrc.sh loading ..."
+
+###############################################################################
+
 alias ls='ls -l --color=tty'
 alias la='ls -al'
 alias cl='clear'
@@ -18,7 +22,6 @@ if command -v go > /dev/null; then
     go env -w GO111MODULE="on"
     go env -w GOPROXY="https://goproxy.io,direct"
 fi
-
 
 ###############################################################################
 
