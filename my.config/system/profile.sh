@@ -200,7 +200,7 @@ function Apt () {
     if [ "$init_load" = true ]; then
         Sudo apt update && Sudo apt -y dist-upgrade && Sudo apt -y autoremove && {
             local pkg=
-            for pkg in "net-tools" "jq"; do
+            for pkg in "net-tools" "build-essential" "jq"; do
                 dpkg -s "$pkg" > /dev/null 2>&1 || Sudo apt install -y "$pkg"
             done
         }
@@ -271,15 +271,24 @@ function Others () {
     LinkExists "$HOME/.zshrc"                             "$config_dir/system/zshrc.sh"
     ## Tmux
     LinkExists "$HOME/.tmux.conf"                         "$config_dir/system/tmux.conf"
-    ## Git
-    LinkExists "$HOME/.gitconfig"                         "$config_dir/system/gitconfig"
 
-    ## VSCode
     if [ "$env_wsl" = true ]; then
-        local vscode_dir="`wslupath --appdata`/Code/User"
+        ## 注意，每次在GUI中修改此类设置后，写入的都是Windows中的settings.json
+        ## 因此，还需手动同步至GitHub项目中的对应文件
+
+        local homepath="`wslupath --home`"         # %HOMEPATH%
+        local appdata="$homepath/AppData/Roaming"  # %APPDATA%
+
+        ## Git
+        CopyExistsWindows "$homepath/.gitconfig"          "$config_dir/system/gitconfig"
+
+        ## VSCode
+        local vscode_dir="$appdata/Code/User"
         CopyExistsWindows "$vscode_dir/settings.json"     "$config_dir/vscode/settings.json"
         CopyExistsWindows "$vscode_dir/keybindings.json"  "$config_dir/vscode/keybindings.json"
     else
+        LinkExists "$HOME/.gitconfig"                     "$config_dir/system/gitconfig"
+
         local vscode_dir="$HOME/.config/Code/User"
         CopyExists "$vscode_dir/settings.json"            "$config_dir/vscode/settings.json"
         CopyExists "$vscode_dir/keybindings.json"         "$config_dir/vscode/keybindings.json"

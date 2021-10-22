@@ -47,7 +47,6 @@
     "editor.suggestSelection": "first",
     "editor.wordSeparators": "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?·～！￥…（）—【】、；：‘’“”，。《》？ ",
     "editor.wordWrapColumn": 120,
-    "emacs-mcx.cursorMoveOnFindWidget": true,
     "errorLens.delay": 5000,
     "errorLens.fontSize": "12",
     "errorLens.margin": "20ch",
@@ -196,6 +195,7 @@
 }
 
 // "workbench.sideBar.location": "right",
-// "http.proxy": "http://username:password@ip:port/",
-// e.g. "http.proxy": "http://127.0.0.1:34560/",
+// "http.proxy": "http://username:password@ip:port/"
+// e.g. "http.proxy": "http://127.0.0.1:34560/"
+// 该配置项可以影响，VSCode作为Electron程序，其本身的网络访问
 // "http.proxyStrictSSL": false,
