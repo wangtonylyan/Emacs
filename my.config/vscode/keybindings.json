@@ -443,16 +443,6 @@
         "when": "editorTextFocus && !editorReadonly"
     },
     {
-        "key": "ctrl+x ctrl+u",
-        "command": "-emacs-mcx.transformToUppercase",
-        "when": "editorTextFocus && !editorReadonly"
-    },
-    {
-        "key": "ctrl+x ctrl+l",
-        "command": "-emacs-mcx.transformToLowercase",
-        "when": "editorTextFocus && !editorReadonly"
-    },
-    {
         "key": "ctrl+alt+space",
         "command": "-workbench.action.toggleSidebarVisibility"
     },
@@ -465,16 +455,6 @@
         "key": "ctrl+shift+backspace",
         "command": "-search.searchEditor.action.deleteFileResults",
         "when": "inSearchEditor"
-    },
-    {
-        "key": "ctrl+shift+space",
-        "command": "emacs.enterMarkMode",
-        "when": "editorTextFocus"
-    },
-    {
-        "key": "ctrl+space",
-        "command": "-emacs.enterMarkMode",
-        "when": "editorTextFocus"
     },
     {
         "key": "ctrl+w",
@@ -565,11 +545,6 @@
     },
     {
         "key": "ctrl+j",
-        "command": "-emacs.C-j",
-        "when": "editorTextFocus && !editorReadonly"
-    },
-    {
-        "key": "ctrl+j",
         "command": "-closeFindWidget",
         "when": "editorFocus && findWidgetVisible"
     },
@@ -604,5 +579,99 @@
         "key": "ctrl+backspace",
         "command": "-workbench.action.terminal.sendSequence",
         "when": "terminalFocus && terminalShellType == 'cmd'"
+    },
+    {
+        "key": "alt+m",
+        "command": "-emacs-mcx.backToIndentation",
+        "when": "editorTextFocus && !config.emacs-mcx.useMetaPrefixMacCmd"
+    },
+    {
+        "key": "alt+m",
+        "command": "-emacs-mcx.backToIndentation",
+        "when": "config.emacs-mcx.useMetaPrefixMacCmd && editorTextFocus"
+    },
+    {
+        "key": "ctrl+oem_2",
+        "command": "-undo",
+        "when": "editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "ctrl+shift+oem_minus",
+        "command": "-undo",
+        "when": "editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "ctrl+y",
+        "command": "-redo"
+    },
+    {
+        "key": "ctrl+u",
+        "command": "-cursorUndo",
+        "when": "textInputFocus"
+    },
+    {
+        "key": "ctrl+shift+y",
+        "command": "-workbench.debug.action.toggleRepl",
+        "when": "workbench.panel.repl.view.active"
+    },
+    {
+        "key": "ctrl+shift+2",
+        "command": "-emacs-mcx.setMarkCommand",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "escape space",
+        "command": "-emacs-mcx.setMarkCommand",
+        "when": "config.emacs-mcx.useMetaPrefixEscape && editorTextFocus"
+    },
+    {
+        "key": "ctrl+shift+space",
+        "command": "emacs-mcx.setMarkCommand",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "ctrl+space",
+        "command": "-emacs-mcx.setMarkCommand",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "ctrl+oem_4 l",
+        "command": "-emacs-mcx.transformToLowercase",
+        "when": "config.emacs-mcx.useMetaPrefixCtrlLeftBracket && editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "escape l",
+        "command": "-emacs-mcx.transformToLowercase",
+        "when": "config.emacs-mcx.useMetaPrefixEscape && editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "ctrl+x ctrl+l",
+        "command": "-emacs-mcx.transformToLowercase",
+        "when": "editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "ctrl+x ctrl+u",
+        "command": "-emacs-mcx.transformToUppercase",
+        "when": "editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "escape u",
+        "command": "-emacs-mcx.transformToUppercase",
+        "when": "config.emacs-mcx.useMetaPrefixEscape && editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "ctrl+oem_4 u",
+        "command": "-emacs-mcx.transformToUppercase",
+        "when": "config.emacs-mcx.useMetaPrefixCtrlLeftBracket && editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "escape c",
+        "command": "-emacs-mcx.transformToTitlecase",
+        "when": "config.emacs-mcx.useMetaPrefixEscape && editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "ctrl+oem_4 c",
+        "command": "-emacs-mcx.transformToTitlecase",
+        "when": "config.emacs-mcx.useMetaPrefixCtrlLeftBracket && editorTextFocus && !editorReadonly"
     }
 ]
