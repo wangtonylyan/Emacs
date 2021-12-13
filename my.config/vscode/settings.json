@@ -191,7 +191,23 @@
     "workbench.productIconTheme": "fluent-icons",
     "workbench.settings.enableNaturalLanguageSearch": false,
     "workbench.startupEditor": "none",
-    "yaml.format.enable": true
+    "yaml.format.enable": true,
+    "gitlens.keymap": "none",
+    "gitlens.hovers.enabled": false,
+    "gitlens.hovers.avatars": false,
+    "gitlens.hovers.pullRequests.enabled": false,
+    "gitlens.currentLine.enabled": false,
+    "gitlens.views.commits.avatars": false,
+    "gitlens.views.tags.avatars": false,
+    "gitlens.views.fileHistory.avatars": false,
+    "gitlens.views.lineHistory.avatars": false,
+    "gitlens.views.branches.avatars": false,
+    "gitlens.views.remotes.avatars": false,
+    "gitlens.views.compare.avatars": false,
+    "gitlens.views.search.avatars": false,
+    "gitlens.views.contributors.avatars": false,
+    "gitlens.views.repositories.avatars": true,
+    "gitlens.blame.avatars": true
 }
 
 // "workbench.sideBar.location": "right",
