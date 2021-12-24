@@ -733,5 +733,81 @@
         "key": "alt+down",
         "command": "-editor.action.moveLinesDownAction",
         "when": "editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "ctrl+alt+n",
+        "command": "-emacs-mcx.addSelectionToNextFindMatch",
+        "when": "editorFocus && !config.emacs-mcx.useMetaPrefixMacCmd"
+    },
+    {
+        "key": "ctrl+alt+n",
+        "command": "-emacs-mcx.addSelectionToNextFindMatch",
+        "when": "config.emacs-mcx.useMetaPrefixMacCmd && editorFocus"
+    },
+    {
+        "key": "escape ctrl+n",
+        "command": "-emacs-mcx.addSelectionToNextFindMatch",
+        "when": "config.emacs-mcx.useMetaPrefixEscape && editorFocus"
+    },
+    {
+        "key": "ctrl+oem_4 ctrl+n",
+        "command": "-emacs-mcx.addSelectionToNextFindMatch",
+        "when": "config.emacs-mcx.useMetaPrefixCtrlLeftBracket && editorFocus"
+    },
+    {
+        "key": "ctrl+alt+p",
+        "command": "-emacs-mcx.addSelectionToPreviousFindMatch",
+        "when": "editorFocus && !config.emacs-mcx.useMetaPrefixMacCmd"
+    },
+    {
+        "key": "ctrl+alt+p",
+        "command": "-emacs-mcx.addSelectionToPreviousFindMatch",
+        "when": "config.emacs-mcx.useMetaPrefixMacCmd && editorFocus"
+    },
+    {
+        "key": "escape ctrl+p",
+        "command": "-emacs-mcx.addSelectionToPreviousFindMatch",
+        "when": "config.emacs-mcx.useMetaPrefixEscape && editorFocus"
+    },
+    {
+        "key": "ctrl+oem_4 ctrl+p",
+        "command": "-emacs-mcx.addSelectionToPreviousFindMatch",
+        "when": "config.emacs-mcx.useMetaPrefixCtrlLeftBracket && editorFocus"
+    },
+    {
+        "key": "ctrl+d",
+        "command": "-editor.action.addSelectionToNextFindMatch",
+        "when": "editorFocus"
+    },
+    {
+        "key": "ctrl+alt+enter",
+        "command": "-editor.action.replaceAll",
+        "when": "editorFocus && findWidgetVisible"
+    },
+    {
+        "key": "ctrl+alt+enter",
+        "command": "-search.action.replaceAll",
+        "when": "replaceActive && searchViewletVisible && !findWidgetVisible"
+    },
+    {
+        "key": "ctrl+alt+n",
+        "command": "-code-runner.run"
+    },
+    {
+        "key": "ctrl+alt+m",
+        "command": "-code-runner.stop"
+    },
+    {
+        "key": "alt+oem_period",
+        "command": "editor.action.revealDefinition",
+        "when": "editorHasDefinitionProvider && editorTextFocus && !isInEmbeddedEditor"
+    },
+    {
+        "key": "alt+oem_comma",
+        "command": "workbench.action.navigateBack"
+    },
+    {
+        "key": "alt+left",
+        "command": "-workbench.action.navigateBack"
     }
 ]

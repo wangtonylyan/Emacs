@@ -18,6 +18,7 @@
     "bracket-pair-colorizer-2.showBracketsInGutter": true,
     "bracket-pair-colorizer-2.showHorizontalScopeLine": false,
     "cmake.configureOnOpen": false,
+    "code-runner.enableAppInsights": false,
     "code-runner.executorMap": {
         "haskell": "stack runghc",
         "python": "python3 -u"
