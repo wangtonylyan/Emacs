@@ -251,6 +251,33 @@ function Docker () {
     fi
 }
 
+## https://github.com/craftzdog/dotfiles-public
+function FishShell () {
+    ## Fish shell
+    ## https://launchpad.net/~fish-shell/+archive/ubuntu/release-3
+    sudo add-apt-repository ppa:fish-shell/release-3
+    sudo apt update
+    sudo apt install fish
+
+    fish
+
+    ## Fisher
+    ## https://github.com/jorgebucaran/fisher
+    curl -sL https://git.io/fisher | source && fisher install jorgebucaran/fisher
+
+    ## Tide
+    ## https://github.com/IlanCosman/tide
+    fisher install IlanCosman/tide@v5  # 选择Lean Prompt Style，以避免安装额外的字体
+
+    ## Z
+    ## https://github.com/jethrokuan/z
+    fisher install jethrokuan/z
+
+    ## use fish as default shell
+    # echo /usr/bin/fish | sudo tee -a /etc/shells
+    chsh -s /usr/bin/fish
+}
+
 function Others () {
     if [ ! -d "$config_dir" ]; then
         ErrorReturn "Others[0]"
