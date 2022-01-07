@@ -34,7 +34,7 @@ function CopyExists () {
     fi
 }
 function CopyExistsWindows() {
-    if [ -e "$1" ] && [ -e "$2" ]; then
+    if [ -e "$1" ] && [ -e "$2" ] && [ "$1" -ot "$2" ]; then
         # cmd.exe /c copy `wslpath -m "$2"` `wslpath -m "$1"`  # CMD does not support UNC paths
         powershell.exe -command Copy-Item `wslpath -m "$2"` -Destination `wslpath -m "$1"`
     fi
