@@ -558,17 +558,17 @@
         "command": "-code-runner.runByLanguage"
     },
     {
-        "key": "ctrl+j",
-        "command": "extension.aceJump.multiChar",
-        "when": "editorTextFocus"
-    },
-    {
         "key": "alt+j",
         "command": "workbench.action.togglePanel"
     },
     {
         "key": "ctrl+j",
         "command": "-workbench.action.togglePanel"
+    },
+    {
+        "key": "ctrl+j",
+        "command": "-emacs-mcx.newLine",
+        "when": "editorTextFocus && !editorReadonly"
     },
     {
         "key": "ctrl+backspace",
@@ -809,5 +809,207 @@
     {
         "key": "alt+left",
         "command": "-workbench.action.navigateBack"
+    },
+    {
+        "key": "alt+oem_period",
+        "command": "-metaGo.gotoAfter"
+    },
+    {
+        "key": "alt+oem_comma",
+        "command": "-metaGo.gotoBefore"
+    },
+    {
+        "key": "alt+oem_2",
+        "command": "-metaGo.gotoSmart"
+    },
+    {
+        "key": "ctrl+alt+oem_period",
+        "command": "-metaGo.addCursorAfter"
+    },
+    {
+        "key": "ctrl+alt+oem_comma",
+        "command": "-metaGo.addCursorBefore"
+    },
+    {
+        "key": "ctrl+alt+oem_2",
+        "command": "-metaGo.addCursorSmart"
+    },
+    {
+        "key": "alt+delete",
+        "command": "-metaGo.metaJump.deleteToAfter",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "alt+backspace",
+        "command": "-metaGo.metaJump.deleteToBefore",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "alt+d",
+        "command": "-metaGo.metaJump.deleteToSmart",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "shift+space",
+        "command": "-metaGo.metaJump.hideDecoration",
+        "when": "editorTextFocus && metaGoJumping"
+    },
+    {
+        "key": "shift+alt+oem_period",
+        "command": "-metaGo.selectAfter",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "shift+alt+oem_comma",
+        "command": "-metaGo.selectBefore",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "shift+alt+oem_2",
+        "command": "-metaGo.selectSmart",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "shift+alt+p",
+        "command": "-metaGo.inSurroundingPairSelection",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "alt+p",
+        "command": "-metaGo.changeSurroundingPair",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "alt+win+left",
+        "command": "-metaGo.cursorSpaceWordLeft",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "alt+win+backspace",
+        "command": "-metaGo.cursorSpaceWordLeftDelete",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "shift+alt+win+left",
+        "command": "-metaGo.cursorSpaceWordLeftSelect",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "alt+win+right",
+        "command": "-metaGo.cursorSpaceWordRight",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "alt+win+delete",
+        "command": "-metaGo.cursorSpaceWordRightDelete",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "shift+alt+win+right",
+        "command": "-metaGo.cursorSpaceWordRightSelect",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "shift+alt+win+backspace",
+        "command": "-metaGo.cursorSpaceWordSpaceLeftDelete",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "shift+alt+win+delete",
+        "command": "-metaGo.cursorSpaceWordSpaceRightDelete",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "alt+end",
+        "command": "-metaGo.gotoEmptyLineDown",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "alt+b",
+        "command": "-metaGo.scrollCurrentLineToBottom",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "alt+m",
+        "command": "-metaGo.scrollCurrentLineToMiddle",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "alt+t",
+        "command": "-metaGo.scrollCurrentLineToTop",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "shift+alt+end",
+        "command": "-metaGo.selectEmptyLineDown",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "alt+home",
+        "command": "-metaGo.gotoEmptyLineUp",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "shift+alt+home",
+        "command": "-metaGo.selectEmptyLineUp",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "ctrl+l",
+        "command": "-metaGo.selectLineDown",
+        "when": "textInputFocus"
+    },
+    {
+        "key": "ctrl+o",
+        "command": "-metaGo.selectLineUp",
+        "when": "editorHasSelection && textInputFocus"
+    },
+    {
+        "key": "alt+win+home",
+        "command": "-metaGo.cursorSpaceWordSpaceLeft",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "shift+alt+win+home",
+        "command": "-metaGo.cursorSpaceWordSpaceLeftSelect",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "alt+win+end",
+        "command": "-metaGo.cursorSpaceWordSpaceRight",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "shift+alt+win+end",
+        "command": "-metaGo.cursorSpaceWordSpaceRightSelect",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "ctrl+alt+p",
+        "command": "-metaGo.inSurroundingPairSelectionWithPairs",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "ctrl+shift+oem_5",
+        "command": "-metaGo.jumpToBracket",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "ctrl+j",
+        "command": "metaGo.gotoSmartActive"
+    },
+    {
+        "key": "ctrl+shift+j",
+        "command": "metaGo.selectSmart"
+    },
+    {
+        "key": "ctrl+x ctrl+x",
+        "command": "metaGo.selectionSwitchActiveWithAnchor",
+        "when": "editorHasSelection && editorTextFocus"
+    },
+    {
+        "key": "alt+a",
+        "command": "-metaGo.selectionSwitchActiveWithAnchor",
+        "when": "editorHasSelection && editorTextFocus"
     }
 ]
