@@ -62,12 +62,16 @@
     "extensions.autoCheckUpdates": false,
     "extensions.autoUpdate": true,
     "extensions.ignoreRecommendations": true,
+    "files.associations": {
+        "*.c": "c",
+        "*.h": "c",
+        "*.json": "jsonc"
+    },
     "files.autoGuessEncoding": true,
     "files.eol": "\n",
     "files.exclude": {
         "**/*.hi": true,
         "**/*.o": true,
-        "**/.vscode": true,
         "**/__pycache__": true
     },
     "files.trimTrailingWhitespace": true,
@@ -126,10 +130,6 @@
     "python.languageServer": "Pylance",
     "python.showStartPage": false,
     "redhat.telemetry.enabled": false,
-    "remote.SSH.remotePlatform": {
-        "Ubuntu18.04Server": "linux",
-        "Ubuntu_Server_18.04": "linux"
-    },
     "scm.diffDecorations": "minimap",
     "search.smartCase": true,
     "sortJSON.orderOverride": [
@@ -249,7 +249,6 @@
     "workbench.startupEditor": "none",
     "yaml.format.enable": true
 }
-
 // "workbench.sideBar.location": "right",
 // "http.proxy": "http://username:password@ip:port/"
 // e.g. "http.proxy": "http://127.0.0.1:34560/"
