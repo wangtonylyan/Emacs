@@ -21,11 +21,11 @@
     "code-runner.enableAppInsights": false,
     "code-runner.executorMap": {
         "haskell": "stack runghc",
-        "python": "python3 -u"
+        "python": "python -u"
     },
     "code-runner.runInTerminal": true,
     "code-runner.saveFileBeforeRun": true,
-    "debug.console.fontSize": 13,
+    "debug.console.fontSize": 14,
     "diffEditor.ignoreTrimWhitespace": false,
     "editor.autoClosingBrackets": "always",
     "editor.bracketPairColorization.enabled": false,
@@ -34,7 +34,7 @@
     "editor.definitionLinkOpensInPeek": true,
     "editor.dragAndDrop": false,
     "editor.foldingHighlight": false,
-    "editor.fontFamily": "'Fira Mono', 'Source Han Sans SC', Consolas, monospace",
+    "editor.fontFamily": "'Cascadia Mono', 'Fira Mono', 'Source Han Sans SC', Consolas, monospace",
     "editor.fontLigatures": true,
     "editor.fontSize": 14,
     "editor.formatOnPaste": true,
@@ -177,6 +177,8 @@
     ],
     "tabnine.experimentalAutoImports": false,
     "telemetry.telemetryLevel": "off",
+    // different from "editor.fontFamily", "Fira Mono" is better on smaller font
+    "terminal.integrated.fontFamily": "'Fira Mono', 'Source Han Sans SC', Consolas, monospace",
     "terminal.integrated.fontSize": 13,
     "terminal.integrated.rendererType": "canvas",
     "terminal.integrated.wordSeparators": "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?·～！￥…（）—【】、；：‘’“”，。《》？ ",
