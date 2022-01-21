@@ -134,6 +134,8 @@ function Proxy () {
         return 1
     fi
 
+    WSL_HOST_IP="$sys_proxy"  # maybe useful for some cases
+
     ## 常用的协议为http(s)和socks5，URL格式皆为<username>:<password>@<server>:<port>
     ## 需要同时设置所有大小写同名的变量，以使更多的软件生效，因为部分软件仅读取指定的变量
     ALL_PROXY=`printf "$sys_proxy_all" "$sys_proxy"`
@@ -151,6 +153,7 @@ function Proxy () {
     https_proxy="$HTTPS_PROXY"
     no_proxy="$NO_PROXY"
 
+    export WSL_HOST_IP
     export ALL_PROXY HTTP_PROXY HTTPS_PROXY NO_PROXY
     export all_proxy http_proxy https_proxy no_proxy
 
@@ -340,6 +343,7 @@ function Others () {
 
 echo "my profile.sh loading ..."
 Setup && echo "my profile.sh loaded" || echo "my profile.sh failed"
+export | grep "WSL_HOST_IP"
 export | grep "proxy"
 
 unset Sudo SudoQ AddToPath LinkAlways LinkExists CopyAlways CopyExists ErrorReturn

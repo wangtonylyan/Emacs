@@ -25,6 +25,15 @@
     },
     "code-runner.runInTerminal": true,
     "code-runner.saveFileBeforeRun": true,
+    "C_Cpp.default.systemIncludePath": [
+        // 该选项设置为空，可避免解析以下系统路径，这尤其适用于交叉编译的项目
+        // 而本地编译的项目，也会自动根据GCC的输出，来获取此类路径
+        // on Linux
+        // "/usr/include",
+        // "/usr/local/include"
+        // on Windows
+        // "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
+    ],
     "debug.console.fontSize": 14,
     "diffEditor.ignoreTrimWhitespace": false,
     "editor.autoClosingBrackets": "always",
@@ -72,6 +81,7 @@
     "files.exclude": {
         "**/*.hi": true,
         "**/*.o": true,
+        "**/*.s": true,
         "**/__pycache__": true
     },
     "files.trimTrailingWhitespace": true,
@@ -116,17 +126,22 @@
     "jupyter.interactiveWindowMode": "perFile",
     "macros": {},
     "markdown.preview.fontFamily": "'Fira Mono', 'Source Han Sans SC', Consolas, monospace",
-    "markdown.preview.fontSize": 18,
+    "markdown.preview.fontSize": 14,
     "markdown.preview.lineHeight": 1.5,
     "materialTheme.accent": "Teal",
     "notebook.cellToolbarLocation": {
         "default": "right",
         "jupyter-notebook": "left"
     },
+    "notebook.dragAndDropEnabled": false,
     "notebook.lineNumbers": "on",
     "notebook.navigation.allowNavigateToSurroundingCells": false,
     "notebook.outline.showCodeCells": true,
     "partialDiff.enableTelemetry": false,
+    "python.formatting.autopep8Args": [
+        "--max-line-length=110",
+        "--ignore=E265,E266,E402"
+    ],
     "python.languageServer": "Pylance",
     "python.showStartPage": false,
     "redhat.telemetry.enabled": false,
@@ -177,7 +192,6 @@
     ],
     "tabnine.experimentalAutoImports": false,
     "telemetry.telemetryLevel": "off",
-    // different from "editor.fontFamily", "Fira Mono" is better on smaller font
     "terminal.integrated.fontFamily": "'Fira Mono', 'Source Han Sans SC', Consolas, monospace",
     "terminal.integrated.fontSize": 13,
     "terminal.integrated.rendererType": "canvas",
@@ -251,6 +265,8 @@
     "workbench.startupEditor": "none",
     "yaml.format.enable": true
 }
+// 目前使用与Visual Studio相同的Cascadia Mono字体，但其不太适合于较密集的文字
+// 因此以上fontFamily各有不同
 // "workbench.sideBar.location": "right",
 // "http.proxy": "http://username:password@ip:port/"
 // e.g. "http.proxy": "http://127.0.0.1:34560/"
