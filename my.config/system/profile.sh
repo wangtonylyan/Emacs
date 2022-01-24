@@ -298,12 +298,12 @@ function VSCode () {
 
     if [ -n "$HTTP_PROXY" ]; then
         if grep -q -e "^\s*\"http.proxy\".*,$" "$vsc_cfg"; then   # with trailing comma
-            sed -i "s/^\s*\"http.proxy\":\(.*\),$/$vsc_proxy,/" "$vsc_cfg"
+            sed -i "s/^\s*\"http.proxy\":\(.*\),$/$vsc_proxy,/g" "$vsc_cfg"
         elif grep -q -e "^\s*\"http.proxy\".*$" "$vsc_cfg"; then  # without trailing comma
-            sed -i "s/^\s*\"http.proxy\":\(.*\)$/$vsc_proxy/" "$vsc_cfg"
+            sed -i "s/^\s*\"http.proxy\":\(.*\)$/$vsc_proxy/g" "$vsc_cfg"
         else
             # replace the whole line `}` with three lines `,\n $vsc_proxy\n }`
-            sed -i "s/^}$/,\n$vsc_proxy\n}/" "$vsc_cfg"
+            sed -i "s/^}$/,\n$vsc_proxy\n}/g" "$vsc_cfg"
         fi
     fi
 }
