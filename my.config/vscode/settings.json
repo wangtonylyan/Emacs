@@ -212,7 +212,7 @@
             "sideBar.foreground": "#000000",
             "tab.activeForeground": "#000000"
         },
-        "[Material Theme Lighter]": {
+        "[Material Theme Lighter]": { // 该系列的亮色主题，都未对VSCode进行优化
             "activityBar.activeBorder": "#80CBC4",
             "activityBar.foreground": "#000000",
             "activityBarBadge.background": "#80CBC4",
