@@ -32,6 +32,7 @@
     "profiles": {
         "defaults": {},
         "list": [
+            // 注意，不要拷贝以下的guid，即保留本地已有的guid，目前已知WSL终端依赖于该值
             {
                 "name": "Windows PowerShell",
                 "colorScheme": "Solarized Light",

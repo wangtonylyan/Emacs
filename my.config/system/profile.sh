@@ -119,10 +119,12 @@ function Setup () {
     # AddToPath "$HOME/.local/bin"  # already added by .profile
     Apt || return 1
     Docker || return 1
+    VSCode || return 1
     Others || return 1
 }
 
 function Proxy () {
+    unset WSL_HOST_IP
     unset ALL_PROXY HTTP_PROXY HTTPS_PROXY NO_PROXY
     unset all_proxy http_proxy https_proxy no_proxy
 
@@ -160,7 +162,7 @@ function Proxy () {
     ## 但无论如何，以下软件的代理，都必须由其配置文件来设置
     ## e.g. Apt
 
-    ## 检测网络访问，还可以启用curl -v选项
+    ## 检测网络访问，还可以启用curl -v选项，查看详细日志
     # curl https://ip.gs
     # curl ipinfo.io
     # curl cip.cc
@@ -279,6 +281,31 @@ function FishShell () {
     ## use fish as default shell
     # echo /usr/bin/fish | sudo tee -a /etc/shells
     chsh -s /usr/bin/fish
+}
+
+function VSCode () {
+    local vsc_cfg="$config_dir/vscode/settings.json"
+    local vsc_proxy="\\\"http.proxy\\\": \\\"${HTTP_PROXY//\//\\\/}\\\""
+
+    if [ ! -d "$config_dir" ]; then
+        ErrorReturn "VSCode[0]"
+        return 1
+    fi
+    if [ ! -e "$vsc_cfg" ]; then
+        ErrorReturn "VSCode[1]"
+        return 1
+    fi
+
+    if [ -n "$HTTP_PROXY" ]; then
+        if grep -q -e "^\s*\"http.proxy\".*,$" "$vsc_cfg"; then   # with trailing comma
+            sed -i "s/^\s*\"http.proxy\":\(.*\),$/$vsc_proxy,/" "$vsc_cfg"
+        elif grep -q -e "^\s*\"http.proxy\".*$" "$vsc_cfg"; then  # without trailing comma
+            sed -i "s/^\s*\"http.proxy\":\(.*\)$/$vsc_proxy/" "$vsc_cfg"
+        else
+            # replace the whole line `}` with three lines `,\n $vsc_proxy\n }`
+            sed -i "s/^}$/,\n$vsc_proxy\n}/" "$vsc_cfg"
+        fi
+    fi
 }
 
 function Others () {
