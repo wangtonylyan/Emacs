@@ -124,6 +124,7 @@
     "javascript.format.semicolons": "insert",
     "jupyter.askForKernelRestart": false,
     "jupyter.interactiveWindowMode": "perFile",
+    "KeilAssistant.MDK.Uv4Path": "C:\\Keil_v5\\UV4\\UV4.exe",
     "macros": {},
     "markdown.preview.fontFamily": "'Fira Mono', 'Source Han Sans SC', Consolas, monospace",
     "markdown.preview.fontSize": 14,
