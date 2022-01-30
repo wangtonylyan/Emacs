@@ -124,7 +124,9 @@
     "javascript.format.semicolons": "insert",
     "jupyter.askForKernelRestart": false,
     "jupyter.interactiveWindowMode": "perFile",
-    "KeilAssistant.MDK.Uv4Path": "C:\\Keil_v5\\UV4\\UV4.exe",
+    "KeilAssistant.MDK.Uv4Path": "C:\\HOME\\Softwares\\Keil_v5\\UV4\\UV4.exe",
+    "EIDE.ARM.ARMCC5.InstallDirectory": "C:\\HOME\\Softwares\\Keil_v5\\ARM\\ARMCC",
+    "EIDE.ARM.INI.Path": "C:\\HOME\\Softwares\\Keil_v5\\TOOLS.INI",
     "macros": {},
     "markdown.preview.fontFamily": "'Fira Mono', 'Source Han Sans SC', Consolas, monospace",
     "markdown.preview.fontSize": 14,
@@ -266,10 +268,16 @@
     "workbench.startupEditor": "none",
     "yaml.format.enable": true
 }
-// 目前使用与Visual Studio相同的Cascadia Mono字体，但其不太适合于较密集的文字
-// 因此以上fontFamily各有不同
-// "workbench.sideBar.location": "right",
-// "http.proxy": "http://username:password@ip:port/"
-// e.g. "http.proxy": "http://127.0.0.1:34560/"
-// 该配置项可以影响，VSCode作为Electron程序，其本身的网络访问
-// "http.proxyStrictSSL": false,
+// 1. 目前使用与Visual Studio相同的Cascadia Mono字体，但其不太适合于较密集的文字
+//    因此以上fontFamily各有不同
+// 2. "workbench.sideBar.location": "right",
+// 3. "http.proxy": "http://username:password@ip:port/"
+//    e.g. "http.proxy": "http://127.0.0.1:34560/"
+//    该配置项可以影响，VSCode作为Electron程序，其本身的网络访问
+//    "http.proxyStrictSSL": false,
+// 4. Paredit
+//    https://calva.io/paredit/
+//    https://calva.io/evaluation/
+//    指针移动，只保留for/backward-sexp，其余都可结合for/backward-char来实现
+//    将"calva.paredit.hijackVSCodeDefaults"视为等同于"calva.keybindingsEnabled"
+//    即忽略或删除，前者为否时才生效的快捷键

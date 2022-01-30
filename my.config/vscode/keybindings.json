@@ -499,26 +499,6 @@
         "when": "editorFocus && findWidgetVisible"
     },
     {
-        "key": "ctrl+h",
-        "command": "expand_region",
-        "when": "editorTextFocus"
-    },
-    {
-        "key": "ctrl+w",
-        "command": "-expand_region",
-        "when": "editorTextFocus"
-    },
-    {
-        "key": "ctrl+shift+h",
-        "command": "undo_expand_region",
-        "when": "editorHasSelection && editorTextFocus"
-    },
-    {
-        "key": "ctrl+shift+w",
-        "command": "-undo_expand_region",
-        "when": "editorHasSelection && editorTextFocus"
-    },
-    {
         "key": "alt+w",
         "command": "-toggleSearchWholeWord",
         "when": "searchViewletFocus"
@@ -1011,5 +991,258 @@
         "key": "alt+a",
         "command": "-metaGo.selectionSwitchActiveWithAnchor",
         "when": "editorHasSelection && editorTextFocus"
+    },
+    {
+        "key": "ctrl+oem_plus",
+        "command": "-workbench.action.zoomIn"
+    },
+    {
+        "key": "ctrl+oem_minus",
+        "command": "-workbench.action.zoomOut"
+    },
+    {
+        "key": "ctrl+numpad_subtract",
+        "command": "-workbench.action.zoomOut"
+    },
+    {
+        "key": "ctrl+shift+oem_minus",
+        "command": "-workbench.action.zoomOut"
+    },
+    {
+        "key": "ctrl+numpad_add",
+        "command": "-workbench.action.zoomIn"
+    },
+    {
+        "key": "ctrl+shift+oem_plus",
+        "command": "-workbench.action.zoomIn"
+    },
+    {
+        "key": "ctrl+numpad0",
+        "command": "-workbench.action.zoomReset"
+    },
+    {
+        "key": "shift+alt+left",
+        "command": "-editor.action.smartSelect.shrink",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "shift+alt+right",
+        "command": "-editor.action.smartSelect.expand",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "ctrl+h",
+        "command": "-emacs-mcx.deleteBackwardChar",
+        "when": "editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "ctrl+h",
+        "command": "editor.action.smartSelect.expand",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "ctrl+shift+h",
+        "command": "editor.action.smartSelect.shrink",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "ctrl+h",
+        "command": "paredit.sexpRangeExpansion",
+        "when": "calva:keybindingsEnabled && editorTextFocus && !calva:cursorInComment && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "shift+alt+right",
+        "command": "-paredit.sexpRangeExpansion",
+        "when": "calva:keybindingsEnabled && editorTextFocus && !calva:cursorInComment && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "ctrl+shift+h",
+        "command": "paredit.sexpRangeContraction",
+        "when": "calva:keybindingsEnabled && editorTextFocus && !calva:cursorInComment && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "shift+alt+left",
+        "command": "-paredit.sexpRangeContraction",
+        "when": "calva:keybindingsEnabled && editorTextFocus && !calva:cursorInComment && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "alt+right",
+        "command": "-paredit.forwardSexp",
+        "when": "calva:cursorAfterComment && editorLangId == 'clojure' || calva:keybindingsEnabled && editorTextFocus && !calva:cursorInComment && !config.calva.paredit.hijackVSCodeDefaults && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "ctrl+right",
+        "command": "-paredit.forwardSexp",
+        "when": "calva:cursorAfterComment && editorLangId == 'clojure' || calva:keybindingsEnabled && config.calva.paredit.hijackVSCodeDefaults && editorTextFocus && !calva:cursorInComment && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "ctrl+alt+f",
+        "command": "paredit.forwardSexp",
+        "when": "calva:cursorAfterComment && editorLangId == 'clojure' || calva:keybindingsEnabled && config.calva.paredit.hijackVSCodeDefaults && editorTextFocus && !calva:cursorInComment && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "alt+left",
+        "command": "-paredit.backwardSexp",
+        "when": "calva:cursorBeforeComment && editorLangId == 'clojure' || calva:keybindingsEnabled && editorTextFocus && !calva:cursorInComment && !config.calva.paredit.hijackVSCodeDefaults && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "ctrl+left",
+        "command": "-paredit.backwardSexp",
+        "when": "calva:cursorBeforeComment && editorLangId == 'clojure' || calva:keybindingsEnabled && config.calva.paredit.hijackVSCodeDefaults && editorTextFocus && !calva:cursorInComment && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "ctrl+alt+b",
+        "command": "paredit.backwardSexp",
+        "when": "calva:cursorBeforeComment && editorLangId == 'clojure' || calva:keybindingsEnabled && config.calva.paredit.hijackVSCodeDefaults && editorTextFocus && !calva:cursorInComment && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "ctrl+down",
+        "command": "-paredit.forwardDownSexp",
+        "when": "calva:keybindingsEnabled && editorTextFocus && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "ctrl+alt+down",
+        "command": "-paredit.forwardUpSexp",
+        "when": "calva:keybindingsEnabled && editorTextFocus && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "ctrl+shift+down",
+        "command": "-paredit.selectForwardDownSexp",
+        "when": "calva:keybindingsEnabled && editorTextFocus && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "ctrl+shift+right",
+        "command": "-paredit.selectForwardSexp",
+        "when": "calva:keybindingsEnabled && editorTextFocus && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "ctrl+shift+alt+down",
+        "command": "-paredit.selectForwardUpSexp",
+        "when": "calva:keybindingsEnabled && editorTextFocus && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "ctrl+alt+up",
+        "command": "-paredit.backwardDownSexp",
+        "when": "calva:keybindingsEnabled && editorTextFocus && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "ctrl+up",
+        "command": "-paredit.backwardUpSexp",
+        "when": "calva:keybindingsEnabled && editorTextFocus && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "ctrl+shift+alt+up",
+        "command": "-paredit.selectBackwardDownSexp",
+        "when": "calva:keybindingsEnabled && editorTextFocus && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "ctrl+shift+left",
+        "command": "-paredit.selectBackwardSexp",
+        "when": "calva:keybindingsEnabled && editorTextFocus && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "ctrl+shift+up",
+        "command": "-paredit.selectBackwardUpSexp",
+        "when": "calva:keybindingsEnabled && editorTextFocus && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "ctrl+alt+d",
+        "command": "emacs-mcx.paredit.killSexp",
+        "when": "editorTextFocus && !config.emacs-mcx.useMetaPrefixMacCmd"
+    },
+    {
+        "key": "ctrl+alt+k",
+        "command": "-emacs-mcx.paredit.killSexp",
+        "when": "editorTextFocus && !config.emacs-mcx.useMetaPrefixMacCmd"
+    },
+    {
+        "key": "ctrl+alt+d",
+        "command": "emacs-mcx.paredit.killSexp",
+        "when": "config.emacs-mcx.useMetaPrefixMacCmd && editorTextFocus"
+    },
+    {
+        "key": "ctrl+alt+k",
+        "command": "-emacs-mcx.paredit.killSexp",
+        "when": "config.emacs-mcx.useMetaPrefixMacCmd && editorTextFocus"
+    },
+    {
+        "key": "shift+backspace",
+        "command": "paredit.forceDeleteBackward",
+        "when": "calva:keybindingsEnabled && editorTextFocus && !editorHasMultipleSelections && !editorReadOnly && editorLangId == 'clojure' && paredit:keyMap == 'strict'"
+    },
+    {
+        "key": "alt+backspace",
+        "command": "-paredit.forceDeleteBackward",
+        "when": "calva:keybindingsEnabled && editorTextFocus && !editorHasMultipleSelections && !editorReadOnly && editorLangId == 'clojure' && paredit:keyMap == 'strict'"
+    },
+    {
+        "key": "shift+delete",
+        "command": "paredit.forceDeleteForward",
+        "when": "calva:keybindingsEnabled && editorTextFocus && !editorHasMultipleSelections && !editorReadOnly && editorLangId == 'clojure' && paredit:keyMap == 'strict'"
+    },
+    {
+        "key": "alt+delete",
+        "command": "-paredit.forceDeleteForward",
+        "when": "calva:keybindingsEnabled && editorTextFocus && !editorHasMultipleSelections && !editorReadOnly && editorLangId == 'clojure' && paredit:keyMap == 'strict'"
+    },
+    {
+        "key": "alt+p",
+        "command": "paredit.dragSexprBackward",
+        "when": "calva:keybindingsEnabled && config.calva.paredit.hijackVSCodeDefaults && editorTextFocus && !calva:cursorInComment && editorLangId == 'clojure' && paredit:keyMap =~ /strict/"
+    },
+    {
+        "key": "alt+up",
+        "command": "-paredit.dragSexprBackward",
+        "when": "calva:keybindingsEnabled && config.calva.paredit.hijackVSCodeDefaults && editorTextFocus && !calva:cursorInComment && editorLangId == 'clojure' && paredit:keyMap =~ /strict/"
+    },
+    {
+        "key": "ctrl+shift+alt+b",
+        "command": "-paredit.dragSexprBackward",
+        "when": "calva:keybindingsEnabled && editorTextFocus && !calva:cursorInComment && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "ctrl+shift+alt+j",
+        "command": "-paredit.dragSexprBackwardDown",
+        "when": "calva:keybindingsEnabled && editorTextFocus && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "ctrl+shift+alt+u",
+        "command": "-paredit.dragSexprBackwardUp",
+        "when": "calva:keybindingsEnabled && editorTextFocus && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "alt+n",
+        "command": "paredit.dragSexprForward",
+        "when": "calva:keybindingsEnabled && config.calva.paredit.hijackVSCodeDefaults && editorTextFocus && !calva:cursorInComment && editorLangId == 'clojure' && paredit:keyMap =~ /strict/"
+    },
+    {
+        "key": "alt+down",
+        "command": "-paredit.dragSexprForward",
+        "when": "calva:keybindingsEnabled && config.calva.paredit.hijackVSCodeDefaults && editorTextFocus && !calva:cursorInComment && editorLangId == 'clojure' && paredit:keyMap =~ /strict/"
+    },
+    {
+        "key": "ctrl+shift+alt+f",
+        "command": "-paredit.dragSexprForward",
+        "when": "calva:keybindingsEnabled && editorTextFocus && !calva:cursorInComment && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "ctrl+shift+alt+d",
+        "command": "-paredit.dragSexprForwardDown",
+        "when": "calva:keybindingsEnabled && editorTextFocus && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "ctrl+shift+alt+k",
+        "command": "-paredit.dragSexprForwardUp",
+        "when": "calva:keybindingsEnabled && editorTextFocus && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "ctrl+k ctrl+k",
+        "command": "-paredit.killRight",
+        "when": "calva:keybindingsEnabled && editorTextFocus && !selectionAnchorSet && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "ctrl+k ctrl+shift+k",
+        "command": "-paredit.selectRight",
+        "when": "calva:keybindingsEnabled && editorTextFocus && !selectionAnchorSet && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
     }
 ]

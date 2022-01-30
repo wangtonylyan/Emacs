@@ -298,7 +298,7 @@ function VSCode () {
 
     if [ -n "$HTTP_PROXY" ]; then
         if grep -q -w "^\s*$vsc_proxy" "$vsc_cfg"; then  # with or without trailing comma
-            :  # grep seems to support sed's pattern, using "$vsc_proxy"?
+            :  # use "$vsc_proxy", because grep seems to support sed's pattern?
         elif grep -q -e "^\s*\"http.proxy\".*,$" "$vsc_cfg"; then  # with trailing comma
             sed -i "s/^\s*\"http.proxy\"\(.*\),$/$vsc_proxy,/g" "$vsc_cfg"
         elif grep -q -e "^\s*\"http.proxy\".*$" "$vsc_cfg"; then  # without trailing comma
