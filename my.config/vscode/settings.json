@@ -46,8 +46,8 @@
     "editor.fontFamily": "'Cascadia Mono', 'Fira Mono', 'Source Han Sans SC', Consolas, monospace",
     "editor.fontLigatures": true,
     "editor.fontSize": 14,
-    "editor.formatOnPaste": true,
-    "editor.formatOnSave": true,
+    "editor.formatOnPaste": false,
+    "editor.formatOnSave": false,
     "editor.matchBrackets": "near",
     "editor.minimap.maxColumn": 40,
     "editor.minimap.size": "fill",
@@ -255,7 +255,7 @@
         "errorLens.warningBackground": "#fff0",
         "errorLens.warningBackgroundLight": "#fff0"
     },
-    "workbench.colorTheme": "Default Light+",
+    "workbench.colorTheme": "Material Theme Lighter",
     "workbench.editor.highlightModifiedTabs": true,
     "workbench.editor.showTabs": true,
     "workbench.editor.tabCloseButton": "off",
@@ -282,3 +282,5 @@
 //    指针移动，只保留for/backward-sexp，其余都可结合for/backward-char来实现
 //    将"calva.paredit.hijackVSCodeDefaults"视为等同于"calva.keybindingsEnabled"
 //    即忽略或删除，前者为否时才生效的快捷键
+// 5. Color Theme
+//    "Default Light+", "Material Theme Lighter"
