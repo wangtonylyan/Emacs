@@ -303,7 +303,7 @@ function VSCode () {
             sed -i "s/^\s*\"http.proxy\"\(.*\),$/$vsc_proxy,/g" "$vsc_cfg"
         elif grep -q -e "^\s*\"http.proxy\".*$" "$vsc_cfg"; then  # without trailing comma
             sed -i "s/^\s*\"http.proxy\"\(.*\)$/$vsc_proxy/g" "$vsc_cfg"
-        else
+        else  # if `vsc_proxy` is not present in `vsc_cfg`
             # replace the whole line `}` with three lines `,\n $vsc_proxy\n }`
             sed -i "s/^}$/,\n$vsc_proxy\n}/g" "$vsc_cfg"
         fi
