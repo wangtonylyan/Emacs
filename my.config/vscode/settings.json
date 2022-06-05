@@ -149,7 +149,15 @@
     "python.languageServer": "Pylance",
     "python.showStartPage": false,
     "redhat.telemetry.enabled": false,
-    "scm.diffDecorations": "minimap",
+    "scm.alwaysShowRepositories": true,
+    "scm.diffDecorations": "gutter",
+    "scm.diffDecorationsGutterPattern": {
+        "added": true,
+        "modified": false
+    },
+    "scm.diffDecorationsGutterWidth": 4,
+    "scm.diffDecorationsIgnoreTrimWhitespace": "inherit",
+    "scm.repositories.sortOrder": "name",
     "search.smartCase": true,
     "sortJSON.orderOverride": [
         "name",
@@ -267,7 +275,10 @@
     "workbench.productIconTheme": "fluent-icons",
     "workbench.settings.enableNaturalLanguageSearch": false,
     "workbench.startupEditor": "none",
-    "yaml.format.enable": true
+    "yaml.format.enable": true,
+    "explorer.fileNesting.enabled": true,
+    "files.refactoring.autoSave": true,
+    "window.confirmBeforeClose": "always"
 }
 // 1. 目前使用与Visual Studio相同的Cascadia Mono字体，但其不太适合于较密集的文字
 //    因此以上fontFamily各有不同

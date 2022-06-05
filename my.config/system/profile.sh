@@ -72,6 +72,8 @@ function Setup () {
         ## for WSL2
         # local sys_proxy=`ip route | grep default | awk '{print $3}'`
         # local sys_proxy=`cat /etc/resolv.conf | grep nameserver | awk '{ print $2 }'`
+        # local sys_proxy=`hostname`          # == hostname.domainname == 127.0.1.1
+        # local sys_proxy="`hostname`.local"  # == 192.168.1.x
         :
     else
         # local sys_proxy='localhost'
@@ -339,7 +341,7 @@ function Others () {
         ## 注意，每次在GUI中修改此类设置后，写入的都是Windows中的settings.json
         ## 因此，还需手动同步至GitHub项目中的对应文件
 
-        local homepath="`wslupath --home`"         # %HOMEPATH%
+        local homepath=`wslupath --home`           # %HOMEPATH%
         local appdata="$homepath/AppData/Roaming"  # %APPDATA%
 
         ## Git
