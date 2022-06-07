@@ -271,7 +271,7 @@
         "errorLens.warningBackground": "#fff0",
         "errorLens.warningBackgroundLight": "#fff0"
     },
-    "workbench.colorTheme": "Material Theme Lighter",
+    "workbench.colorTheme": "Default Light+",
     "workbench.editor.highlightModifiedTabs": true,
     "workbench.editor.showTabs": true,
     "workbench.editor.tabCloseButton": "off",
