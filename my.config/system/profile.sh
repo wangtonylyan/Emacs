@@ -308,9 +308,8 @@ function Others() {
     ## Git
     if [ "$g_WSL_ENV" = true ]; then
         CopyExistsWindows "$g_USR_PROFILE/.gitconfig" "$g_CFG_HOME/system/gitconfig"
-    else
-        LinkExists "$HOME/.gitconfig" "$g_CFG_HOME/system/gitconfig"
     fi
+    LinkExists "$HOME/.gitconfig" "$g_CFG_HOME/system/gitconfig"
 
     ## Go
     AddToPath "$HOME/lib/go/bin"
