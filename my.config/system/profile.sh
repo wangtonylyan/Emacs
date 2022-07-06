@@ -1,154 +1,164 @@
-function Sudo () {
-    local cmd="$@"
+#!/usr/bin/bash
 
-    sh -c "$cmd" > /dev/null 2>&1 ||
-    echo "$USER" | sudo -S -k sh -c "$cmd"  # 利用账户名与密码相同的特点
+function Sudo() {
+    local -r cmd="$*"
+
+    bash -c "$cmd" >/dev/null 2>&1 ||
+        echo "$USER" | sudo -S -k bash -c "$cmd" # 利用账户名与密码相同的特点
 }
-function SudoQ () {  # quietly
-    Sudo "$@" > /dev/null 2>&1
+function SudoQ() { # quietly
+    Sudo "$*" >/dev/null 2>&1
 }
 
-function AddToPath () {
+function AddToPath() {
     if [ -d "$1" ]; then
         export PATH="$1:$PATH"
     fi
 }
-function LinkAlways () {
-    if [ -d `dirname "$1"` ] && [ -e "$2" ]; then
+function LinkAlways() {
+    if [ -d "$(dirname "$1")" ] && [ -e "$2" ]; then
         SudoQ ln -sf "$2" "$1"
     fi
 }
-function LinkExists () {
+function LinkExists() {
     if [ -e "$1" ] && [ -e "$2" ]; then
         SudoQ ln -sf "$2" "$1"
     fi
 }
-function CopyAlways () {
-    if [ -d `dirname "$1"` ] && [ -e "$2" ]; then
+
+function CopyAlways() {
+    if [ -d "$(dirname "$1")" ] && [ -e "$2" ]; then
         SudoQ cp -f "$2" "$1"
     fi
 }
-function CopyExists () {
-    if [ -e "$1" ] && [ -e "$2" ]; then
+function CopyExists() {
+    if [ -e "$1" ] && [ -e "$2" ] && [ "$1" -ot "$2" ]; then
         SudoQ cp -f "$2" "$1"
+    fi
+}
+function CopyAlwaysWindows() {
+    if [ -d "$(dirname "$1")" ] && [ -e "$2" ]; then
+        # cmd.exe /c copy "$(wslpath -m "$2")" "$(wslpath -m "$1")" # CMD does not support UNC paths
+        powershell.exe -command Copy-Item "$(wslpath -m "$2")" -Destination "$(wslpath -m "$1")"
     fi
 }
 function CopyExistsWindows() {
     if [ -e "$1" ] && [ -e "$2" ] && [ "$1" -ot "$2" ]; then
-        # cmd.exe /c copy `wslpath -m "$2"` `wslpath -m "$1"`  # CMD does not support UNC paths
-        powershell.exe -command Copy-Item `wslpath -m "$2"` -Destination `wslpath -m "$1"`
+        powershell.exe -command Copy-Item "$(wslpath -m "$2")" -Destination "$(wslpath -m "$1")"
     fi
 }
 
-function ErrorReturn () {
+function ErrorReturn() {
     echo "[WARN] error return from $1 !!!"
     [ -n "$2" ] && echo "$2"
+}
+function CheckGlobalVar() {
+    if [ -z "$g_INIT_LOAD" ]; then
+        ErrorReturn "CheckGlobalVar[g_INIT_LOAD]"
+        return 1
+    fi
+    if [ -z "$g_WSL_ENV" ]; then
+        ErrorReturn "CheckGlobalVar[g_WSL_ENV]"
+        return 1
+    fi
+    if [ ! -d "$g_CFG_HOME" ]; then
+        ErrorReturn "CheckGlobalVar[g_CFG_HOME]"
+        return 1
+    fi
 }
 
 ###############################################################################
 
-function Setup () {
-    ###########################################################################
-    ############################## configuration ##############################
-    ###########################################################################
-    if [ -z "$MY_CFG_PRIVATE_ENABLED" ]; then  # which should be declared in .profile
-        local init_load=true
+function Setup() {
+    if [ -z "$MY_CFG_PRIVATE_ENABLED" ]; then # which should be declared in .profile
+        local -r g_INIT_LOAD=true
         echo "this is an initial loading ..."
     else
-        local init_load=false
+        local -r g_INIT_LOAD=false
     fi
-
     if [ -n "$IS_WSL" ] || [ -n "$WSL_DISTRO_NAME" ]; then
-        local env_wsl=true
+        local -r g_WSL_ENV=true
     else
-        local env_wsl=false
+        local -r g_WSL_ENV=false
     fi
 
-    if [ "$env_wsl" = true ]; then
+    if [ "$g_WSL_ENV" = true ]; then
         ## for WSL1
-        # local sys_proxy=`ifconfig eth0 | grep "inet " | awk '{ print $2 }'`
-        # local sys_proxy=`ifconfig wifi0 | grep "inet " | awk '{ print $2 }'`
+        # local -r g_PROXY_SRV=$(ifconfig eth0 | grep "inet " | awk '{ print $2 }')
+        # local -r g_PROXY_SRV=$(ifconfig wifi0 | grep "inet " | awk '{ print $2 }')
 
         ## for WSL2
-        # local sys_proxy=`ip route | grep default | awk '{print $3}'`
-        # local sys_proxy=`cat /etc/resolv.conf | grep nameserver | awk '{ print $2 }'`
-        # local sys_proxy=`hostname`          # == hostname.domainname == 127.0.1.1
-        # local sys_proxy="`hostname`.local"  # == 192.168.1.x
-        :
+        # local -r g_PROXY_SRV=$(ip route | grep default | awk '{print $3}')
+        # local -r g_PROXY_SRV=$(grep nameserver </etc/resolv.conf | awk '{ print $2 }')
+        # local -r g_PROXY_SRV=$(hostname)       # == hostname.domainname == 127.0.1.1
+        # local -r g_PROXY_SRV=$(hostname).local # == 192.168.1.x
+
+        # local -r g_USR_PROFILE=$(wslupath --home) # deprecated
+        local -r g_USR_PROFILE=$(wslpath "$(wslvar USERPROFILE)") # %HOMEPATH%
+        local -r g_APP_DATA="$g_USR_PROFILE/AppData/Roaming"      # %APPDATA%
     else
-        # local sys_proxy='localhost'
-        :
+        # local -r g_PROXY_SRV='localhost'
+
+        local -r g_USR_PROFILE="$HOME"
+        local -r g_APP_DATA="$g_USR_PROFILE/.config"
     fi
 
-    if [ -n "$sys_proxy" ]; then
-        local sys_proxy_all='http://%s:34560/'
-        # local sys_proxy_all='socks5://%s:34561/'
-        # local sys_proxy_http='http://%s:34560/'
-    else
-        local apt_source="tsinghua"
-        # local apt_source="aliyun"
-        :
-    fi
-    ###########################################################################
     ###########################################################################
 
     ## 所有环境变量的设置，也可写入/etc/environment文件
-    export LC_ALL=en_US.UTF-8    # fix WSL error
-    export LC_CTYPE=zh_CN.UTF-8  # use Sougou Input in Emacs
-
-    Proxy || return 1
+    export LC_ALL=en_US.UTF-8   # fix WSL error
+    export LC_CTYPE=zh_CN.UTF-8 # use Sougou Input in Emacs
 
     ## Emacs
-    local dir=
+    local dir
     for dir in "project" "projects" "Project" "Projects"; do
         if [ -d "$HOME/$dir/Emacs" ]; then
-            local projects_dir="$HOME/$dir"
+            local -r emacs_dir="$HOME/$dir"
             break
         fi
     done
-    if [ -z "$projects_dir" ]; then
+    if [ -z "$emacs_dir" ]; then
         ErrorReturn "Setup[0]" "Please clone https://github.com/wangtonylyan/Emacs.git first."
         return 1
     fi
 
     if [ ! -d "$HOME/.emacs.d" ]; then
-        LinkAlways "$HOME/.emacs.d" "$projects_dir/Emacs"
+        LinkAlways "$HOME/.emacs.d" "$emacs_dir"
     fi
 
-    local config_dir="$HOME/.emacs.d/my.config"
+    local -r g_CFG_HOME="$HOME/.emacs.d/my.config"
 
-    ## Applications
-    # AddToPath "$HOME/.local/bin"  # already added by .profile
+    ###########################################################################
+
+    # AddToPath "$HOME/.local/bin" # already added by .profile
+    Proxy || return 1
     Apt || return 1
-    Docker || return 1
     VSCode || return 1
     Others || return 1
 }
 
-function Proxy () {
+function Proxy() {
     unset WSL_HOST_IP
     unset ALL_PROXY HTTP_PROXY HTTPS_PROXY NO_PROXY
     unset all_proxy http_proxy https_proxy no_proxy
 
-    if [ -z "$sys_proxy" ]; then
+    if [ -z "$g_PROXY_SRV" ]; then
         return 0
     fi
-    if [ -z "$sys_proxy_all" ]; then
-        ErrorReturn "Proxy[0]"
-        return 1
-    fi
 
-    WSL_HOST_IP="$sys_proxy"  # maybe useful for some cases
+    CheckGlobalVar || return 1
+
+    if [ "$g_WSL_ENV" = true ]; then
+        WSL_HOST_IP="$g_PROXY_SRV"
+        export WSL_HOST_IP # maybe useful for some cases
+    fi
 
     ## 常用的协议为http(s)和socks5，URL格式皆为<username>:<password>@<server>:<port>
-    ## 需要同时设置所有大小写同名的变量，以使更多的软件生效，因为部分软件仅读取指定的变量
-    ALL_PROXY=`printf "$sys_proxy_all" "$sys_proxy"`
+    ## 需要同时设置所有大小写同名的变量，以使更多的软件生效，因为部分软件仅读取特定大小写的变量
 
-    if [ -z "$sys_proxy_http" ]; then
-        HTTP_PROXY="$ALL_PROXY"
-    else
-        HTTP_PROXY=`printf "$sys_proxy_http" "$sys_proxy"`
-    fi
+    ALL_PROXY=$(printf 'http://%s:34560/' "$g_PROXY_SRV")
+    # ALL_PROXY=$(printf 'socks5://%s:34561/' "$g_PROXY_SRV")
+    HTTP_PROXY="$ALL_PROXY"
     HTTPS_PROXY="$HTTP_PROXY"
     NO_PROXY="localhost"
 
@@ -157,7 +167,6 @@ function Proxy () {
     https_proxy="$HTTPS_PROXY"
     no_proxy="$NO_PROXY"
 
-    export WSL_HOST_IP
     export ALL_PROXY HTTP_PROXY HTTPS_PROXY NO_PROXY
     export all_proxy http_proxy https_proxy no_proxy
 
@@ -170,28 +179,29 @@ function Proxy () {
     # curl cip.cc
 }
 
-function Apt () {
-    local apt_dir="/etc/apt"
-    local apt_cfg="$apt_dir/apt.conf"
-    local apt_src="$apt_dir/sources.list"
-    local codename=`lsb_release -cs`
+function Apt() {
+    local -r apt_dir="/etc/apt"
+    local -r apt_cfg="$apt_dir/apt.conf"
+    local -r apt_src="$apt_dir/sources.list"
+    local -r codename=$(lsb_release -cs)
 
-    if [ ! -d "$config_dir" ]; then
-        ErrorReturn "Apt[0]"
-        return 1
-    fi
-    if [ -z "$apt_source" ]; then
-        local apt_source="default"
+    CheckGlobalVar || return 1
+
+    if [ -n "$g_PROXY_SRV" ]; then
+        local -r src="default"
+    else
+        local -r src="tsinghua"
+        # local -r src="aliyun"
     fi
 
-    local config="$config_dir/system/apt.conf"
-    local source=`printf "$config_dir/system/apt.sources.%s" "$apt_source"`
+    local -r config="$g_CFG_HOME/system/apt.conf"
+    local -r source=$(printf "$g_CFG_HOME/system/apt.sources.%s" "$src")
 
     if [ -d "$apt_dir" ] && [ -e "$config" ]; then
         SudoQ rm -f "$apt_cfg"
         SudoQ cp -f "$config" "$apt_cfg"
 
-        SudoQ sed -i "/^\s*Acquire::http::Proxy/d"  "$apt_cfg"
+        SudoQ sed -i "/^\s*Acquire::http::Proxy/d" "$apt_cfg"
         SudoQ sed -i "/^\s*Acquire::https::Proxy/d" "$apt_cfg"
 
         if [ -n "$HTTP_PROXY" ] && [ -n "$HTTPS_PROXY" ]; then
@@ -204,174 +214,117 @@ function Apt () {
         SudoQ "sed \"s/<codename>/${codename}/g\" $source > $apt_src"
     fi
 
-    if [ "$init_load" = true ]; then
+    if [ "$g_INIT_LOAD" = true ]; then
+        local pkg_list=("net-tools" "build-essential" "jq")
+
+        if [ "$g_WSL_ENV" = true ]; then
+            ## https://wslutiliti.es/wslu/
+            ## https://github.com/wslutilities/wslu
+            ## https://launchpad.net/~wslutilities/+archive/ubuntu/wslu
+            Sudo add-apt-repository ppa:wslutilities/wslu
+            pkg_list+=("wslu")
+        fi
+
+        local -r pkg_list
         Sudo apt update && Sudo apt -y dist-upgrade && Sudo apt -y autoremove && {
-            local pkg=
-            for pkg in "net-tools" "build-essential" "jq"; do
-                dpkg -s "$pkg" > /dev/null 2>&1 || Sudo apt install -y "$pkg"
+            local pkg
+            for pkg in "${pkg_list[@]}"; do
+                dpkg -s "$pkg" >/dev/null 2>&1 || Sudo apt install -y "$pkg"
             done
         }
     fi
 }
 
-function Docker () {
-    local apt_dir="/etc/apt"
-    local apt_cfg="$apt_dir/apt.conf"
-    local apt_src="$apt_dir/sources.list"
-    local codename=`lsb_release -cs`
+function VSCode() {
+    local -r vsc_dir="$g_APP_DATA/Code/User"
+    local -r vsc_cfg="$vsc_dir/settings.json"
+    local -r vsc_key="$vsc_dir/keybindings.json"
 
-    if [ "$env_wsl" = true ]; then
-        return 0
-    fi
-    if [ ! -e "$apt_cfg" ] || [ ! -e "$apt_src" ]; then
-        ErrorReturn "Docker[0]"
-        return 1
-    fi
+    CheckGlobalVar || return 1
 
-    ## https://docs.docker.com/engine/install/ubuntu/
-    if [ "$init_load" = true ]; then
-        Sudo "curl -vfsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -" || {
-            ErrorReturn "Docker[1]"
-            return 1
-        }
-    fi
+    ## 注意，在GUI中修改设置后，写入的都是Windows中的json文件
+    ## 因此，还需手动同步并替换，GitHub项目中的对应文件
+    local -r config="$g_CFG_HOME/vscode/settings.json"
+    local -r config_tmp="${config}.tmp"
+    local -r keyset="$g_CFG_HOME/vscode/keybindings.json"
 
-    SudoQ "echo '' >> $apt_src"
-    SudoQ "echo '## Docker' >> $apt_src"
-    if grep -q -e "^\s*Acquire::http::Proxy" -e "^\s*Acquire::https::Proxy" "$apt_cfg"; then
-        # Sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $codename stable"
-        SudoQ "echo 'deb [arch=amd64] https://download.docker.com/linux/ubuntu $codename stable' >> $apt_src"
-        SudoQ "echo 'deb-src [arch=amd64] https://download.docker.com/linux/ubuntu $codename stable' >> $apt_src"
-    else
-        ## https://mirrors.tuna.tsinghua.edu.cn/help/docker-ce/
-        # Sudo add-apt-repository "deb [arch=amd64] https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/ubuntu $codename stable"
-        SudoQ "echo 'deb [arch=amd64] https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/ubuntu $codename stable' >> $apt_src"
-        SudoQ "echo 'deb-src [arch=amd64] https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/ubuntu $codename stable' >> $apt_src"
-    fi
-
-    if [ "$init_load" = true ]; then
-        Sudo apt update &&
-        Sudo apt install -y docker-ce docker-ce-cli containerd.io || {
-            ErrorReturn "Docker[2]"
-            return 1
-        }
-    fi
-}
-
-## https://github.com/craftzdog/dotfiles-public
-function FishShell () {
-    ## Fish shell
-    ## https://launchpad.net/~fish-shell/+archive/ubuntu/release-3
-    sudo add-apt-repository ppa:fish-shell/release-3
-    sudo apt update
-    sudo apt install fish
-
-    fish
-
-    ## Fisher
-    ## https://github.com/jorgebucaran/fisher
-    curl -sL https://git.io/fisher | source && fisher install jorgebucaran/fisher
-
-    ## Tide
-    ## https://github.com/IlanCosman/tide
-    fisher install IlanCosman/tide@v5  # 选择Lean Prompt Style，以避免安装额外的字体
-
-    ## Z
-    ## https://github.com/jethrokuan/z
-    fisher install jethrokuan/z
-
-    ## use fish as default shell
-    # echo /usr/bin/fish | sudo tee -a /etc/shells
-    chsh -s /usr/bin/fish
-}
-
-function VSCode () {
-    local vsc_cfg="$config_dir/vscode/settings.json"
-    local vsc_proxy="\\\"http.proxy\\\": \\\"${HTTP_PROXY//\//\\\/}\\\""
-
-    if [ ! -d "$config_dir" ]; then
-        ErrorReturn "VSCode[0]"
-        return 1
-    fi
-    if [ ! -e "$vsc_cfg" ]; then
-        ErrorReturn "VSCode[1]"
-        return 1
-    fi
-
-    if [ -n "$HTTP_PROXY" ]; then
-        if grep -q -w "^\s*$vsc_proxy" "$vsc_cfg"; then  # with or without trailing comma
-            :  # use "$vsc_proxy", because grep seems to support sed's pattern?
-        elif grep -q -e "^\s*\"http.proxy\".*,$" "$vsc_cfg"; then  # with trailing comma
-            sed -i "s/^\s*\"http.proxy\"\(.*\),$/$vsc_proxy,/g" "$vsc_cfg"
-        elif grep -q -e "^\s*\"http.proxy\".*$" "$vsc_cfg"; then  # without trailing comma
-            sed -i "s/^\s*\"http.proxy\"\(.*\)$/$vsc_proxy/g" "$vsc_cfg"
-        else  # if `vsc_proxy` is not present in `vsc_cfg`
-            # replace the whole line `}` with three lines `,\n $vsc_proxy\n }`
-            sed -i "s/^}$/,\n$vsc_proxy\n}/g" "$vsc_cfg"
+    if [ -e "$vsc_cfg" ] && [ -e "$config" ] && [ ! "$vsc_cfg" -nt "$config" ]; then
+        if [ -n "$HTTP_PROXY" ]; then
+            if grep -q -e "^\s*\"http.proxy\":\s*\"$HTTP_PROXY\"" "$vsc_cfg"; then
+                local -r vsc_cfg_proxy=false
+            else
+                local -r vsc_cfg_proxy=true
+            fi
+        else
+            if grep -q -e "^\s*\"http.proxy\"" "$vsc_cfg"; then
+                local -r vsc_cfg_proxy=true
+            else
+                local -r vsc_cfg_proxy=false
+            fi
         fi
-    else
-        if grep -q -e "^\s*\"http.proxy\"" "$vsc_cfg"; then
-            sed -i "/^\s*\"http.proxy\"/d" "$vsc_cfg"
+
+        if [ "$vsc_cfg_proxy" = true ] || [ "$vsc_cfg" -ot "$config" ]; then
+            if [ -n "$HTTP_PROXY" ]; then
+                # jq only accepts strict json, i.e. fails to recognize comments
+                sed 's/\(^\/\/.*\|\s\/\/.*\)//' "$config" |
+                    jq --indent 4 "del(.[\"http.proxy\"]) | .[\"http.proxy\"] = \"$HTTP_PROXY\"" >"$config_tmp"
+            else
+                sed 's/\(^\/\/.*\|\s\/\/.*\)//' "$config" |
+                    jq --indent 4 "del(.[\"http.proxy\"])" >"$config_tmp"
+            fi
+
+            touch -r "$config_tmp" -m "$config"
+
+            if [ "$g_WSL_ENV" = true ]; then
+                CopyAlwaysWindows "$vsc_cfg" "$config_tmp"
+            else
+                CopyAlways "$vsc_cfg" "$config_tmp"
+            fi
+        fi
+    fi
+
+    if [ -e "$vsc_key" ] && [ -e "$keyset" ] && [ ! "$vsc_key" -nt "$keyset" ]; then
+        if [ "$vsc_key" -ot "$keyset" ]; then
+            if [ "$g_WSL_ENV" = true ]; then
+                CopyAlwaysWindows "$vsc_key" "$keyset"
+            else
+                CopyAlways "$vsc_key" "$keyset"
+            fi
         fi
     fi
 }
 
-function Others () {
-    if [ ! -d "$config_dir" ]; then
-        ErrorReturn "Others[0]"
-        return 1
-    fi
-
-    ## Docker Daemon
-    # CopyExists "/etc/default/docker"       "$config_dir/system/docker.default"      # for init or upstart
-    # CopyExists "/etc/docker/daemon.json"   "$config_dir/system/docker.daemon.json"  # for systemd
-    ## Docker Container
-    # "$HOME/.docker/config.json" "$config_dir/system/docker.config.json"
+function Others() {
+    CheckGlobalVar || return 1
 
     ## SSH
-    # LinkAlways "/etc/ssh/ssh_config"  "$config_dir/system/ssh_config"
-    # LinkAlways "/etc/ssh/sshd_config" "$config_dir/system/sshd_config"
-
+    # LinkAlways "/etc/ssh/ssh_config" "$g_CFG_HOME/system/ssh_config"
+    # LinkAlways "/etc/ssh/sshd_config" "$g_CFG_HOME/system/sshd_config"
     ## Zsh
-    LinkExists "$HOME/.zshrc"                             "$config_dir/system/zshrc.sh"
+    # LinkExists "$HOME/.zshrc" "$g_CFG_HOME/system/zshrc.sh"
     ## Tmux
-    LinkExists "$HOME/.tmux.conf"                         "$config_dir/system/tmux.conf"
+    # LinkExists "$HOME/.tmux.conf" "$g_CFG_HOME/system/tmux.conf"
 
-    if [ "$env_wsl" = true ]; then
-        ## 注意，每次在GUI中修改此类设置后，写入的都是Windows中的settings.json
-        ## 因此，还需手动同步至GitHub项目中的对应文件
-
-        local homepath=`wslupath --home`           # %HOMEPATH%
-        local appdata="$homepath/AppData/Roaming"  # %APPDATA%
-
-        ## Git
-        CopyExistsWindows "$homepath/.gitconfig"          "$config_dir/system/gitconfig"
-
-        ## VSCode
-        local vscode_dir="$appdata/Code/User"
-        CopyExistsWindows "$vscode_dir/settings.json"     "$config_dir/vscode/settings.json"
-        CopyExistsWindows "$vscode_dir/keybindings.json"  "$config_dir/vscode/keybindings.json"
+    ## Git
+    if [ "$g_WSL_ENV" = true ]; then
+        CopyExistsWindows "$g_USR_PROFILE/.gitconfig" "$g_CFG_HOME/system/gitconfig"
     else
-        LinkExists "$HOME/.gitconfig"                     "$config_dir/system/gitconfig"
-
-        local vscode_dir="$HOME/.config/Code/User"
-        CopyExists "$vscode_dir/settings.json"            "$config_dir/vscode/settings.json"
-        CopyExists "$vscode_dir/keybindings.json"         "$config_dir/vscode/keybindings.json"
+        LinkExists "$HOME/.gitconfig" "$g_CFG_HOME/system/gitconfig"
     fi
 
     ## Go
-    AddToPath  "$HOME/lib/go/bin"
+    AddToPath "$HOME/lib/go/bin"
     ## Rust
-    AddToPath  "$HOME/.cargo/bin"
+    AddToPath "$HOME/.cargo/bin"
     ## Python
-    LinkExists "$HOME/.config/pycodestyle"                "$config_dir/program/pycodestyle.cfg"
+    LinkExists "$HOME/.config/pycodestyle" "$g_CFG_HOME/program/pycodestyle.cfg"
     ## Node.js
-    AddToPath  "$HOME/lib/nodejs/node-v14.17.5-linux-x64/bin"
+    AddToPath "$HOME/lib/nodejs/node-v14.17.5-linux-x64/bin"
     ## Haskell
-    LinkExists "$HOME/.cabal/config"                      "$config_dir/program/cabal.config"
-    LinkExists "$HOME/.stack/config.yaml"                 "$config_dir/program/stack-config.yaml"
-    LinkExists "$HOME/.config/brittany/config.yaml"       "$config_dir/program/brittany.yaml"
-    AddToPath  "/opt/ghc/bin"
+    LinkExists "$HOME/.cabal/config" "$g_CFG_HOME/program/cabal.config"
+    LinkExists "$HOME/.stack/config.yaml" "$g_CFG_HOME/program/stack-config.yaml"
+    LinkExists "$HOME/.config/brittany/config.yaml" "$g_CFG_HOME/program/brittany.yaml"
+    AddToPath "/opt/ghc/bin"
 }
 
 ###############################################################################
@@ -379,7 +332,9 @@ function Others () {
 echo "my profile.sh loading ..."
 Setup && echo "my profile.sh loaded" || echo "my profile.sh failed"
 export | grep "WSL_HOST_IP"
-export | grep "proxy"
+export | grep "PROXY"
 
-unset Sudo SudoQ AddToPath LinkAlways LinkExists CopyAlways CopyExists ErrorReturn
-unset Setup Proxy Apt Docker Others
+unset Sudo SudoQ AddToPath LinkAlways LinkExists
+unset CopyAlways CopyExists CopyAlwaysWindows CopyExistsWindows
+unset ErrorReturn CheckGlobalVar
+unset Setup Proxy Apt VSCode Others
