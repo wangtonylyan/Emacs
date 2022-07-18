@@ -132,7 +132,11 @@
     "java.refactor.renameFromFileExplorer": "preview",
     "javascript.format.semicolons": "insert",
     "jupyter.askForKernelRestart": false,
+    "jupyter.generateSVGPlots": true,
     "jupyter.interactiveWindowMode": "perFile",
+    "jupyter.jupyterCommandLineArguments": [
+        "--allow-root"
+    ],
     "KeilAssistant.MDK.Uv4Path": "C:\\HOME\\Softwares\\Keil_v5\\UV4\\UV4.exe",
     "EIDE.ARM.ARMCC5.InstallDirectory": "C:\\HOME\\Softwares\\Keil_v5\\ARM\\ARMCC",
     "EIDE.ARM.INI.Path": "C:\\HOME\\Softwares\\Keil_v5\\TOOLS.INI",
