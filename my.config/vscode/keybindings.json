@@ -1244,5 +1244,9 @@
         "key": "ctrl+k ctrl+shift+k",
         "command": "-paredit.selectRight",
         "when": "calva:keybindingsEnabled && editorTextFocus && !selectionAnchorSet && editorLangId == 'clojure' && paredit:keyMap =~ /original|strict/"
+    },
+    {
+        "key": "ctrl+oem_5",
+        "command": "-workbench.action.splitEditor"
     }
 ]
