@@ -40,11 +40,13 @@ function CopyAlwaysWindows() {
     if [ -d "$(dirname "$1")" ] && [ -e "$2" ]; then
         # cmd.exe /c copy "$(wslpath -m "$2")" "$(wslpath -m "$1")" # CMD does not support UNC paths
         powershell.exe -command Copy-Item "$(wslpath -m "$2")" -Destination "$(wslpath -m "$1")"
+        echo "copy \"$(basename "$2")\" to \"$1\""
     fi
 }
 function CopyExistsWindows() {
     if [ -e "$1" ] && [ -e "$2" ] && [ "$1" -ot "$2" ]; then
         powershell.exe -command Copy-Item "$(wslpath -m "$2")" -Destination "$(wslpath -m "$1")"
+        echo "copy \"$(basename "$2")\" to \"$1\""
     fi
 }
 

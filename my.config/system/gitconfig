@@ -16,3 +16,4 @@
 #	proxy = https://<username>:<password>@<server>:<port>
 [core]
 	autocrlf = input
+	ignorecase = false

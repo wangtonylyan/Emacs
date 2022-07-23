@@ -1,4 +1,16 @@
 {
+    "C_Cpp.default.systemIncludePath": [
+        // 该选项设置为空，可避免解析以下系统路径，这尤其适用于交叉编译的项目
+        // 而本地编译的项目，也会自动根据GCC的输出，来获取此类路径
+        // on Linux
+        // "/usr/include",
+        // "/usr/local/include"
+        // on Windows
+        // "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
+    ],
+    "EIDE.ARM.ARMCC5.InstallDirectory": "C:\\HOME\\Softwares\\Keil_v5\\ARM\\ARMCC",
+    "EIDE.ARM.INI.Path": "C:\\HOME\\Softwares\\Keil_v5\\TOOLS.INI",
+    "KeilAssistant.MDK.Uv4Path": "C:\\HOME\\Softwares\\Keil_v5\\UV4\\UV4.exe",
     "[haskell]": {
         "editor.tabSize": 2
     },
@@ -25,15 +37,6 @@
     },
     "code-runner.runInTerminal": true,
     "code-runner.saveFileBeforeRun": true,
-    "C_Cpp.default.systemIncludePath": [
-        // 该选项设置为空，可避免解析以下系统路径，这尤其适用于交叉编译的项目
-        // 而本地编译的项目，也会自动根据GCC的输出，来获取此类路径
-        // on Linux
-        // "/usr/include",
-        // "/usr/local/include"
-        // on Windows
-        // "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
-    ],
     "debug.console.fontSize": 14,
     "diffEditor.ignoreTrimWhitespace": false,
     "editor.autoClosingBrackets": "always",
@@ -69,6 +72,7 @@
     "errorLens.margin": "20ch",
     "errorLens.messageTemplate": "[$severity] $message",
     "explorer.enableDragAndDrop": false,
+    "explorer.fileNesting.enabled": true,
     "extensions.autoCheckUpdates": false,
     "extensions.autoUpdate": true,
     "extensions.ignoreRecommendations": true,
@@ -85,23 +89,24 @@
         "**/*.s": true,
         "**/__pycache__": true
     },
+    "files.refactoring.autoSave": true,
     "files.trimTrailingWhitespace": true,
     "filesize.showGzip": false,
     "git.decorations.enabled": false,
     "git.ignoreMissingGitWarning": true,
-    "gitlens.currentLine.enabled": false,
-    "gitlens.hovers.enabled": false,
-    "gitlens.hovers.avatars": false,
-    "gitlens.hovers.currentLine.over": "line",
-    "gitlens.hovers.pullRequests.enabled": false,
-    "gitlens.codeLens.enabled": false,
+    "gitlens.blame.avatars": true,
     "gitlens.changes.locations": [
         "gutter"
     ],
+    "gitlens.codeLens.enabled": false,
+    "gitlens.currentLine.enabled": false,
     "gitlens.heatmap.locations": [
         "gutter"
     ],
-    "gitlens.blame.avatars": true,
+    "gitlens.hovers.avatars": false,
+    "gitlens.hovers.currentLine.over": "line",
+    "gitlens.hovers.enabled": false,
+    "gitlens.hovers.pullRequests.enabled": false,
     "gitlens.keymap": "none",
     "gitlens.views.branches.avatars": false,
     "gitlens.views.commits.avatars": false,
@@ -137,10 +142,8 @@
     "jupyter.jupyterCommandLineArguments": [
         "--allow-root"
     ],
-    "KeilAssistant.MDK.Uv4Path": "C:\\HOME\\Softwares\\Keil_v5\\UV4\\UV4.exe",
-    "EIDE.ARM.ARMCC5.InstallDirectory": "C:\\HOME\\Softwares\\Keil_v5\\ARM\\ARMCC",
-    "EIDE.ARM.INI.Path": "C:\\HOME\\Softwares\\Keil_v5\\TOOLS.INI",
     "macros": {},
+    "markdown-preview-enhanced.previewTheme": "solarized-light.css",
     "markdown.preview.fontFamily": "'Fira Mono', 'Source Han Sans SC', Consolas, monospace",
     "markdown.preview.fontSize": 14,
     "markdown.preview.lineHeight": 1.5,
@@ -218,12 +221,15 @@
     "telemetry.telemetryLevel": "off",
     "terminal.integrated.fontFamily": "'Fira Mono', 'Source Han Sans SC', Consolas, monospace",
     "terminal.integrated.fontSize": 13,
+    "terminal.integrated.shellIntegration.enabled": true,
     "terminal.integrated.wordSeparators": "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?·～！￥…（）—【】、；：‘’“”，。《》？ ",
     "todo-tree.highlights.enabled": true,
     "todo-tree.tree.showScanModeButton": false,
     "typescript.format.semicolons": "insert",
     "update.mode": "none",
     "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+    "window.commandCenter": true,
+    "window.confirmBeforeClose": "always",
     "window.title": "${dirty}${activeFolderLong}${separator}${remoteName}",
     "window.titleBarStyle": "custom",
     "window.titleSeparator": " ◾ ",
@@ -286,10 +292,7 @@
     "workbench.productIconTheme": "fluent-icons",
     "workbench.settings.enableNaturalLanguageSearch": false,
     "workbench.startupEditor": "none",
-    "yaml.format.enable": true,
-    "explorer.fileNesting.enabled": true,
-    "files.refactoring.autoSave": true,
-    "window.confirmBeforeClose": "always"
+    "yaml.format.enable": true
 }
 // 1. 目前使用与Visual Studio相同的Cascadia Mono字体，但其不太适合于较密集的文字
 //    因此以上fontFamily各有不同
@@ -306,3 +309,11 @@
 //    即忽略或删除，前者为否时才生效的快捷键
 // 5. Color Theme
 //    "Default Light+", "Material Theme Lighter"
+// 6. Markdown Preview Enhanced
+// https://shd101wyy.github.io/markdown-preview-enhanced/#/customize-css
+// run "Markdown Preview Enhanced: Customize Css" command, and edit style.less file,
+// .markdown-preview.markdown-preview {
+//     font-family: "Cascadia Mono", "Fira Mono", "Source Han Sans SC", Consolas, monospace;
+//     font-size: 14px;
+// }
+// based on "editor.fontFamily" and "editor.fontSize"

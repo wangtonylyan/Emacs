@@ -1248,5 +1248,24 @@
     {
         "key": "ctrl+oem_5",
         "command": "-workbench.action.splitEditor"
+    },
+    {
+        "key": "ctrl+z",
+        "command": "workbench.action.terminal.runRecentCommand",
+        "when": "terminalFocus"
+    },
+    {
+        "key": "ctrl+x z",
+        "command": "-workbench.action.toggleZenMode",
+        "when": "!terminalFocus"
+    },
+    {
+        "key": "ctrl+shift+z",
+        "command": "-redo"
+    },
+    {
+        "key": "ctrl+shift+oem_period",
+        "command": "-editor.action.inPlaceReplace.down",
+        "when": "editorTextFocus && !editorReadonly"
     }
 ]
