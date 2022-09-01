@@ -67,6 +67,7 @@
     },
     "editor.wordSeparators": "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?·～！￥…（）—【】、；：‘’“”，。《》？ ",
     "editor.wordWrapColumn": 120,
+    "emacs-mcx.cursorMoveOnFindWidget": true,
     "emacs-mcx.enableDigitArgument": false,
     "errorLens.delay": 5000,
     "errorLens.fontSize": "12",
