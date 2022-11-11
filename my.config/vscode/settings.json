@@ -295,7 +295,8 @@
     "workbench.productIconTheme": "fluent-icons",
     "workbench.settings.enableNaturalLanguageSearch": false,
     "workbench.startupEditor": "none",
-    "yaml.format.enable": true
+    "yaml.format.enable": true,
+    "cmake.revealLog": "never"
 }
 // 1. 目前使用与Visual Studio相同的Cascadia Mono字体，但其不太适合于较密集的文字
 //    因此以上fontFamily各有不同
