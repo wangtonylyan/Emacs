@@ -31,6 +31,7 @@
     "bracket-pair-colorizer-2.showBracketsInGutter": true,
     "bracket-pair-colorizer-2.showHorizontalScopeLine": false,
     "cmake.configureOnOpen": false,
+    "cmake.revealLog": "never",
     "code-runner.enableAppInsights": false,
     "code-runner.executorMap": {
         "haskell": "runghc",
@@ -228,7 +229,7 @@
     "terminal.integrated.fontFamily": "'Fira Mono', 'Source Han Sans SC', Consolas, monospace",
     "terminal.integrated.fontSize": 13,
     "terminal.integrated.shellIntegration.enabled": true,
-    "terminal.integrated.wordSeparators": "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?·～！￥…（）—【】、；：‘’“”，。《》？ ",
+    "terminal.integrated.wordSeparators": "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/? ·～！￥…（）—【】、；：‘’“”，。《》？",
     "todo-tree.highlights.enabled": true,
     "todo-tree.tree.showScanModeButton": false,
     "typescript.format.semicolons": "insert",
@@ -240,52 +241,6 @@
     "window.titleBarStyle": "custom",
     "window.titleSeparator": " ◾ ",
     "window.zoomLevel": -0.5,
-    "workbench.colorCustomizations": {
-        "[Better Solarized Light]": {
-            "editor.foreground": "#000000",
-            "editor.selectionBackground": "#ff8046",
-            "sideBar.foreground": "#000000",
-            "tab.activeForeground": "#000000"
-        },
-        "[Material Theme Lighter]": { // 该系列的亮色主题，都未对VSCode进行优化
-            "activityBar.activeBorder": "#80CBC4",
-            "activityBar.foreground": "#000000",
-            "activityBarBadge.background": "#80CBC4",
-            "breadcrumb.activeSelectionForeground": "#02ac9b",
-            "editor.findMatchBorder": "#80CBC4",
-            "editor.foreground": "#000000",
-            "editor.selectionBackground": "#0000001c",
-            "editorSuggestWidget.highlightForeground": "#02ac9b",
-            "editorWidget.border": "#80CBC4",
-            "editorWidget.resizeBorder": "#80CBC4",
-            "list.activeSelectionForeground": "#02ac9b",
-            "list.highlightForeground": "#02ac9b",
-            "list.inactiveSelectionForeground": "#02ac9b",
-            "menu.selectionForeground": "#02ac9b",
-            "menubar.selectionForeground": "#02ac9b",
-            "notificationLink.foreground": "#02ac9b",
-            "panelTitle.activeBorder": "#80CBC4",
-            "pickerGroup.foreground": "#02ac9b",
-            "progressBar.background": "#80CBC4",
-            "scrollbarSlider.activeBackground": "#80CBC4",
-            "selection.background": "#0000001c",
-            "settings.headerForeground": "#02ac9b",
-            "settings.modifiedItemIndicator": "#80CBC4",
-            "sideBar.foreground": "#000000",
-            "statusBarItem.remoteBackground": "#80CBC4",
-            "tab.activeBorder": "#80CBC4",
-            "tab.activeForeground": "#000000",
-            "textLink.foreground": "#02ac9b"
-        },
-        "errorLens.errorBackground": "#fff0",
-        "errorLens.errorBackgroundLight": "#fff0",
-        "errorLens.hintBackground": "#fff0",
-        "errorLens.hintBackgroundLight": "#fff0",
-        "errorLens.infoBackground": "#fff0",
-        "errorLens.infoBackgroundLight": "#fff0",
-        "errorLens.warningBackground": "#fff0",
-        "errorLens.warningBackgroundLight": "#fff0"
-    },
     "workbench.colorTheme": "Default Light+",
     "workbench.editor.highlightModifiedTabs": true,
     "workbench.editor.showTabs": true,
@@ -298,8 +253,7 @@
     "workbench.productIconTheme": "fluent-icons",
     "workbench.settings.enableNaturalLanguageSearch": false,
     "workbench.startupEditor": "none",
-    "yaml.format.enable": true,
-    "cmake.revealLog": "never"
+    "yaml.format.enable": true
 }
 // 1. 目前使用与Visual Studio相同的Cascadia Mono字体，但其不太适合于较密集的文字
 //    因此以上fontFamily各有不同
