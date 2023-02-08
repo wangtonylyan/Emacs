@@ -8,6 +8,7 @@
         // on Windows
         // "C:/Program Files/Microsoft Visual Studio 10.0/VC/include"
     ],
+    "C_Cpp.formatting": "clangFormat",
     "EIDE.ARM.ARMCC5.InstallDirectory": "C:\\HOME\\Softwares\\Keil_v5\\ARM\\ARMCC",
     "EIDE.ARM.INI.Path": "C:\\HOME\\Softwares\\Keil_v5\\TOOLS.INI",
     "KeilAssistant.MDK.Uv4Path": "C:\\HOME\\Softwares\\Keil_v5\\UV4\\UV4.exe",
@@ -94,6 +95,7 @@
     "files.refactoring.autoSave": true,
     "files.trimTrailingWhitespace": true,
     "filesize.showGzip": false,
+    "git.confirmSync": false,
     "git.decorations.enabled": false,
     "git.ignoreMissingGitWarning": true,
     "gitlens.blame.avatars": true,
@@ -123,6 +125,7 @@
     "go.buildOnSave": "workspace",
     "go.toolsManagement.autoUpdate": true,
     "go.useLanguageServer": true,
+    "haskell.manageHLS": "GHCup",
     "hediet.vscode-drawio.local-storage": "eyIuZHJhd2lvLWNvbmZpZyI6IntcImxhbmd1YWdlXCI6XCJcIixcImN1c3RvbUZvbnRzXCI6W10sXCJsaWJyYXJpZXNcIjpcImdlbmVyYWxcIixcImN1c3RvbUxpYnJhcmllc1wiOltcIkwuc2NyYXRjaHBhZFwiXSxcInBsdWdpbnNcIjpbXSxcInJlY2VudENvbG9yc1wiOltdLFwiZm9ybWF0V2lkdGhcIjowLFwiY3JlYXRlVGFyZ2V0XCI6ZmFsc2UsXCJwYWdlRm9ybWF0XCI6e1wieFwiOjAsXCJ5XCI6MCxcIndpZHRoXCI6ODI3LFwiaGVpZ2h0XCI6MTE2OX0sXCJzZWFyY2hcIjp0cnVlLFwic2hvd1N0YXJ0U2NyZWVuXCI6dHJ1ZSxcImdyaWRDb2xvclwiOlwiI2QwZDBkMFwiLFwiZGFya0dyaWRDb2xvclwiOlwiIzZlNmU2ZVwiLFwiYXV0b3NhdmVcIjp0cnVlLFwicmVzaXplSW1hZ2VzXCI6bnVsbCxcIm9wZW5Db3VudGVyXCI6MCxcInZlcnNpb25cIjoxOCxcInVuaXRcIjoxLFwiaXNSdWxlck9uXCI6ZmFsc2UsXCJ1aVwiOlwiXCJ9In0=",
     "hediet.vscode-drawio.theme": "Kennedy",
     "hungryDelete.enableSmartBackspace": true,
