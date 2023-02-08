@@ -241,7 +241,7 @@
     "window.titleBarStyle": "custom",
     "window.titleSeparator": " ◾ ",
     "window.zoomLevel": -0.5,
-    "workbench.colorTheme": "Default Light+",
+    "workbench.colorTheme": "Default Light+ Experimental",
     "workbench.editor.highlightModifiedTabs": true,
     "workbench.editor.showTabs": true,
     "workbench.editor.tabCloseButton": "off",
